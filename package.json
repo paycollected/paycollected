@@ -1,0 +1,24 @@
+{
+  "name": "paycollected",
+  "version": "1.0.0",
+  "description": "A web application to automate shared payment for groups",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/paycollected/paycollected.git"
+  },
+  "author": "Binh Nguyen, Jessica Chen, Chan Le",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/paycollected/paycollected/issues"
+  },
+  "homepage": "https://github.com/paycollected/paycollected#readme",
+  "dependencies": {
+    "@apollo/client": "^3.6.9",
+    "apollo-server": "^3.10.2",
+    "graphql": "^16.6.0"
+  }
+}
