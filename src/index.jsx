@@ -6,7 +6,7 @@ import App from './components/App.jsx';
 // require('dotenv').config();
 
 const client = new ApolloClient({
-  uri: 'http://localhost:4320',
+  uri: 'http://localhost:5647/graphql',
   // will need to find out how to 'hide' server URI when deployed
   cache: new InMemoryCache(),
 });
