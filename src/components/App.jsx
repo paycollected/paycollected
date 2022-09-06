@@ -1,5 +1,15 @@
 import React, { useEffect } from 'react';
 import { gql, useApolloClient, useQuery } from '@apollo/client';
+import { Routes, Route } from 'react-router-dom';
+import Home from './Home.jsx';
+import Login from './Login.jsx';
+import Signup from './Signup.jsx';
+import Dashboard from './Dashboard.jsx';
+import CreateSubscription from './CreateSubscription.jsx';
+import JoinSubscription from './JoinSubscription.jsx';
+import Cards from './Cards.jsx';
+import Checkout from './Checkout.jsx';
+import ViewSubscriptions from './ViewSubscriptions.jsx';
 
 function App() {
   /* proof of concept that Apollo Client is working using an existing GraphQL endpoint
@@ -31,20 +41,34 @@ function App() {
   // }, [client]);
 
   // METHOD 2:
-  const HELLO = gql`
-    query Query {
-      hello
-    }
-  `;
+  // const HELLO = gql`
+  //   query Query {
+  //     hello
+  //   }
+  // `;
 
-  const { loading, error, data } = useQuery(HELLO);
+  // const { loading, error, data } = useQuery(HELLO);
 
-  if (data) {
-    return (
-      <div>{data.hello}</div>
-    );
-  }
-  return null;
+  // if (data) {
+  //   return (
+  //     <div>{data.hello}</div>
+  //   );
+  // }
+  // return null;
+  return (
+    <Routes>
+      <Route path="/" element={<Home />} />
+      <Route path="/home" element={<Home />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/signup" element={<Signup />} />
+      <Route path="/dashboard" element={<Dashboard />} />
+      <Route path="/subscription/create" element={<CreateSubscription />} />
+      <Route path="/subscription/:productID" element={<JoinSubscription />} />
+      <Route path="/cards" element={<Cards />} />
+      <Route path="/checkout" element={<Checkout />} />
+      <Route path="/subscription/all" element={<ViewSubscriptions />} />
+    </Routes>
+  );
 }
 
 export default App;
