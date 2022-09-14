@@ -1,33 +1,90 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { gql, useMutation } from '@apollo/client';
 
-export default function Signup() {
+export default function Signup({ setUser }) {
   const navigate = useNavigate();
   const [username, setUsername] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [password, setPassword] = useState('');
   const [password2, setPassword2] = useState('');
   const [email, setEmail] = useState('');
   const [usernameTaken, setUsernameTaken] = useState(false);
   const [passwordMismatch, setPasswordMismatch] = useState(false);
 
-  const handleSubmit = (e) => {
-    /*
-    1) check if username already exists
-    2) password1 = password2
-    */
-    e.preventDefault();
-    console.log('email: ', email);
-    if (password !== password2) {
-      setPasswordMismatch(true);
+  const SIGN_UP = gql`
+    mutation ($firstName: String!, $lastName: String!, $username: String!, $password: String!, $email: String!) {
+      createUser(firstName: $firstName, lastName: $lastName, username: $username, password: $password, email: $email)
     }
-    // if successful, navigate to dashboard
-    navigate('/dashboard');
+  `;
+
+  const [signup, { data, loading, error}] = useMutation(SIGN_UP, {
+    onCompleted: ({ createUser }) => {
+      localStorage.setItem('token', createUser);
+      localStorage.setItem('username', username);
+      setUser(username);
+      navigate('/dashboard');
+    },
+    onError: ({ message }) => {
+      console.log('create user error: ', message);
+      /* TO-DO: handle UI error later
+      message = 'This username already exists'
+      message = 'This email already exists'
+      message = 'Unable to create user' --> try again later
+
+      switch(message) {
+        case 'This username already exists':
+          // handle later
+          break;
+        case 'This email already exists':
+          // handle later
+          break;
+        default:
+      }
+      */
+    },
+  });
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (password !== password2) {
+      console.log('passwords dont match');
+      setPasswordMismatch(true);
+    } else {
+      setPasswordMismatch(false);
+      signup({
+        variables: {
+          firstName, lastName, username, password, email,
+        },
+      });
+    }
   };
 
   return (
     <div>
       <h1>This is the Signup page</h1>
       <form autoComplete="off" onSubmit={handleSubmit}>
+        <label htmlFor="firstName">
+          First Name
+          <input
+            name="firstName"
+            value={firstName}
+            type="text"
+            required
+            onChange={(e) => { setFirstName(e.target.value); }}
+          />
+        </label>
+        <label htmlFor="lastName">
+          Last Name
+          <input
+            name="lastName"
+            value={lastName}
+            type="text"
+            required
+            onChange={(e) => { setLastName(e.target.value); }}
+          />
+        </label>
         <label htmlFor="username">
           Username
           <input
