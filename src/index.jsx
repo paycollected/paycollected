@@ -1,6 +1,7 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import { ApolloClient, InMemoryCache, ApolloProvider } from '@apollo/client';
+import { ApolloClient, InMemoryCache, ApolloProvider, createHttpLink } from '@apollo/client';
+import { setContext } from '@apollo/client/link/context';
 import { BrowserRouter } from 'react-router-dom';
 import App from './components/App.jsx';
 
@@ -8,9 +9,23 @@ import App from './components/App.jsx';
 
 // console.log('env: ', process.env.PORT);
 
-const client = new ApolloClient({
+const httpLink = createHttpLink({
+  // TODO: will need to find out how to 'hide' server URI when deployed
   uri: 'http://localhost:5647/graphql',
-  // will need to find out how to 'hide' server URI when deployed
+});
+
+const authLink = setContext((_, { headers }) => {
+  const token = localStorage.getItem('token');
+  return {
+    headers: {
+      ...headers,
+      authorization: token || '',
+    },
+  };
+});
+
+const client = new ApolloClient({
+  link: authLink.concat(httpLink),
   cache: new InMemoryCache(),
 });
 
