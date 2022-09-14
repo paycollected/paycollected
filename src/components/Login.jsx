@@ -19,10 +19,16 @@ export default function Login({ setUser }) {
 
   const [logUserIn, { data: loginData, loading, error: loginError }] = useMutation(LOG_IN, {
     onCompleted: ({ login }) => {
-      localStorage.setItem('token', login);
-      localStorage.setItem('username', username);
-      setUser(username);
-      navigate('/dashboard');
+      // login = token returned; null if passwords do not match
+      if (login) {
+        localStorage.setItem('token', login);
+        localStorage.setItem('username', username.toLowerCase());
+        setUser(username.toLowerCase());
+        navigate('/dashboard');
+      } else {
+        // TO-DO: handle UI error for wrong username & password
+        console.log('Wrong username and password');
+      }
     },
     onError: ({ message }) => {
       localStorage.clear();
@@ -44,7 +50,6 @@ export default function Login({ setUser }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log('username: ', username);
     logUserIn({
       variables: {
         username,
