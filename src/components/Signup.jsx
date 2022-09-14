@@ -19,7 +19,7 @@ export default function Signup({ setUser }) {
     }
   `;
 
-  const [signup, { data, loading, error}] = useMutation(SIGN_UP, {
+  const [signup, { data, loading, error }] = useMutation(SIGN_UP, {
     onCompleted: ({ createUser }) => {
       localStorage.setItem('token', createUser);
       localStorage.setItem('username', username.trim().toLowerCase());
