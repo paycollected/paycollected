@@ -22,8 +22,8 @@ export default function Login({ setUser }) {
       // login = token returned; null if passwords do not match
       if (login) {
         localStorage.setItem('token', login);
-        localStorage.setItem('username', username.toLowerCase());
-        setUser(username.toLowerCase());
+        localStorage.setItem('username', username.trim().toLowerCase());
+        setUser(username.trim().toLowerCase());
         navigate('/dashboard');
       } else {
         // TO-DO: handle UI error for wrong username & password

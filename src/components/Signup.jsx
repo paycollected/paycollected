@@ -22,8 +22,8 @@ export default function Signup({ setUser }) {
   const [signup, { data, loading, error}] = useMutation(SIGN_UP, {
     onCompleted: ({ createUser }) => {
       localStorage.setItem('token', createUser);
-      localStorage.setItem('username', username.toLowerCase());
-      setUser(username.toLowerCase());
+      localStorage.setItem('username', username.trim().toLowerCase());
+      setUser(username.trim().toLowerCase());
       navigate('/dashboard');
     },
     onError: ({ message }) => {
