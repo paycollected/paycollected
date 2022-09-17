@@ -1,11 +1,25 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { gql, useMutation, useLazyQuery } from '@apollo/client';
+import { useForm } from 'react-hook-form';
+import Button from '@mui/material/Button';
+import FormControl from '@mui/material/FormControl';
+import FormGroup from '@mui/material/FormGroup';
+import FormHelperText from '@mui/material/FormHelperText';
+import InputAdornment from '@mui/material/InputAdornment';
+import IconButton from '@mui/material/IconButton';
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
+import TextField from '@mui/material/TextField';
 
 export default function Login({ setUser }) {
   const navigate = useNavigate();
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  const { register, handleSubmit, formState: { errors } } = useForm();
+  // if login info is valid
+  const [showPassword, setShowPassword] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  // const [username, setUsername] = useState('');
+  // const [password, setPassword] = useState('');
   const LOG_IN = gql`
     mutation ($username: String!, $password: String!) {
       login(username: $username, password: $password)
@@ -21,35 +35,35 @@ export default function Login({ setUser }) {
     onCompleted: ({ login }) => {
       // login = token returned; null if passwords do not match
       if (login) {
+        console.log('login: ', login);
         localStorage.setItem('token', login);
-        localStorage.setItem('username', username.toLowerCase());
-        setUser(username.toLowerCase());
+        localStorage.setItem('username', login.username); // need access to username
+        setErrorMessage('');
+        setUser(login.username); // need access to username
         navigate('/dashboard');
       } else {
-        // TO-DO: handle UI error for wrong username & password
-        console.log('Wrong username and password');
+        setErrorMessage('Incorrect username and password');
       }
     },
     onError: ({ message }) => {
       localStorage.clear();
-      console.log('login error in onError: ', message);
-      /* TO-DO: handle UI error later
-      message = 'This username does not exist' --> display message to ask user to verify username
-      message = 'Unable to log in' --> server error: display message to try again later
-
-      switch(message) {
+      switch (message) {
         case 'This username does not exist':
-          // handle later
+          setErrorMessage('Please verify username');
+          break;
+        case 'Unable to log in':
+          setErrorMessage('Please try logging in later');
           break;
         default:
+          setErrorMessage('');
+          console.log('login error: ', message);
+          break;
       }
-      */
     },
   });
   const [helloQuery, { data: helloData, error: helloError }] = useLazyQuery(HELLO);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const onSubmit = ({ username, password }) => {
     logUserIn({
       variables: {
         username,
@@ -57,12 +71,6 @@ export default function Login({ setUser }) {
       },
     });
   };
-
-  // if (loginData) {
-  //   console.log('loginData received: ', loginData);
-  //   // data here will be token
-  //   localStorage.setItem('token', loginData.login);
-  // }
 
   const testQuery = () => {
     helloQuery();
@@ -79,31 +87,59 @@ export default function Login({ setUser }) {
   return (
     <div>
       <h1>This is the Login page</h1>
-      <form autoComplete="off" onSubmit={handleSubmit}>
-        <label htmlFor="username">
-          Username
-          <input
-            name="username"
-            value={username}
-            type="text"
-            required
-            onChange={(e) => { setUsername(e.target.value); }}
-          />
-        </label>
-        <label htmlFor="password">
-          Password
-          <input
-            name="password"
-            value={password}
-            type="password"
-            required
-            onChange={(e) => { setPassword(e.target.value); }}
-          />
-        </label>
-        <input type="submit" value="Sign In" />
+      <form
+        autoComplete="off"
+        onSubmit={handleSubmit(onSubmit)}
+      >
+        <TextField
+          name="username"
+          label="Username"
+          required
+          type="text"
+          variant="outlined"
+          defaultValue=""
+          {...register('username', { required: 'Username required' })}
+          error={!!errors?.username}
+          helperText={errors?.username ? errors.username.message : ' '}
+        />
+        <TextField
+          name="password"
+          label="Password"
+          required
+          type={showPassword ? 'text' : 'password'}
+          variant="outlined"
+          defaultValue=""
+          {...register('password', { required: 'Password required' })}
+          error={!!errors?.password}
+          helperText={errors?.password ? errors.password.message : ' '}
+          InputProps={{
+            endAdornment:
+            (
+              <InputAdornment position="end">
+                <IconButton
+                  aria-label="toggle password visibility"
+                  onClick={() => {
+                    setShowPassword(!showPassword);
+                  }}
+                  onMouseDown={(e) => e.preventDefault()}
+                  edge="end"
+                >
+                  {showPassword ? <VisibilityOff /> : <Visibility />}
+                </IconButton>
+              </InputAdornment>
+            ),
+          }}
+        />
+        {errorMessage.length > 0 ? (
+          <div>{errorMessage}</div>
+        ) : (
+          <div>&nbsp;</div>
+        )}
+        <Button type="submit" variant="contained" disabled={loading}>Sign in</Button>
       </form>
       <p>Don&apos;t have an account? Sign up!</p>
-      <button type="button" onClick={() => { navigate('/signup'); }}>Sign up</button>
+      <Button variant="contained" onClick={() => { navigate('/signup'); }}>Sign up</Button>
+      <Button variant="contained" onClick={() => { navigate('/home'); }}>Cancel</Button>
       <button type="button" onClick={testQuery}>Test Query Authentication</button>
     </div>
   );
