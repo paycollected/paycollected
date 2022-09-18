@@ -38,7 +38,6 @@ export default function Login({ setUser, planToJoin }) {
     onCompleted: ({ login }) => {
       // login = token returned; null if passwords do not match
       if (login) {
-        console.log('login: ', login);
         localStorage.setItem('token', login.token);
         localStorage.setItem('username', login.username); // need access to username
         setErrorMessage('');

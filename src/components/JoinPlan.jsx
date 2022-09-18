@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { gql, useQuery } from '@apollo/client';
 
-export default function JoinPlan() {
+export default function JoinPlan({ setPlanToJoin }) {
   const { planId } = useParams();
 
   useEffect(() => {
@@ -11,9 +11,9 @@ export default function JoinPlan() {
     }
   }, []);
 
-  const GET_PLAN = gql`
-    query
-  `;
+  // const GET_PLAN = gql`
+  //   query
+  // `;
 
   return (
     <>
