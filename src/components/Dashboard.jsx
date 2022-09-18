@@ -5,22 +5,21 @@ export default function Dashboard({ username, setUser }) {
   const navigate = useNavigate();
   const [showCodeInput, setShowCodeInput] = useState(false);
   const [code, setCode] = useState('');
+
   const codeInputSubmit = (e) => {
     e.preventDefault();
     navigate(`/join/${code}`);
   };
 
+  const logUserOut = () => {
+    localStorage.clear();
+    setUser(null);
+    navigate('/');
+  };
+
   return (
     <div>
-      <button
-        type="button"
-        onClick={() => {
-          localStorage.clear();
-          setUser(null);
-        }}
-      >
-        Log Out
-      </button>
+      <button type="button" onClick={logUserOut}>Log Out</button>
       <h1>
         {username}
         &apos;s Dashboard
