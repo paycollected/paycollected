@@ -1,8 +1,15 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 
-export default function Home() {
+export default function Home({ setPlanToJoin }) {
   const navigate = useNavigate();
+  const { planId } = useParams();
+
+  useEffect(() => {
+    if (planId) {
+      setPlanToJoin(planId);
+    }
+  }, []);
 
   return (
     <div>

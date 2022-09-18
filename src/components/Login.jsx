@@ -12,7 +12,7 @@ import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import TextField from '@mui/material/TextField';
 
-export default function Login({ setUser }) {
+export default function Login({ setUser, planToJoin }) {
   const navigate = useNavigate();
   const { register, handleSubmit, formState: { errors } } = useForm();
   // if login info is valid
@@ -43,7 +43,11 @@ export default function Login({ setUser }) {
         localStorage.setItem('username', login.username); // need access to username
         setErrorMessage('');
         setUser(login.username); // need access to username
-        navigate('/dashboard');
+        if (!planToJoin) {
+          navigate('/dashboard');
+        } else {
+          navigate(`/join/${planToJoin}`);
+        }
       } else {
         setErrorMessage('Incorrect username and password');
       }
