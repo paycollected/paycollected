@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { gql, useMutation } from '@apollo/client';
 
-export default function Signup({ setUser }) {
+export default function Signup({ setUser, planToJoin }) {
   const navigate = useNavigate();
   const [username, setUsername] = useState('');
   const [firstName, setFirstName] = useState('');
@@ -27,7 +27,11 @@ export default function Signup({ setUser }) {
       localStorage.setItem('token', createUser.token);
       localStorage.setItem('username', createUser.username);
       setUser(createUser.username);
-      navigate('/dashboard');
+      if (!planToJoin) {
+        navigate('/dashboard');
+      } else {
+        navigate(`/join/${planToJoin}`);
+      }
     },
     onError: ({ message }) => {
       console.log('create user error: ', message);
