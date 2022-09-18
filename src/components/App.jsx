@@ -19,7 +19,7 @@ function App() {
       <Route path="/home" element={<Home />} />
       <Route path="/login" element={!user ? <Login setUser={setUser} /> : <Navigate to="/dashboard" />} />
       <Route path="/signup" element={!user ? <Signup setUser={setUser} /> : <Navigate to="/dashboard" />} />
-      <Route path="/dashboard" element={<Dashboard />} />
+      <Route path="/dashboard" element={<Dashboard username={user} setUser={setUser} />} />
       <Route path="/subscription/create" element={<CreateSubscription />} />
       <Route path="/subscription/:productID" element={<JoinSubscription />} />
       <Route path="/cards" element={<Cards />} />

@@ -15,15 +15,18 @@ export default function Signup({ setUser }) {
 
   const SIGN_UP = gql`
     mutation ($firstName: String!, $lastName: String!, $username: String!, $password: String!, $email: String!) {
-      createUser(firstName: $firstName, lastName: $lastName, username: $username, password: $password, email: $email)
+      createUser(firstName: $firstName, lastName: $lastName, username: $username, password: $password, email: $email) {
+        username
+        token
+      }
     }
   `;
 
   const [signup, { data, loading, error }] = useMutation(SIGN_UP, {
     onCompleted: ({ createUser }) => {
-      localStorage.setItem('token', createUser);
-      localStorage.setItem('username', username.trim().toLowerCase());
-      setUser(username.trim().toLowerCase());
+      localStorage.setItem('token', createUser.token);
+      localStorage.setItem('username', createUser.username);
+      setUser(createUser.username);
       navigate('/dashboard');
     },
     onError: ({ message }) => {

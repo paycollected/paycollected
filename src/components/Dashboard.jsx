@@ -1,7 +1,12 @@
 import React from 'react';
 
-export default function Dashboard() {
+export default function Dashboard({ username, setUser }) {
   return (
-    <h1>This is the Dashboard page</h1>
+    <div>
+      <h1>
+        {username}
+        &apos;s Dashboard
+      </h1>
+    </div>
   );
 }
