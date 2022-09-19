@@ -1,8 +1,9 @@
 import React, { useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { gql, useQuery } from '@apollo/client';
 
 export default function JoinPlan({ setPlanToJoin }) {
+  const navigate = useNavigate();
   const { planId } = useParams();
 
   const GET_PLAN = gql`
@@ -61,6 +62,7 @@ export default function JoinPlan({ setPlanToJoin }) {
         )}
         {otherMembers.length === 0
           && (<div>There is currently no other members on this plan.</div>)}
+        <button type="button" onClick={() => { navigate('/dashboard')}}>Cancel</button>
       </>
     );
   }
