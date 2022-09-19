@@ -8,7 +8,9 @@ export default function Dashboard({ username, setUser }) {
 
   const codeInputSubmit = (e) => {
     e.preventDefault();
-    navigate(`/join/${code}`);
+    const formattedCode = code.toString().trim();
+    setCode(formattedCode);
+    navigate(`/join/${formattedCode}`);
   };
 
   const logUserOut = () => {
