@@ -34,7 +34,7 @@ export default function JoinPlan({ setPlanToJoin }) {
 
   useEffect(() => {
     if (planId) {
-      setPlanToJoin(planId);
+      setPlanToJoin(planId.toString().trim());
     }
   }, []);
 
