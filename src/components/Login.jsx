@@ -22,7 +22,10 @@ export default function Login({ setUser }) {
   // const [password, setPassword] = useState('');
   const LOG_IN = gql`
     mutation ($username: String!, $password: String!) {
-      login(username: $username, password: $password)
+      login(username: $username, password: $password) {
+        username
+        token
+      }
     }
   `;
   const HELLO = gql`
@@ -35,18 +38,19 @@ export default function Login({ setUser }) {
     onCompleted: ({ login }) => {
       // login = token returned; null if passwords do not match
       if (login) {
-        console.log('login: ', login);
-        localStorage.setItem('token', login);
+        localStorage.setItem('token', login.token);
         localStorage.setItem('username', login.username); // need access to username
         setErrorMessage('');
         setUser(login.username); // need access to username
         navigate('/dashboard');
       } else {
         setErrorMessage('Incorrect username and password');
+        setUser(null);
       }
     },
     onError: ({ message }) => {
       localStorage.clear();
+      setUser(null);
       switch (message) {
         case 'This username does not exist':
           setErrorMessage('Please verify username');
