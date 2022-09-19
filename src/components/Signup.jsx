@@ -1,58 +1,66 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { gql, useMutation } from '@apollo/client';
+import { useForm } from 'react-hook-form';
+import Button from '@mui/material/Button';
+import TextField from '@mui/material/TextField';
 
 export default function Signup({ setUser }) {
   const navigate = useNavigate();
-  const [username, setUsername] = useState('');
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [password, setPassword] = useState('');
-  const [password2, setPassword2] = useState('');
-  const [email, setEmail] = useState('');
-  const [usernameTaken, setUsernameTaken] = useState(false);
-  const [passwordMismatch, setPasswordMismatch] = useState(false);
+  const { register, handleSubmit, formState: { errors } } = useForm();
+  // const [username, setUsername] = useState('');
+  // const [firstName, setFirstName] = useState('');
+  // const [lastName, setLastName] = useState('');
+  // const [password, setPassword] = useState('');
+  // const [password2, setPassword2] = useState('');
+  // const [email, setEmail] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
 
   const SIGN_UP = gql`
     mutation ($firstName: String!, $lastName: String!, $username: String!, $password: String!, $email: String!) {
-      createUser(firstName: $firstName, lastName: $lastName, username: $username, password: $password, email: $email)
+      createUser(firstName: $firstName, lastName: $lastName, username: $username, password: $password, email: $email) {
+        username
+        token
+      }
     }
   `;
 
   const [signup, { data, loading, error}] = useMutation(SIGN_UP, {
     onCompleted: ({ createUser }) => {
-      localStorage.setItem('token', createUser);
-      localStorage.setItem('username', username.toLowerCase());
-      setUser(username.toLowerCase());
+      localStorage.setItem('token', createUser.token);
+      localStorage.setItem('username', createUser.username);
+      setErrorMessage('');
+      setUser(createUser.username);
       navigate('/dashboard');
     },
     onError: ({ message }) => {
-      console.log('create user error: ', message);
-      /* TO-DO: handle UI error later
-      message = 'This username already exists'
-      message = 'This email already exists'
-      message = 'Unable to create user' --> try again later
-
-      switch(message) {
+      localStorage.clear();
+      setUser(null);
+      switch (message) {
         case 'This username already exists':
-          // handle later
+          setErrorMessage('Username already exists');
           break;
         case 'This email already exists':
-          // handle later
+          setErrorMessage('Email already exists');
+          break;
+        case 'Unable to create user':
+          setErrorMessage('Please try signing up later');
           break;
         default:
+          setErrorMessage('');
+          console.log('create user error: ', message);
+          break;
       }
-      */
     },
   });
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const onSubmit = ({
+    firstName, lastName, username, password, password2, email,
+  }) => {
     if (password !== password2) {
-      console.log('passwords dont match');
-      setPasswordMismatch(true);
+      setErrorMessage('Passwords must match');
     } else {
-      setPasswordMismatch(false);
+      setErrorMessage('');
       signup({
         variables: {
           firstName, lastName, username, password, email,
@@ -64,68 +72,82 @@ export default function Signup({ setUser }) {
   return (
     <div>
       <h1>This is the Signup page</h1>
-      <form autoComplete="off" onSubmit={handleSubmit}>
-        <label htmlFor="firstName">
-          First Name
-          <input
-            name="firstName"
-            value={firstName}
-            type="text"
-            required
-            onChange={(e) => { setFirstName(e.target.value); }}
-          />
-        </label>
-        <label htmlFor="lastName">
-          Last Name
-          <input
-            name="lastName"
-            value={lastName}
-            type="text"
-            required
-            onChange={(e) => { setLastName(e.target.value); }}
-          />
-        </label>
-        <label htmlFor="username">
-          Username
-          <input
-            name="username"
-            value={username}
-            type="text"
-            required
-            onChange={(e) => { setUsername(e.target.value); }}
-          />
-        </label>
-        <label htmlFor="password">
-          Password
-          <input
-            name="password"
-            value={password}
-            type="password"
-            required
-            onChange={(e) => { setPassword(e.target.value); }}
-          />
-        </label>
-        <label htmlFor="password2">
-          Confirm Password:
-          <input
-            name="password2"
-            value={password2}
-            type="password"
-            required
-            onChange={(e) => { setPassword2(e.target.value); }}
-          />
-        </label>
-        <label htmlFor="email">
-          Email
-          <input
-            name="email"
-            value={email}
-            type="email"
-            required
-            onChange={(e) => { setEmail(e.target.value); }}
-          />
-        </label>
-        <button type="submit">Join</button>
+      <form
+        autoComplete="off"
+        onSubmit={handleSubmit(onSubmit)}
+      >
+        <TextField
+          name="firstName"
+          label="First Name"
+          required
+          type="text"
+          variant="outlined"
+          defaultValue=""
+          {...register('firstName', { required: 'First name required' })}
+          error={!!errors?.firstName}
+          helperText={errors?.firstName ? errors.firstName.message : ' '}
+        />
+        <TextField
+          name="lastName"
+          label="Last Name"
+          required
+          type="text"
+          variant="outlined"
+          defaultValue=""
+          {...register('lastName', { required: 'Last name required' })}
+          error={!!errors?.lastName}
+          helperText={errors?.lastName ? errors.lastName.message : ' '}
+        />
+        <TextField
+          name="username"
+          label="Username"
+          required
+          type="text"
+          variant="outlined"
+          defaultValue=""
+          {...register('username', { required: 'Username required' })}
+          error={!!errors?.username}
+          helperText={errors?.username ? errors.username.message : ' '}
+        />
+        <TextField
+          name="password"
+          label="Password"
+          required
+          type="password"
+          variant="outlined"
+          defaultValue=""
+          {...register('password', { required: 'Password required' })}
+          error={!!errors?.password}
+          helperText={errors?.password ? errors.password.message : ' '}
+        />
+        <TextField
+          name="password2"
+          label="Confirm Password"
+          required
+          type="password"
+          variant="outlined"
+          defaultValue=""
+          {...register('password2', { required: 'Enter password again' })}
+          error={!!errors?.password2}
+          helperText={errors?.password2 ? errors.password2.message : ' '}
+        />
+        <TextField
+          name="email"
+          label="Email"
+          required
+          type="email"
+          variant="outlined"
+          defaultValue=""
+          {...register('email', { required: 'Email required' })}
+          error={!!errors?.email}
+          helperText={errors?.email ? errors.email.message : ' '}
+        />
+        {errorMessage.length > 0 ? (
+          <div>{errorMessage}</div>
+        ) : (
+          <div>&nbsp;</div>
+        )}
+        <Button type="submit" variant="contained" disabled={loading}>Join</Button>
       </form>
     </div>
   );

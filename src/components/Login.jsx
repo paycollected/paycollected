@@ -5,7 +5,6 @@ import { useForm } from 'react-hook-form';
 import Button from '@mui/material/Button';
 import FormControl from '@mui/material/FormControl';
 import FormGroup from '@mui/material/FormGroup';
-import FormHelperText from '@mui/material/FormHelperText';
 import InputAdornment from '@mui/material/InputAdornment';
 import IconButton from '@mui/material/IconButton';
 import Visibility from '@mui/icons-material/Visibility';
@@ -18,8 +17,7 @@ export default function Login({ setUser }) {
   // if login info is valid
   const [showPassword, setShowPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
-  // const [username, setUsername] = useState('');
-  // const [password, setPassword] = useState('');
+
   const LOG_IN = gql`
     mutation ($username: String!, $password: String!) {
       login(username: $username, password: $password) {
