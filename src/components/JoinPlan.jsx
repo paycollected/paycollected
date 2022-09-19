@@ -5,21 +5,64 @@ import { gql, useQuery } from '@apollo/client';
 export default function JoinPlan({ setPlanToJoin }) {
   const { planId } = useParams();
 
+  const GET_PLAN = gql`
+    query ($planId: String!) {
+      viewOnePlan(planId: $planId) {
+        name
+        owner {
+          firstName
+          lastName
+          username
+        },
+        cycleFrequency
+        perCycleCost
+        otherMembers {
+          firstName
+          lastName
+          username
+        }
+      }
+    }
+  `;
+
+  const { loading, data, error } = useQuery(GET_PLAN, {
+    variables: { planId: planId.toString().trim() },
+    fetchPolicy: 'network-only',
+    nextFetchPolicy: 'cache-and-network',
+  });
+
   useEffect(() => {
     if (planId) {
       setPlanToJoin(planId);
     }
   }, []);
 
-  // const GET_PLAN = gql`
-  //   query
-  // `;
+  if (data) {
+    const {
+      name, owner, cycleFrequency, perCycleCost, otherMembers,
+    } = data.viewOnePlan;
 
-  return (
-    <>
-      <h1>This is the Join Subscription page</h1>
-      <button type="button" onClick={() => { navigate('/login'); }}>Login</button>
-    </>
-
-  );
+    return (
+      <>
+        <h1>This is the Join Subscription page</h1>
+        <h2>{name}</h2>
+        <div>
+          Owned by:&nbsp;
+          {owner.firstName.concat(' ', owner.lastName)}
+        </div>
+        <div>{`Total Plan Cost: $${perCycleCost} ${cycleFrequency.toLowerCase()}`}</div>
+        {otherMembers.length > 0 && (
+          <>
+            <div>Others on this plan:</div>
+            <ul>
+              {otherMembers.map((member) => (<li>{member.firstName.concat(' ', member.lastName)}</li>))}
+            </ul>
+          </>
+        )}
+        {otherMembers.length === 0
+          && (<div>There is currently no other members on this plan.</div>)}
+      </>
+    );
+  }
+  return null;
 }
