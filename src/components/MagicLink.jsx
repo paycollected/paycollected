@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import Button from '@mui/material/Button';
+// require('dotenv').config();
 
 export default function MagicLink({ planToJoin, setShowMagicLink }) {
   const navigate = useNavigate();
