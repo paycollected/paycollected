@@ -15,10 +15,30 @@ export default function CreatePlan({ setPlanToJoin, setShowMagicLink }) {
   const navigate = useNavigate();
   const { register, handleSubmit, formState: { errors } } = useForm();
 
+  const CREATE_PLAN = gql`
+    mutation ($planName: String!, $cycleFrequency: String!, $perCycleCost: Float!, $numberOfMembers: Int!) {
+      createPlan(planName: $planName, cycleFrequency: $cycleFrequency, perCycleCost: $perCycleCost, numberOfMembers: $numberOfMembers)
+    }
+  `;
+
+  const [createNewPlan, { data, loading, error }] = useMutation(CREATE_PLAN, {
+    onCompleted: ({ createPlan }) => {
+      console.log('stripe id: ', createPlan);
+    },
+    onError: ({ message }) => {
+      console.log('error creating plan: ', message);
+    },
+  });
+
   const onSubmit = ({
-    planName, cycleAmount, cycleFreq, numUsers,
+    planName, cycleFrequency, perCycleCost, numberOfMembers,
   }) => {
-    console.log('form data: ', planName, cycleAmount, cycleFreq, numUsers);
+    console.log('form data: ', planName, perCycleCost, cycleFrequency, numberOfMembers);
+    createNewPlan({
+      variables: {
+        planName, cycleFrequency, perCycleCost, numberOfMembers,
+      },
+    });
   };
 
   return (
@@ -40,48 +60,48 @@ export default function CreatePlan({ setPlanToJoin, setShowMagicLink }) {
           helperText={errors?.planName ? errors.planName.message : ' '}
         />
         <TextField
-          name="cycleAmount"
-          label="Per-Cycle Amount"
-          required
-          type="number"
-          variant="outlined"
-          {...register('cycleAmount', { required: 'Enter total amount per pay cycle' })}
-          error={!!errors?.cycleAmount}
-          helperText={errors?.cycleAmount ? errors.cycleAmount.message : ' '}
-          InputProps={{
-            inputProps: { min: 0 },
-            startAdornment: <InputAdornment position="start">$</InputAdornment>,
-          }}
-        />
-        <TextField
           sx={{ width: '25ch' }}
-          name="cycleFreq"
+          name="cycleFrequency"
           label="Cycle Frequency"
           required
           select
           defaultValue=""
-          {...register('cycleFreq', { required: 'Select cycle frequency' })}
-          error={!!errors?.cycleFreq}
-          helperText={errors?.cycleFreq ? errors.cycleFreq.message : ' '}
+          {...register('cycleFrequency', { required: 'Select cycle frequency' })}
+          error={!!errors?.cycleFrequency}
+          helperText={errors?.cycleFrequency ? errors.cycleFrequency.message : ' '}
         >
-          {['Monthly', 'Every 3 months', 'Yearly'].map((freq) => (
+          {['Weekly', 'Monthly', 'Yearly'].map((freq) => (
             <MenuItem key={freq} value={freq}>
               {freq}
             </MenuItem>
           ))}
         </TextField>
         <TextField
-          name="numUsers"
+          name="perCycleCost"
+          label="Per-Cycle Cost"
+          required
+          type="number"
+          variant="outlined"
+          {...register('perCycleCost', { required: 'Enter total cost per pay cycle' })}
+          error={!!errors?.perCycleCost}
+          helperText={errors?.perCycleCost ? errors.perCycleCost.message : ' '}
+          InputProps={{
+            inputProps: { min: 0, step: 0.01 },
+            startAdornment: <InputAdornment position="start">$</InputAdornment>,
+          }}
+        />
+        <TextField
+          name="numberOfMembers"
           label="Number of people per plan"
           required
           type="number"
           variant="outlined"
-          {...register('numUsers', { required: 'Number of members required' })}
-          error={!!errors?.numUsers}
-          helperText={errors?.numUsers ? errors.numUsers.message : ' '}
+          {...register('numberOfMembers', { required: 'Number of members required' })}
+          error={!!errors?.numberOfMembers}
+          helperText={errors?.numberOfMembers ? errors.numberOfMembers.message : ' '}
           InputProps={{ inputProps: { min: 0 } }}
         />
-        <Button type="submit" variant="contained">Submit</Button>
+        <Button type="submit" variant="contained" disabled={loading}>Submit</Button>
       </form>
       <Button variant="contained" onClick={() => { navigate('/dashboard'); }}>Cancel</Button>
     </div>
