@@ -5,15 +5,9 @@ import { useForm } from 'react-hook-form';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 
-export default function Signup({ setUser }) {
+export default function Signup({ setUser, planToJoin }) {
   const navigate = useNavigate();
   const { register, handleSubmit, formState: { errors } } = useForm();
-  // const [username, setUsername] = useState('');
-  // const [firstName, setFirstName] = useState('');
-  // const [lastName, setLastName] = useState('');
-  // const [password, setPassword] = useState('');
-  // const [password2, setPassword2] = useState('');
-  // const [email, setEmail] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
 
   const SIGN_UP = gql`
@@ -25,13 +19,17 @@ export default function Signup({ setUser }) {
     }
   `;
 
-  const [signup, { data, loading, error}] = useMutation(SIGN_UP, {
+  const [signup, { data, loading, error }] = useMutation(SIGN_UP, {
     onCompleted: ({ createUser }) => {
       localStorage.setItem('token', createUser.token);
       localStorage.setItem('username', createUser.username);
-      setErrorMessage('');
       setUser(createUser.username);
-      navigate('/dashboard');
+      setErrorMessage('');
+      if (!planToJoin) {
+        navigate('/dashboard');
+      } else {
+        navigate(`/join/${planToJoin}`);
+      }
     },
     onError: ({ message }) => {
       localStorage.clear();

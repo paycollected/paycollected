@@ -7,7 +7,11 @@ import TextField from '@mui/material/TextField';
 import InputAdornment from '@mui/material/InputAdornment';
 import MenuItem from '@mui/material/MenuItem';
 
-export default function CreateSubscription() {
+export default function CreatePlan({ setPlanToJoin, setShowMagicLink }) {
+  /* after submitting create plan form
+  --> will get back a planID as response to mutation
+  --> set this planID in state to generate magic link
+  */
   const navigate = useNavigate();
   const { register, handleSubmit, formState: { errors } } = useForm();
 
