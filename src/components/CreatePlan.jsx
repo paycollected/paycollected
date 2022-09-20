@@ -24,6 +24,8 @@ export default function CreatePlan({ setPlanToJoin, setShowMagicLink }) {
   const [createNewPlan, { data, loading, error }] = useMutation(CREATE_PLAN, {
     onCompleted: ({ createPlan }) => {
       console.log('stripe id: ', createPlan);
+      setPlanToJoin(createPlan);
+      setShowMagicLink(true);
     },
     onError: ({ message }) => {
       console.log('error creating plan: ', message);
@@ -34,7 +36,6 @@ export default function CreatePlan({ setPlanToJoin, setShowMagicLink }) {
     planName, cycleFrequency, perCycleCost, numberOfMembers,
   }) => {
     const uppercaseCycleFrequency = cycleFrequency.toUpperCase();
-    console.log('form data: ', planName, uppercaseCycleFrequency, perCycleCost, numberOfMembers);
     createNewPlan({
       variables: {
         planName,
