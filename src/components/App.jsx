@@ -12,6 +12,9 @@ import ViewPlans from './ViewPlans.jsx';
 import MagicLink from './MagicLink.jsx';
 
 function App() {
+  /*
+  NOTE: Later on implement a catch all for wrong routes to tell user that page doesn't exist there
+  */
   const [user, setUser] = useState(localStorage.getItem('username'));
   const [planToJoin, setPlanToJoin] = useState(null);
   const [showMagicLink, setShowMagicLink] = useState(false);
