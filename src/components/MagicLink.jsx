@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import Button from '@mui/material/Button';
 
 export default function MagicLink({ planToJoin, setShowMagicLink }) {
   const navigate = useNavigate();
@@ -10,15 +11,21 @@ export default function MagicLink({ planToJoin, setShowMagicLink }) {
       <div>
         <p>Have other members on your plan join by sharing this link:</p>
         <h3>{`${process.env.CLIENT_HOST}:${process.env.PORT}/join/${planToJoin}`}</h3>
-        <button
-          type="button"
+        <Button
+          variant="contained"
           onClick={() => {
             setShowMagicLink(false);
             navigate(`/join/${planToJoin}`);
           }}
         >
           Join this plan!
-        </button>
+        </Button>
+        <Button
+          variant="contained"
+          onClick={() => { navigate('/dashboard'); }}
+        >
+          Dashboard
+        </Button>
       </div>
     </>
   );
