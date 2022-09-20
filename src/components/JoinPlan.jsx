@@ -21,6 +21,7 @@ export default function JoinPlan({ setPlanToJoin }) {
           firstName
           lastName
           username
+          quantity
         }
       }
     }
@@ -56,12 +57,14 @@ export default function JoinPlan({ setPlanToJoin }) {
           <>
             <div>Others on this plan:</div>
             <ul>
-              {otherMembers.map((member) => (<li key={member.username}>{member.firstName.concat(' ', member.lastName)}</li>))}
+              {otherMembers.map((member) => (
+                <li key={member.username}>{`${member.firstName} ${member.lastName} x ${member.quantity}`}</li>
+              ))}
             </ul>
           </>
         )}
         {otherMembers.length === 0
-          && (<div>There is currently no other members on this plan.</div>)}
+          && (<div>There are currently no members on this plan.</div>)}
         <button type="button" onClick={() => { navigate('/dashboard'); }}>Cancel</button>
         <button type="button" onClick={() => { navigate('/checkout'); }}>Pay</button>
       </>
