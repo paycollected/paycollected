@@ -9,41 +9,58 @@ export default function ViewPlans() {
   // it will also include a link to Stripe page, can cancel subscriptions
 
   const GET_ALL_PLANS = gql`
-    query() {
-      viewAllPlans() {
-
+    query {
+      viewAllPlans {
+        planId
+        name
+        owner {
+          firstName
+          lastName
+          username
+        }
+        cycleFrequency
+        perCycleCost
+        otherMembers {
+          firstName
+          lastName
+          username
+          quantity
+        }
       }
     }
   `;
 
   const { loading, data, error } = useQuery(GET_ALL_PLANS, {
-
+    fetchPolicy: 'network-only',
+    nextFetchPolicy: 'cache-and-network',
   });
 
   return (
     <div>
       <h1>This is the ViewSubscriptions page to list all subscriptions</h1>
-      {data ?
-        (plans.map((plan) => (
-          <div>
+      {data
+        && (data.viewAllPlans.map((plan) => (
+          <div key={plan.planId}>
             <div>
-            Owned by:&nbsp;
-            {plan.owner.firstName.concat(' ', plan.owner.lastName)}
+              Owned by:&nbsp;
+              {plan.owner.firstName.concat(' ', plan.owner.lastName)}
             </div>
             <div>{`Total Plan Cost: $${plan.perCycleCost} ${plan.cycleFrequency.toLowerCase()}`}</div>
             {plan.otherMembers.length > 0 && (
               <>
                 <div>Others on this plan:</div>
                 <ul>
-                  {plan.otherMembers.map((member) => (<li key={member.username}>{member.firstName.concat(' ', member.lastName)}</li>))}
+                  {plan.otherMembers.map((member) => (
+                    <li key={member.username}>{`${member.firstName} ${member.lastName} x ${member.quantity}`}</li>
+                  ))}
                 </ul>
               </>
             )}
             {plan.otherMembers.length === 0
-              && (<div>There is currently no other members on this plan.</div>)}
+              && (<div>There are currently no members on this plan.</div>)}
           </div>
-        ))) : null}
-      <Button variant="contained" onClick={() => { navigate('/dashboard'); }}>Cancel</Button>
+        )))}
+      <Button variant="contained" onClick={() => { navigate('/dashboard'); }}>Dashboard</Button>
     </div>
   );
 }
