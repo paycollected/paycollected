@@ -16,7 +16,7 @@ export default function CreatePlan({ setPlanToJoin, setShowMagicLink }) {
   const { register, handleSubmit, formState: { errors } } = useForm();
 
   const CREATE_PLAN = gql`
-    mutation ($planName: String!, $cycleFrequency: String!, $perCycleCost: Float!, $numberOfMembers: Int!) {
+    mutation ($planName: String!, $cycleFrequency: CycleFrequency!, $perCycleCost: Float!, $numberOfMembers: Int!) {
       createPlan(planName: $planName, cycleFrequency: $cycleFrequency, perCycleCost: $perCycleCost, numberOfMembers: $numberOfMembers)
     }
   `;
@@ -33,10 +33,14 @@ export default function CreatePlan({ setPlanToJoin, setShowMagicLink }) {
   const onSubmit = ({
     planName, cycleFrequency, perCycleCost, numberOfMembers,
   }) => {
-    console.log('form data: ', planName, perCycleCost, cycleFrequency, numberOfMembers);
+    const uppercaseCycleFrequency = cycleFrequency.toUpperCase();
+    console.log('form data: ', planName, uppercaseCycleFrequency, perCycleCost, numberOfMembers);
     createNewPlan({
       variables: {
-        planName, cycleFrequency, perCycleCost, numberOfMembers,
+        planName,
+        cycleFrequency: uppercaseCycleFrequency,
+        perCycleCost: Number(perCycleCost),
+        numberOfMembers: Number(numberOfMembers),
       },
     });
   };
