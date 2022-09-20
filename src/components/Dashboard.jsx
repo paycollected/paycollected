@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Button from '@mui/material/Button';
+import TextField from '@mui/material/TextField';
 
 export default function Dashboard({ username, setUser, setPlanToJoin }) {
   const navigate = useNavigate();
@@ -22,20 +24,30 @@ export default function Dashboard({ username, setUser, setPlanToJoin }) {
 
   return (
     <div>
-      <button type="button" onClick={logUserOut}>Log Out</button>
+      <Button variant="contained" onClick={logUserOut}>Log Out</Button>
       <h1>
         {username}
         &apos;s Dashboard
       </h1>
-      <button type="button" onClick={() => { navigate('/plan/create'); }}>Create a New Plan</button>
-      <button type="button" onClick={() => { navigate('/plan/all'); }}>Your Current Plans</button>
-      <button type="button" onClick={() => { setShowCodeInput(true); }}>Have a Code? Join a Plan!</button>
-      {showCodeInput && (
+      <Button variant="contained" onClick={() => { navigate('/plan/create'); }}>Create a New Plan</Button>
+      <Button variant="contained" onClick={() => { navigate('/plan/all'); }}>Your Current Plans</Button>
+      <Button variant="contained" onClick={() => { setShowCodeInput(true); }}>Have a Code? Join a Plan!</Button>
+      <div>
+        {showCodeInput && (
         <form onSubmit={codeInputSubmit}>
-          <input type="text" placeholder="Plan Code" value={code} onChange={(e) => { setCode(e.target.value); }} />
-          <input type="submit" value="Join!" />
+          <TextField
+            type="text"
+            label="Plan Code"
+            placeholder="Plan Code"
+            value={code}
+            required
+            variant="outlined"
+            onChange={(e) => { setCode(e.target.value); }}
+          />
+          <Button variant="contained" type="submit">Join!</Button>
         </form>
-      )}
+        )}
+      </div>
     </div>
   );
 }
