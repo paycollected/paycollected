@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import Button from '@mui/material/Button';
 
 export default function Home({ setPlanToJoin }) {
   const navigate = useNavigate();
@@ -14,8 +15,8 @@ export default function Home({ setPlanToJoin }) {
   return (
     <div>
       <h1>This is the Home page</h1>
-      <button type="button" onClick={() => { navigate('/login'); }}>Login</button>
-      <button type="button" onClick={() => { navigate('/signup'); }}>Sign up</button>
+      <Button variant="contained" onClick={() => { navigate('/login'); }}>Login</Button>
+      <Button variant="contained" onClick={() => { navigate('/signup'); }}>Sign up</Button>
     </div>
   );
 }

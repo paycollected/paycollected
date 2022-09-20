@@ -3,9 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { gql, useMutation, useLazyQuery } from '@apollo/client';
 import { useForm } from 'react-hook-form';
 import Button from '@mui/material/Button';
-import FormControl from '@mui/material/FormControl';
-import FormGroup from '@mui/material/FormGroup';
-import FormHelperText from '@mui/material/FormHelperText';
 import InputAdornment from '@mui/material/InputAdornment';
 import IconButton from '@mui/material/IconButton';
 import Visibility from '@mui/icons-material/Visibility';
@@ -18,8 +15,7 @@ export default function Login({ setUser, planToJoin }) {
   // if login info is valid
   const [showPassword, setShowPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
-  // const [username, setUsername] = useState('');
-  // const [password, setPassword] = useState('');
+
   const LOG_IN = gql`
     mutation ($username: String!, $password: String!) {
       login(username: $username, password: $password) {
@@ -49,10 +45,12 @@ export default function Login({ setUser, planToJoin }) {
         }
       } else {
         setErrorMessage('Incorrect username and password');
+        setUser(null);
       }
     },
     onError: ({ message }) => {
       localStorage.clear();
+      setUser(null);
       switch (message) {
         case 'This username does not exist':
           setErrorMessage('Please verify username');
