@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-export default function Dashboard({ username, setUser }) {
+export default function Dashboard({ username, setUser, setPlanToJoin }) {
   const navigate = useNavigate();
   const [showCodeInput, setShowCodeInput] = useState(false);
   const [code, setCode] = useState('');
@@ -16,6 +16,7 @@ export default function Dashboard({ username, setUser }) {
   const logUserOut = () => {
     localStorage.clear();
     setUser(null);
+    setPlanToJoin(null);
     navigate('/');
   };
 
