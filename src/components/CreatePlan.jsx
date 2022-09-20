@@ -56,6 +56,7 @@ export default function CreatePlan({ setPlanToJoin, setShowMagicLink }) {
         <TextField
           name="planName"
           label="Plan Name"
+          placeholder="Plan Name"
           required
           type="text"
           variant="outlined"
@@ -68,6 +69,7 @@ export default function CreatePlan({ setPlanToJoin, setShowMagicLink }) {
           sx={{ width: '25ch' }}
           name="cycleFrequency"
           label="Cycle Frequency"
+          placeholder="Cycle Frequency"
           required
           select
           defaultValue=""
@@ -84,6 +86,7 @@ export default function CreatePlan({ setPlanToJoin, setShowMagicLink }) {
         <TextField
           name="perCycleCost"
           label="Per-Cycle Cost"
+          placeholder="Per-Cycle Cost"
           required
           type="number"
           variant="outlined"
@@ -98,6 +101,7 @@ export default function CreatePlan({ setPlanToJoin, setShowMagicLink }) {
         <TextField
           name="numberOfMembers"
           label="Number of people per plan"
+          placeholder="Number of people per plan"
           required
           type="number"
           variant="outlined"
