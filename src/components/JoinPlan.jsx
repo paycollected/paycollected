@@ -17,7 +17,7 @@ export default function JoinPlan({ setPlanToJoin }) {
         },
         cycleFrequency
         perCycleCost
-        otherMembers {
+        activeMembers {
           firstName
           lastName
           username
@@ -41,7 +41,7 @@ export default function JoinPlan({ setPlanToJoin }) {
 
   if (data) {
     const {
-      name, owner, cycleFrequency, perCycleCost, otherMembers,
+      name, owner, cycleFrequency, perCycleCost, activeMembers,
     } = data.viewOnePlan;
 
     return (
@@ -53,17 +53,17 @@ export default function JoinPlan({ setPlanToJoin }) {
           {owner.firstName.concat(' ', owner.lastName)}
         </div>
         <div>{`Total Plan Cost: $${perCycleCost} ${cycleFrequency.toLowerCase()}`}</div>
-        {otherMembers.length > 0 && (
+        {activeMembers.length > 0 && (
           <>
             <div>Others on this plan:</div>
             <ul>
-              {otherMembers.map((member) => (
+              {activeMembers.map((member) => (
                 <li key={member.username}>{`${member.firstName} ${member.lastName} x ${member.quantity}`}</li>
               ))}
             </ul>
           </>
         )}
-        {otherMembers.length === 0
+        {activeMembers.length === 0
           && (<div>There are currently no members on this plan.</div>)}
         <button type="button" onClick={() => { navigate('/dashboard'); }}>Cancel</button>
         <button type="button" onClick={() => { navigate('/checkout'); }}>Pay</button>

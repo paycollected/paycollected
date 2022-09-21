@@ -20,7 +20,7 @@ export default function ViewPlans() {
         }
         cycleFrequency
         perCycleCost
-        otherMembers {
+        activeMembers {
           firstName
           lastName
           username
@@ -46,17 +46,17 @@ export default function ViewPlans() {
               {plan.owner.firstName.concat(' ', plan.owner.lastName)}
             </div>
             <div>{`Total Plan Cost: $${plan.perCycleCost} ${plan.cycleFrequency.toLowerCase()}`}</div>
-            {plan.otherMembers.length > 0 && (
+            {plan.activeMembers.length > 0 && (
               <>
                 <div>Others on this plan:</div>
                 <ul>
-                  {plan.otherMembers.map((member) => (
+                  {plan.activeMembers.map((member) => (
                     <li key={member.username}>{`${member.firstName} ${member.lastName} x ${member.quantity}`}</li>
                   ))}
                 </ul>
               </>
             )}
-            {plan.otherMembers.length === 0
+            {plan.activeMembers.length === 0
               && (<div>There are currently no members on this plan.</div>)}
           </div>
         )))}
