@@ -22,5 +22,6 @@ module.exports = {
     'import/extensions': 'off',
     'react/jsx-filename-extension': 'off',
     'comma-dangle': 'off',
+    'react/prop-types': 'off',
   },
 };
