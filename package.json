@@ -22,6 +22,8 @@
     "@emotion/styled": "^11.10.4",
     "@mui/icons-material": "^5.10.3",
     "@mui/material": "^5.10.5",
+    "@stripe/react-stripe-js": "^1.12.0",
+    "@stripe/stripe-js": "^1.38.1",
     "dotenv": "^16.0.2",
     "express": "^4.18.1",
     "graphql": "^16.6.0",
