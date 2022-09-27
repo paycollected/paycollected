@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { gql, useMutation, useLazyQuery } from '@apollo/client';
+import { gql, useMutation } from '@apollo/client';
 import { useForm } from 'react-hook-form';
 import Button from '@mui/material/Button';
 import InputAdornment from '@mui/material/InputAdornment';
@@ -24,13 +24,8 @@ export default function Login({ setUser, planToJoin }) {
       }
     }
   `;
-  const HELLO = gql`
-    query {
-      hello
-    }
-  `;
 
-  const [logUserIn, { data: loginData, loading, error: loginError }] = useMutation(LOG_IN, {
+  const [logUserIn, { loading }] = useMutation(LOG_IN, {
     onCompleted: ({ login }) => {
       // login = token returned; null if passwords do not match
       if (login) {
@@ -65,7 +60,6 @@ export default function Login({ setUser, planToJoin }) {
       }
     },
   });
-  const [helloQuery, { data: helloData, error: helloError }] = useLazyQuery(HELLO);
 
   const onSubmit = ({ username, password }) => {
     logUserIn({
@@ -76,17 +70,6 @@ export default function Login({ setUser, planToJoin }) {
     });
   };
 
-  const testQuery = () => {
-    helloQuery();
-  };
-
-  if (helloData) {
-    console.log('helloData received: ', helloData);
-  }
-
-  if (helloError) {
-    console.log('helloError: ', helloError);
-  }
 
   return (
     <div>
@@ -144,7 +127,6 @@ export default function Login({ setUser, planToJoin }) {
       <p>Don&apos;t have an account? Sign up!</p>
       <Button variant="contained" onClick={() => { navigate('/signup'); }}>Sign up</Button>
       <Button variant="contained" onClick={() => { navigate('/home'); }}>Cancel</Button>
-      <button type="button" onClick={testQuery}>Test Query Authentication</button>
     </div>
   );
 }
