@@ -44,6 +44,7 @@ export default function JoinPlan({ setPlanToJoin, setStripeClientSecret }) {
   const [makePayment, { data: payData, loading: payLoading, error: payError}] = useMutation(PAY, {
     onCompleted: ({ pay }) => {
       setStripeClientSecret(pay);
+      localStorage.set('clientSecret', pay);
       navigate('/checkout');
     },
     onError: ({ message }) => { console.log(message); },

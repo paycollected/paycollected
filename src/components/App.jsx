@@ -18,7 +18,7 @@ function App() {
   const [user, setUser] = useState(localStorage.getItem('username'));
   const [planToJoin, setPlanToJoin] = useState(null);
   const [showMagicLink, setShowMagicLink] = useState(false);
-  const [stripeClientSecret, setStripeClientSecret] = useState(null);
+  const [stripeClientSecret, setStripeClientSecret] = useState(localStorage.getItem('clientSecret'));
 
   return (
     <Routes>
