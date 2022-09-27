@@ -57,7 +57,6 @@ export default function JoinPlan({ setPlanToJoin, setStripeClientSecret }) {
     }
   }, []);
 
-
   const onSubmit = (e) => {
     e.preventDefault();
     makePayment({

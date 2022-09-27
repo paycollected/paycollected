@@ -36,7 +36,7 @@ function CheckoutForm() {
       <h3>This is the Checkout Form component</h3>
       <form onSubmit={handlePaymentSubmit}>
         <CardElement />
-        <button type="submit">Make payment</button>
+        <button type="submit" disabled={!stripe}>Make payment</button>
       </form>
     </>
   );
