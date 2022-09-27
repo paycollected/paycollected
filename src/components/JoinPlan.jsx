@@ -1,10 +1,11 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { gql, useQuery } from '@apollo/client';
+import { gql, useQuery, useMutation } from '@apollo/client';
 
-export default function JoinPlan({ setPlanToJoin }) {
+export default function JoinPlan({ setPlanToJoin, setStripeClientSecret }) {
   const navigate = useNavigate();
   const { planId } = useParams();
+  const [planQuantity, setPlanQuantity] = useState(0);
 
   const GET_PLAN = gql`
     query ($planId: String!) {
@@ -17,6 +18,7 @@ export default function JoinPlan({ setPlanToJoin }) {
         },
         cycleFrequency
         perCycleCost
+        maxNumberOfMembers
         activeMembers {
           firstName
           lastName
@@ -25,6 +27,9 @@ export default function JoinPlan({ setPlanToJoin }) {
         }
       }
     }
+  `;
+
+  const PAY = gql`
   `;
 
   const { loading, data, error } = useQuery(GET_PLAN, {
@@ -39,9 +44,15 @@ export default function JoinPlan({ setPlanToJoin }) {
     }
   }, []);
 
+  const onSubmit = (e) => {
+    e.preventDefault();
+
+    navigate('/checkout');
+  };
+
   if (data) {
     const {
-      name, owner, cycleFrequency, perCycleCost, activeMembers,
+      name, owner, cycleFrequency, perCycleCost, maxNumberOfMembers, activeMembers,
     } = data.viewOnePlan;
 
     return (
@@ -65,8 +76,18 @@ export default function JoinPlan({ setPlanToJoin }) {
         )}
         {activeMembers.length === 0
           && (<div>There are currently no members on this plan.</div>)}
+        <form onSubmit={onSubmit}>
+          <input
+            type="number"
+            placeholder="Quantity"
+            required
+            min="1"
+            max={maxNumberOfMembers - activeMembers.length}
+            onChange={(e) => { setPlanQuantity(e.target.value); }}
+          />
+          <button type="submit">Join</button>
+        </form>
         <button type="button" onClick={() => { navigate('/dashboard'); }}>Cancel</button>
-        <button type="button" onClick={() => { navigate('/checkout'); }}>Pay</button>
       </>
     );
   }
