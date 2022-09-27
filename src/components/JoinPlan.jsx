@@ -2,40 +2,51 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { gql, useQuery, useMutation } from '@apollo/client';
 
+const GET_PLAN = gql`
+  query ($planId: String!) {
+    viewOnePlan(planId: $planId) {
+      name
+      owner {
+        firstName
+        lastName
+        username
+      },
+      cycleFrequency
+      perCycleCost
+      maxNumberOfMembers
+      activeMembers {
+        firstName
+        lastName
+        username
+        quantity
+      }
+    }
+  }
+`;
+
+const PAY = gql`
+  mutation ($planId: String!, $quantity: Int!) {
+    pay(planId: $planId, quantity: $quantity)
+  }
+`;
+
 export default function JoinPlan({ setPlanToJoin, setStripeClientSecret }) {
   const navigate = useNavigate();
   const { planId } = useParams();
-  const [planQuantity, setPlanQuantity] = useState(0);
+  const [quantity, setQuantity] = useState(0);
 
-  const GET_PLAN = gql`
-    query ($planId: String!) {
-      viewOnePlan(planId: $planId) {
-        name
-        owner {
-          firstName
-          lastName
-          username
-        },
-        cycleFrequency
-        perCycleCost
-        maxNumberOfMembers
-        activeMembers {
-          firstName
-          lastName
-          username
-          quantity
-        }
-      }
-    }
-  `;
-
-  const PAY = gql`
-  `;
-
-  const { loading, data, error } = useQuery(GET_PLAN, {
+  const { loading: getPlanLoading, data: getPlanData, error: getPlanError } = useQuery(GET_PLAN, {
     variables: { planId: planId.toString().trim() },
     fetchPolicy: 'network-only',
     nextFetchPolicy: 'cache-and-network',
+  });
+
+  const [makePayment, { data: payData, loading: payLoading, error: payError}] = useMutation(PAY, {
+    onCompleted: ({ pay }) => {
+      setStripeClientSecret(pay);
+      navigate('/checkout');
+    },
+    onError: ({ message }) => { console.log(message); },
   });
 
   useEffect(() => {
@@ -44,16 +55,21 @@ export default function JoinPlan({ setPlanToJoin, setStripeClientSecret }) {
     }
   }, []);
 
+
   const onSubmit = (e) => {
     e.preventDefault();
-
-    navigate('/checkout');
+    makePayment({
+      variables: {
+        planId,
+        quantity
+      }
+    });
   };
 
-  if (data) {
+  if (getPlanData) {
     const {
       name, owner, cycleFrequency, perCycleCost, maxNumberOfMembers, activeMembers,
-    } = data.viewOnePlan;
+    } = getPlanData.viewOnePlan;
 
     return (
       <>
@@ -83,7 +99,7 @@ export default function JoinPlan({ setPlanToJoin, setStripeClientSecret }) {
             required
             min="1"
             max={maxNumberOfMembers - activeMembers.length}
-            onChange={(e) => { setPlanQuantity(e.target.value); }}
+            onChange={(e) => { setQuantity(Number(e.target.value)); }}
           />
           <button type="submit">Join</button>
         </form>
