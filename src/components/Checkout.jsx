@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
-  useStripe, useElements, CardElement, Elements
+  useStripe, useElements, CardElement, Elements, PaymentElement,
 } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 
@@ -17,17 +17,22 @@ function CheckoutForm() {
       // Make sure to disable form submission until Stripe.js has loaded.
       return;
     }
-    const { error } = await stripe.confirmPayment({
-      //`Elements` instance that was used to create the Payment Element
-      elements,
-      confirmParams: {
-        return_url: 'http://localhost:2891/',
-      },
-    });
+    try {
+      console.log(elements);
+      const { error } = await stripe.confirmPayment({
+        //`Elements` instance that was used to create the Payment Element
+        elements,
+        confirmParams: {
+          return_url: 'http://localhost:2891/',
+        },
+      });
 
-    if (error) {// error processing payment from Stripe
-      console.log(error);
-      // may want to navigate to a payment Error page here
+      if (error) {// error processing payment from Stripe
+        console.log(error);
+        // may want to navigate to a payment Error page here
+      }
+    } catch(err) {
+      console.log('This is a client side error:', err);
     }
   };
 
@@ -35,7 +40,8 @@ function CheckoutForm() {
     <>
       <h3>This is the Checkout Form component</h3>
       <form onSubmit={handlePaymentSubmit}>
-        <CardElement />
+        {/* <CardElement /> */}
+        <PaymentElement />
         <button type="submit" disabled={!stripe}>Make payment</button>
       </form>
     </>
@@ -50,6 +56,7 @@ on another note, subscription will expire if not followed up with payment
 --> will prob need to set up webhooks
 how does this affect what we store in db?
 */
+
 export default function Checkout({ stripeClientSecret }) {
   const options = {
     clientSecret: stripeClientSecret
@@ -59,7 +66,7 @@ export default function Checkout({ stripeClientSecret }) {
     return (
       <Elements stripe={stripePromise} options={options}>
         <h1>This is the Checkout page with a Client Secret</h1>
-        <CheckoutForm stripeClientSecret={stripeClientSecret} />
+        <CheckoutForm />
       </Elements>
     );
   }
