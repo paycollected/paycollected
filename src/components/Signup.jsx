@@ -5,19 +5,19 @@ import { useForm } from 'react-hook-form';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 
+const SIGN_UP = gql`
+mutation ($firstName: String!, $lastName: String!, $username: String!, $password: String!, $email: String!) {
+  createUser(firstName: $firstName, lastName: $lastName, username: $username, password: $password, email: $email) {
+    username
+    token
+  }
+}
+`;
+
 export default function Signup({ setUser, planToJoin }) {
   const navigate = useNavigate();
   const { register, handleSubmit, formState: { errors } } = useForm();
   const [errorMessage, setErrorMessage] = useState('');
-
-  const SIGN_UP = gql`
-    mutation ($firstName: String!, $lastName: String!, $username: String!, $password: String!, $email: String!) {
-      createUser(firstName: $firstName, lastName: $lastName, username: $username, password: $password, email: $email) {
-        username
-        token
-      }
-    }
-  `;
 
   const [signup, { data, loading, error }] = useMutation(SIGN_UP, {
     onCompleted: ({ createUser }) => {

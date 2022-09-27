@@ -41,10 +41,11 @@ export default function JoinPlan({ setPlanToJoin, setStripeClientSecret }) {
     nextFetchPolicy: 'cache-and-network',
   });
 
+  // will need to handle this payLoading state on client side so user knows what to expect
   const [makePayment, { data: payData, loading: payLoading, error: payError}] = useMutation(PAY, {
     onCompleted: ({ pay }) => {
       setStripeClientSecret(pay);
-      localStorage.set('clientSecret', pay);
+      localStorage.setItem('clientSecret', pay);
       navigate('/checkout');
     },
     onError: ({ message }) => { console.log(message); },

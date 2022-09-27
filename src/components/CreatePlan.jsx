@@ -7,6 +7,12 @@ import TextField from '@mui/material/TextField';
 import InputAdornment from '@mui/material/InputAdornment';
 import MenuItem from '@mui/material/MenuItem';
 
+const CREATE_PLAN = gql`
+mutation ($planName: String!, $cycleFrequency: CycleFrequency!, $perCycleCost: Float!, $numberOfMembers: Int!) {
+  createPlan(planName: $planName, cycleFrequency: $cycleFrequency, perCycleCost: $perCycleCost, numberOfMembers: $numberOfMembers)
+}
+`;
+
 export default function CreatePlan({ setPlanToJoin, setShowMagicLink }) {
   /* after submitting create plan form
   --> will get back a planID as response to mutation
@@ -14,12 +20,6 @@ export default function CreatePlan({ setPlanToJoin, setShowMagicLink }) {
   */
   const navigate = useNavigate();
   const { register, handleSubmit, formState: { errors } } = useForm();
-
-  const CREATE_PLAN = gql`
-    mutation ($planName: String!, $cycleFrequency: CycleFrequency!, $perCycleCost: Float!, $numberOfMembers: Int!) {
-      createPlan(planName: $planName, cycleFrequency: $cycleFrequency, perCycleCost: $perCycleCost, numberOfMembers: $numberOfMembers)
-    }
-  `;
 
   const [createNewPlan, { data, loading, error }] = useMutation(CREATE_PLAN, {
     onCompleted: ({ createPlan }) => {

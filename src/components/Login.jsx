@@ -9,21 +9,21 @@ import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import TextField from '@mui/material/TextField';
 
+const LOG_IN = gql`
+mutation ($username: String!, $password: String!) {
+  login(username: $username, password: $password) {
+    username
+    token
+  }
+}
+`;
+
 export default function Login({ setUser, planToJoin }) {
   const navigate = useNavigate();
   const { register, handleSubmit, formState: { errors } } = useForm();
   // if login info is valid
   const [showPassword, setShowPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
-
-  const LOG_IN = gql`
-    mutation ($username: String!, $password: String!) {
-      login(username: $username, password: $password) {
-        username
-        token
-      }
-    }
-  `;
 
   const [logUserIn, { loading }] = useMutation(LOG_IN, {
     onCompleted: ({ login }) => {
@@ -69,7 +69,6 @@ export default function Login({ setUser, planToJoin }) {
       },
     });
   };
-
 
   return (
     <div>

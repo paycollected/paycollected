@@ -3,32 +3,32 @@ import { useNavigate } from 'react-router-dom';
 import { gql, useQuery } from '@apollo/client';
 import Button from '@mui/material/Button';
 
+const GET_ALL_PLANS = gql`
+query {
+  viewAllPlans {
+    planId
+    name
+    owner {
+      firstName
+      lastName
+      username
+    }
+    cycleFrequency
+    perCycleCost
+    activeMembers {
+      firstName
+      lastName
+      username
+      quantity
+    }
+  }
+}
+`;
+
 export default function ViewPlans() {
   const navigate = useNavigate();
   // this component will display all existing plans for this user (query from backend)
   // it will also include a link to Stripe page, can cancel subscriptions
-
-  const GET_ALL_PLANS = gql`
-    query {
-      viewAllPlans {
-        planId
-        name
-        owner {
-          firstName
-          lastName
-          username
-        }
-        cycleFrequency
-        perCycleCost
-        activeMembers {
-          firstName
-          lastName
-          username
-          quantity
-        }
-      }
-    }
-  `;
 
   const { loading, data, error } = useQuery(GET_ALL_PLANS, {
     fetchPolicy: 'network-only',

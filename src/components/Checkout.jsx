@@ -27,6 +27,7 @@ function CheckoutForm() {
 
     if (error) {// error processing payment from Stripe
       console.log(error);
+      // may want to navigate to a payment Error page here
     }
   };
 
@@ -44,6 +45,10 @@ function CheckoutForm() {
 /*
 after clicking pay but not completing the checkout process,
 when coming back to the checkout page the client secret is lost if not saved somewhere
+
+on another note, subscription will expire if not followed up with payment
+--> will prob need to set up webhooks
+how does this affect what we store in db?
 */
 export default function Checkout({ stripeClientSecret }) {
   const options = {
