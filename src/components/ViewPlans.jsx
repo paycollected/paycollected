@@ -22,6 +22,7 @@ export default function ViewPlans() {
       {data
         && (data.viewAllPlans.map((plan) => (
           <div key={plan.planId}>
+            <h2>{plan.name}</h2>
             <div>
               Owned by:&nbsp;
               {plan.owner.firstName.concat(' ', plan.owner.lastName)}

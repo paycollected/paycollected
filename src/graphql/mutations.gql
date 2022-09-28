@@ -15,10 +15,14 @@ mutation LogIn ($username: String!, $password: String!) {
 
 
 mutation CreatePlanMutation ($planName: String!, $cycleFrequency: CycleFrequency!, $perCycleCost: Float!, $maxQuantity: Int!) {
-  createPlan(planName: $planName, cycleFrequency: $cycleFrequency, perCycleCost: $perCycleCost, maxQuantity: $maxQuantity)
+  createPlan(planName: $planName, cycleFrequency: $cycleFrequency, perCycleCost: $perCycleCost, maxQuantity: $maxQuantity) {
+    productId
+  }
 }
 
 
 mutation Pay ($planId: String!, $quantity: Int!) {
-  pay(planId: $planId, quantity: $quantity)
+  pay(planId: $planId, quantity: $quantity) {
+    clientSecret
+  }
 }

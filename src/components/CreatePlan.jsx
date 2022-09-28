@@ -6,7 +6,7 @@ import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import InputAdornment from '@mui/material/InputAdornment';
 import MenuItem from '@mui/material/MenuItem';
-import CreatePlanMutation from '../graphql/mutations.gql';
+import { CreatePlanMutation } from '../graphql/mutations.gql';
 
 const CREATE_PLAN = CreatePlanMutation;
 
@@ -20,8 +20,7 @@ export default function CreatePlan({ setPlanToJoin, setShowMagicLink }) {
 
   const [createNewPlan, { data, loading, error }] = useMutation(CREATE_PLAN, {
     onCompleted: ({ createPlan }) => {
-      console.log('stripe id: ', createPlan);
-      setPlanToJoin(createPlan);
+      setPlanToJoin(createPlan.productId);
       setShowMagicLink(true);
     },
     onError: ({ message }) => {

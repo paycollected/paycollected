@@ -38,3 +38,41 @@ query ViewAllPlans {
     }
   }
 }
+
+# query AllQueries {
+#   viewOnePlan(planId: $planId) {
+#     name
+#     owner {
+#       firstName
+#       lastName
+#       username
+#     },
+#     cycleFrequency
+#     perCycleCost
+#     maxQuantity
+#     activeMembers {
+#       firstName
+#       lastName
+#       username
+#       quantity
+#     }
+#   }
+
+#   viewAllPlans {
+#     planId
+#     name
+#     owner {
+#       firstName
+#       lastName
+#       username
+#     }
+#     cycleFrequency
+#     perCycleCost
+#     activeMembers {
+#       firstName
+#       lastName
+#       username
+#       quantity
+#     }
+#   }
+# }

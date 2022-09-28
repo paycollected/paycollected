@@ -21,8 +21,8 @@ export default function JoinPlan({ setPlanToJoin, setStripeClientSecret }) {
   // will need to handle this payLoading state on client side so user knows what to expect
   const [makePayment, { data: payData, loading: payLoading, error: payError}] = useMutation(PAY, {
     onCompleted: ({ pay }) => {
-      setStripeClientSecret(pay);
-      localStorage.setItem('clientSecret', pay);
+      setStripeClientSecret(pay.clientSecret);
+      localStorage.setItem('clientSecret', pay.clientSecret);
       navigate('/checkout');
     },
     onError: ({ message }) => { console.log(message); },
