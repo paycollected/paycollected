@@ -13,7 +13,7 @@ const GET_PLAN = gql`
       },
       cycleFrequency
       perCycleCost
-      maxNumberOfMembers
+      maxQuantity
       activeMembers {
         firstName
         lastName
@@ -69,7 +69,7 @@ export default function JoinPlan({ setPlanToJoin, setStripeClientSecret }) {
 
   if (getPlanData) {
     const {
-      name, owner, cycleFrequency, perCycleCost, maxNumberOfMembers, activeMembers,
+      name, owner, cycleFrequency, perCycleCost, maxQuantity, activeMembers,
     } = getPlanData.viewOnePlan;
 
     return (
@@ -99,7 +99,7 @@ export default function JoinPlan({ setPlanToJoin, setStripeClientSecret }) {
             placeholder="Quantity"
             required
             min="1"
-            max={maxNumberOfMembers - activeMembers.length}
+            max={maxQuantity - activeMembers.length}
             onChange={(e) => { setQuantity(Number(e.target.value)); }}
           />
           <button type="submit">Join</button>
