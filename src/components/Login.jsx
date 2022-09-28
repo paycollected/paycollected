@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { gql, useMutation } from '@apollo/client';
+import { useMutation } from '@apollo/client';
 import { useForm } from 'react-hook-form';
 import Button from '@mui/material/Button';
 import InputAdornment from '@mui/material/InputAdornment';
@@ -8,6 +8,9 @@ import IconButton from '@mui/material/IconButton';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import TextField from '@mui/material/TextField';
+import { LogIn } from '../graphql/mutations.gql';
+
+const LOG_IN = LogIn;
 
 export default function Login({ setUser, planToJoin }) {
   const navigate = useNavigate();
@@ -15,15 +18,6 @@ export default function Login({ setUser, planToJoin }) {
   // if login info is valid
   const [showPassword, setShowPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
-
-  const LOG_IN = gql`
-    mutation ($username: String!, $password: String!) {
-      login(username: $username, password: $password) {
-        username
-        token
-      }
-    }
-  `;
 
   const [logUserIn, { loading }] = useMutation(LOG_IN, {
     onCompleted: ({ login }) => {
@@ -69,7 +63,6 @@ export default function Login({ setUser, planToJoin }) {
       },
     });
   };
-
 
   return (
     <div>
