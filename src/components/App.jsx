@@ -10,11 +10,10 @@ import Cards from './Cards.jsx';
 import Checkout from './Checkout.jsx';
 import ViewPlans from './ViewPlans.jsx';
 import MagicLink from './MagicLink.jsx';
+import FourOhFour from './404.jsx';
+import PaymentSuccess from './PaymentSuccess.jsx';
 
 function App() {
-  /*
-  NOTE: Later on implement a catch all for wrong routes to tell user that page doesn't exist there
-  */
   const [user, setUser] = useState(localStorage.getItem('username'));
   const [planToJoin, setPlanToJoin] = useState(null);
   const [showMagicLink, setShowMagicLink] = useState(false);
@@ -53,6 +52,8 @@ function App() {
       <Route path="/cards" element={<Cards />} />
       <Route path="/checkout" element={<Checkout stripeClientSecret={stripeClientSecret} />} />
       <Route path="/plan/all" element={<ViewPlans />} />
+      <Route path="/payment-success" element={<PaymentSuccess />} />
+      <Route path="*" element={<FourOhFour />} />
     </Routes>
   );
 }
