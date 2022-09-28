@@ -1,6 +1,6 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import {
-  useStripe, useElements, CardElement, Elements, PaymentElement,
+  useStripe, useElements, Elements, PaymentElement,
 } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 
@@ -20,7 +20,7 @@ function CheckoutForm() {
     try {
       console.log(elements);
       const { error } = await stripe.confirmPayment({
-        //`Elements` instance that was used to create the Payment Element
+        // Elements` instance that was used to create the Payment Element
         elements,
         confirmParams: {
           return_url: 'http://localhost:2891/',
@@ -31,7 +31,7 @@ function CheckoutForm() {
         console.log(error);
         // may want to navigate to a payment Error page here
       }
-    } catch(err) {
+    } catch (err) {
       console.log('This is a client side error:', err);
     }
   };
