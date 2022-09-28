@@ -67,6 +67,13 @@ export default function JoinPlan({ setPlanToJoin, setStripeClientSecret }) {
     });
   };
 
+  if (getPlanError) {
+    const { message } = getPlanError;
+    if (message === 'No plan matched search') {
+      return message; // consider how UI should handle this
+    }
+  }
+
   if (getPlanData) {
     const {
       name, owner, cycleFrequency, perCycleCost, maxQuantity, activeMembers,

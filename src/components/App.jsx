@@ -53,6 +53,7 @@ function App() {
       <Route path="/checkout" element={<Checkout stripeClientSecret={stripeClientSecret} />} />
       <Route path="/plan/all" element={<ViewPlans />} />
       <Route path="/payment-success" element={<PaymentSuccess />} />
+      <Route path="/404" element={<FourOhFour />} />
       <Route path="*" element={<FourOhFour />} />
     </Routes>
   );
