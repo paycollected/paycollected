@@ -1,34 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { gql, useQuery, useMutation } from '@apollo/client';
+import { useQuery, useMutation } from '@apollo/client';
+import { Pay } from '../graphql/mutations.gql';
+import { ViewOnePlan } from '../graphql/queries.gql';
 
-const GET_PLAN = gql`
-  query ($planId: String!) {
-    viewOnePlan(planId: $planId) {
-      name
-      owner {
-        firstName
-        lastName
-        username
-      },
-      cycleFrequency
-      perCycleCost
-      maxQuantity
-      activeMembers {
-        firstName
-        lastName
-        username
-        quantity
-      }
-    }
-  }
-`;
-
-const PAY = gql`
-  mutation ($planId: String!, $quantity: Int!) {
-    pay(planId: $planId, quantity: $quantity)
-  }
-`;
+const GET_PLAN = ViewOnePlan;
+const PAY = Pay;
 
 export default function JoinPlan({ setPlanToJoin, setStripeClientSecret }) {
   const navigate = useNavigate();

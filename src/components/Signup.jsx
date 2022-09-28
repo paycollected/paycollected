@@ -1,18 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { gql, useMutation } from '@apollo/client';
+import { useMutation } from '@apollo/client';
 import { useForm } from 'react-hook-form';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
+import { CreateUser } from '../graphql/mutations.gql';
 
-const SIGN_UP = gql`
-mutation ($firstName: String!, $lastName: String!, $username: String!, $password: String!, $email: String!) {
-  createUser(firstName: $firstName, lastName: $lastName, username: $username, password: $password, email: $email) {
-    username
-    token
-  }
-}
-`;
+const SIGN_UP = CreateUser;
 
 export default function Signup({ setUser, planToJoin }) {
   const navigate = useNavigate();

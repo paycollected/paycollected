@@ -1,17 +1,14 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { gql, useMutation } from '@apollo/client';
+import { useMutation } from '@apollo/client';
 import { useForm } from 'react-hook-form';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import InputAdornment from '@mui/material/InputAdornment';
 import MenuItem from '@mui/material/MenuItem';
+import CreatePlanMutation from '../graphql/mutations.gql';
 
-const CREATE_PLAN = gql`
-mutation ($planName: String!, $cycleFrequency: CycleFrequency!, $perCycleCost: Float!, $maxQuantity: Int!) {
-  createPlan(planName: $planName, cycleFrequency: $cycleFrequency, perCycleCost: $perCycleCost, maxQuantity: $maxQuantity)
-}
-`;
+const CREATE_PLAN = CreatePlanMutation;
 
 export default function CreatePlan({ setPlanToJoin, setShowMagicLink }) {
   /* after submitting create plan form

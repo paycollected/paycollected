@@ -1,29 +1,10 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { gql, useQuery } from '@apollo/client';
+import { useQuery } from '@apollo/client';
 import Button from '@mui/material/Button';
+import { ViewAllPlans } from '../graphql/queries.gql';
 
-const GET_ALL_PLANS = gql`
-query {
-  viewAllPlans {
-    planId
-    name
-    owner {
-      firstName
-      lastName
-      username
-    }
-    cycleFrequency
-    perCycleCost
-    activeMembers {
-      firstName
-      lastName
-      username
-      quantity
-    }
-  }
-}
-`;
+const GET_ALL_PLANS = ViewAllPlans;
 
 export default function ViewPlans() {
   const navigate = useNavigate();
