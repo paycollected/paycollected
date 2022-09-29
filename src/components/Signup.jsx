@@ -15,9 +15,11 @@ export default function Signup({ setUser, planToJoin }) {
 
   const [signup, { data, loading, error }] = useMutation(SIGN_UP, {
     onCompleted: ({ createUser }) => {
-      localStorage.setItem('token', createUser.token);
-      localStorage.setItem('username', createUser.username);
-      setUser(createUser.username);
+      const { username, email, token } = createUser;
+      localStorage.setItem('token', token);
+      localStorage.setItem('username', username);
+      localStorage.setItem('email', email);
+      setUser(username);
       setErrorMessage('');
       if (!planToJoin) {
         navigate('/dashboard');

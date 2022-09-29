@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-  useStripe, useElements, Elements, PaymentElement,
+  useStripe, useElements, Elements, PaymentElement, LinkAuthenticationElement,
 } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 
@@ -18,7 +18,6 @@ function CheckoutForm() {
       return;
     }
     try {
-      console.log(elements);
       const { error } = await stripe.confirmPayment({
         // Elements` instance that was used to create the Payment Element
         elements,
@@ -43,8 +42,18 @@ function CheckoutForm() {
     <>
       <h3>This is the Checkout Form component</h3>
       <form onSubmit={handlePaymentSubmit}>
-        {/* <CardElement /> */}
-        <PaymentElement />
+        <LinkAuthenticationElement />
+        <PaymentElement
+          options={
+            {
+              defaultValues: {
+                billingDetails: {
+                  email: localStorage.getItem('email'),
+                }
+              }
+            }
+          }
+        />
         <button type="submit" disabled={!stripe}>Make payment</button>
       </form>
     </>
