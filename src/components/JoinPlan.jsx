@@ -1,41 +1,31 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { gql, useQuery, useMutation } from '@apollo/client';
+import { useQuery, useMutation } from '@apollo/client';
+import { Pay } from '../graphql/mutations.gql';
+import { ViewOnePlan } from '../graphql/queries.gql';
+
+const GET_PLAN = ViewOnePlan;
+const PAY = Pay;
 
 export default function JoinPlan({ setPlanToJoin, setStripeClientSecret }) {
   const navigate = useNavigate();
   const { planId } = useParams();
-  const [planQuantity, setPlanQuantity] = useState(0);
+  const [quantity, setQuantity] = useState(0);
 
-  const GET_PLAN = gql`
-    query ($planId: String!) {
-      viewOnePlan(planId: $planId) {
-        name
-        owner {
-          firstName
-          lastName
-          username
-        },
-        cycleFrequency
-        perCycleCost
-        maxNumberOfMembers
-        activeMembers {
-          firstName
-          lastName
-          username
-          quantity
-        }
-      }
-    }
-  `;
-
-  const PAY = gql`
-  `;
-
-  const { loading, data, error } = useQuery(GET_PLAN, {
+  const { loading: getPlanLoading, data: getPlanData, error: getPlanError } = useQuery(GET_PLAN, {
     variables: { planId: planId.toString().trim() },
     fetchPolicy: 'network-only',
     nextFetchPolicy: 'cache-and-network',
+  });
+
+  // will need to handle this payLoading state on client side so user knows what to expect
+  const [makePayment, { data: payData, loading: payLoading, error: payError}] = useMutation(PAY, {
+    onCompleted: ({ pay }) => {
+      setStripeClientSecret(pay.clientSecret);
+      localStorage.setItem('clientSecret', pay.clientSecret);
+      navigate('/checkout');
+    },
+    onError: ({ message }) => { console.log(message); },
   });
 
   useEffect(() => {
@@ -46,14 +36,25 @@ export default function JoinPlan({ setPlanToJoin, setStripeClientSecret }) {
 
   const onSubmit = (e) => {
     e.preventDefault();
-
-    navigate('/checkout');
+    makePayment({
+      variables: {
+        planId,
+        quantity
+      }
+    });
   };
 
-  if (data) {
+  if (getPlanError) {
+    const { message } = getPlanError;
+    if (message === 'No plan matched search') {
+      return message; // consider how UI should handle this
+    }
+  }
+
+  if (getPlanData) {
     const {
-      name, owner, cycleFrequency, perCycleCost, maxNumberOfMembers, activeMembers,
-    } = data.viewOnePlan;
+      name, owner, cycleFrequency, perCycleCost, maxQuantity, activeMembers,
+    } = getPlanData.viewOnePlan;
 
     return (
       <>
@@ -82,8 +83,8 @@ export default function JoinPlan({ setPlanToJoin, setStripeClientSecret }) {
             placeholder="Quantity"
             required
             min="1"
-            max={maxNumberOfMembers - activeMembers.length}
-            onChange={(e) => { setPlanQuantity(e.target.value); }}
+            max={maxQuantity - activeMembers.length}
+            onChange={(e) => { setQuantity(Number(e.target.value)); }}
           />
           <button type="submit">Join</button>
         </form>

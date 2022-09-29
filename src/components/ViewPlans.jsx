@@ -1,34 +1,15 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { gql, useQuery } from '@apollo/client';
+import { useQuery } from '@apollo/client';
 import Button from '@mui/material/Button';
+import { ViewAllPlans } from '../graphql/queries.gql';
+
+const GET_ALL_PLANS = ViewAllPlans;
 
 export default function ViewPlans() {
   const navigate = useNavigate();
   // this component will display all existing plans for this user (query from backend)
   // it will also include a link to Stripe page, can cancel subscriptions
-
-  const GET_ALL_PLANS = gql`
-    query {
-      viewAllPlans {
-        planId
-        name
-        owner {
-          firstName
-          lastName
-          username
-        }
-        cycleFrequency
-        perCycleCost
-        activeMembers {
-          firstName
-          lastName
-          username
-          quantity
-        }
-      }
-    }
-  `;
 
   const { loading, data, error } = useQuery(GET_ALL_PLANS, {
     fetchPolicy: 'network-only',
@@ -41,6 +22,7 @@ export default function ViewPlans() {
       {data
         && (data.viewAllPlans.map((plan) => (
           <div key={plan.planId}>
+            <h2>{plan.name}</h2>
             <div>
               Owned by:&nbsp;
               {plan.owner.firstName.concat(' ', plan.owner.lastName)}

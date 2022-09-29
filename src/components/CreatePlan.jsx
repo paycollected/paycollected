@@ -1,11 +1,14 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { gql, useMutation } from '@apollo/client';
+import { useMutation } from '@apollo/client';
 import { useForm } from 'react-hook-form';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import InputAdornment from '@mui/material/InputAdornment';
 import MenuItem from '@mui/material/MenuItem';
+import { CreatePlanMutation } from '../graphql/mutations.gql';
+
+const CREATE_PLAN = CreatePlanMutation;
 
 export default function CreatePlan({ setPlanToJoin, setShowMagicLink }) {
   /* after submitting create plan form
@@ -15,16 +18,9 @@ export default function CreatePlan({ setPlanToJoin, setShowMagicLink }) {
   const navigate = useNavigate();
   const { register, handleSubmit, formState: { errors } } = useForm();
 
-  const CREATE_PLAN = gql`
-    mutation ($planName: String!, $cycleFrequency: CycleFrequency!, $perCycleCost: Float!, $numberOfMembers: Int!) {
-      createPlan(planName: $planName, cycleFrequency: $cycleFrequency, perCycleCost: $perCycleCost, numberOfMembers: $numberOfMembers)
-    }
-  `;
-
   const [createNewPlan, { data, loading, error }] = useMutation(CREATE_PLAN, {
     onCompleted: ({ createPlan }) => {
-      console.log('stripe id: ', createPlan);
-      setPlanToJoin(createPlan);
+      setPlanToJoin(createPlan.productId);
       setShowMagicLink(true);
     },
     onError: ({ message }) => {
@@ -33,15 +29,14 @@ export default function CreatePlan({ setPlanToJoin, setShowMagicLink }) {
   });
 
   const onSubmit = ({
-    planName, cycleFrequency, perCycleCost, numberOfMembers,
+    planName, cycleFrequency, perCycleCost, maxQuantity,
   }) => {
-    const uppercaseCycleFrequency = cycleFrequency.toUpperCase();
     createNewPlan({
       variables: {
         planName,
-        cycleFrequency: uppercaseCycleFrequency,
+        cycleFrequency: cycleFrequency.toUpperCase(),
         perCycleCost: Number(perCycleCost),
-        numberOfMembers: Number(numberOfMembers),
+        maxQuantity: Number(maxQuantity),
       },
     });
   };
@@ -99,15 +94,15 @@ export default function CreatePlan({ setPlanToJoin, setShowMagicLink }) {
           }}
         />
         <TextField
-          name="numberOfMembers"
+          name="maxQuantity"
           label="Number of people per plan"
           placeholder="Number of people per plan"
           required
           type="number"
           variant="outlined"
-          {...register('numberOfMembers', { required: 'Number of members required' })}
-          error={!!errors?.numberOfMembers}
-          helperText={errors?.numberOfMembers ? errors.numberOfMembers.message : ' '}
+          {...register('maxQuantity', { required: 'Max quantity required' })}
+          error={!!errors?.maxQuantity}
+          helperText={errors?.maxQuantity ? errors.maxQuantity.message : ' '}
           InputProps={{ inputProps: { min: 0 } }}
         />
         <Button type="submit" variant="contained" disabled={loading}>Submit</Button>
