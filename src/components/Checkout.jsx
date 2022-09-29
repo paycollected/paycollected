@@ -23,7 +23,7 @@ function CheckoutForm() {
         // Elements` instance that was used to create the Payment Element
         elements,
         confirmParams: {
-          return_url: 'http://localhost:2891/payment-successful',
+          return_url: 'http://localhost:2891/payment-success/',
           // actual redirect URL string 'http://localhost:2891/payment-successful?payment_intent=pi_3LmvGnAJ5Ik974ue1pMLTTnB&payment_intent_client_secret=pi_3LmvGnAJ5Ik974ue1pMLTTnB_secret_8BraUagRkakm4GC2RiHgCLk5u&redirect_status=succeeded'
           // however, this will return the 404 page instead of the payment successful component at current configuration
         },
