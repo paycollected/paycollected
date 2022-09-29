@@ -12,6 +12,7 @@ module.exports = {
     publicPath: '/',
     path: DIST_DIR,
   },
+  mode: 'development',
   module: {
     rules: [
       {
