@@ -18,6 +18,16 @@ function App() {
   const [planToJoin, setPlanToJoin] = useState(null);
   const [showMagicLink, setShowMagicLink] = useState(false);
   const [stripeClientSecret, setStripeClientSecret] = useState(localStorage.getItem('clientSecret'));
+  /*
+  Note from Stripe API: The client secret can be used to complete a payment from your frontend.
+  It should not be stored, logged, or exposed to anyone other than the customer.
+  Make sure that you have TLS enabled on any page that includes the client secret.
+
+  --> If customer does not go through with payment in one sitting, perhaps we should let this client
+  secret expire and when they come back, we'll make them go through the checkout process over again
+  which will create a new subscription with new subscription id and give them a new client secret.
+  Is it safe to store this client secret in local storage??
+  */
 
   return (
     <Routes>
