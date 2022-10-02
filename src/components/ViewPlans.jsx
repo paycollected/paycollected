@@ -19,6 +19,10 @@ export default function ViewPlans() {
   return (
     <div>
       <h1>This is the ViewSubscriptions page to list all subscriptions</h1>
+      <Button variant="contained" onClick={() => { navigate('/dashboard'); }}>Dashboard</Button>
+      <Button variant="contained">Manage Payment Methods</Button>
+      {/* cannot update quantity or update payment method via Stripe customer portal directly
+      because our backend is on a separate server */}
       {data
         && (data.viewAllPlans.map((plan) => (
           <div key={plan.planId}>
@@ -42,7 +46,6 @@ export default function ViewPlans() {
               && (<div>There are currently no members on this plan.</div>)}
           </div>
         )))}
-      <Button variant="contained" onClick={() => { navigate('/dashboard'); }}>Dashboard</Button>
     </div>
   );
 }
