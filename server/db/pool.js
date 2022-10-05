@@ -4,7 +4,7 @@ require('dotenv').config();
 
 const pool = new Pool({
   database: process.env.DB,
-  host: process.env.HOST,
+  host: process.env.SERVER_HOST,
   max: 20,
   // idleTimeoutMillis: 30000,
   // connectionTimeoutMillis: 2000,
