@@ -286,6 +286,10 @@ export default {
         try {
           const { rows } = await models.getUserInfo(username);
           const { stripeCusId: customer } = rows[0];
+          /*
+          Note that we're skipping programmatically configure the session here
+          and did that manually in Stripe dev portal.
+          */
           const { url } = await stripe.billingPortal.sessions.create({
             customer,
             return_url: 'http://localhost:5647/dashboard/',
