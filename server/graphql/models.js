@@ -9,8 +9,7 @@ export function checkUser(username, email) {
     LIMIT 1`;
 
   return pool.query(query, [username, email]);
-};
-
+}
 
 export function createUser(firstName, lastName, username, password, email) {
   const query = `
@@ -21,8 +20,7 @@ export function createUser(firstName, lastName, username, password, email) {
   `;
   const args = [firstName, lastName, username, password, email];
   return pool.query(query, args);
-};
-
+}
 
 export function getPass(username) {
   const query = `
@@ -32,8 +30,7 @@ export function getPass(username) {
   `;
 
   return pool.query(query, [username]);
-};
-
+}
 
 export function addPlan(username, planName, cycleFrequency, perCycleCost, sProdId, sPriceId, perCyclePerPersonCost, maxQuantity) {
   const query = `
@@ -51,8 +48,7 @@ export function addPlan(username, planName, cycleFrequency, perCycleCost, sProdI
   `;
   const args = [username, planName, cycleFrequency, perCycleCost, perCyclePerPersonCost, sProdId, sPriceId, maxQuantity];
   return pool.query(query, args);
-};
-
+}
 
 export function viewOnePlan(planId) {
   const query = `
@@ -69,9 +65,8 @@ export function viewOnePlan(planId) {
     ON up.username = u.username
     WHERE up.plan_owner = True AND p.s_prod_id = $1`;
 
-    return pool.query(query, [planId]);
-};
-
+  return pool.query(query, [planId]);
+}
 
 export function membersOnOnePlan(planId) {
   const query = `
@@ -86,8 +81,7 @@ export function membersOnOnePlan(planId) {
     WHERE up.quantity > 0 AND up.plan_id = $1`;
 
   return pool.query(query, [planId]);
-};
-
+}
 
 export function viewAllPlans(username) {
   const query = `
@@ -117,7 +111,7 @@ export function viewAllPlans(username) {
     WHERE up.plan_owner = True`;
 
   return pool.query(query, [username]);
-};
+}
 
 export function getUserInfo(username) {
   const query = `
@@ -125,17 +119,23 @@ export function getUserInfo(username) {
     FROM users
     WHERE username = $1`;
   return pool.query(query, [username]);
-};
+}
 
 export function saveStripeCusId(username, sCusId) {
-  const query = `UPDATE users SET s_cus_id = $1 WHERE username = $2`;
+  const query = `
+    UPDATE users
+    SET s_cus_id = $1
+    WHERE username = $2`;
   return pool.query(query, [sCusId, username]);
 }
 
 export function getPriceId(planId) {
-  const query = `SELECT s_price_id AS "sPriceId" FROM plans WHERE s_prod_id = $1`
+  const query = `
+    SELECT s_price_id AS "sPriceId"
+    FROM plans
+    WHERE s_prod_id = $1`;
   return pool.query(query, [planId]);
-};
+}
 
 export function addSubscriptionId(planId, quantity, subscriptionId, username) {
   const query = `
@@ -147,4 +147,4 @@ export function addSubscriptionId(planId, quantity, subscriptionId, username) {
   `;
 
   return pool.query(query, [quantity, subscriptionId, planId, username]);
-};
+}

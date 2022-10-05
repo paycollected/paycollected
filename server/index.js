@@ -7,9 +7,9 @@ import router from './rest/routes';
 
 require('dotenv').config();
 
-const SERVER_PORT = process.env.SERVER_PORT;
+const { SERVER_PORT } = process.env;
 
-async function startApolloServer(typeDefs, resolvers) {
+async function startApolloServer() {
   const app = express();
   app.use('/rest', router);
 
@@ -44,6 +44,6 @@ async function startApolloServer(typeDefs, resolvers) {
     console.log(`🛌 REST server is served at localhost:${SERVER_PORT}`);
   });
   console.log(`🚀 GraphQL Server ready at http://localhost:${SERVER_PORT}${server.graphqlPath}`);
-};
+}
 
 startApolloServer(typeDefs, resolvers);
