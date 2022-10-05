@@ -9,7 +9,7 @@ export default gql`
   type PlanMember {
     firstName: String!
     lastName: String!
-    username: String!
+    username: ID!
     quantity: Int # 0 means not paying # nullable because quantity for owner field is null
   }
 
@@ -34,7 +34,7 @@ export default gql`
   }
 
   type Plan {
-    planId: String!
+    planId: ID!
     name: String!
     owner: PlanMember!
     cycleFrequency: CycleFrequency!
