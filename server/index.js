@@ -43,8 +43,13 @@ async function startApolloServer() {
 
   await server.start();
   server.applyMiddleware({ app, cors: { origin: true, credentials: true } });
+
+  // serving web client
+  // these needs to go after Apollo server middleware
+  // otherwise * wildcard endpoint will redirect /graphql endpoint to 404 page
   app.use(express.static(path.join(__dirname, '..', 'client', 'dist')));
   app.get('*', (req, res) => res.sendFile(path.resolve(__dirname, '..', 'client', 'dist', 'index.html')));
+
   app.listen(SERVER_PORT, () => {
     console.log(`🛌 REST server is served at localhost:${SERVER_PORT}`);
   });
