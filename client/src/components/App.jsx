@@ -29,11 +29,15 @@ function App() {
   Is it safe to store this client secret in local storage??
   */
 
+  /*
+  More TO-DO: Check expiration date for token and automatically sign user out once token has expired
+  */
+
   return (
     <Routes>
-      <Route path="/" element={!user ? <Home /> : <Navigate to="/dashboard" />} />
-      <Route path="/login" element={!user ? <Login setUser={setUser} planToJoin={planToJoin} /> : <Navigate to="/dashboard" />} />
-      <Route path="/signup" element={!user ? <Signup setUser={setUser} planToJoin={planToJoin} /> : <Navigate to="/dashboard" />} />
+      <Route path="/" element={!user ? <Home /> : <Navigate to="/" />} />
+      <Route path="/login" element={!user ? <Login setUser={setUser} planToJoin={planToJoin} /> : <Navigate to="/" />} />
+      <Route path="/signup" element={!user ? <Signup setUser={setUser} planToJoin={planToJoin} /> : <Navigate to="/" />} />
       <Route
         path="/dashboard"
         element={user ? <Dashboard username={user} setUser={setUser} setPlanToJoin={setPlanToJoin} /> : <Navigate to="/" />}
@@ -59,10 +63,10 @@ function App() {
             )
           }
       />
-      <Route path="/cards" element={<Cards />} />
-      <Route path="/checkout" element={<Checkout stripeClientSecret={stripeClientSecret} />} />
-      <Route path="/plan/all" element={<ViewPlans />} />
-      <Route path="/payment-success" element={<PaymentSuccess />} />
+      <Route path="/cards" element={user ? <Cards /> : <Navigate to="/" />} />
+      <Route path="/checkout" element={user ? <Checkout stripeClientSecret={stripeClientSecret} /> : <Navigate to="/" />} />
+      <Route path="/plan/all" element={user ? <ViewPlans /> : <Navigate to="/" />} />
+      <Route path="/payment-success" element={user ? <PaymentSuccess /> : <Navigate to="/" />} />
       <Route path="/404" element={<FourOhFour />} />
       <Route path="*" element={<FourOhFour />} />
     </Routes>
