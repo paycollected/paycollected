@@ -10,8 +10,6 @@ const EDIT_PAYMENT = EditPayment;
 
 export default function ViewPlans() {
   const navigate = useNavigate();
-  // this component will display all existing plans for this user (query from backend)
-  // it will also include a link to Stripe page, can cancel subscriptions
 
   const { loading, data, error } = useQuery(GET_ALL_PLANS, {
     fetchPolicy: 'network-only',
