@@ -1,15 +1,18 @@
-import * as models from '../models.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import stripeSDK from 'stripe';
-import { ApolloError, UserInputError, AuthenticationError, ForbiddenError } from 'apollo-server-core';
+import {
+  ApolloError, UserInputError, AuthenticationError, ForbiddenError
+} from 'apollo-server-core';
+import * as models from '../models.js';
+
 const saltRounds = 10;
 const stripe = stripeSDK(process.env.STRIPE_SECRET_KEY);
 
 const recurringInterval = {
-  'weekly': 'week',
-  'monthly': 'month',
-  'yearly': 'year'
+  weekly: 'week',
+  monthly: 'month',
+  yearly: 'year'
 };
 
 export default {
@@ -21,24 +24,21 @@ export default {
           const { rows } = await models.viewOnePlan(planId);
           if (rows.length === 0) { // no match
             errMsg = 'No plan matched search';
-            throw new Error;
+            throw new Error();
           }
           const result = { ...rows[0], planId };
           result.perCycleCost /= 100;
           return result;
-        }
-
-        catch (asyncError) {
+        } catch (asyncError) {
           if (errMsg) {
             throw new ApolloError(errMsg);
-            // will need to handle this error in front end where the join page will send this query request
+            // will need to handle this error in front end
+            // where the join page will send this query request
           }
           console.log(asyncError);
           throw new ApolloError('Unable to retrieve plan information');
         }
-      }
-
-      else if (err === 'Incorrect token') {
+      } else if (err === 'Incorrect token') {
         throw new AuthenticationError(err);
       } else if (err === 'Unauthorized request') {
         throw new ForbiddenError(err);
@@ -49,26 +49,21 @@ export default {
       if (username) {
         try {
           const { rows } = await models.viewAllPlans(username);
-          rows.forEach(row => {
+          rows.forEach((row) => {
             row.perCycleCost /= 100;
-          })
+          });
           return rows;
-        }
-
-        catch (asyncError) {
+        } catch (asyncError) {
           console.log(asyncError);
           throw new ApolloError('Unable to retrieve plans information');
         }
-      }
-
-      else if (err === 'Incorrect token') {
+      } else if (err === 'Incorrect token') {
         throw new AuthenticationError(err);
       } else if (err === 'Unauthorized request') {
         throw new ForbiddenError(err);
       }
     },
   },
-
 
   Plan: {
     activeMembers: async ({ planId }, _, { username, err }) => {
@@ -76,14 +71,11 @@ export default {
         try {
           const { rows } = await models.membersOnOnePlan(planId);
           return rows;
-        }
-        catch (asyncError) {
+        } catch (asyncError) {
           console.log(asyncError);
           throw new ApolloError('Unable to retrieve plan information');
         }
-      }
-
-      else if (err === 'Incorrect token') {
+      } else if (err === 'Incorrect token') {
         throw new AuthenticationError(err);
       } else if (err === 'Unauthorized request') {
         throw new ForbiddenError(err);
@@ -91,9 +83,10 @@ export default {
     },
   },
 
-
   Mutation: {
-    createUser: async (_, { firstName, lastName, username, password, email }) => {
+    createUser: async (_, {
+      firstName, lastName, username, password, email
+    }) => {
       let errMsg;
       username = username.trim().toLowerCase();
       email = email.trim().toLowerCase();
@@ -113,21 +106,20 @@ export default {
             email,
             token
           };
+        // username or email exist --> return error
+        } else if (rows[0].username === username) {
+          errMsg = 'This username already exists';
+          throw new Error();
         } else {
-          // username or email exist --> return error
-          if (rows[0].username === username) {
-            errMsg = 'This username already exists';
-            throw new Error;
-          } else {
-            errMsg = 'This email already exists';
-            throw new Error;
-          }
+          errMsg = 'This email already exists';
+          throw new Error();
         }
       } catch (asyncError) {
-
         /*
-        Because this entire process depends on many async operations (2 database queries + 1 bcrypt here),
-        this catch block will catch ALL errors from any of these async operations and throw a generic error message.
+        Because this entire process depends on many async operations
+        (2 database queries + 1 bcrypt here),
+        this catch block will catch ALL errors from any of these async operations
+        and throw a generic error message.
         According to Apollo docs, this should generate an error with code 'INTERNAL_SERVER_ERROR'.
         */
 
@@ -142,7 +134,6 @@ export default {
       }
     },
 
-
     login: async (_, { username, password }) => {
       let errMsg;
       username = username.trim().toLowerCase();
@@ -151,7 +142,7 @@ export default {
         // if username does not exist, throw error
         if (rows.length === 0) {
           errMsg = 'This username does not exist';
-          throw new Error;
+          throw new Error();
         }
         // if username exists but password doesn't match, return null
         const savedPass = rows[0].password;
@@ -174,9 +165,7 @@ export default {
           email,
           token
         };
-      }
-
-      catch (asyncError) {
+      } catch (asyncError) {
         if (errMsg) {
           // if anticipated bad input error
           throw new UserInputError(errMsg);
@@ -188,8 +177,9 @@ export default {
       }
     },
 
-
-    createPlan: async (_, { planName, cycleFrequency, perCycleCost, maxQuantity }, { username, err }) => {
+    createPlan: async (_, {
+      planName, cycleFrequency, perCycleCost, maxQuantity
+    }, { username, err }) => {
       if (username) {
         try {
           planName = planName.trim();
@@ -211,12 +201,11 @@ export default {
               interval: recurringInterval[cycleFrequency]
             },
           });
-          const { id: sPriceId }  = price;
+          const { id: sPriceId } = price;
 
           await models.addPlan(username, planName, cycleFrequency, perCycleCost, sProdId, sPriceId, perCyclePerPersonCost, maxQuantity);
           return { productId: sProdId };
-        }
-        catch (asyncError) {
+        } catch (asyncError) {
           console.log(asyncError);
           throw new ApolloError('Unable to create new plan');
         }
@@ -227,7 +216,6 @@ export default {
       }
     },
 
-
     pay: async (_, { planId, quantity }, { username, err }) => {
       /*
       1. check whether this user has a stripe Id or not, if not create a Stripe cus for them
@@ -236,23 +224,24 @@ export default {
       */
 
       /* right now assuming that nobody extra is joining plan compared to originally declared
-      # of members when plan was first created. will still need to check for # of people already on plan
+      # of members when plan was created. will still need to check for # of people already on plan
       and compare with originally declared value --> adjust pricing later.
       */
       if (username) {
         try {
           let sCusId;
           const { rows } = await models.getUserInfo(username);
-          const { stripeCusId, firstName, lastName, email } = rows[0];
+          const {
+            stripeCusId, firstName, lastName, email
+          } = rows[0];
           if (stripeCusId === null) { // create a customer
             const { id } = await stripe.customers.create({
-              name: firstName + ' ' + lastName,
+              name: `${firstName} ${lastName}`,
               email
             });
             sCusId = id;
             await models.saveStripeCusId(username, sCusId);
-          }
-          else {
+          } else {
             sCusId = stripeCusId;
           }
           // at this point user will have stripeCusId
@@ -280,12 +269,10 @@ export default {
           */
           await models.addSubscriptionId(planId, quantity, subscriptionId, username);
           return { clientSecret };
-        }
-        catch (asyncError) {
+        } catch (asyncError) {
           console.log(asyncError);
           throw new ApolloError('Unable to create subscription');
         }
-
       } else if (err === 'Incorrect token') {
         throw new AuthenticationError(err);
       } else if (err === 'Unauthorized request') {
