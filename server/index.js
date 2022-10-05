@@ -51,4 +51,4 @@ async function startApolloServer() {
   console.log(`🚀 GraphQL Server ready at http://localhost:${SERVER_PORT}${server.graphqlPath}`);
 }
 
-startApolloServer(typeDefs, resolvers);
+startApolloServer();
