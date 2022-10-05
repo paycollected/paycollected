@@ -1,10 +1,12 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useQuery } from '@apollo/client';
+import { useQuery, useMutation } from '@apollo/client';
 import Button from '@mui/material/Button';
 import { ViewAllPlans } from '../graphql/queries.gql';
+import { EditPayment } from '../graphql/mutations.gql';
 
 const GET_ALL_PLANS = ViewAllPlans;
+const EDIT_PAYMENT = EditPayment;
 
 export default function ViewPlans() {
   const navigate = useNavigate();
@@ -16,11 +18,22 @@ export default function ViewPlans() {
     nextFetchPolicy: 'cache-and-network',
   });
 
+  const [
+    submitEditPayment,
+    { loading: editPaymentLoading, error: editPaymentError, data: editPaymentData }
+  ] = useMutation(EDIT_PAYMENT, {
+    onCompleted: ({ editPayment }) => {
+      const { portalSessionURL } = editPayment;
+      window.location.replace(portalSessionURL);
+    },
+    onError: ({ message }) => { console.log(message); }
+  });
+
   return (
     <div>
       <h1>This is the ViewSubscriptions page to list all subscriptions</h1>
       <Button variant="contained" onClick={() => { navigate('/dashboard'); }}>Dashboard</Button>
-      <Button variant="contained">Manage Payment Methods</Button>
+      <Button variant="contained" onClick={() => { submitEditPayment(); }}>Manage Payment Methods</Button>
       {/* cannot update quantity or update payment method via Stripe customer portal directly
       because our backend is on a separate server */}
       {data
