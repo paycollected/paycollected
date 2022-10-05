@@ -3,8 +3,8 @@ import express from 'express';
 import dotenv from 'dotenv';
 import jwt from 'jsonwebtoken';
 import path from 'path';
-import typeDefs from './graphql/controllers/typeDefs';
-import resolvers from './graphql/controllers/resolvers';
+import typeDefs from './graphql/typeDefs';
+import resolvers from './graphql/resolvers';
 import router from './rest/routes';
 
 dotenv.config();
@@ -43,8 +43,13 @@ async function startApolloServer() {
 
   await server.start();
   server.applyMiddleware({ app, cors: { origin: true, credentials: true } });
+
+  // serving web client
+  // these needs to go after Apollo server middleware
+  // otherwise * wildcard endpoint will redirect /graphql endpoint to 404 page
   app.use(express.static(path.join(__dirname, '..', 'client', 'dist')));
   app.get('*', (req, res) => res.sendFile(path.resolve(__dirname, '..', 'client', 'dist', 'index.html')));
+
   app.listen(SERVER_PORT, () => {
     console.log(`🛌 REST server is served at localhost:${SERVER_PORT}`);
   });

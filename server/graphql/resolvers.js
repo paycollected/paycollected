@@ -4,7 +4,7 @@ import stripeSDK from 'stripe';
 import {
   ApolloError, UserInputError, AuthenticationError, ForbiddenError
 } from 'apollo-server-core';
-import * as models from '../models.js';
+import * as models from '../db/models.js';
 
 const saltRounds = 10;
 const stripe = stripeSDK(process.env.STRIPE_SECRET_KEY);
@@ -138,14 +138,14 @@ export default {
       let errMsg;
       username = username.trim().toLowerCase();
       try {
-        const { rows } = await models.getPass(username);
+        const { rows } = await models.getUserInfo(username);
         // if username does not exist, throw error
         if (rows.length === 0) {
           errMsg = 'This username does not exist';
           throw new Error();
         }
         // if username exists but password doesn't match, return null
-        const savedPass = rows[0].password;
+        const { password: savedPass} = rows[0];
         const result = await bcrypt.compare(password, savedPass);
         if (!result) {
           return null;
@@ -273,11 +273,39 @@ export default {
           console.log(asyncError);
           throw new ApolloError('Unable to create subscription');
         }
+
       } else if (err === 'Incorrect token') {
         throw new AuthenticationError(err);
       } else if (err === 'Unauthorized request') {
         throw new ForbiddenError(err);
       }
     },
+
+    editPayment: async (_, __, { username, err }) => {
+      if (username) {
+        try {
+          const { rows } = await models.getUserInfo(username);
+          const { stripeCusId: customer } = rows[0];
+          /*
+          Note that we're skipping programmatically configure the session here
+          and did that manually in Stripe dev portal.
+          */
+          const { url } = await stripe.billingPortal.sessions.create({
+            customer,
+            return_url: 'http://localhost:5647/dashboard/',
+          });
+          return { portalSessionURL: url };
+        } catch (asyncError) {
+          console.log(asyncError);
+          throw new ApolloError('Unable to get customer portal link');
+        }
+
+      } else if (err === 'Incorrect token') {
+        throw new AuthenticationError(err);
+      } else if (err === 'Unauthorized request') {
+        throw new ForbiddenError(err);
+      }
+    },
+
   }
 };

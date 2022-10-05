@@ -23,8 +23,14 @@ mutation CreatePlanMutation ($planName: String!, $cycleFrequency: CycleFrequency
 }
 
 
-mutation Pay ($planId: String!, $quantity: Int!) {
+mutation Pay ($planId: ID!, $quantity: Int!) {
   pay(planId: $planId, quantity: $quantity) {
     clientSecret
+  }
+}
+
+mutation EditPayment {
+  editPayment {
+    portalSessionURL
   }
 }

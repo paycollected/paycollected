@@ -2,11 +2,12 @@ import { gql } from 'apollo-server-core';
 
 export default gql`
   type Query {
-    viewOnePlan (planId: String!): Plan!
+    viewOnePlan (planId: ID!): Plan!
     viewAllPlans: [Plan]!
   }
 
   type PlanMember {
+    stripeCusId: ID # nullable for plan owner who has just joined and does not have Stripe Cus ID yet
     firstName: String!
     lastName: String!
     username: String!
@@ -27,6 +28,10 @@ export default gql`
     productId: String!
   }
 
+  type PortalSession {
+    portalSessionURL: String!
+  }
+
   enum CycleFrequency {
     WEEKLY
     MONTHLY
@@ -34,7 +39,7 @@ export default gql`
   }
 
   type Plan {
-    planId: String!
+    planId: ID!
     name: String!
     owner: PlanMember!
     cycleFrequency: CycleFrequency!
@@ -66,8 +71,10 @@ export default gql`
     # returning stripe product ID here, which will be used as code
 
     pay(
-      planId: String!
+      planId: ID!
       quantity: Int!
     ): PaymentIntent! # returning client secret
+
+    editPayment: PortalSession!
   }
 `;

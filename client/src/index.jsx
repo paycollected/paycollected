@@ -5,6 +5,7 @@ import {
 } from '@apollo/client';
 import { setContext } from '@apollo/client/link/context';
 import { BrowserRouter } from 'react-router-dom';
+import { ChakraProvider } from '@chakra-ui/react';
 import App from './components/App.jsx';
 
 const httpLink = createHttpLink({
@@ -27,11 +28,14 @@ const client = new ApolloClient({
   cache: new InMemoryCache(),
 });
 
+// ChakraProvider will break all MUI components
 const root = createRoot(document.getElementById('root'));
 root.render(
   <ApolloProvider client={client}>
     <BrowserRouter>
-      <App />
+      {/* <ChakraProvider> */}
+        <App />
+      {/* </ChakraProvider> */}
     </BrowserRouter>
-  </ApolloProvider>,
+  </ApolloProvider>
 );
