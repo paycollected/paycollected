@@ -138,14 +138,14 @@ export default {
       let errMsg;
       username = username.trim().toLowerCase();
       try {
-        const { rows } = await models.getPass(username);
+        const { rows } = await models.getUserInfo(username);
         // if username does not exist, throw error
         if (rows.length === 0) {
           errMsg = 'This username does not exist';
           throw new Error();
         }
         // if username exists but password doesn't match, return null
-        const savedPass = rows[0].password;
+        const { password: savedPass} = rows[0];
         const result = await bcrypt.compare(password, savedPass);
         if (!result) {
           return null;

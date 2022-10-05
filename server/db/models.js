@@ -11,6 +11,7 @@ export function checkUser(username, email) {
   return pool.query(query, [username, email]);
 }
 
+
 export function createUser(firstName, lastName, username, password, email) {
   const query = `
     INSERT INTO users
@@ -22,15 +23,6 @@ export function createUser(firstName, lastName, username, password, email) {
   return pool.query(query, args);
 }
 
-export function getPass(username) {
-  const query = `
-    SELECT password
-    FROM users
-    WHERE username = $1
-  `;
-
-  return pool.query(query, [username]);
-}
 
 export function addPlan(username, planName, cycleFrequency, perCycleCost, sProdId, sPriceId, perCyclePerPersonCost, maxQuantity) {
   const query = `
@@ -50,6 +42,7 @@ export function addPlan(username, planName, cycleFrequency, perCycleCost, sProdI
   return pool.query(query, args);
 }
 
+
 export function viewOnePlan(planId) {
   const query = `
     SELECT
@@ -57,7 +50,7 @@ export function viewOnePlan(planId) {
       UPPER(p.cycle_frequency::VARCHAR) AS "cycleFrequency",
       p.per_cycle_cost AS "perCycleCost",
       p.max_quantity AS "maxQuantity",
-      json_build_object('firstName', u.first_name, 'lastName', u.last_name, 'username', u.username) AS owner
+      json_build_object('firstName', u.first_name, 'lastName', u.last_name, 'username', u.username, 'stripeCusId', u.s_cus_id) AS owner
     FROM plans p
     JOIN user_plan up
     ON p.s_prod_id = up.plan_id
@@ -68,10 +61,12 @@ export function viewOnePlan(planId) {
   return pool.query(query, [planId]);
 }
 
+
 export function membersOnOnePlan(planId) {
   const query = `
     SELECT
       up.username AS username,
+      u.s_cus_id AS "stripeCusId",
       u.first_name AS "firstName",
       u.last_name AS "lastName",
       up.quantity AS quantity
@@ -82,6 +77,7 @@ export function membersOnOnePlan(planId) {
 
   return pool.query(query, [planId]);
 }
+
 
 export function viewAllPlans(username) {
   const query = `
@@ -102,7 +98,7 @@ export function viewAllPlans(username) {
       name,
       "cycleFrequency",
       "perCycleCost",
-      json_build_object('firstName', u.first_name, 'lastName', u.last_name, 'username', u.username) AS owner
+      json_build_object('firstName', u.first_name, 'lastName', u.last_name, 'username', u.username, 'stripeCusId', u.s_cus_id) AS owner
     FROM select1
     JOIN user_plan up
     ON "planId" = up.plan_id
@@ -113,13 +109,15 @@ export function viewAllPlans(username) {
   return pool.query(query, [username]);
 }
 
+
 export function getUserInfo(username) {
   const query = `
-    SELECT s_cus_id AS "stripeCusId", first_name AS "firstName", last_name AS "lastName", email
+    SELECT s_cus_id AS "stripeCusId", first_name AS "firstName", last_name AS "lastName", email, password
     FROM users
     WHERE username = $1`;
   return pool.query(query, [username]);
 }
+
 
 export function saveStripeCusId(username, sCusId) {
   const query = `
@@ -129,6 +127,7 @@ export function saveStripeCusId(username, sCusId) {
   return pool.query(query, [sCusId, username]);
 }
 
+
 export function getPriceId(planId) {
   const query = `
     SELECT s_price_id AS "sPriceId"
@@ -136,6 +135,7 @@ export function getPriceId(planId) {
     WHERE s_prod_id = $1`;
   return pool.query(query, [planId]);
 }
+
 
 export function addSubscriptionId(planId, quantity, subscriptionId, username) {
   const query = `

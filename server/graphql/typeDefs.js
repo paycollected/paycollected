@@ -2,14 +2,15 @@ import { gql } from 'apollo-server-core';
 
 export default gql`
   type Query {
-    viewOnePlan (planId: String!): Plan!
+    viewOnePlan (planId: ID!): Plan!
     viewAllPlans: [Plan]!
   }
 
   type PlanMember {
+    stripeCusId: ID # nullable for plan owner who has just joined and does not have Stripe Cus ID yet
     firstName: String!
     lastName: String!
-    username: ID!
+    username: String!
     quantity: Int # 0 means not paying # nullable because quantity for owner field is null
   }
 
@@ -70,7 +71,7 @@ export default gql`
     # returning stripe product ID here, which will be used as code
 
     pay(
-      planId: String!
+      planId: ID!
       quantity: Int!
     ): PaymentIntent! # returning client secret
 
