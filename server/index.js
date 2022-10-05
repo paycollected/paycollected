@@ -1,17 +1,22 @@
 import { ApolloServer } from 'apollo-server-express';
 import express from 'express';
+import dotenv from 'dotenv';
 import jwt from 'jsonwebtoken';
+import path from 'path';
 import typeDefs from './graphql/controllers/typeDefs';
 import resolvers from './graphql/controllers/resolvers';
 import router from './rest/routes';
 
-require('dotenv').config();
+dotenv.config();
 
 const { SERVER_PORT } = process.env;
 
 async function startApolloServer() {
   const app = express();
+  app.use(express.json());
   app.use('/rest', router);
+  app.use(express.static(path.join(__dirname, '..', 'client', 'dist')));
+  app.get('*', (req, res) => res.sendFile(path.resolve(__dirname, '..', 'client', 'dist', 'index.html')));
 
   const server = new ApolloServer({
     typeDefs,

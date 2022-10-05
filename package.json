@@ -4,9 +4,8 @@
   "description": "A web application to automate shared payment for groups",
   "main": "app.js",
   "scripts": {
-    "start": "webpack --mode development --watch & npx nodemon app.js",
+    "start": "webpack --mode development --watch & nodemon --exec babel-node ./server/index",
     "build": "npx webpack",
-    "start-server": "nodemon --exec babel-node ./server/index",
     "db-schema": "psql postgres -f ./server/db/schema.sql"
   },
   "repository": {
