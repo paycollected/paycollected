@@ -3,8 +3,8 @@ import express from 'express';
 import dotenv from 'dotenv';
 import jwt from 'jsonwebtoken';
 import path from 'path';
-import typeDefs from './graphql/controllers/typeDefs';
-import resolvers from './graphql/controllers/resolvers';
+import typeDefs from './graphql/typeDefs';
+import resolvers from './graphql/resolvers';
 import router from './rest/routes';
 
 dotenv.config();

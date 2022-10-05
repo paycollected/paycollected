@@ -4,7 +4,7 @@ import stripeSDK from 'stripe';
 import {
   ApolloError, UserInputError, AuthenticationError, ForbiddenError
 } from 'apollo-server-core';
-import * as models from '../models.js';
+import * as models from '../db/models.js';
 
 const saltRounds = 10;
 const stripe = stripeSDK(process.env.STRIPE_SECRET_KEY);
