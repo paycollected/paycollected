@@ -15,8 +15,6 @@ async function startApolloServer() {
   const app = express();
   app.use(express.json());
   app.use('/rest', router);
-  app.use(express.static(path.join(__dirname, '..', 'client', 'dist')));
-  app.get('*', (req, res) => res.sendFile(path.resolve(__dirname, '..', 'client', 'dist', 'index.html')));
 
   const server = new ApolloServer({
     typeDefs,
@@ -45,6 +43,8 @@ async function startApolloServer() {
 
   await server.start();
   server.applyMiddleware({ app, cors: { origin: true, credentials: true } });
+  app.use(express.static(path.join(__dirname, '..', 'client', 'dist')));
+  app.get('*', (req, res) => res.sendFile(path.resolve(__dirname, '..', 'client', 'dist', 'index.html')));
   app.listen(SERVER_PORT, () => {
     console.log(`🛌 REST server is served at localhost:${SERVER_PORT}`);
   });
