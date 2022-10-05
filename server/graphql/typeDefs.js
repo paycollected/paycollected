@@ -27,6 +27,10 @@ export default gql`
     productId: String!
   }
 
+  type PortalSession {
+    portalSessionURL: String!
+  }
+
   enum CycleFrequency {
     WEEKLY
     MONTHLY
@@ -69,5 +73,7 @@ export default gql`
       planId: String!
       quantity: Int!
     ): PaymentIntent! # returning client secret
+
+    editPayment: PortalSession!
   }
 `;

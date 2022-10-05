@@ -273,11 +273,35 @@ export default {
           console.log(asyncError);
           throw new ApolloError('Unable to create subscription');
         }
+
       } else if (err === 'Incorrect token') {
         throw new AuthenticationError(err);
       } else if (err === 'Unauthorized request') {
         throw new ForbiddenError(err);
       }
     },
+
+    editPayment: async (_, __, { username, err }) => {
+      if (username) {
+        try {
+          const { rows } = await models.getUserInfo(username);
+          const { stripeCusId: customer } = rows[0];
+          const { url } = await stripe.billingPortal.sessions.create({
+            customer,
+            return_url: 'http://localhost:5647/dashboard/',
+          });
+          return { portalSessionURL: url };
+        } catch (asyncError) {
+          console.log(asyncError);
+          throw new ApolloError('Unable to get customer portal link');
+        }
+
+      } else if (err === 'Incorrect token') {
+        throw new AuthenticationError(err);
+      } else if (err === 'Unauthorized request') {
+        throw new ForbiddenError(err);
+      }
+    },
+
   }
 };

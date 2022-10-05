@@ -22,7 +22,7 @@ function CheckoutForm() {
         // Elements` instance that was used to create the Payment Element
         elements,
         confirmParams: {
-          return_url: 'http://localhost:2891/payment-success/',
+          return_url: 'http://localhost:5647/payment-success/',
           // actual redirect URL string 'http://localhost:2891/payment-success/?payment_intent=pi_3LmvGnAJ5Ik974ue1pMLTTnB&payment_intent_client_secret=pi_3LmvGnAJ5Ik974ue1pMLTTnB_secret_8BraUagRkakm4GC2RiHgCLk5u&redirect_status=succeeded'
           // correctly redirected to Successful Payment component!
           // Do we need query parameters in the redirection link?
