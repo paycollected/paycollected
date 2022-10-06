@@ -11,7 +11,7 @@ export default function MagicLink({ planToJoin, setShowMagicLink }) {
       <h1>This is the Magic Link page</h1>
       <div>
         <p>Have other members on your plan join by sharing this link:</p>
-        <h3>{`${process.env.CLIENT_HOST}:${process.env.PORT}/join/${planToJoin}`}</h3>
+        <h3>{`${process.env.CLIENT_HOST}:${process.env.SERVER_PORT}/join/${planToJoin}`}</h3>
         <Button
           variant="contained"
           onClick={() => {
@@ -23,7 +23,10 @@ export default function MagicLink({ planToJoin, setShowMagicLink }) {
         </Button>
         <Button
           variant="contained"
-          onClick={() => { navigate('/dashboard'); }}
+          onClick={() => {
+            setShowMagicLink(false);
+            navigate('/dashboard');
+          }}
         >
           Dashboard
         </Button>
