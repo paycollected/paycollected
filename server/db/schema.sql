@@ -33,8 +33,8 @@ CREATE TABLE IF NOT EXISTS plans (
 -- relational tables
 CREATE TABLE IF NOT EXISTS user_plan (
   id SERIAL PRIMARY KEY,
-  username VARCHAR(100) NOT NULL REFERENCES users(username),
-  plan_id VARCHAR(255) NOT NULL REFERENCES plans(s_prod_id),
+  username VARCHAR(100) NOT NULL REFERENCES users(username) ON DELETE CASCADE,
+  plan_id VARCHAR(255) NOT NULL REFERENCES plans(s_prod_id) ON DELETE CASCADE,
   plan_owner BOOLEAN NOT NULL DEFAULT FALSE,
   quantity INTEGER NOT NULL DEFAULT 0,
   subscription_id VARCHAR(255) UNIQUE, -- stripe subscription id

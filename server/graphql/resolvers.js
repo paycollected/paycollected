@@ -261,9 +261,10 @@ export default {
           }
           // at this point user will have stripeCusId
           // create subscription with stripe
-          const { rows: getPriceIdRows } = await models.getPriceId(planId);
-          const { sPriceId } = getPriceIdRows[0];
-          const { id: subscriptionId, latest_invoice } = await stripe.subscriptions.create({
+          const { rows: getPriceIdStartDateRows } = await models.getPriceIdAndStartDate(planId);
+          const { sPriceId, startDate } = getPriceIdStartDateRows[0];
+          const subscriptionObj = await stripe.subscriptions.create({
+          // const { id: subscriptionId, latest_invoice } = await stripe.subscriptions.create({
             customer: sCusId,
             items: [
               { price: sPriceId, quantity }
@@ -273,17 +274,20 @@ export default {
               save_default_payment_method: 'on_subscription',
               payment_method_types: ['link', 'card'],
             },
+            trial_end: Number(startDate),
             expand: ['latest_invoice.payment_intent']
           });
-          const clientSecret = latest_invoice.payment_intent.client_secret;
-
+          // const clientSecret = latest_invoice.payment_intent.client_secret;
+          console.log(subscriptionObj);
           // save subscriptionId in database
           /*  Right now is not the right time to update this subscription info in our db yet
           because customer hasn't paid and db is updated already. This db query will need to be
           run only after successful payment (webhook).
           */
-          await models.addSubscriptionId(planId, quantity, subscriptionId, username);
-          return { clientSecret };
+
+          await models.addSubscriptionId(planId, quantity, subscriptionObj.id, username);
+          // await models.addSubscriptionId(planId, quantity, subscriptionId, username);
+          return { clientSecret: 'abc' };
         } catch (asyncError) {
           console.log(asyncError);
           throw new ApolloError('Unable to create subscription');

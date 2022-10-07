@@ -128,9 +128,9 @@ export function saveStripeCusId(username, sCusId) {
 }
 
 
-export function getPriceId(planId) {
+export function getPriceIdAndStartDate(planId) {
   const query = `
-    SELECT s_price_id AS "sPriceId"
+    SELECT s_price_id AS "sPriceId", start_date AS "startDate"
     FROM plans
     WHERE s_prod_id = $1`;
   return pool.query(query, [planId]);
