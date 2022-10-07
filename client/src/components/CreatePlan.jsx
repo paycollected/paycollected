@@ -11,12 +11,12 @@ import { CreatePlanMutation as CREATE_PLAN } from '../graphql/mutations.gql';
 const today = new Date();
 const nextMonth = new Date();
 nextMonth.setMonth(nextMonth.getMonth() + 1);
-// we'll limit user to only be able to pick a start date that is between today and 1 month from now
+// we'll limit users to only be able to pick a start date that is between today and 1 month from now
 
 const processDateStr = (date) => {
   const year = date.getFullYear().toString();
   const month = (date.getMonth() + 1).toString().padStart(2, '0'); // month is zero-th indexed
-  const dateStr = (date.getDate()).toString().padStart(2, '0');
+  const dateStr = date.getDate().toString().padStart(2, '0');
   return `${year}-${month}-${dateStr}`;
 };
 
