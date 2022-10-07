@@ -4,9 +4,7 @@ import { useMutation } from '@apollo/client';
 import { useForm } from 'react-hook-form';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
-import { CreateUser } from '../graphql/mutations.gql';
-
-const SIGN_UP = CreateUser;
+import { CreateUser as SIGN_UP } from '../graphql/mutations.gql';
 
 export default function Signup({ setUser, planToJoin }) {
   const navigate = useNavigate();

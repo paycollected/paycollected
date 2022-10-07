@@ -41,8 +41,7 @@
     "react-dom": "^18.2.0",
     "react-hook-form": "^7.35.0",
     "react-router-dom": "^6.3.0",
-    "stripe": "^10.10.0",
-    "styled-components": "^5.3.5"
+    "stripe": "^10.10.0"
   },
   "devDependencies": {
     "@babel/core": "^7.18.13",

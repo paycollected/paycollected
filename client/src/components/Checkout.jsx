@@ -18,12 +18,12 @@ function CheckoutForm() {
       return;
     }
     try {
-      const { error } = await stripe.confirmPayment({
+      const { error } = await stripe.confirmSetup({
         // Elements` instance that was used to create the Payment Element
         elements,
         confirmParams: {
           return_url: 'http://localhost:5647/payment-success/',
-          // actual redirect URL string 'http://localhost:2891/payment-success/?payment_intent=pi_3LmvGnAJ5Ik974ue1pMLTTnB&payment_intent_client_secret=pi_3LmvGnAJ5Ik974ue1pMLTTnB_secret_8BraUagRkakm4GC2RiHgCLk5u&redirect_status=succeeded'
+          // actual redirect URL string 'http://localhost:5647/payment-success/?setup_intent=seti_1Lq9rqAJ5Ik974ueIdg7WHn9&setup_intent_client_secret=seti_1Lq9rqAJ5Ik974ueIdg7WHn9_secret_MZISJyXsMF6na4pA6ryaqOfvt8JbeGa&redirect_status=succeeded'
           // correctly redirected to Successful Payment component!
           // Do we need query parameters in the redirection link?
         },

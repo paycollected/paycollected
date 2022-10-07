@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMutation } from '@apollo/client';
 import { useForm } from 'react-hook-form';
@@ -6,9 +6,22 @@ import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import InputAdornment from '@mui/material/InputAdornment';
 import MenuItem from '@mui/material/MenuItem';
-import { CreatePlanMutation } from '../graphql/mutations.gql';
+import { CreatePlanMutation as CREATE_PLAN } from '../graphql/mutations.gql';
 
-const CREATE_PLAN = CreatePlanMutation;
+const today = new Date();
+const nextMonth = new Date();
+nextMonth.setMonth(nextMonth.getMonth() + 1);
+// we'll limit users to only be able to pick a start date that is between today and 1 month from now
+
+const processDateStr = (date) => {
+  const year = date.getFullYear().toString();
+  const month = (date.getMonth() + 1).toString().padStart(2, '0'); // month is zero-th indexed
+  const dateStr = date.getDate().toString().padStart(2, '0');
+  return `${year}-${month}-${dateStr}`;
+};
+
+const fullDate = processDateStr(today);
+const nextMonthFullDate = processDateStr(nextMonth);
 
 export default function CreatePlan({ setPlanToJoin, setShowMagicLink }) {
   /* after submitting create plan form
@@ -17,6 +30,7 @@ export default function CreatePlan({ setPlanToJoin, setShowMagicLink }) {
   */
   const navigate = useNavigate();
   const { register, handleSubmit, formState: { errors } } = useForm();
+  const [startDate, setStartDate] = useState(fullDate);
 
   const [createNewPlan, { data, loading, error }] = useMutation(CREATE_PLAN, {
     onCompleted: ({ createPlan }) => {
@@ -37,6 +51,7 @@ export default function CreatePlan({ setPlanToJoin, setShowMagicLink }) {
         cycleFrequency: cycleFrequency.toUpperCase(),
         perCycleCost: Number(perCycleCost),
         maxQuantity: Number(maxQuantity),
+        startDate: ((new Date(...startDate.split('-'))).valueOf() / 1000).toString(),
       },
     });
   };
@@ -104,6 +119,13 @@ export default function CreatePlan({ setPlanToJoin, setShowMagicLink }) {
           error={!!errors?.maxQuantity}
           helperText={errors?.maxQuantity ? errors.maxQuantity.message : ' '}
           InputProps={{ inputProps: { min: 0 } }}
+        />
+        <input
+          type="date"
+          value={startDate}
+          min={fullDate}
+          max={nextMonthFullDate}
+          onChange={(e) => { setStartDate(e.target.value); }}
         />
         <Button type="submit" variant="contained" disabled={loading}>Submit</Button>
       </form>

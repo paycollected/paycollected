@@ -178,32 +178,39 @@ export default {
     },
 
     createPlan: async (_, {
-      planName, cycleFrequency, perCycleCost, maxQuantity
+      planName, cycleFrequency, perCycleCost, maxQuantity, startDate
     }, { username, err }) => {
       if (username) {
         try {
           planName = planName.trim();
           cycleFrequency = cycleFrequency.toLowerCase();
-          // creates stripe product object
-          const product = await stripe.products.create({
-            name: planName
-          });
-          const { id: sProdId } = product;
 
-          // creates stripe price object
+          // creates stripe price object, also create stripe product in the same call
           perCycleCost *= 100; // store in cents
           const perCyclePerPersonCost = Math.ceil(perCycleCost / maxQuantity); // in cents
-          const price = await stripe.prices.create({
-            product: sProdId,
+          const { id: sPriceId, product: sProdId } = await stripe.prices.create({
+            product_data: {
+              name: planName
+            },
             unit_amount: perCyclePerPersonCost,
             currency: 'usd',
             recurring: {
               interval: recurringInterval[cycleFrequency]
             },
           });
-          const { id: sPriceId } = price;
 
-          await models.addPlan(username, planName, cycleFrequency, perCycleCost, sProdId, sPriceId, perCyclePerPersonCost, maxQuantity);
+          await models.addPlan(
+            username,
+            planName,
+            cycleFrequency,
+            perCycleCost,
+            sProdId,
+            sPriceId,
+            perCyclePerPersonCost,
+            maxQuantity,
+            startDate
+          );
+
           return { productId: sProdId };
         } catch (asyncError) {
           console.log(asyncError);
@@ -235,6 +242,10 @@ export default {
             stripeCusId, firstName, lastName, email
           } = rows[0];
           if (stripeCusId === null) { // create a customer
+            /*
+            this whole operation takes a while to process so perhaps we should create a Stripe customer
+            account when user first signs up to our platform?
+            */
             const { id } = await stripe.customers.create({
               name: `${firstName} ${lastName}`,
               email
@@ -246,9 +257,9 @@ export default {
           }
           // at this point user will have stripeCusId
           // create subscription with stripe
-          const { rows: getPriceIdRows } = await models.getPriceId(planId);
-          const { sPriceId } = getPriceIdRows[0];
-          const { id: subscriptionId, latest_invoice } = await stripe.subscriptions.create({
+          const { rows: getPriceIdStartDateRows } = await models.getPriceIdAndStartDate(planId);
+          const { sPriceId, startDate } = getPriceIdStartDateRows[0];
+          const { id: subscriptionId, pending_setup_intent } = await stripe.subscriptions.create({
             customer: sCusId,
             items: [
               { price: sPriceId, quantity }
@@ -258,15 +269,17 @@ export default {
               save_default_payment_method: 'on_subscription',
               payment_method_types: ['link', 'card'],
             },
-            expand: ['latest_invoice.payment_intent']
+            trial_end: Number(startDate),
+            expand: ['pending_setup_intent']
           });
-          const clientSecret = latest_invoice.payment_intent.client_secret;
 
+          const { client_secret: clientSecret } = pending_setup_intent;
           // save subscriptionId in database
-          /*  Right now is not the right time to update this subscription info in our db yet
+          /*  Right now is NOT the right time to update this subscription info in our db yet
           because customer hasn't paid and db is updated already. This db query will need to be
           run only after successful payment (webhook).
           */
+
           await models.addSubscriptionId(planId, quantity, subscriptionId, username);
           return { clientSecret };
         } catch (asyncError) {
