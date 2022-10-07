@@ -178,7 +178,7 @@ export default {
     },
 
     createPlan: async (_, {
-      planName, cycleFrequency, perCycleCost, maxQuantity
+      planName, cycleFrequency, perCycleCost, maxQuantity, startDate
     }, { username, err }) => {
       if (username) {
         try {
@@ -203,7 +203,18 @@ export default {
           });
           const { id: sPriceId } = price;
 
-          await models.addPlan(username, planName, cycleFrequency, perCycleCost, sProdId, sPriceId, perCyclePerPersonCost, maxQuantity);
+          await models.addPlan(
+            username,
+            planName,
+            cycleFrequency,
+            perCycleCost,
+            sProdId,
+            sPriceId,
+            perCyclePerPersonCost,
+            maxQuantity,
+            startDate
+          );
+
           return { productId: sProdId };
         } catch (asyncError) {
           console.log(asyncError);
@@ -235,6 +246,10 @@ export default {
             stripeCusId, firstName, lastName, email
           } = rows[0];
           if (stripeCusId === null) { // create a customer
+            /*
+            this whole operation takes a while to process so perhaps we should create a Stripe customer
+            account when user first signs up to our platform?
+            */
             const { id } = await stripe.customers.create({
               name: `${firstName} ${lastName}`,
               email

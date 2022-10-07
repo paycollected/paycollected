@@ -24,21 +24,21 @@ export function createUser(firstName, lastName, username, password, email) {
 }
 
 
-export function addPlan(username, planName, cycleFrequency, perCycleCost, sProdId, sPriceId, perCyclePerPersonCost, maxQuantity) {
+export function addPlan(username, planName, cycleFrequency, perCycleCost, sProdId, sPriceId, perCyclePerPersonCost, maxQuantity, startDate) {
   const query = `
     WITH first_insert AS
       (
         INSERT INTO plans
-          (plan_name, cycle_frequency, per_cycle_cost, per_user_per_cycle_cost, s_prod_id, s_price_id, max_quantity)
+          (plan_name, cycle_frequency, per_cycle_cost, per_user_per_cycle_cost, s_prod_id, s_price_id, max_quantity, start_date)
         VALUES
-          ($2, $3, $4::INTEGER, $5::INTEGER, $6, $7, $8)
+          ($2, $3, $4, $5, $6, $7, $8, $9::BIGINT)
       )
     INSERT INTO user_plan
       (username, plan_id, plan_owner)
     VALUES
       ($1, $6, TRUE)
   `;
-  const args = [username, planName, cycleFrequency, perCycleCost, perCyclePerPersonCost, sProdId, sPriceId, maxQuantity];
+  const args = [username, planName, cycleFrequency, perCycleCost, perCyclePerPersonCost, sProdId, sPriceId, maxQuantity, startDate];
   return pool.query(query, args);
 }
 
