@@ -184,24 +184,20 @@ export default {
         try {
           planName = planName.trim();
           cycleFrequency = cycleFrequency.toLowerCase();
-          // creates stripe product object
-          const product = await stripe.products.create({
-            name: planName
-          });
-          const { id: sProdId } = product;
 
-          // creates stripe price object
+          // creates stripe price object, also create stripe product in the same call
           perCycleCost *= 100; // store in cents
           const perCyclePerPersonCost = Math.ceil(perCycleCost / maxQuantity); // in cents
-          const price = await stripe.prices.create({
-            product: sProdId,
+          const { id: sPriceId, product: sProdId } = await stripe.prices.create({
+            product_data: {
+              name: planName
+            },
             unit_amount: perCyclePerPersonCost,
             currency: 'usd',
             recurring: {
               interval: recurringInterval[cycleFrequency]
             },
           });
-          const { id: sPriceId } = price;
 
           await models.addPlan(
             username,
