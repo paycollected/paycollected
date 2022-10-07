@@ -263,8 +263,7 @@ export default {
           // create subscription with stripe
           const { rows: getPriceIdStartDateRows } = await models.getPriceIdAndStartDate(planId);
           const { sPriceId, startDate } = getPriceIdStartDateRows[0];
-          const subscriptionObj = await stripe.subscriptions.create({
-          // const { id: subscriptionId, latest_invoice } = await stripe.subscriptions.create({
+          const { id: subscriptionId, pending_setup_intent } = await stripe.subscriptions.create({
             customer: sCusId,
             items: [
               { price: sPriceId, quantity }
@@ -277,17 +276,15 @@ export default {
             trial_end: Number(startDate),
             expand: ['pending_setup_intent']
           });
-          // const clientSecret = latest_invoice.payment_intent.client_secret;
-          const clientSecret = subscriptionObj.pending_setup_intent.client_secret;
-          console.log(subscriptionObj);
+
+          const { client_secret: clientSecret } = pending_setup_intent;
           // save subscriptionId in database
-          /*  Right now is not the right time to update this subscription info in our db yet
+          /*  Right now is NOT the right time to update this subscription info in our db yet
           because customer hasn't paid and db is updated already. This db query will need to be
           run only after successful payment (webhook).
           */
 
-          await models.addSubscriptionId(planId, quantity, subscriptionObj.id, username);
-          // await models.addSubscriptionId(planId, quantity, subscriptionId, username);
+          await models.addSubscriptionId(planId, quantity, subscriptionId, username);
           return { clientSecret };
         } catch (asyncError) {
           console.log(asyncError);
