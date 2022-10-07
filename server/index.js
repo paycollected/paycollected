@@ -49,7 +49,7 @@ async function startApolloServer() {
 
 
   // serving web client
-  // these needs to go AFTER Apollo server middleware and webhook middlewares
+  // these needs to go AFTER Apollo server and webhook middlewares
   // otherwise * wildcard endpoint will redirect /graphql and /webhook endpoints to 404 page
   app.use(express.static(path.join(__dirname, '..', 'client', 'dist')));
   app.get('*', (req, res) => res.sendFile(path.resolve(__dirname, '..', 'client', 'dist', 'index.html')));
