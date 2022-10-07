@@ -5,7 +5,7 @@ import jwt from 'jsonwebtoken';
 import path from 'path';
 import typeDefs from './graphql/typeDefs';
 import resolvers from './graphql/resolvers';
-import router from './rest/routes';
+import webhook from './webhook';
 
 dotenv.config();
 
@@ -13,8 +13,11 @@ const { SERVER_PORT } = process.env;
 
 async function startApolloServer() {
   const app = express();
+  app.use('/', webhook);
+
+  // Json middleware must be mounted AFTER webhook endpoint because req.body comes in as raw buffer to webhook endpoint
+  // whereas express.json expects a json payload
   app.use(express.json());
-  app.use('/rest', router);
 
   const server = new ApolloServer({
     typeDefs,
@@ -44,16 +47,17 @@ async function startApolloServer() {
   await server.start();
   server.applyMiddleware({ app, cors: { origin: true, credentials: true } });
 
+
   // serving web client
-  // these needs to go after Apollo server middleware
-  // otherwise * wildcard endpoint will redirect /graphql endpoint to 404 page
+  // these needs to go after Apollo server middleware and webhook middlewares
+  // otherwise * wildcard endpoint will redirect /graphql and /webhook endpoints to 404 page
   app.use(express.static(path.join(__dirname, '..', 'client', 'dist')));
   app.get('*', (req, res) => res.sendFile(path.resolve(__dirname, '..', 'client', 'dist', 'index.html')));
 
   app.listen(SERVER_PORT, () => {
     console.log(`🛌 REST server is served at localhost:${SERVER_PORT}`);
+    console.log(`🚀 GraphQL Server ready at http://localhost:${SERVER_PORT}${server.graphqlPath}`);
   });
-  console.log(`🚀 GraphQL Server ready at http://localhost:${SERVER_PORT}${server.graphqlPath}`);
 }
 
 startApolloServer();
