@@ -275,9 +275,10 @@ export default {
               payment_method_types: ['link', 'card'],
             },
             trial_end: Number(startDate),
-            expand: ['latest_invoice.payment_intent']
+            expand: ['pending_setup_intent']
           });
           // const clientSecret = latest_invoice.payment_intent.client_secret;
+          const clientSecret = subscriptionObj.pending_setup_intent.client_secret;
           console.log(subscriptionObj);
           // save subscriptionId in database
           /*  Right now is not the right time to update this subscription info in our db yet
@@ -287,7 +288,7 @@ export default {
 
           await models.addSubscriptionId(planId, quantity, subscriptionObj.id, username);
           // await models.addSubscriptionId(planId, quantity, subscriptionId, username);
-          return { clientSecret: 'abc' };
+          return { clientSecret };
         } catch (asyncError) {
           console.log(asyncError);
           throw new ApolloError('Unable to create subscription');
