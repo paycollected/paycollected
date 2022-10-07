@@ -31,7 +31,7 @@ export function addPlan(username, planName, cycleFrequency, perCycleCost, sProdI
         INSERT INTO plans
           (plan_name, cycle_frequency, per_cycle_cost, per_user_per_cycle_cost, s_prod_id, s_price_id, max_quantity, start_date)
         VALUES
-          ($2, $3, $4, $5, $6, $7, $8, $9::BIGINT / 1000)
+          ($2, $3, $4, $5, $6, $7, $8, $9::BIGINT)
       )
     INSERT INTO user_plan
       (username, plan_id, plan_owner)

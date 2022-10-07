@@ -8,9 +8,7 @@ import IconButton from '@mui/material/IconButton';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import TextField from '@mui/material/TextField';
-import { LogIn } from '../graphql/mutations.gql';
-
-const LOG_IN = LogIn;
+import { LogIn as LOG_IN } from '../graphql/mutations.gql';
 
 export default function Login({ setUser, planToJoin }) {
   const navigate = useNavigate();

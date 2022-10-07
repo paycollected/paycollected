@@ -1,11 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation } from '@apollo/client';
-import { Pay } from '../graphql/mutations.gql';
-import { ViewOnePlan } from '../graphql/queries.gql';
-
-const GET_PLAN = ViewOnePlan;
-const PAY = Pay;
+import { Pay as PAY } from '../graphql/mutations.gql';
+import { ViewOnePlan as GET_PLAN } from '../graphql/queries.gql';
 
 export default function JoinPlan({ setPlanToJoin, setStripeClientSecret }) {
   const navigate = useNavigate();

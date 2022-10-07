@@ -2,11 +2,8 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation } from '@apollo/client';
 import Button from '@mui/material/Button';
-import { ViewAllPlans } from '../graphql/queries.gql';
-import { EditPayment } from '../graphql/mutations.gql';
-
-const GET_ALL_PLANS = ViewAllPlans;
-const EDIT_PAYMENT = EditPayment;
+import { ViewAllPlans as GET_ALL_PLANS } from '../graphql/queries.gql';
+import { EditPayment as EDIT_PAYMENT } from '../graphql/mutations.gql';
 
 export default function ViewPlans() {
   const navigate = useNavigate();

@@ -13,14 +13,14 @@ const nextMonth = new Date();
 nextMonth.setMonth(nextMonth.getMonth() + 1);
 
 const processDateStr = (date) => {
-  const year = date.getUTCFullYear().toString();
-  const month = (date.getUTCMonth() + 1).toString().padStart(2, '0');
-  const dateStr = (date.getUTCDate() + 1).toString().padStart(2, '0');
+  const year = date.getFullYear().toString();
+  const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  const dateStr = (date.getDate() + 1).toString().padStart(2, '0');
   return `${year}-${month}-${dateStr}`;
 };
 
 const fullDate = processDateStr(today);
-const nextFullDate = processDateStr(nextMonth);
+const nextMonthFullDate = processDateStr(nextMonth);
 
 export default function CreatePlan({ setPlanToJoin, setShowMagicLink }) {
   /* after submitting create plan form
@@ -50,7 +50,7 @@ export default function CreatePlan({ setPlanToJoin, setShowMagicLink }) {
         cycleFrequency: cycleFrequency.toUpperCase(),
         perCycleCost: Number(perCycleCost),
         maxQuantity: Number(maxQuantity),
-        startDate: Date.UTC(...startDate.split('-')).toString(),
+        startDate: ((new Date(...startDate.split('-'))).valueOf() / 1000).toString(),
       },
     });
   };
@@ -123,7 +123,7 @@ export default function CreatePlan({ setPlanToJoin, setShowMagicLink }) {
           type="date"
           value={startDate}
           min={fullDate}
-          max={nextFullDate}
+          max={nextMonthFullDate}
           onChange={(e) => { setStartDate(e.target.value); }}
         />
         <Button type="submit" variant="contained" disabled={loading}>Submit</Button>
