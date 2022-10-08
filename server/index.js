@@ -15,8 +15,8 @@ async function startApolloServer() {
   const app = express();
   app.use('/', webhook);
 
-  // Json middleware must be mounted AFTER webhook endpoint because req.body comes in as raw buffer to webhook endpoint
-  // whereas express.json expects a json payload
+  // Json middleware must be mounted AFTER webhook endpoint because req.body needs to be in json format
+  // so that webhook could convert it into raw buffer
   app.use(express.json());
 
   const server = new ApolloServer({
