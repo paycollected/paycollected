@@ -95,7 +95,11 @@ export default {
         // username and email do not exist -> create user
         if (rows.length === 0) {
           const hashedPass = await bcrypt.hash(password, saltRounds);
-          await models.createUser(firstName, lastName, username, hashedPass, email);
+          const { id: stripeCusId } = await stripe.customers.create({
+            name: `${firstName} ${lastName}`,
+            email
+          });
+          await models.createUser(firstName, lastName, username, hashedPass, email, stripeCusId);
           const token = jwt.sign({
             // expires after 2 weeks
             exp: Math.floor(Date.now() / 1000) + (60 * 60 * 24 * 14),

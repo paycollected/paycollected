@@ -12,14 +12,14 @@ export function checkUser(username, email) {
 }
 
 
-export function createUser(firstName, lastName, username, password, email) {
+export function createUser(firstName, lastName, username, password, email, stripeCusId) {
   const query = `
     INSERT INTO users
-      (first_name, last_name, username, password, email)
+      (first_name, last_name, username, password, email, s_cus_id)
     VALUES
-      ($1, $2, $3, $4, $5)
+      ($1, $2, $3, $4, $5, $6)
   `;
-  const args = [firstName, lastName, username, password, email];
+  const args = [firstName, lastName, username, password, email, stripeCusId];
   return pool.query(query, args);
 }
 
