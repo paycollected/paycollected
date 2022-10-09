@@ -228,7 +228,7 @@ export default {
         try {
           // check that user is NOT already subscribed to plan
           const { rows } = await models.joinPlan(username, planId);
-          const { cycleFrequency, perCycleCost, sPriceId, startDate, email, sCusId, quantity, count } = rows[0];
+          const { cycleFrequency, perCycleCost, startDate, email, sCusId, quantity, count } = rows[0];
           if (quantity) {
             // if owner and haven't joined plan, quantity = 0
             // if not owner and haven't joined plan, quantity is null
@@ -243,10 +243,11 @@ export default {
 
           }
           // create a subscription and price in the same API call
-          const perCyclePerPersonCost = perCycleCost / (count + newQuantity);
+          const perCyclePerPersonCost = Math.ceil(perCycleCost / (count + newQuantity));
+          console.log(perCycleCost, perCyclePerPersonCost, typeof count, newQuantity)
           const { id: subscriptionId, items, pending_setup_intent } = await stripe.subscriptions.create({
             customer: sCusId,
-            items: [
+            items: [{
               price_data: {
                 currency: 'usd',
                 product: planId,
@@ -257,7 +258,7 @@ export default {
                 }
               },
               quantity: newQuantity,
-            ],
+            }],
             payment_behavior: 'default_incomplete',
             payment_settings: {
               save_default_payment_method: 'on_subscription',
@@ -267,14 +268,8 @@ export default {
             expand: ['pending_setup_intent']
           });
 
-
-          if (sPriceId) {
-            // archiving old priceID in stripe system
-            await stripe.prices.update(sPriceId, { active: false });
-          }
-
-          const { id: newPriceId } = items.data[0].price;
-          await models.saveNewPriceId(newPriceId, planId);
+          await models.addSubscriptionId(planId, newQuantity, subscriptionId, username);
+          // still need to move this subscription to webhooks
           const { client_secret: clientSecret } = pending_setup_intent;
           return { clientSecret };
 

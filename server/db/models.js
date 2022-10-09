@@ -139,7 +139,7 @@ export function getUserInfo(username) {
 export function joinPlan(username, planId) {
   const query = `
     WITH p AS (
-      SELECT cycle_frequency, per_cycle_cost, s_price_id, start_date
+      SELECT cycle_frequency, per_cycle_cost, start_date
       FROM plans
       WHERE s_prod_id = $2
     ),
@@ -160,33 +160,27 @@ export function joinPlan(username, planId) {
       VALUES (
         (SELECT cycle_frequency FROM p),
         (SELECT per_cycle_cost FROM p),
-        (SELECT s_price_id FROM p),
         (SELECT start_date FROM p),
         (SELECT email FROM u),
         (SELECT s_cus_id FROM u),
         (SELECT quantity FROM up1),
-        (SELECT count FROM up2)
+        (SELECT count::INTEGER FROM up2)
       )
-    ) AS t ("cycleFrequency", "perCycleCost", "sPriceId", "startDate", email, "sCusId", quantity, count);
+    ) AS t ("cycleFrequency", "perCycleCost", "startDate", email, "sCusId", quantity, count);
   `;
 
   return pool.query(query, [username, planId]);
 }
 
 
-// export function addSubscriptionId(planId, quantity, subscriptionId, username) {
-//   const query = `
-//     INSERT INTO user_plan (quantity, subscription_id, plan_id, username)
-//     VALUES ($1, $2, $3, $4)
-//     ON CONFLICT (username, plan_id)
-//     DO UPDATE SET quantity = user_plan.quantity + $1, subscription_id = $2
-//     WHERE user_plan.username = $4 AND user_plan.plan_id = $3
-//   `;
+export function addSubscriptionId(planId, quantity, subscriptionId, username) {
+  const query = `
+    INSERT INTO user_plan (quantity, subscription_id, plan_id, username)
+    VALUES ($1, $2, $3, $4)
+    ON CONFLICT (username, plan_id)
+    DO UPDATE SET quantity = user_plan.quantity + $1, subscription_id = $2
+    WHERE user_plan.username = $4 AND user_plan.plan_id = $3
+  `;
 
-//   return pool.query(query, [quantity, subscriptionId, planId, username]);
-// }
-
-export function saveNewPriceId(newPriceId, planId) {
-  const query = `UPDATE plans SET s_price_id = $1 WHERE s_prod_id = $2`;
-  return pool.query(query, [newPriceId, planId]);
+  return pool.query(query, [quantity, subscriptionId, planId, username]);
 }
