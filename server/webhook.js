@@ -74,7 +74,7 @@ webhook.post('/webhook', express.raw({type: 'application/json'}), async (req, re
     // ... handle other event types
     case 'customer.subscription.created':
       subscription = event.data.object;
-      console.log(subscription);
+      console.log('------------> subscription:', subscription);
       const { id: subscriptionId, customer: customerId, items, metadata } = subscription;
       const { username } = metadata;
       const { id: subscriptionItemId, price, quantity } = items.data[0];
@@ -100,7 +100,8 @@ webhook.post('/webhook', express.raw({type: 'application/json'}), async (req, re
                 proration_behavior: 'none',
               }
             );
-            await Promise.all(rows.map((row) => updateStripePrice(row)));
+            const resolvedRows = await Promise.all(rows.map((row) => updateStripePrice(row)));
+            console.log('-----------------> resolved rows:', resolvedRows[0]);
           }
         }
       } catch (err) {

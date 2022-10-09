@@ -168,7 +168,7 @@ export function updatePriceOnJoining(planId, quantity, subscriptionId, subscript
       INSERT INTO user_plan (quantity, subscription_id, subscription_item_id, plan_id, username)
       VALUES ($1, $2, $3, $4, $5)
       ON CONFLICT (username, plan_id)
-      DO UPDATE SET quantity = user_plan.quantity + $1
+      DO UPDATE SET quantity = user_plan.quantity + $1, subscription_id = $2, subscription_item_id = $3
       WHERE user_plan.username = $5 AND user_plan.plan_id = $4
     )
     SELECT username, subscription_id AS "subscriptionId", subscription_item_id AS "subscriptionItemId", quantity
