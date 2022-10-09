@@ -23,8 +23,7 @@ CREATE TABLE IF NOT EXISTS plans (
   per_cycle_per_person_cost INTEGER NOT NULL,
   s_prod_id VARCHAR(255) PRIMARY KEY,
   s_price_id VARCHAR(255) UNIQUE, -- corresponds to per_user_per_cycle_cost
-  start_date BIGINT NOT NULL, -- in UTC format
-  UNIQUE (s_prod_id, s_price_id)
+  start_date BIGINT NOT NULL -- in UTC format
 );
 
 -- relational tables

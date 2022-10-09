@@ -187,9 +187,6 @@ export function joinPlan(username, planId) {
 // }
 
 export function saveNewPriceId(newPriceId, planId) {
-  const query = `
-    INSERT INTO plans (s_price_id) VALUES ($1) WHERE s_prod_id = $2
-    ON CONFLICT (s_price_id, s_prod_id) DO UPDATE SET s_price_id = $1 WHERE s_prod_id = $2
-  `;
+  const query = `UPDATE plans SET s_price_id = $1 WHERE s_prod_id = $2`;
   return pool.query(query, [newPriceId, planId]);
 }
