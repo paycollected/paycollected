@@ -1,7 +1,7 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import stripeSDK from 'stripe';
-import * as models from './db/models.js';
+import * as models from '../db/models.js';
 
 dotenv.config();
 const webhook = express.Router();

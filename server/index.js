@@ -5,7 +5,7 @@ import jwt from 'jsonwebtoken';
 import path from 'path';
 import typeDefs from './graphql/typeDefs';
 import resolvers from './graphql/resolvers';
-import webhook from './webhook';
+import webhook from './webhooks/webhook';
 
 dotenv.config();
 
