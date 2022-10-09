@@ -26,6 +26,7 @@ mutation CreatePlanMutation ($planName: String!, $cycleFrequency: CycleFrequency
 mutation JoinPlan ($planId: ID!, $quantity: Int!) {
   joinPlan(planId: $planId, quantity: $quantity) {
     clientSecret
+    email
   }
 }
 

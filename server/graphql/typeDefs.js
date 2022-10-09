@@ -22,6 +22,7 @@ export default gql`
 
   type PaymentIntent {
     clientSecret: String!
+    email: String!
   }
 
   type ProductId {

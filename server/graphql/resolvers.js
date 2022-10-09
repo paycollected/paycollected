@@ -282,7 +282,7 @@ export default {
           });
 
           const { client_secret: clientSecret } = pending_setup_intent;
-          return { clientSecret };
+          return { clientSecret, email };
 
         } catch (asyncError) {
           if (errMsg) {
