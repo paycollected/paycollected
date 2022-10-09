@@ -124,18 +124,6 @@ export function getUserInfo(username) {
 // }
 
 
-// export function getPlanInfo(planId) {
-//   const query = `
-//     SELECT
-//       s_price_id AS "sPriceId",
-//       start_date AS "startDate",
-//       cycle_frequency AS "cycleFrequency",
-//       per_cycle_cost AS "perCycleCost",
-//     FROM plans
-//     WHERE s_prod_id = $1`;
-//   return pool.query(query, [planId]);
-// }
-
 export function joinPlan(username, planId) {
   const query = `
     WITH p AS (
