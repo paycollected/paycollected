@@ -249,7 +249,7 @@ export default {
             customer: sCusId,
             metadata: {
               username,
-            }
+            },
             items: [{
               price_data: {
                 currency: 'usd',

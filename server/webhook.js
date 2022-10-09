@@ -1,18 +1,19 @@
 import express from 'express';
 import dotenv from 'dotenv';
-import stripe from 'stripe';
+import stripeSDK from 'stripe';
 import * as models from './db/models';
 
 dotenv.config();
 const webhook = express.Router();
 const endpointSecret = process.env.STRIPE_WEBHOOK_ENDPOINT_SECRET;
+const stripe = stripeSDK(process.env.STRIPE_SECRET_KEY);
 
-webhook.post('/webhook', express.raw({type: 'application/json'}), (req, res) => {
+webhook.post('/webhook', express.raw({type: 'application/json'}), async (req, res) => {
   const signature = req.headers['stripe-signature'];
 
   let event;
   try {
-    event = stripe.webhooks.constructEvent(req.body, signature, endpointSecret);
+    event = stripeSDK.webhooks.constructEvent(req.body, signature, endpointSecret);
   } catch (err) {
     res.status(400).send(`Webhook Error: ${err.message}`);
     return;
@@ -73,34 +74,39 @@ webhook.post('/webhook', express.raw({type: 'application/json'}), (req, res) => 
     // ... handle other event types
     case 'customer.subscription.created':
       subscription = event.data.object;
+      console.log(subscription);
       const { id: subscriptionId, customer: customerId, items, metadata } = subscription;
       const { username } = metadata;
-      const { price, quantity } = items;
+      const { id: subscriptionItemId, price, quantity } = items.data[0];
       const { id: priceId, product: productId } = price;
       // save this subscription to user_plan table,
       // also query all other existing users on this same plan and update their subscriptions with new price
       try {
         const { rows } = await models.updatePriceOnJoining(productId, quantity, subscriptionId, subscriptionItemId, username);
-        rows.forEach((row) => {
-          const { username: othersUsername, subscriptionId: othersSubscriptionId, subscriptionItemId, quantity } = row;
-          const subscription = await stripe.subscriptions.update(
-            othersSubscriptionId,
-            {
-              // metadata: { username: othersUsername },
-              items: [
-                {
-                  id: subscriptionItemId,
-                  price: priceId,
-                  // quantity
-                }
-              ]
-            }
-        });
-      }
-      catch (err) {
+        if (rows.length > 0) {
+          const updateStripePrice = async (row) => {
+            const { username: othersUsername, subscriptionId: othersSubscriptionId, subscriptionItemId: othersSubsItemId, quantity } = row;
+            const subscription = await stripe.subscriptions.update(
+              othersSubscriptionId,
+              {
+                // metadata: { username: othersUsername },
+                items: [
+                  {
+                    id: othersSubsItemId,
+                    price: priceId,
+                    // quantity
+                  }
+                ],
+                proration_behavior: 'none',
+              }
+            );
+            await Promise.all(rows.map((row) => updateStripePrice(row)));
+          }
+        }
+      } catch (err) {
         console.log(err);
-      }
-
+      };
+      break;
     default:
       console.log(`Unhandled event type ${event.type}`);
   }
