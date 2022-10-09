@@ -1,13 +1,12 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import stripeSDK from 'stripe';
-import * as models from '../db/models.js';
 import * as helpers from './helpers.js';
 
 dotenv.config();
 const webhook = express.Router();
 const endpointSecret = process.env.STRIPE_WEBHOOK_ENDPOINT_SECRET;
-const stripe = stripeSDK(process.env.STRIPE_SECRET_KEY);
+
 
 webhook.post('/webhook', express.raw({type: 'application/json'}), async (req, res) => {
   const signature = req.headers['stripe-signature'];
