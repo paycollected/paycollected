@@ -161,14 +161,20 @@ export function joinPlan(username, planId) {
 }
 
 
-export function addSubscriptionId(planId, quantity, subscriptionId, username) {
+export function updatePriceOnJoining(planId, quantity, subscriptionId, subscriptionItemId, username) {
   const query = `
-    INSERT INTO user_plan (quantity, subscription_id, plan_id, username)
-    VALUES ($1, $2, $3, $4)
-    ON CONFLICT (username, plan_id)
-    DO UPDATE SET quantity = user_plan.quantity + $1, subscription_id = $2
-    WHERE user_plan.username = $4 AND user_plan.plan_id = $3
+    WITH update_sub_id AS
+    (
+      INSERT INTO user_plan (quantity, subscription_id, subscription_item_id, plan_id, username)
+      VALUES ($1, $2, $3, $4, $5)
+      ON CONFLICT (username, plan_id)
+      DO UPDATE SET quantity = user_plan.quantity + $1
+      WHERE user_plan.username = $5 AND user_plan.plan_id = $4
+    )
+    SELECT username, subscription_id AS "subscriptionId", subscription_item_id AS "subscriptionItemId", quantity
+    FROM user_plan
+    WHERE plan_id = $4 AND username != $5;
   `;
 
-  return pool.query(query, [quantity, subscriptionId, planId, username]);
+  return pool.query(query, [quantity, subscriptionId, subscriptionItemId, planId, username]);
 }

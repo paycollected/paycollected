@@ -33,6 +33,7 @@ CREATE TABLE IF NOT EXISTS user_plan (
   plan_owner BOOLEAN NOT NULL DEFAULT FALSE,
   quantity INTEGER NOT NULL DEFAULT 0,
   subscription_id VARCHAR(255) UNIQUE, -- stripe subscription id
+  subscription_item_id VARCHAR(255) UNIQUE,
   UNIQUE (username, plan_id)
 );
 

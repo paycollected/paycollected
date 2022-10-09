@@ -1,6 +1,7 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import stripe from 'stripe';
+import * as models from './db/models';
 
 dotenv.config();
 const webhook = express.Router();
@@ -19,6 +20,7 @@ webhook.post('/webhook', express.raw({type: 'application/json'}), (req, res) => 
 
   // Handle the event
   let invoice;
+  let subscription;
   switch (event.type) {
     case 'invoice.payment_failed':
       invoice = event.data.object;
@@ -30,8 +32,7 @@ webhook.post('/webhook', express.raw({type: 'application/json'}), (req, res) => 
       break;
     case 'setup_intent.succeeded':
       const setupIntent = event.data.object;
-      console.log('-----------> here is the setupIntent', setupIntent);
-
+      // console.log('-----------> here is the setupIntent', setupIntent);
       /*
       sample setupIntent event object:
       {
@@ -70,6 +71,36 @@ webhook.post('/webhook', express.raw({type: 'application/json'}), (req, res) => 
     // Then define and call a function to handle the event setup_intent.succeeded
       break;
     // ... handle other event types
+    case 'customer.subscription.created':
+      subscription = event.data.object;
+      const { id: subscriptionId, customer: customerId, items, metadata } = subscription;
+      const { username } = metadata;
+      const { price, quantity } = items;
+      const { id: priceId, product: productId } = price;
+      // save this subscription to user_plan table,
+      // also query all other existing users on this same plan and update their subscriptions with new price
+      try {
+        const { rows } = await models.updatePriceOnJoining(productId, quantity, subscriptionId, subscriptionItemId, username);
+        rows.forEach((row) => {
+          const { username: othersUsername, subscriptionId: othersSubscriptionId, subscriptionItemId, quantity } = row;
+          const subscription = await stripe.subscriptions.update(
+            othersSubscriptionId,
+            {
+              // metadata: { username: othersUsername },
+              items: [
+                {
+                  id: subscriptionItemId,
+                  price: priceId,
+                  // quantity
+                }
+              ]
+            }
+        });
+      }
+      catch (err) {
+        console.log(err);
+      }
+
     default:
       console.log(`Unhandled event type ${event.type}`);
   }

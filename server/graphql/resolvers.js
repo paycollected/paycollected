@@ -247,6 +247,9 @@ export default {
           console.log(perCycleCost, perCyclePerPersonCost, typeof count, newQuantity)
           const { id: subscriptionId, items, pending_setup_intent } = await stripe.subscriptions.create({
             customer: sCusId,
+            metadata: {
+              username,
+            }
             items: [{
               price_data: {
                 currency: 'usd',
@@ -268,8 +271,6 @@ export default {
             expand: ['pending_setup_intent']
           });
 
-          await models.addSubscriptionId(planId, newQuantity, subscriptionId, username);
-          // still need to move this subscription to webhooks
           const { client_secret: clientSecret } = pending_setup_intent;
           return { clientSecret };
 
