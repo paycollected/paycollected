@@ -31,84 +31,63 @@ webhook.post('/webhook', express.raw({type: 'application/json'}), async (req, re
       invoice = event.data.object;
       // Then define and call a function to handle the event invoice.payment_succeeded
       break;
-    case 'setup_intent.succeeded':
-      const setupIntent = event.data.object;
-      // console.log('-----------> here is the setupIntent', setupIntent);
-      /*
-      sample setupIntent event object:
-      {
-        id: 'seti_1LqIFwAJ5Ik974ueG3yqSpnO',
-        object: 'setup_intent',
-        application: null,
-        cancellation_reason: null,
-        client_secret: 'seti_1LqIFwAJ5Ik974ueG3yqSpnO_secret_MZR8m1EIiaIs3nEFsHogIXkzLd9cb79',
-        created: 1665155672,
-        customer: 'cus_MZHqVYncRVfWZB',
-        description: null,
-        flow_directions: null,
-        last_setup_error: null,
-        latest_attempt: 'setatt_1LqIFzAJ5Ik974ueCDXgNphA',
-        livemode: false,
-        mandate: 'mandate_1LqIG0AJ5Ik974uePxHJTWOU',
-        metadata: {},
-        next_action: null,
-        on_behalf_of: null,
-        payment_method: 'pm_1LqIFzAJ5Ik974ueurBGpOXI',
-        payment_method_options: {
-          card: {
-            mandate_options: null,
-            network: null,
-            request_three_d_secure: 'automatic'
-          }
-        },
-        payment_method_types: [ 'link', 'card' ],
-        single_use_mandate: null,
-        status: 'succeeded',
-        usage: 'off_session'
-      }
-
-      */
-
-    // Then define and call a function to handle the event setup_intent.succeeded
-      break;
-    // ... handle other event types
     case 'customer.subscription.created':
       subscription = event.data.object;
-      // console.log('------------> subscription:', subscription);
       const { id: subscriptionId, customer: customerId, items, metadata } = subscription;
       const { username } = metadata;
       const { id: subscriptionItemId, price, quantity } = items.data[0];
-      const { id: priceId, product: productId } = price;
-      // save this subscription to user_plan table,
-      // also query all other existing users on this same plan and update their subscriptions with new price
+      const { id: newPriceId, product: productId } = price;
+
+      /*
+      1. query for old price ID, then archive old price ID & save new price ID
+      2. save subscription details, query all other existing users on this same plan and update (on stripe) their subscriptions with new price
+      */
       try {
-        const { rows } = await models.updatePriceOnJoining(productId, quantity, subscriptionId, subscriptionItemId, username);
-        console.log('--------------> rows:', rows);
-        if (rows.length > 0) {
-          const updateStripePrice = async (row) => {
-            console.log('----------------> row', row);
-            const { username: othersUsername, subscriptionId: othersSubscriptionId, subscriptionItemId: othersSubsItemId, quantity } = row;
-            const subscription = await stripe.subscriptions.update(
-              othersSubscriptionId,
-              {
-                // metadata: { username: othersUsername },
-                items: [
-                  {
-                    id: othersSubsItemId,
-                    price: priceId,
-                    // quantity
-                  }
-                ],
-                proration_behavior: 'none',
-              }
-            );
+        const processPriceId = async () => {
+          const { rows: priceIdRows } = await models.getPriceId(productId);
+          const { sPriceId } = priceIdRows[0];
+          const archiveOldPriceId = async (sPriceId) => {
+            if (sPriceId) {
+              await stripe.prices.update(sPriceId, { active: false });
+            }
           };
-          const resolvedRows = await Promise.all(rows.map((row) => updateStripePrice(row)));
+
+          await Promise.all([archiveOldPriceId(sPriceId), models.saveNewPriceId(newPriceId)]);
+        };
+
+        const processSubscriptions = async () => {
+          const { rows } = await models.updatePriceOnJoining(productId, quantity, subscriptionId, subscriptionItemId, username);
+          if (rows.length > 0) {
+            const updateStripePrice = async (row) => {
+              const { username: othersUsername, subscriptionId: othersSubscriptionId, subscriptionItemId: othersSubsItemId, quantity } = row;
+              const subscription = await stripe.subscriptions.update(
+                othersSubscriptionId,
+                {
+                  // metadata: { username: othersUsername },
+                  items: [
+                    {
+                      id: othersSubsItemId,
+                      price: newPriceId,
+                      // quantity
+                    }
+                  ],
+                  proration_behavior: 'none',
+                }
+              );
+            };
+            await Promise.all(rows.map((row) => updateStripePrice(row)));
+          }
         }
-      } catch (err) {
+
+        await Promise.all([processPriceId(), processSubscriptions()]);
+      }
+
+      catch (err) {
         console.log(err);
       };
+
       break;
+
     default:
       console.log(`Unhandled event type ${event.type}`);
   }

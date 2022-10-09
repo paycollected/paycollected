@@ -118,12 +118,6 @@ export function getUserInfo(username) {
 }
 
 
-// export function checkUserPlan(username, planId) {
-//   const query = `SELECT quantity FROM user_plan WHERE username = $1 AND plan_id = $2`;
-//   return pool.query(query, [username, planId]);
-// }
-
-
 export function joinPlan(username, planId) {
   const query = `
     WITH p AS (
@@ -177,4 +171,15 @@ export function updatePriceOnJoining(planId, quantity, subscriptionId, subscript
   `;
 
   return pool.query(query, [quantity, subscriptionId, subscriptionItemId, planId, username]);
+}
+
+
+export function getPriceId(planId) {
+  return pool.query('SELECT s_price_id AS "sPriceId" FROM plans WHERE s_prod_id = $1', [planId]);
+}
+
+
+export function saveNewPriceId(newPriceId, planId) {
+  const query = `UPDATE plans SET s_price_id = $1 WHERE s_prod_id = $2`;
+  return pool.query(query, [newPriceId, planId]);
 }

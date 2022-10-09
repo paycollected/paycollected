@@ -242,24 +242,27 @@ export default {
             // adjust nextStartDate here
 
           }
-          // create a subscription and price in the same API call
           const perCyclePerPersonCost = Math.ceil(perCycleCost / (count + newQuantity));
-          console.log(perCycleCost, perCyclePerPersonCost, typeof count, newQuantity)
+
+          // create a stripe price ID
+          const { id: priceId } = await stripe.prices.create({
+            currency: 'usd',
+            product: planId,
+            unit_amount: perCyclePerPersonCost,
+            recurring: {
+              interval: recurringInterval[cycleFrequency],
+              // could consider allowing customers to do interval count in the future?
+            }
+          });
+
+          // create a Stripe subscription
           const { id: subscriptionId, items, pending_setup_intent } = await stripe.subscriptions.create({
             customer: sCusId,
             metadata: {
               username,
             },
             items: [{
-              price_data: {
-                currency: 'usd',
-                product: planId,
-                unit_amount: perCyclePerPersonCost,
-                recurring: {
-                  interval: recurringInterval[cycleFrequency],
-                  // could consider allowing customers to do interval count in the future?
-                }
-              },
+              price: priceId,
               quantity: newQuantity,
             }],
             payment_behavior: 'default_incomplete',
