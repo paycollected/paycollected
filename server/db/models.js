@@ -49,7 +49,6 @@ export function viewOnePlan(planId) {
       p.plan_name AS name,
       UPPER(p.cycle_frequency::VARCHAR) AS "cycleFrequency",
       p.per_cycle_cost AS "perCycleCost",
-      p.max_quantity AS "maxQuantity",
       json_build_object('firstName', u.first_name, 'lastName', u.last_name, 'username', u.username, 'stripeCusId', u.s_cus_id) AS owner
     FROM plans p
     JOIN user_plan up

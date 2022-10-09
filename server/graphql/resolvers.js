@@ -229,8 +229,10 @@ export default {
 
     pay: async (_, { planId, quantity }, { username, err }) => {
       /*
-      2. create subscription (need price id + cus id, quantity)
-      3. save subscription id in user_plan table
+      1. Query database for total price, price ID of plan, for total number of quantities in the plan to calculate the new per-person cost
+      2. Create a new price ID, attach this price ID to the product ID of plan (if product already has a price ID attached, then set old price ID to inactive, and activate this new price ID)
+      3. For a new person joining, if the start date is in the future, do nothing? If start date has passed, then follow examples above to pass in trial_end for subscription creation
+
       */
 
       /* right now assuming that nobody extra is joining plan compared to originally declared

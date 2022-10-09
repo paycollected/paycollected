@@ -45,7 +45,6 @@ export default gql`
     cycleFrequency: CycleFrequency!
     perCycleCost: Float!
     activeMembers: [PlanMember]! # can include owner, will only include members whose quantity > 0
-    maxQuantity: Int # nullable because viewAllPlans query doesn't need this info
   }
 
   type Mutation {

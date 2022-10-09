@@ -50,7 +50,7 @@ export default function JoinPlan({ setPlanToJoin, setStripeClientSecret }) {
 
   if (getPlanData) {
     const {
-      name, owner, cycleFrequency, perCycleCost, maxQuantity, activeMembers,
+      name, owner, cycleFrequency, perCycleCost, activeMembers,
     } = getPlanData.viewOnePlan;
 
     return (
