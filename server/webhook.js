@@ -53,7 +53,7 @@ webhook.post('/webhook', express.raw({type: 'application/json'}), async (req, re
           because archiveOldPriceId needs price Id obtained from getPriceId
           and saveNewPriceId will overwrite old priceId in db
           */
-          await Promise.all([archiveOldPriceId(sPriceId), models.saveNewPriceId(newPriceId)]);
+          await Promise.all([archiveOldPriceId(sPriceId), models.saveNewPriceId(newPriceId, productId)]);
         };
 
 
@@ -64,7 +64,7 @@ webhook.post('/webhook', express.raw({type: 'application/json'}), async (req, re
           const { rows } = await models.updatePriceOnJoining(productId, quantity, subscriptionId, subscriptionItemId, username);
           if (rows.length > 0) {
             const updateStripePrice = async (row) => {
-              const { username: othersUsername, subscriptionId: othersSubscriptionId, subscriptionItemId: othersSubsItemId, quantity } = row;
+              const { username: othersUsername, subscriptionId: othersSubscriptionId, subscriptionItemId: othersSubsItemId, quantity: othersQuantity } = row;
               const subscription = await stripe.subscriptions.update(
                 othersSubscriptionId,
                 {
@@ -73,7 +73,7 @@ webhook.post('/webhook', express.raw({type: 'application/json'}), async (req, re
                     {
                       id: othersSubsItemId,
                       price: newPriceId,
-                      quantity
+                      quantity: othersQuantity
                     }
                   ],
                   proration_behavior: 'none',
