@@ -37,12 +37,10 @@ webhook.post('/webhook', express.raw({type: 'application/json'}), async (req, re
       const { username } = metadata;
       const { id: subscriptionItemId, price, quantity } = items.data[0];
       const { id: newPriceId, product: productId } = price;
+      // will still need to handle email automation - maybe using SendGrid
 
-      /*
-      1. query for old price ID, then archive old price ID & save new price ID
-      2. save subscription details, query all other existing users on this same plan and update (on stripe) their subscriptions with new price
-      */
       try {
+        // 1. query for old price ID, then archive old price ID (on stripe system) & save new price ID (our db)
         const processPriceId = async () => {
           const { rows: priceIdRows } = await models.getPriceId(productId);
           const { sPriceId } = priceIdRows[0];
@@ -51,10 +49,17 @@ webhook.post('/webhook', express.raw({type: 'application/json'}), async (req, re
               await stripe.prices.update(sPriceId, { active: false });
             }
           };
-
+          /* Both archiveOldPriceId and saveNewPriceId MUST occur AFTER getPriceId
+          because archiveOldPriceId needs price Id obtained from getPriceId
+          and saveNewPriceId will overwrite old priceId in db
+          */
           await Promise.all([archiveOldPriceId(sPriceId), models.saveNewPriceId(newPriceId)]);
         };
 
+
+        // 2. save subscription details (our db),
+        // query all other existing users on this same plan (db)
+        // and update their subscriptions with new price (stripe system)
         const processSubscriptions = async () => {
           const { rows } = await models.updatePriceOnJoining(productId, quantity, subscriptionId, subscriptionItemId, username);
           if (rows.length > 0) {
@@ -63,12 +68,12 @@ webhook.post('/webhook', express.raw({type: 'application/json'}), async (req, re
               const subscription = await stripe.subscriptions.update(
                 othersSubscriptionId,
                 {
-                  // metadata: { username: othersUsername },
+                  metadata: { username: othersUsername },
                   items: [
                     {
                       id: othersSubsItemId,
                       price: newPriceId,
-                      // quantity
+                      quantity
                     }
                   ],
                   proration_behavior: 'none',
@@ -79,6 +84,7 @@ webhook.post('/webhook', express.raw({type: 'application/json'}), async (req, re
           }
         }
 
+        // processPriceId and processSubscriptions don't depend on each other so we can await them simultaneously
         await Promise.all([processPriceId(), processSubscriptions()]);
       }
 

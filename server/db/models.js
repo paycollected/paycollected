@@ -156,6 +156,12 @@ export function joinPlan(username, planId) {
 
 
 export function updatePriceOnJoining(planId, quantity, subscriptionId, subscriptionItemId, username) {
+  /*
+  this query does 2 things:
+  1) the INSERT / UPDATE clauses store information about a certain subscription plan in our datastore
+  2) the SELECT clause return all the stripe subscriptions that are on the same product (plan),
+  so we can call stripe API to update their prices later
+  */
   const query = `
     WITH update_sub_id AS
     (

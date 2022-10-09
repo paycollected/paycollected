@@ -95,22 +95,24 @@ export default {
         const { rows } = await models.checkUser(username, email);
         // username and email do not exist -> create user
         if (rows.length === 0) {
-          const hashedPass = await bcrypt.hash(password, saltRounds);
-          const { id: stripeCusId } = await stripe.customers.create({
-            name: `${firstName} ${lastName}`,
-            email
-          });
+          const [
+            { id: stripeCusId },
+            hashedPass
+          ] = await Promise.all([
+            stripe.customers.create({
+              name: `${firstName} ${lastName}`,
+              email
+            }),
+            bcrypt.hash(password, saltRounds)
+          ]);
+
           await models.createUser(firstName, lastName, username, hashedPass, email, stripeCusId);
           const token = jwt.sign({
             // expires after 2 weeks
             exp: Math.floor(Date.now() / 1000) + (60 * 60 * 24 * 14),
             data: username
           }, process.env.SECRET_KEY);
-          return {
-            username,
-            email,
-            token
-          };
+          return { username, email, token };
         // username or email exist --> return error
         } else if (rows[0].username === username) {
           errMsg = 'This username already exists';
