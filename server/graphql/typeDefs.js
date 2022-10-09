@@ -69,7 +69,7 @@ export default gql`
     ): ProductId!
     # returning stripe product ID here, which will be used as code
 
-    pay(
+    joinPlan(
       planId: ID!
       quantity: Int!
     ): PaymentIntent! # returning client secret

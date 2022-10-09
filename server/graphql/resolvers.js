@@ -192,30 +192,20 @@ export default {
 
           // creates stripe price object, also create stripe product in the same call
           perCycleCost *= 100; // store in cents
-          const { id: sProdId } = await stripe.products.create({
+          const { id: productId } = await stripe.products.create({
             name: planName
           });
-          // const { id: sPriceId, product: sProdId } = await stripe.prices.create({
-          //   product_data: {
-          //     name: planName
-          //   },
-          //   unit_amount: perCyclePerPersonCost,
-          //   currency: 'usd',
-          //   recurring: {
-          //     interval: recurringInterval[cycleFrequency]
-          //   },
-          // });
 
           await models.addPlan(
             username,
             planName,
             cycleFrequency,
             perCycleCost,
-            sProdId,
+            productId,
             startDate
           );
 
-          return { productId: sProdId };
+          return { productId };
         } catch (asyncError) {
           console.log(asyncError);
           throw new ApolloError('Unable to create new plan');
@@ -227,47 +217,71 @@ export default {
       }
     },
 
-    pay: async (_, { planId, quantity }, { username, err }) => {
+    joinPlan: async (_, { planId, quantity: newQuantity }, { username, err }) => {
       /*
       1. Query database for total price, price ID of plan, for total number of quantities in the plan to calculate the new per-person cost
       2. Create a new price ID, attach this price ID to the product ID of plan (if product already has a price ID attached, then set old price ID to inactive, and activate this new price ID)
       3. For a new person joining, if the start date is in the future, do nothing? If start date has passed, then follow examples above to pass in trial_end for subscription creation
       */
-
+      let errMsg;
       if (username) {
         try {
-          const { rows } = await models.getUserInfo(username);
-          const {
-            stripeCusId, email
-          } = rows[0];
-          const sCusId = stripeCusId;
-          // create subscription with stripe
-          const { rows: getPriceIdStartDateRows } = await models.getPriceIdAndStartDate(planId);
-          const { sPriceId, startDate } = getPriceIdStartDateRows[0];
-          const { id: subscriptionId, pending_setup_intent } = await stripe.subscriptions.create({
+          // check that user is NOT already subscribed to plan
+          const { rows } = await models.joinPlan(username, planId);
+          const { cycleFrequency, perCycleCost, sPriceId, startDate, email, sCusId, quantity, count } = rows[0];
+          if (quantity) {
+            // if owner and haven't joined plan, quantity = 0
+            // if not owner and haven't joined plan, quantity is null
+            // front end will need to display a msg telling user to use 'adjust quantity' in dashboard instead
+            errMsg = 'User is already subscribed to this plan';
+            throw new Error();
+          }
+
+          let nextStartDate = Number(startDate);
+          if (!isFuture(nextStartDate * 1000)) {
+            // adjust nextStartDate here
+
+          }
+          // create a subscription and price in the same API call
+          const perCyclePerPersonCost = perCycleCost / (count + newQuantity);
+          const { id: subscriptionId, items, pending_setup_intent } = await stripe.subscriptions.create({
             customer: sCusId,
             items: [
-              { price: sPriceId, quantity }
+              price_data: {
+                currency: 'usd',
+                product: planId,
+                unit_amount: perCyclePerPersonCost,
+                recurring: {
+                  interval: recurringInterval[cycleFrequency],
+                  // could consider allowing customers to do interval count in the future?
+                }
+              },
+              quantity: newQuantity,
             ],
             payment_behavior: 'default_incomplete',
             payment_settings: {
               save_default_payment_method: 'on_subscription',
               payment_method_types: ['link', 'card'],
             },
-            trial_end: Number(startDate),
+            trial_end: nextStartDate,
             expand: ['pending_setup_intent']
           });
 
-          const { client_secret: clientSecret } = pending_setup_intent;
-          // save subscriptionId in database
-          /*  Right now is NOT the right time to update this subscription info in our db yet
-          because customer hasn't paid and db is updated already. This db query will need to be
-          run only after successful payment (webhook).
-          */
 
-          await models.addSubscriptionId(planId, quantity, subscriptionId, username);
+          if (sPriceId) {
+            // archiving old priceID in stripe system
+            await stripe.prices.update(sPriceId, { active: false });
+          }
+
+          const { id: newPriceId } = items.data[0].price;
+          await models.saveNewPriceId(newPriceId, planId);
+          const { client_secret: clientSecret } = pending_setup_intent;
           return { clientSecret };
+
         } catch (asyncError) {
+          if (errMsg) {
+            throw new ForbiddenError(errMsg);
+          }
           console.log(asyncError);
           throw new ApolloError('Unable to create subscription');
         }

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation } from '@apollo/client';
-import { Pay as PAY } from '../graphql/mutations.gql';
+import { JoinPlan as JOIN_PLAN } from '../graphql/mutations.gql';
 import { ViewOnePlan as GET_PLAN } from '../graphql/queries.gql';
 
 export default function JoinPlan({ setPlanToJoin, setStripeClientSecret }) {
@@ -16,10 +16,10 @@ export default function JoinPlan({ setPlanToJoin, setStripeClientSecret }) {
   });
 
   // will need to handle this payLoading state on client side so user knows what to expect
-  const [makePayment, { data: payData, loading: payLoading, error: payError}] = useMutation(PAY, {
-    onCompleted: ({ pay }) => {
-      setStripeClientSecret(pay.clientSecret);
-      localStorage.setItem('clientSecret', pay.clientSecret);
+  const [makePayment, { data: payData, loading: payLoading, error: payError}] = useMutation(JOIN_PLAN, {
+    onCompleted: ({ joinPlan }) => {
+      setStripeClientSecret(joinPlan.clientSecret);
+      localStorage.setItem('clientSecret', joinPlan.clientSecret);
       navigate('/checkout');
     },
     onError: ({ message }) => { console.log(message); },

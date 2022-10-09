@@ -23,8 +23,8 @@ mutation CreatePlanMutation ($planName: String!, $cycleFrequency: CycleFrequency
 }
 
 
-mutation Pay ($planId: ID!, $quantity: Int!) {
-  pay(planId: $planId, quantity: $quantity) {
+mutation JoinPlan ($planId: ID!, $quantity: Int!) {
+  joinPlan(planId: $planId, quantity: $quantity) {
     clientSecret
   }
 }

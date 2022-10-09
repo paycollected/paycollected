@@ -24,7 +24,7 @@ export function createUser(firstName, lastName, username, password, email, strip
 }
 
 
-export function addPlan(username, planName, cycleFrequency, perCycleCost, sProdId, startDate) {
+export function addPlan(username, planName, cycleFrequency, perCycleCost, productId, startDate) {
   const query = `
     WITH first_insert AS
       (
@@ -38,7 +38,7 @@ export function addPlan(username, planName, cycleFrequency, perCycleCost, sProdI
     VALUES
       ($1, $5, TRUE)
   `;
-  const args = [username, planName, cycleFrequency, perCycleCost, sProdId, startDate];
+  const args = [username, planName, cycleFrequency, perCycleCost, productId, startDate];
   return pool.query(query, args);
 }
 
@@ -118,23 +118,78 @@ export function getUserInfo(username) {
 }
 
 
-export function getPriceIdAndStartDate(planId) {
+// export function checkUserPlan(username, planId) {
+//   const query = `SELECT quantity FROM user_plan WHERE username = $1 AND plan_id = $2`;
+//   return pool.query(query, [username, planId]);
+// }
+
+
+// export function getPlanInfo(planId) {
+//   const query = `
+//     SELECT
+//       s_price_id AS "sPriceId",
+//       start_date AS "startDate",
+//       cycle_frequency AS "cycleFrequency",
+//       per_cycle_cost AS "perCycleCost",
+//     FROM plans
+//     WHERE s_prod_id = $1`;
+//   return pool.query(query, [planId]);
+// }
+
+export function joinPlan(username, planId) {
   const query = `
-    SELECT s_price_id AS "sPriceId", start_date AS "startDate"
-    FROM plans
-    WHERE s_prod_id = $1`;
-  return pool.query(query, [planId]);
+    WITH p AS (
+      SELECT cycle_frequency, per_cycle_cost, s_price_id, start_date
+      FROM plans
+      WHERE s_prod_id = $2
+    ),
+    u AS (
+      SELECT email, s_cus_id FROM users WHERE username = $1
+    ),
+    up1 AS (
+      SELECT quantity
+      FROM user_plan
+      WHERE plan_id = $2 AND username = $1
+    ),
+    up2 AS (
+      SELECT SUM (quantity) AS count
+      FROM user_plan
+      WHERE plan_id = $2
+    )
+    SELECT * FROM (
+      VALUES (
+        (SELECT cycle_frequency FROM p),
+        (SELECT per_cycle_cost FROM p),
+        (SELECT s_price_id FROM p),
+        (SELECT start_date FROM p),
+        (SELECT email FROM u),
+        (SELECT s_cus_id FROM u),
+        (SELECT quantity FROM up1),
+        (SELECT count FROM up2)
+      )
+    ) AS t ("cycleFrequency", "perCycleCost", "sPriceId", "startDate", email, "sCusId", quantity, count);
+  `;
+
+  return pool.query(query, [username, planId]);
 }
 
 
-export function addSubscriptionId(planId, quantity, subscriptionId, username) {
-  const query = `
-    INSERT INTO user_plan (quantity, subscription_id, plan_id, username)
-    VALUES ($1, $2, $3, $4)
-    ON CONFLICT (username, plan_id)
-    DO UPDATE SET quantity = user_plan.quantity + $1, subscription_id = $2
-    WHERE user_plan.username = $4 AND user_plan.plan_id = $3
-  `;
+// export function addSubscriptionId(planId, quantity, subscriptionId, username) {
+//   const query = `
+//     INSERT INTO user_plan (quantity, subscription_id, plan_id, username)
+//     VALUES ($1, $2, $3, $4)
+//     ON CONFLICT (username, plan_id)
+//     DO UPDATE SET quantity = user_plan.quantity + $1, subscription_id = $2
+//     WHERE user_plan.username = $4 AND user_plan.plan_id = $3
+//   `;
 
-  return pool.query(query, [quantity, subscriptionId, planId, username]);
+//   return pool.query(query, [quantity, subscriptionId, planId, username]);
+// }
+
+export function saveNewPriceId(newPriceId, planId) {
+  const query = `
+    INSERT INTO plans (s_price_id) VALUES ($1) WHERE s_prod_id = $2
+    ON CONFLICT (s_price_id, s_prod_id) DO UPDATE SET s_price_id = $1 WHERE s_prod_id = $2
+  `;
+  return pool.query(query, [newPriceId, planId]);
 }
