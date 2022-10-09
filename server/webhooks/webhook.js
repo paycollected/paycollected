@@ -41,63 +41,14 @@ webhook.post('/webhook', express.raw({type: 'application/json'}), async (req, re
       // will still need to handle email automation - maybe using SendGrid
 
       try {
-        // 1. query for old price ID, then archive old price ID (on stripe system) & save new price ID (our db)
-        const processPriceId = async () => {
-          const { rows: priceIdRows } = await models.getPriceId(productId);
-          const { sPriceId } = priceIdRows[0];
-          const archiveOldPriceId = async (sPriceId) => {
-            if (sPriceId) {
-              await stripe.prices.update(sPriceId, { active: false });
-            }
-          };
-          /* Both archiveOldPriceId and saveNewPriceId MUST occur AFTER getPriceId
-          because archiveOldPriceId needs price Id obtained from getPriceId
-          and saveNewPriceId will overwrite old priceId in db
-          */
-          await Promise.all([archiveOldPriceId(sPriceId), models.saveNewPriceId(newPriceId, productId)]);
-        };
-
-
-        // 2. save subscription details (our db),
-        // query all other existing users on this same plan (db)
-        // and update their subscriptions with new price (stripe system)
-        // const processSubscriptions = async (productId, quantity, subscriptionId, subscriptionItemId, username, newPriceId) => {
-        //   const { rows } = await models.updatePriceOnJoining(productId, quantity, subscriptionId, subscriptionItemId, username);
-        //   if (rows.length > 0) {
-        //     const updateStripePrice = async (row) => {
-        //       const {
-        //         username: othersUsername,
-        //         subscriptionId: othersSubscriptionId,
-        //         subscriptionItemId: othersSubsItemId,
-        //         quantity: othersQuantity
-        //       } = row;
-        //       const subscription = await stripe.subscriptions.update(
-        //         othersSubscriptionId,
-        //         {
-        //           metadata: { username: othersUsername },
-        //           items: [
-        //             {
-        //               id: othersSubsItemId,
-        //               price: newPriceId,
-        //               quantity: othersQuantity
-        //             }
-        //           ],
-        //           proration_behavior: 'none',
-        //         }
-        //       );
-        //     };
-        //     await Promise.all(rows.map((row) => updateStripePrice(row)));
-        //   }
-        // }
-
         // processPriceId and processSubscriptions don't depend on each other so we can await them simultaneously
-        await Promise.all([processPriceId(), helpers.processSubscriptions(productId, quantity, subscriptionId, subscriptionItemId, username, newPriceId)]);
-      }
-
-      catch (err) {
+        await Promise.all([
+          helpers.processPriceId(productId, newPriceId),
+          helpers.processSubscriptions(productId, quantity, subscriptionId, subscriptionItemId, username, newPriceId)
+        ]);
+      } catch (err) {
         console.log(err);
       };
-
       break;
 
     default:
