@@ -2,6 +2,7 @@ import express from 'express';
 import dotenv from 'dotenv';
 import stripeSDK from 'stripe';
 import * as models from '../db/models.js';
+import * as helpers from './helpers.js';
 
 dotenv.config();
 const webhook = express.Router();
@@ -60,37 +61,37 @@ webhook.post('/webhook', express.raw({type: 'application/json'}), async (req, re
         // 2. save subscription details (our db),
         // query all other existing users on this same plan (db)
         // and update their subscriptions with new price (stripe system)
-        const processSubscriptions = async () => {
-          const { rows } = await models.updatePriceOnJoining(productId, quantity, subscriptionId, subscriptionItemId, username);
-          if (rows.length > 0) {
-            const updateStripePrice = async (row) => {
-              const {
-                username: othersUsername,
-                subscriptionId: othersSubscriptionId,
-                subscriptionItemId: othersSubsItemId,
-                quantity: othersQuantity
-              } = row;
-              const subscription = await stripe.subscriptions.update(
-                othersSubscriptionId,
-                {
-                  metadata: { username: othersUsername },
-                  items: [
-                    {
-                      id: othersSubsItemId,
-                      price: newPriceId,
-                      quantity: othersQuantity
-                    }
-                  ],
-                  proration_behavior: 'none',
-                }
-              );
-            };
-            await Promise.all(rows.map((row) => updateStripePrice(row)));
-          }
-        }
+        // const processSubscriptions = async (productId, quantity, subscriptionId, subscriptionItemId, username, newPriceId) => {
+        //   const { rows } = await models.updatePriceOnJoining(productId, quantity, subscriptionId, subscriptionItemId, username);
+        //   if (rows.length > 0) {
+        //     const updateStripePrice = async (row) => {
+        //       const {
+        //         username: othersUsername,
+        //         subscriptionId: othersSubscriptionId,
+        //         subscriptionItemId: othersSubsItemId,
+        //         quantity: othersQuantity
+        //       } = row;
+        //       const subscription = await stripe.subscriptions.update(
+        //         othersSubscriptionId,
+        //         {
+        //           metadata: { username: othersUsername },
+        //           items: [
+        //             {
+        //               id: othersSubsItemId,
+        //               price: newPriceId,
+        //               quantity: othersQuantity
+        //             }
+        //           ],
+        //           proration_behavior: 'none',
+        //         }
+        //       );
+        //     };
+        //     await Promise.all(rows.map((row) => updateStripePrice(row)));
+        //   }
+        // }
 
         // processPriceId and processSubscriptions don't depend on each other so we can await them simultaneously
-        await Promise.all([processPriceId(), processSubscriptions()]);
+        await Promise.all([processPriceId(), helpers.processSubscriptions(productId, quantity, subscriptionId, subscriptionItemId, username, newPriceId)]);
       }
 
       catch (err) {
