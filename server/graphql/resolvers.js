@@ -212,7 +212,6 @@ export default {
             cycleFrequency,
             perCycleCost,
             sProdId,
-            maxQuantity,
             startDate
           );
 
