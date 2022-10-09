@@ -20,10 +20,8 @@ CREATE TABLE IF NOT EXISTS plans (
   plan_name VARCHAR(50) NOT NULL,
   cycle_frequency CYCLE_FREQ NOT NULL,
   per_cycle_cost INTEGER NOT NULL,
-  per_user_per_cycle_cost INTEGER NOT NULL,
   s_prod_id VARCHAR(255) PRIMARY KEY,
-  s_price_id VARCHAR(255) UNIQUE NOT NULL, -- corresponds to per_user_per_cycle_cost
-  max_quantity INTEGER NOT NULL,
+  s_price_id VARCHAR(255) UNIQUE, -- corresponds to per_user_per_cycle_cost
   start_date BIGINT NOT NULL -- in UTC format
 );
 

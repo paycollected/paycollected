@@ -16,8 +16,8 @@ mutation LogIn ($username: String!, $password: String!) {
 }
 
 
-mutation CreatePlanMutation ($planName: String!, $cycleFrequency: CycleFrequency!, $perCycleCost: Float!, $maxQuantity: Int!, $startDate: String!) {
-  createPlan(planName: $planName, cycleFrequency: $cycleFrequency, perCycleCost: $perCycleCost, maxQuantity: $maxQuantity, startDate: $startDate) {
+mutation CreatePlanMutation ($planName: String!, $cycleFrequency: CycleFrequency!, $perCycleCost: Float!, $startDate: String!) {
+  createPlan(planName: $planName, cycleFrequency: $cycleFrequency, perCycleCost: $perCycleCost, startDate: $startDate) {
     productId
   }
 }

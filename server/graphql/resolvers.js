@@ -4,6 +4,7 @@ import stripeSDK from 'stripe';
 import {
   ApolloError, UserInputError, AuthenticationError, ForbiddenError
 } from 'apollo-server-core';
+import { isFuture } from 'date-fns';
 import * as models from '../db/models.js';
 
 const saltRounds = 10;
@@ -182,7 +183,7 @@ export default {
     },
 
     createPlan: async (_, {
-      planName, cycleFrequency, perCycleCost, maxQuantity, startDate
+      planName, cycleFrequency, perCycleCost, startDate
     }, { username, err }) => {
       if (username) {
         try {
@@ -191,17 +192,19 @@ export default {
 
           // creates stripe price object, also create stripe product in the same call
           perCycleCost *= 100; // store in cents
-          const perCyclePerPersonCost = Math.ceil(perCycleCost / maxQuantity); // in cents
-          const { id: sPriceId, product: sProdId } = await stripe.prices.create({
-            product_data: {
-              name: planName
-            },
-            unit_amount: perCyclePerPersonCost,
-            currency: 'usd',
-            recurring: {
-              interval: recurringInterval[cycleFrequency]
-            },
+          const { id: sProdId } = await stripe.products.create({
+            name: planName
           });
+          // const { id: sPriceId, product: sProdId } = await stripe.prices.create({
+          //   product_data: {
+          //     name: planName
+          //   },
+          //   unit_amount: perCyclePerPersonCost,
+          //   currency: 'usd',
+          //   recurring: {
+          //     interval: recurringInterval[cycleFrequency]
+          //   },
+          // });
 
           await models.addPlan(
             username,
@@ -209,8 +212,6 @@ export default {
             cycleFrequency,
             perCycleCost,
             sProdId,
-            sPriceId,
-            perCyclePerPersonCost,
             maxQuantity,
             startDate
           );
@@ -229,7 +230,6 @@ export default {
 
     pay: async (_, { planId, quantity }, { username, err }) => {
       /*
-      1. check whether this user has a stripe Id or not, if not create a Stripe cus for them
       2. create subscription (need price id + cus id, quantity)
       3. save subscription id in user_plan table
       */
@@ -240,26 +240,11 @@ export default {
       */
       if (username) {
         try {
-          let sCusId;
           const { rows } = await models.getUserInfo(username);
           const {
-            stripeCusId, firstName, lastName, email
+            stripeCusId, email
           } = rows[0];
-          if (stripeCusId === null) { // create a customer
-            /*
-            this whole operation takes a while to process so perhaps we should create a Stripe customer
-            account when user first signs up to our platform?
-            */
-            const { id } = await stripe.customers.create({
-              name: `${firstName} ${lastName}`,
-              email
-            });
-            sCusId = id;
-            await models.saveStripeCusId(username, sCusId);
-          } else {
-            sCusId = stripeCusId;
-          }
-          // at this point user will have stripeCusId
+          const sCusId = stripeCusId;
           // create subscription with stripe
           const { rows: getPriceIdStartDateRows } = await models.getPriceIdAndStartDate(planId);
           const { sPriceId, startDate } = getPriceIdStartDateRows[0];

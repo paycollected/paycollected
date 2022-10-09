@@ -66,7 +66,6 @@ export default gql`
       planName: String!
       cycleFrequency: CycleFrequency!
       perCycleCost: Float!
-      maxQuantity: Int!
       startDate: String! # in UTC format
     ): ProductId!
     # returning stripe product ID here, which will be used as code
