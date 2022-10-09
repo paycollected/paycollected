@@ -43,7 +43,7 @@ export default function CreatePlan({ setPlanToJoin, setShowMagicLink }) {
   });
 
   const onSubmit = ({
-    planName, cycleFrequency, perCycleCost, maxQuantity,
+    planName, cycleFrequency, perCycleCost,
   }) => {
     const formattedStartDate = new Date(...startDate.split('-'));
     formattedStartDate.setMonth(formattedStartDate.getMonth() - 1); // month is zero-th indexed
@@ -52,7 +52,6 @@ export default function CreatePlan({ setPlanToJoin, setShowMagicLink }) {
         planName,
         cycleFrequency: cycleFrequency.toUpperCase(),
         perCycleCost: Number(perCycleCost),
-        maxQuantity: Number(maxQuantity),
         startDate: (formattedStartDate.valueOf() / 1000).toString(),
         // need seconds and not milliseconds
         // only using dates so exact time will default to 00:00:00 of that day
@@ -112,18 +111,6 @@ export default function CreatePlan({ setPlanToJoin, setShowMagicLink }) {
             startAdornment: <InputAdornment position="start">$</InputAdornment>,
           }}
         />
-        <TextField
-          name="maxQuantity"
-          label="Number of people per plan"
-          placeholder="Number of people per plan"
-          required
-          type="number"
-          variant="outlined"
-          {...register('maxQuantity', { required: 'Max quantity required' })}
-          error={!!errors?.maxQuantity}
-          helperText={errors?.maxQuantity ? errors.maxQuantity.message : ' '}
-          InputProps={{ inputProps: { min: 0 } }}
-        />
         <input
           type="date"
           value={startDate}
@@ -131,6 +118,7 @@ export default function CreatePlan({ setPlanToJoin, setShowMagicLink }) {
           max={nextMonthFullDate}
           onChange={(e) => { setStartDate(e.target.value); }}
         />
+        {console.log(startDate)}
         <Button type="submit" variant="contained" disabled={loading}>Submit</Button>
       </form>
       <Button variant="contained" onClick={() => { navigate('/dashboard'); }}>Cancel</Button>

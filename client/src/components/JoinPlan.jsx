@@ -80,7 +80,6 @@ export default function JoinPlan({ setPlanToJoin, setStripeClientSecret }) {
             placeholder="Quantity"
             required
             min="1"
-            max={maxQuantity - activeMembers.length}
             onChange={(e) => { setQuantity(Number(e.target.value)); }}
           />
           <button type="submit">Join</button>

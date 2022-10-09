@@ -24,7 +24,7 @@ export function createUser(firstName, lastName, username, password, email, strip
 }
 
 
-export function addPlan(username, planName, cycleFrequency, perCycleCost, sProdId, sPriceId, startDate) {
+export function addPlan(username, planName, cycleFrequency, perCycleCost, sProdId, startDate) {
   const query = `
     WITH first_insert AS
       (
