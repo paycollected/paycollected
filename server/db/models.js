@@ -97,7 +97,13 @@ export function viewAllPlans(username) {
       name,
       "cycleFrequency",
       "perCycleCost",
-      json_build_object('firstName', u.first_name, 'lastName', u.last_name, 'username', u.username, 'stripeCusId', u.s_cus_id) AS owner
+      json_build_object
+      (
+        'firstName', u.first_name,
+        'lastName', u.last_name,
+        'username', u.username,
+        'stripeCusId', u.s_cus_id
+      ) AS owner
     FROM select1
     JOIN user_plan up
     ON "planId" = up.plan_id
