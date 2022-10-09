@@ -1,7 +1,7 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import stripeSDK from 'stripe';
-import * as models from './db/models';
+import * as models from './db/models.js';
 
 dotenv.config();
 const webhook = express.Router();
@@ -74,7 +74,7 @@ webhook.post('/webhook', express.raw({type: 'application/json'}), async (req, re
     // ... handle other event types
     case 'customer.subscription.created':
       subscription = event.data.object;
-      console.log('------------> subscription:', subscription);
+      // console.log('------------> subscription:', subscription);
       const { id: subscriptionId, customer: customerId, items, metadata } = subscription;
       const { username } = metadata;
       const { id: subscriptionItemId, price, quantity } = items.data[0];
@@ -83,8 +83,10 @@ webhook.post('/webhook', express.raw({type: 'application/json'}), async (req, re
       // also query all other existing users on this same plan and update their subscriptions with new price
       try {
         const { rows } = await models.updatePriceOnJoining(productId, quantity, subscriptionId, subscriptionItemId, username);
+        console.log('--------------> rows:', rows);
         if (rows.length > 0) {
           const updateStripePrice = async (row) => {
+            console.log('----------------> row', row);
             const { username: othersUsername, subscriptionId: othersSubscriptionId, subscriptionItemId: othersSubsItemId, quantity } = row;
             const subscription = await stripe.subscriptions.update(
               othersSubscriptionId,
@@ -100,9 +102,8 @@ webhook.post('/webhook', express.raw({type: 'application/json'}), async (req, re
                 proration_behavior: 'none',
               }
             );
-            const resolvedRows = await Promise.all(rows.map((row) => updateStripePrice(row)));
-            console.log('-----------------> resolved rows:', resolvedRows[0]);
-          }
+          };
+          const resolvedRows = await Promise.all(rows.map((row) => updateStripePrice(row)));
         }
       } catch (err) {
         console.log(err);
