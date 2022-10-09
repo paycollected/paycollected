@@ -1,4 +1,4 @@
-import pool from '../db/pool.js';
+import pool from '../db/pool';
 
 export function checkUser(username, email) {
   const query = `SELECT
