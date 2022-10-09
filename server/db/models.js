@@ -186,6 +186,5 @@ export function getPriceId(planId) {
 
 
 export function saveNewPriceId(newPriceId, planId) {
-  const query = `UPDATE plans SET s_price_id = $1 WHERE s_prod_id = $2`;
-  return pool.query(query, [newPriceId, planId]);
+  return pool.query('UPDATE plans SET s_price_id = $1 WHERE s_prod_id = $2', [newPriceId, planId]);
 }
