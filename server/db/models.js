@@ -118,15 +118,6 @@ export function getUserInfo(username) {
 }
 
 
-export function saveStripeCusId(username, sCusId) {
-  const query = `
-    UPDATE users
-    SET s_cus_id = $1
-    WHERE username = $2`;
-  return pool.query(query, [sCusId, username]);
-}
-
-
 export function getPriceIdAndStartDate(planId) {
   const query = `
     SELECT s_price_id AS "sPriceId", start_date AS "startDate"
