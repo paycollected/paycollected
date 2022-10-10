@@ -127,7 +127,7 @@ export function getUserInfo(username) {
 export function joinPlan(username, planId) {
   const query = `
     WITH p AS (
-      SELECT cycle_frequency, per_cycle_cost, start_date
+      SELECT cycle_frequency, per_cycle_cost, start_date, s_price_id
       FROM plans
       WHERE s_prod_id = $2
     ),
@@ -149,19 +149,20 @@ export function joinPlan(username, planId) {
         (SELECT cycle_frequency FROM p),
         (SELECT per_cycle_cost FROM p),
         (SELECT start_date FROM p),
+        (SELECT s_price_id FROM p),
         (SELECT email FROM u),
         (SELECT s_cus_id FROM u),
         (SELECT quantity FROM up1),
         (SELECT count::INTEGER FROM up2)
       )
-    ) AS t ("cycleFrequency", "perCycleCost", "startDate", email, "sCusId", quantity, count);
+    ) AS t ("cycleFrequency", "perCycleCost", "startDate", "prevPriceId", email, "sCusId", quantity, count);
   `;
 
   return pool.query(query, [username, planId]);
 }
 
 
-export function updatePriceOnJoining(planId, quantity, subscriptionId, subscriptionItemId, username) {
+export function updateOnQuantChange(planId, quantity, subscriptionId, subscriptionItemId, username) {
   /*
   this query does 2 things:
   1) the INSERT / UPDATE clauses store information about a certain subscription plan in our datastore
@@ -174,7 +175,7 @@ export function updatePriceOnJoining(planId, quantity, subscriptionId, subscript
       INSERT INTO user_plan (quantity, subscription_id, subscription_item_id, plan_id, username)
       VALUES ($1, $2, $3, $4, $5)
       ON CONFLICT (username, plan_id)
-      DO UPDATE SET quantity = user_plan.quantity + $1, subscription_id = $2, subscription_item_id = $3
+      DO UPDATE SET quantity = $1, subscription_id = $2, subscription_item_id = $3
       WHERE user_plan.username = $5 AND user_plan.plan_id = $4
     )
     SELECT username, subscription_id AS "subscriptionId", subscription_item_id AS "subscriptionItemId", quantity
@@ -183,11 +184,6 @@ export function updatePriceOnJoining(planId, quantity, subscriptionId, subscript
   `;
 
   return pool.query(query, [quantity, subscriptionId, subscriptionItemId, planId, username]);
-}
-
-
-export function getPriceId(planId) {
-  return pool.query('SELECT s_price_id AS "sPriceId" FROM plans WHERE s_prod_id = $1', [planId]);
 }
 
 

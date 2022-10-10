@@ -235,7 +235,7 @@ export default {
         try {
           // check that user is NOT already subscribed to plan
           const { rows } = await models.joinPlan(username, planId);
-          const { cycleFrequency, perCycleCost, startDate, email, sCusId, quantity, count } = rows[0];
+          const { cycleFrequency, perCycleCost, startDate, prevPriceId, email, sCusId, quantity, count } = rows[0];
           if (quantity) {
             // if owner and haven't joined plan, quantity = 0
             // if not owner and haven't joined plan, quantity is null
@@ -285,7 +285,8 @@ export default {
             setupIntentId,
             {
               metadata: {
-                priceId,
+                prevPriceId,
+                newPriceId: priceId,
                 subscriptionId,
                 subscriptionItemId,
                 username,
