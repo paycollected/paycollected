@@ -22,6 +22,7 @@ webhook.post('/webhook', express.raw({type: 'application/json'}), async (req, re
   // Handle the event
   let invoice;
   let subscription;
+  let setupIntent;
   switch (event.type) {
     case 'invoice.payment_failed':
       invoice = event.data.object;
@@ -31,19 +32,15 @@ webhook.post('/webhook', express.raw({type: 'application/json'}), async (req, re
       invoice = event.data.object;
       // Then define and call a function to handle the event invoice.payment_succeeded
       break;
-    case 'customer.subscription.created':
-      subscription = event.data.object;
-      const { id: subscriptionId, customer: customerId, items, metadata } = subscription;
-      const { username } = metadata;
-      const { id: subscriptionItemId, price, quantity } = items.data[0];
-      const { id: newPriceId, product: productId } = price;
-      // will still need to handle email automation - maybe using SendGrid
-
+    case 'setup_intent.succeeded':
+      setupIntent = event.data.object;
+      const { subscriptionId, priceId, subscriptionItemId, productId, username } = setupIntent.metadata;
+      const quantity = Number(setupIntent.metadata.quantity);
       try {
         // processPriceId and processSubscriptions don't depend on each other so we can await them simultaneously
         await Promise.all([
-          helpers.processPriceId(productId, newPriceId),
-          helpers.processSubscriptions(productId, quantity, subscriptionId, subscriptionItemId, username, newPriceId)
+          helpers.processPriceId(productId, priceId),
+          helpers.processSubscriptions(productId, quantity, subscriptionId, subscriptionItemId, username, priceId)
         ]);
       } catch (err) {
         console.log(err);

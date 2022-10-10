@@ -249,13 +249,12 @@ export default {
             // TO-DO!! adjust nextStartDate here
 
           }
-          const perCyclePerPersonCost = Math.ceil(perCycleCost / (count + newQuantity));
 
           // create a stripe price ID
           const { id: priceId } = await stripe.prices.create({
             currency: 'usd',
             product: planId,
-            unit_amount: perCyclePerPersonCost,
+            unit_amount: Math.ceil(perCycleCost / (count + newQuantity)),
             recurring: {
               interval: recurringInterval[cycleFrequency],
               // could consider allowing customers to do interval count in the future?
@@ -265,9 +264,6 @@ export default {
           // create a Stripe subscription
           const { id: subscriptionId, items, pending_setup_intent } = await stripe.subscriptions.create({
             customer: sCusId,
-            metadata: {
-              username,
-            },
             items: [{
               price: priceId,
               quantity: newQuantity,
@@ -281,7 +277,23 @@ export default {
             expand: ['pending_setup_intent']
           });
 
-          const { client_secret: clientSecret } = pending_setup_intent;
+          const { id: setupIntentId, client_secret: clientSecret } = pending_setup_intent;
+          const { id: subscriptionItemId } = items.data[0];
+
+          // storing information needed for webhook in metadata for setupIntent so we don't have to query db too often later
+          await stripe.setupIntents.update(
+            setupIntentId,
+            {
+              metadata: {
+                priceId,
+                subscriptionId,
+                subscriptionItemId,
+                username,
+                productId: planId,
+                quantity: newQuantity,
+              }
+            }
+          );
           return { clientSecret, email };
 
         } catch (asyncError) {
