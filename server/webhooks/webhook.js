@@ -6,7 +6,7 @@ import * as helpers from './helpers.js';
 dotenv.config();
 const webhook = express.Router();
 const endpointSecret = process.env.STRIPE_WEBHOOK_ENDPOINT_SECRET;
-
+const stripe = stripeSDK(process.env.STRIPE_SECRET_KEY);
 
 webhook.post('/webhook', express.raw({type: 'application/json'}), async (req, res) => {
   const signature = req.headers['stripe-signature'];
@@ -39,13 +39,13 @@ webhook.post('/webhook', express.raw({type: 'application/json'}), async (req, re
       } = setupIntent.metadata;
       const quantity = Number(setupIntent.metadata.quantity);
       try {
-        // processPriceId and processSubscriptions don't depend on each other so we can await them simultaneously
-        await Promise.all([
-          helpers.processPriceId(productId, prevPriceId, newPriceId),
-          helpers.processSubscriptions(
-            productId, quantity, subscriptionId, subscriptionItemId, username, newPriceId
-          )
-        ]);
+        // archivePriceId and processQuantChange don't depend on each other so we can await them simultaneously
+      await Promise.all([
+        helpers.archivePriceId(productId, prevPriceId, newPriceId),
+        helpers.processQuantChange(
+          productId, quantity, subscriptionId, subscriptionItemId, username, newPriceId
+        )
+      ]);
       } catch (err) {
         console.log(err);
       };

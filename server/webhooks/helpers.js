@@ -6,14 +6,11 @@ dotenv.config();
 const stripe = stripeSDK(process.env.STRIPE_SECRET_KEY);
 
 
-// 1. archive old price ID (on stripe system) & save new price ID (our db)
-export async function processPriceId(productId, prevPriceId, newPriceId) {
+// 1. archive old price ID (on stripe system)
+export async function archivePriceId(prevPriceId) {
   if (prevPriceId) {
-    await Promise.all([stripe.prices.update(prevPriceId, { active: false }), models.saveNewPriceId(newPriceId, productId)]);
-    return;
+    await stripe.prices.update(prevPriceId, { active: false });
   }
-  await models.saveNewPriceId(newPriceId, productId);
-  return;
 };
 
 
@@ -41,11 +38,12 @@ async function updateStripePrice(row, price) {
 };
 
 
-// 2. save subscription details (our db),
+// 2. save new subscription details (our db),
+// update product w/ new price ID (our db)
 // query all other existing users on this same plan (db)
 // and update their subscriptions with new price (stripe system)
-export async function processSubscriptions(productId, quantity, subscriptionId, subscriptionItemId, username, newPriceId) {
-  const { rows } = await models.updateOnQuantChange(productId, quantity, subscriptionId, subscriptionItemId, username);
+export async function processQuantChange(productId, quantity, subscriptionId, subscriptionItemId, username, newPriceId) {
+  const { rows } = await models.updateOnQuantChange(productId, quantity, subscriptionId, subscriptionItemId, username, newPriceId);
   if (rows.length > 0) {
     await Promise.all(rows.map((row) => updateStripePrice(row, newPriceId)));
   }
