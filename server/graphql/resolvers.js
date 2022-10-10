@@ -222,13 +222,13 @@ export default {
       }
     },
 
-    joinPlan: async (_, { planId, quantity: newQuantity }, { username, err }) => {
+    joinPlan: async (_, { planId, quantity: newQuantity }, { username, email, stripeCusId, err }) => {
       let errMsg;
       if (username) {
         try {
           // check that user is NOT already subscribed to plan
           const { rows } = await models.joinPlan(username, planId);
-          const { cycleFrequency, perCycleCost, startDate, prevPriceId, email, sCusId, quantity, count } = rows[0];
+          const { cycleFrequency, perCycleCost, startDate, prevPriceId, quantity, count } = rows[0];
           if (quantity) {
             // if owner and haven't joined plan, quantity = 0
             // if not owner and haven't joined plan, quantity is null
@@ -256,7 +256,7 @@ export default {
 
           // create a Stripe subscription
           const { id: subscriptionId, items, pending_setup_intent } = await stripe.subscriptions.create({
-            customer: sCusId,
+            customer: stripeCusId,
             items: [{
               price: priceId,
               quantity: newQuantity,

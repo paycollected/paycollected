@@ -131,9 +131,6 @@ export function joinPlan(username, planId) {
       FROM plans
       WHERE s_prod_id = $2
     ),
-    u AS (
-      SELECT email, s_cus_id FROM users WHERE username = $1
-    ),
     up1 AS (
       SELECT quantity
       FROM user_plan
@@ -150,12 +147,10 @@ export function joinPlan(username, planId) {
         (SELECT per_cycle_cost FROM p),
         (SELECT start_date FROM p),
         (SELECT s_price_id FROM p),
-        (SELECT email FROM u),
-        (SELECT s_cus_id FROM u),
         (SELECT quantity FROM up1),
         (SELECT count::INTEGER FROM up2)
       )
-    ) AS t ("cycleFrequency", "perCycleCost", "startDate", "prevPriceId", email, "sCusId", quantity, count);
+    ) AS t ("cycleFrequency", "perCycleCost", "startDate", "prevPriceId", quantity, count);
   `;
 
   return pool.query(query, [username, planId]);

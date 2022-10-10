@@ -32,7 +32,7 @@ async function startApolloServer() {
         try {
           const { username, email, stripeCusId, exp } = jwt.verify(token, process.env.SECRET_KEY);
           if (!isFuture(exp * 1000)) {
-            return { username, email, stripeCusId, err: 'Token has expired' };
+            return { username: null, email: null, stripeCusId: null, err: 'Token has expired' };
           }
           return { username, email, stripeCusId, err: null };
         } catch {
