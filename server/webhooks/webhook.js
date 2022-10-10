@@ -32,7 +32,7 @@ webhook.post('/webhook', express.raw({type: 'application/json'}), async (req, re
       invoice = event.data.object;
       // Then define and call a function to handle the event invoice.payment_succeeded
       break;
-    case 'setup_intent.succeeded':
+    case 'setup_intent.succeeded': // someone new joining plan
       setupIntent = event.data.object;
       const { subscriptionId, prevPriceId, newPriceId, subscriptionItemId, productId, username } = setupIntent.metadata;
       const quantity = Number(setupIntent.metadata.quantity);
