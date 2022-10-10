@@ -22,6 +22,7 @@ export default gql`
 
   type PaymentIntent {
     clientSecret: String!
+    email: String!
   }
 
   type ProductId {
@@ -45,7 +46,6 @@ export default gql`
     cycleFrequency: CycleFrequency!
     perCycleCost: Float!
     activeMembers: [PlanMember]! # can include owner, will only include members whose quantity > 0
-    maxQuantity: Int # nullable because viewAllPlans query doesn't need this info
   }
 
   type Mutation {
@@ -66,12 +66,11 @@ export default gql`
       planName: String!
       cycleFrequency: CycleFrequency!
       perCycleCost: Float!
-      maxQuantity: Int!
       startDate: String! # in UTC format
     ): ProductId!
     # returning stripe product ID here, which will be used as code
 
-    pay(
+    joinPlan(
       planId: ID!
       quantity: Int!
     ): PaymentIntent! # returning client secret

@@ -9,7 +9,6 @@ query ViewOnePlan ($planId: ID!) {
     },
     cycleFrequency
     perCycleCost
-    maxQuantity
     activeMembers {
       stripeCusId
       firstName

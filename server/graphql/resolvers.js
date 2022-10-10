@@ -4,6 +4,7 @@ import stripeSDK from 'stripe';
 import {
   ApolloError, UserInputError, AuthenticationError, ForbiddenError
 } from 'apollo-server-core';
+import { isFuture } from 'date-fns';
 import * as models from '../db/models.js';
 
 const saltRounds = 10;
@@ -94,18 +95,27 @@ export default {
         const { rows } = await models.checkUser(username, email);
         // username and email do not exist -> create user
         if (rows.length === 0) {
-          const hashedPass = await bcrypt.hash(password, saltRounds);
-          await models.createUser(firstName, lastName, username, hashedPass, email);
+          const [
+            { id: stripeCusId },
+            hashedPass
+          ] = await Promise.all([
+            stripe.customers.create({
+              name: `${firstName} ${lastName}`,
+              email
+            }),
+            bcrypt.hash(password, saltRounds)
+          ]);
+
+          await models.createUser(firstName, lastName, username, hashedPass, email, stripeCusId);
           const token = jwt.sign({
             // expires after 2 weeks
             exp: Math.floor(Date.now() / 1000) + (60 * 60 * 24 * 14),
-            data: username
-          }, process.env.SECRET_KEY);
-          return {
+            // storing user's info in token so we can easily obtain it from context in any resolver
             username,
             email,
-            token
-          };
+            stripeCusId,
+          }, process.env.SECRET_KEY);
+          return { username, email, token };
         // username or email exist --> return error
         } else if (rows[0].username === username) {
           errMsg = 'This username already exists';
@@ -145,7 +155,7 @@ export default {
           throw new Error();
         }
         // if username exists but password doesn't match, return null
-        const { password: savedPass} = rows[0];
+        const { password: savedPass, stripeCusId, email } = rows[0];
         const result = await bcrypt.compare(password, savedPass);
         if (!result) {
           return null;
@@ -155,11 +165,11 @@ export default {
         const token = jwt.sign({
           // expires after 2 weeks
           exp: Math.floor(Date.now() / 1000) + (60 * 60 * 24 * 14),
-          data: username
+          username,
+          email,
+          stripeCusId,
         }, process.env.SECRET_KEY);
 
-        const { rows: userInfoRows } = await models.getUserInfo(username);
-        const { email } = userInfoRows[0];
         return {
           username,
           email,
@@ -178,25 +188,17 @@ export default {
     },
 
     createPlan: async (_, {
-      planName, cycleFrequency, perCycleCost, maxQuantity, startDate
+      planName, cycleFrequency, perCycleCost, startDate
     }, { username, err }) => {
       if (username) {
         try {
           planName = planName.trim();
           cycleFrequency = cycleFrequency.toLowerCase();
 
-          // creates stripe price object, also create stripe product in the same call
+          // create stripe product
           perCycleCost *= 100; // store in cents
-          const perCyclePerPersonCost = Math.ceil(perCycleCost / maxQuantity); // in cents
-          const { id: sPriceId, product: sProdId } = await stripe.prices.create({
-            product_data: {
-              name: planName
-            },
-            unit_amount: perCyclePerPersonCost,
-            currency: 'usd',
-            recurring: {
-              interval: recurringInterval[cycleFrequency]
-            },
+          const { id: productId } = await stripe.products.create({
+            name: planName
           });
 
           await models.addPlan(
@@ -204,14 +206,11 @@ export default {
             planName,
             cycleFrequency,
             perCycleCost,
-            sProdId,
-            sPriceId,
-            perCyclePerPersonCost,
-            maxQuantity,
+            productId,
             startDate
           );
 
-          return { productId: sProdId };
+          return { productId };
         } catch (asyncError) {
           console.log(asyncError);
           throw new ApolloError('Unable to create new plan');
@@ -223,66 +222,78 @@ export default {
       }
     },
 
-    pay: async (_, { planId, quantity }, { username, err }) => {
-      /*
-      1. check whether this user has a stripe Id or not, if not create a Stripe cus for them
-      2. create subscription (need price id + cus id, quantity)
-      3. save subscription id in user_plan table
-      */
-
-      /* right now assuming that nobody extra is joining plan compared to originally declared
-      # of members when plan was created. will still need to check for # of people already on plan
-      and compare with originally declared value --> adjust pricing later.
-      */
+    joinPlan: async (_, { planId, quantity: newQuantity }, { username, err }) => {
+      let errMsg;
       if (username) {
         try {
-          let sCusId;
-          const { rows } = await models.getUserInfo(username);
-          const {
-            stripeCusId, firstName, lastName, email
-          } = rows[0];
-          if (stripeCusId === null) { // create a customer
-            /*
-            this whole operation takes a while to process so perhaps we should create a Stripe customer
-            account when user first signs up to our platform?
-            */
-            const { id } = await stripe.customers.create({
-              name: `${firstName} ${lastName}`,
-              email
-            });
-            sCusId = id;
-            await models.saveStripeCusId(username, sCusId);
-          } else {
-            sCusId = stripeCusId;
+          // check that user is NOT already subscribed to plan
+          const { rows } = await models.joinPlan(username, planId);
+          const { cycleFrequency, perCycleCost, startDate, prevPriceId, email, sCusId, quantity, count } = rows[0];
+          if (quantity) {
+            // if owner and haven't joined plan, quantity = 0
+            // if not owner and haven't joined plan, quantity is null
+            // front end will need to display a msg telling user to use 'adjust quantity' in dashboard instead
+            errMsg = 'User is already subscribed to this plan';
+            throw new Error();
           }
-          // at this point user will have stripeCusId
-          // create subscription with stripe
-          const { rows: getPriceIdStartDateRows } = await models.getPriceIdAndStartDate(planId);
-          const { sPriceId, startDate } = getPriceIdStartDateRows[0];
-          const { id: subscriptionId, pending_setup_intent } = await stripe.subscriptions.create({
+
+          let nextStartDate = Number(startDate);
+          if (!isFuture(nextStartDate * 1000)) {
+            // TO-DO!! adjust nextStartDate here
+
+          }
+
+          // create a stripe price ID
+          const { id: priceId } = await stripe.prices.create({
+            currency: 'usd',
+            product: planId,
+            unit_amount: Math.ceil(perCycleCost / (count + newQuantity)),
+            recurring: {
+              interval: recurringInterval[cycleFrequency],
+              // could consider allowing customers to do interval count in the future?
+            }
+          });
+
+          // create a Stripe subscription
+          const { id: subscriptionId, items, pending_setup_intent } = await stripe.subscriptions.create({
             customer: sCusId,
-            items: [
-              { price: sPriceId, quantity }
-            ],
+            items: [{
+              price: priceId,
+              quantity: newQuantity,
+            }],
             payment_behavior: 'default_incomplete',
             payment_settings: {
               save_default_payment_method: 'on_subscription',
               payment_method_types: ['link', 'card'],
             },
-            trial_end: Number(startDate),
+            trial_end: nextStartDate,
             expand: ['pending_setup_intent']
           });
 
-          const { client_secret: clientSecret } = pending_setup_intent;
-          // save subscriptionId in database
-          /*  Right now is NOT the right time to update this subscription info in our db yet
-          because customer hasn't paid and db is updated already. This db query will need to be
-          run only after successful payment (webhook).
-          */
+          const { id: setupIntentId, client_secret: clientSecret } = pending_setup_intent;
+          const { id: subscriptionItemId } = items.data[0];
 
-          await models.addSubscriptionId(planId, quantity, subscriptionId, username);
-          return { clientSecret };
+          // storing information needed for webhook in metadata for setupIntent so we don't have to query db too often later
+          await stripe.setupIntents.update(
+            setupIntentId,
+            {
+              metadata: {
+                prevPriceId,
+                newPriceId: priceId,
+                subscriptionId,
+                subscriptionItemId,
+                username,
+                productId: planId,
+                quantity: newQuantity,
+              }
+            }
+          );
+          return { clientSecret, email };
+
         } catch (asyncError) {
+          if (errMsg) {
+            throw new ForbiddenError(errMsg);
+          }
           console.log(asyncError);
           throw new ApolloError('Unable to create subscription');
         }

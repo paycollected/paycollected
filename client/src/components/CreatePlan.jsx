@@ -11,12 +11,12 @@ import { CreatePlanMutation as CREATE_PLAN } from '../graphql/mutations.gql';
 const today = new Date();
 const nextMonth = new Date();
 nextMonth.setMonth(nextMonth.getMonth() + 1);
-// we'll limit users to only be able to pick a start date that is between today and 1 month from now
+// we'll limit users to only be able to pick a start date that is between tomorrow and 1 month from then
 
 const processDateStr = (date) => {
   const year = date.getFullYear().toString();
   const month = (date.getMonth() + 1).toString().padStart(2, '0'); // month is zero-th indexed
-  const dateStr = date.getDate().toString().padStart(2, '0');
+  const dateStr = (date.getDate() + 1).toString().padStart(2, '0'); // starting tomorrow
   return `${year}-${month}-${dateStr}`;
 };
 
@@ -43,15 +43,18 @@ export default function CreatePlan({ setPlanToJoin, setShowMagicLink }) {
   });
 
   const onSubmit = ({
-    planName, cycleFrequency, perCycleCost, maxQuantity,
+    planName, cycleFrequency, perCycleCost,
   }) => {
+    const formattedStartDate = new Date(...startDate.split('-'));
+    formattedStartDate.setMonth(formattedStartDate.getMonth() - 1); // month is zero-th indexed
     createNewPlan({
       variables: {
         planName,
         cycleFrequency: cycleFrequency.toUpperCase(),
         perCycleCost: Number(perCycleCost),
-        maxQuantity: Number(maxQuantity),
-        startDate: ((new Date(...startDate.split('-'))).valueOf() / 1000).toString(),
+        startDate: (formattedStartDate.valueOf() / 1000).toString(),
+        // need seconds and not milliseconds
+        // only using dates so exact time will default to 00:00:00 of that day
       },
     });
   };
@@ -108,18 +111,6 @@ export default function CreatePlan({ setPlanToJoin, setShowMagicLink }) {
             startAdornment: <InputAdornment position="start">$</InputAdornment>,
           }}
         />
-        <TextField
-          name="maxQuantity"
-          label="Number of people per plan"
-          placeholder="Number of people per plan"
-          required
-          type="number"
-          variant="outlined"
-          {...register('maxQuantity', { required: 'Max quantity required' })}
-          error={!!errors?.maxQuantity}
-          helperText={errors?.maxQuantity ? errors.maxQuantity.message : ' '}
-          InputProps={{ inputProps: { min: 0 } }}
-        />
         <input
           type="date"
           value={startDate}
@@ -127,6 +118,7 @@ export default function CreatePlan({ setPlanToJoin, setShowMagicLink }) {
           max={nextMonthFullDate}
           onChange={(e) => { setStartDate(e.target.value); }}
         />
+        {console.log(startDate)}
         <Button type="submit" variant="contained" disabled={loading}>Submit</Button>
       </form>
       <Button variant="contained" onClick={() => { navigate('/dashboard'); }}>Cancel</Button>

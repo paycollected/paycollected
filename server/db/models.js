@@ -1,4 +1,4 @@
-import pool from '../db/pool.js';
+import pool from '../db/pool';
 
 export function checkUser(username, email) {
   const query = `SELECT
@@ -12,33 +12,33 @@ export function checkUser(username, email) {
 }
 
 
-export function createUser(firstName, lastName, username, password, email) {
+export function createUser(firstName, lastName, username, password, email, stripeCusId) {
   const query = `
     INSERT INTO users
-      (first_name, last_name, username, password, email)
+      (first_name, last_name, username, password, email, s_cus_id)
     VALUES
-      ($1, $2, $3, $4, $5)
+      ($1, $2, $3, $4, $5, $6)
   `;
-  const args = [firstName, lastName, username, password, email];
+  const args = [firstName, lastName, username, password, email, stripeCusId];
   return pool.query(query, args);
 }
 
 
-export function addPlan(username, planName, cycleFrequency, perCycleCost, sProdId, sPriceId, perCyclePerPersonCost, maxQuantity, startDate) {
+export function addPlan(username, planName, cycleFrequency, perCycleCost, productId, startDate) {
   const query = `
     WITH first_insert AS
       (
         INSERT INTO plans
-          (plan_name, cycle_frequency, per_cycle_cost, per_user_per_cycle_cost, s_prod_id, s_price_id, max_quantity, start_date)
+          (plan_name, cycle_frequency, per_cycle_cost, s_prod_id, start_date)
         VALUES
-          ($2, $3, $4, $5, $6, $7, $8, $9::BIGINT)
+          ($2, $3, $4, $5, $6::BIGINT)
       )
     INSERT INTO user_plan
       (username, plan_id, plan_owner)
     VALUES
-      ($1, $6, TRUE)
+      ($1, $5, TRUE)
   `;
-  const args = [username, planName, cycleFrequency, perCycleCost, perCyclePerPersonCost, sProdId, sPriceId, maxQuantity, startDate];
+  const args = [username, planName, cycleFrequency, perCycleCost, productId, startDate];
   return pool.query(query, args);
 }
 
@@ -49,7 +49,6 @@ export function viewOnePlan(planId) {
       p.plan_name AS name,
       UPPER(p.cycle_frequency::VARCHAR) AS "cycleFrequency",
       p.per_cycle_cost AS "perCycleCost",
-      p.max_quantity AS "maxQuantity",
       json_build_object('firstName', u.first_name, 'lastName', u.last_name, 'username', u.username, 'stripeCusId', u.s_cus_id) AS owner
     FROM plans p
     JOIN user_plan up
@@ -98,7 +97,13 @@ export function viewAllPlans(username) {
       name,
       "cycleFrequency",
       "perCycleCost",
-      json_build_object('firstName', u.first_name, 'lastName', u.last_name, 'username', u.username, 'stripeCusId', u.s_cus_id) AS owner
+      json_build_object
+      (
+        'firstName', u.first_name,
+        'lastName', u.last_name,
+        'username', u.username,
+        'stripeCusId', u.s_cus_id
+      ) AS owner
     FROM select1
     JOIN user_plan up
     ON "planId" = up.plan_id
@@ -119,32 +124,69 @@ export function getUserInfo(username) {
 }
 
 
-export function saveStripeCusId(username, sCusId) {
+export function joinPlan(username, planId) {
   const query = `
-    UPDATE users
-    SET s_cus_id = $1
-    WHERE username = $2`;
-  return pool.query(query, [sCusId, username]);
-}
-
-
-export function getPriceIdAndStartDate(planId) {
-  const query = `
-    SELECT s_price_id AS "sPriceId", start_date AS "startDate"
-    FROM plans
-    WHERE s_prod_id = $1`;
-  return pool.query(query, [planId]);
-}
-
-
-export function addSubscriptionId(planId, quantity, subscriptionId, username) {
-  const query = `
-    INSERT INTO user_plan (quantity, subscription_id, plan_id, username)
-    VALUES ($1, $2, $3, $4)
-    ON CONFLICT (username, plan_id)
-    DO UPDATE SET quantity = user_plan.quantity + $1, subscription_id = $2
-    WHERE user_plan.username = $4 AND user_plan.plan_id = $3
+    WITH p AS (
+      SELECT cycle_frequency, per_cycle_cost, start_date, s_price_id
+      FROM plans
+      WHERE s_prod_id = $2
+    ),
+    u AS (
+      SELECT email, s_cus_id FROM users WHERE username = $1
+    ),
+    up1 AS (
+      SELECT quantity
+      FROM user_plan
+      WHERE plan_id = $2 AND username = $1
+    ),
+    up2 AS (
+      SELECT SUM (quantity) AS count
+      FROM user_plan
+      WHERE plan_id = $2
+    )
+    SELECT * FROM (
+      VALUES (
+        (SELECT cycle_frequency FROM p),
+        (SELECT per_cycle_cost FROM p),
+        (SELECT start_date FROM p),
+        (SELECT s_price_id FROM p),
+        (SELECT email FROM u),
+        (SELECT s_cus_id FROM u),
+        (SELECT quantity FROM up1),
+        (SELECT count::INTEGER FROM up2)
+      )
+    ) AS t ("cycleFrequency", "perCycleCost", "startDate", "prevPriceId", email, "sCusId", quantity, count);
   `;
 
-  return pool.query(query, [quantity, subscriptionId, planId, username]);
+  return pool.query(query, [username, planId]);
+}
+
+
+export function updateOnQuantChange(planId, quantity, subscriptionId, subscriptionItemId, username) {
+  /*
+  this query does 2 things:
+  1) the INSERT / UPDATE clauses store information about a certain subscription plan in our datastore
+  2) the SELECT clause return all the stripe subscriptions that are on the same product (plan),
+  so we can call stripe API to update their prices later
+  */
+  const query = `
+    WITH update_sub_id AS
+    (
+      INSERT INTO user_plan (quantity, subscription_id, subscription_item_id, plan_id, username)
+      VALUES ($1, $2, $3, $4, $5)
+      ON CONFLICT (username, plan_id)
+      DO UPDATE SET quantity = $1, subscription_id = $2, subscription_item_id = $3
+      WHERE user_plan.username = $5 AND user_plan.plan_id = $4
+    )
+    SELECT username, subscription_id AS "subscriptionId", subscription_item_id AS "subscriptionItemId", quantity
+    FROM user_plan
+    WHERE plan_id = $4 AND username != $5;
+  `;
+
+  return pool.query(query, [quantity, subscriptionId, subscriptionItemId, planId, username]);
+}
+
+
+export function saveNewPriceId(newPriceId, planId) {
+  return pool.query('UPDATE plans SET s_price_id = $1 WHERE s_prod_id = $2', [newPriceId, planId]);
 }
