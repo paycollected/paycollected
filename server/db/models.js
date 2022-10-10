@@ -157,11 +157,12 @@ export function joinPlan(username, planId) {
 }
 
 
-export function updateOnQuantChange(planId, quantity, subscriptionId, subscriptionItemId, username) {
+export function updateOnQuantChange(planId, quantity, subscriptionId, subscriptionItemId, username, newPriceId) {
   /*
-  this query does 2 things:
-  1) the INSERT / UPDATE clauses store information about a certain subscription plan in our datastore
-  2) the SELECT clause return all the stripe subscriptions that are on the same product (plan),
+  this query does 3 things:
+  1) the first INSERT / UPDATE clauses store information about incoming subscription plan in our datastore
+  2) update the product with the new price ID
+  3) the SELECT clause return all the stripe subscriptions that are on the same product (plan),
   so we can call stripe API to update their prices later
   */
   const query = `
@@ -172,16 +173,20 @@ export function updateOnQuantChange(planId, quantity, subscriptionId, subscripti
       ON CONFLICT (username, plan_id)
       DO UPDATE SET quantity = $1, subscription_id = $2, subscription_item_id = $3
       WHERE user_plan.username = $5 AND user_plan.plan_id = $4
+    ),
+    update_price_id AS
+    (
+      UPDATE plans SET s_price_id = $6 WHERE s_prod_id = $4
     )
     SELECT username, subscription_id AS "subscriptionId", subscription_item_id AS "subscriptionItemId", quantity
     FROM user_plan
     WHERE plan_id = $4 AND username != $5;
   `;
 
-  return pool.query(query, [quantity, subscriptionId, subscriptionItemId, planId, username]);
+  return pool.query(query, [quantity, subscriptionId, subscriptionItemId, planId, username, newPriceId]);
 }
 
 
-export function saveNewPriceId(newPriceId, planId) {
-  return pool.query('UPDATE plans SET s_price_id = $1 WHERE s_prod_id = $2', [newPriceId, planId]);
-}
+// export function saveNewPriceId(newPriceId, planId) {
+//   return pool.query('UPDATE plans SET s_price_id = $1 WHERE s_prod_id = $2', [newPriceId, planId]);
+// }
