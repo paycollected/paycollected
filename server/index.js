@@ -29,18 +29,18 @@ async function startApolloServer() {
       // no Authorization (may be signing up)
       if (token.length > 0) {
         try {
-          const username = jwt.verify(token, process.env.SECRET_KEY).data;
-          return { username, err: null };
+          const { username, email, stripeCusId, exp } = jwt.verify(token, process.env.SECRET_KEY);
+          return { username, email, stripeCusId, err: null };
         } catch {
           /* If handling authentication error at context level as opposed to at resolvers level,
           error message appears slightly different from what we're used to with the other errors
           ('fail to create context' etc.). Moving this error handling to resolvers to 'standardize'
           error msgs.
           */
-          return { username: null, err: 'Incorrect token'}
+          return { username: null, email: null, stripeCusId: null, err: 'Incorrect token'}
         }
       }
-      return { username: null, err: 'Unauthorized request' };
+      return { username: null, email: null, stripeCusId: null, err: 'Unauthorized request' };
     },
   });
 

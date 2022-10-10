@@ -110,7 +110,10 @@ export default {
           const token = jwt.sign({
             // expires after 2 weeks
             exp: Math.floor(Date.now() / 1000) + (60 * 60 * 24 * 14),
-            data: username
+            // storing user's info in token so we can easily obtain it from context in any resolver
+            username,
+            email,
+            stripeCusId,
           }, process.env.SECRET_KEY);
           return { username, email, token };
         // username or email exist --> return error
@@ -152,7 +155,7 @@ export default {
           throw new Error();
         }
         // if username exists but password doesn't match, return null
-        const { password: savedPass} = rows[0];
+        const { password: savedPass, stripeCusId, email } = rows[0];
         const result = await bcrypt.compare(password, savedPass);
         if (!result) {
           return null;
@@ -162,11 +165,11 @@ export default {
         const token = jwt.sign({
           // expires after 2 weeks
           exp: Math.floor(Date.now() / 1000) + (60 * 60 * 24 * 14),
-          data: username
+          username,
+          email,
+          stripeCusId,
         }, process.env.SECRET_KEY);
 
-        const { rows: userInfoRows } = await models.getUserInfo(username);
-        const { email } = userInfoRows[0];
         return {
           username,
           email,
