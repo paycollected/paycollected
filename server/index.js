@@ -3,6 +3,7 @@ import express from 'express';
 import dotenv from 'dotenv';
 import jwt from 'jsonwebtoken';
 import path from 'path';
+import { isFuture } from 'date-fns';
 import typeDefs from './graphql/typeDefs';
 import resolvers from './graphql/resolvers';
 import webhook from './webhooks/webhook';
@@ -30,6 +31,9 @@ async function startApolloServer() {
       if (token.length > 0) {
         try {
           const { username, email, stripeCusId, exp } = jwt.verify(token, process.env.SECRET_KEY);
+          if (!isFuture(exp * 1000)) {
+            return { username, email, stripeCusId, err: 'Token has expired' };
+          }
           return { username, email, stripeCusId, err: null };
         } catch {
           /* If handling authentication error at context level as opposed to at resolvers level,
