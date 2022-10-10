@@ -185,8 +185,3 @@ export function updateOnQuantChange(planId, quantity, subscriptionId, subscripti
 
   return pool.query(query, [quantity, subscriptionId, subscriptionItemId, planId, username, newPriceId]);
 }
-
-
-// export function saveNewPriceId(newPriceId, planId) {
-//   return pool.query('UPDATE plans SET s_price_id = $1 WHERE s_prod_id = $2', [newPriceId, planId]);
-// }
