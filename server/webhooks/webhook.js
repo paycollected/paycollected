@@ -34,13 +34,17 @@ webhook.post('/webhook', express.raw({type: 'application/json'}), async (req, re
       break;
     case 'setup_intent.succeeded': // someone new joining plan
       setupIntent = event.data.object;
-      const { subscriptionId, prevPriceId, newPriceId, subscriptionItemId, productId, username } = setupIntent.metadata;
+      const {
+        subscriptionId, prevPriceId, newPriceId, subscriptionItemId, productId, username
+      } = setupIntent.metadata;
       const quantity = Number(setupIntent.metadata.quantity);
       try {
         // processPriceId and processSubscriptions don't depend on each other so we can await them simultaneously
         await Promise.all([
           helpers.processPriceId(productId, prevPriceId, newPriceId),
-          helpers.processSubscriptions(productId, quantity, subscriptionId, subscriptionItemId, username, newPriceId)
+          helpers.processSubscriptions(
+            productId, quantity, subscriptionId, subscriptionItemId, username, newPriceId
+          )
         ]);
       } catch (err) {
         console.log(err);
