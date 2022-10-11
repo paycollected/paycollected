@@ -252,7 +252,6 @@ export default {
               interval: recurringInterval[cycleFrequency],
               // could consider allowing customers to do interval count in the future?
             },
-            proration_behavior: 'none',
           });
 
           // create a Stripe subscription
@@ -267,8 +266,18 @@ export default {
               save_default_payment_method: 'on_subscription',
               payment_method_types: ['link', 'card'],
             },
+            proration_behavior: 'none',
             trial_end: nextStartDate,
-            expand: ['pending_setup_intent']
+            expand: ['pending_setup_intent'],
+            metadata: {
+              productId: planId,
+              priceId,
+              productTotalQuantity: count + newQuantity,
+              username,
+              email,
+              cycleFrequency: recurringInterval[cycleFrequency],
+              perCycleCost,
+            }
           });
 
           const { id: setupIntentId, client_secret: clientSecret } = pending_setup_intent;
@@ -284,8 +293,11 @@ export default {
                 subscriptionId,
                 subscriptionItemId,
                 username,
+                cycleFrequency: recurringInterval[cycleFrequency],
+                perCycleCost,
                 productId: planId,
                 quantity: newQuantity,
+                productTotalQuantity: count + newQuantity,
               }
             }
           );

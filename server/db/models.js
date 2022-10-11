@@ -176,9 +176,16 @@ export function updateOnQuantChange(planId, quantity, subscriptionId, subscripti
     (
       UPDATE plans SET s_price_id = $6 WHERE s_prod_id = $4
     )
-    SELECT username, subscription_id AS "subscriptionId", subscription_item_id AS "subscriptionItemId", quantity
-    FROM user_plan
-    WHERE plan_id = $4 AND username != $5;
+    SELECT
+      up.username,
+      u.email,
+      up.subscription_id AS "subscriptionId",
+      up.subscription_item_id AS "subscriptionItemId",
+      up.quantity
+    FROM user_plan up
+    JOIN users u
+    ON up.username = u.username
+    WHERE plan_id = $4 AND up.username != $5
   `;
 
   return pool.query(query, [quantity, subscriptionId, subscriptionItemId, planId, username, newPriceId]);

@@ -35,22 +35,33 @@ webhook.post('/webhook', express.raw({type: 'application/json'}), async (req, re
     case 'setup_intent.succeeded': // someone new joining plan
       setupIntent = event.data.object;
       const {
-        subscriptionId, prevPriceId, newPriceId, subscriptionItemId, productId, username
+        subscriptionId, prevPriceId, newPriceId, subscriptionItemId, productId, username, cycleFrequency,
       } = setupIntent.metadata;
       const quantity = Number(setupIntent.metadata.quantity);
+      const productTotalQuantity = Number(setupIntent.metadata.productTotalQuantity);
+      const perCycleCost = Number(setupIntent.metadata.perCycleCost);
       try {
         // archivePriceId and processQuantChange don't depend on each other so we can await them simultaneously
       await Promise.all([
         helpers.archivePriceId(prevPriceId),
         helpers.processQuantChange(
-          productId, quantity, subscriptionId, subscriptionItemId, username, newPriceId
+          productId, quantity, subscriptionId, subscriptionItemId, username, newPriceId, cycleFrequency, productTotalQuantity, perCycleCost
         )
       ]);
       } catch (err) {
         console.log(err);
       };
       break;
-
+    case 'customer.subscription.deleted':
+      // priceID --> archive that price
+      // create a new price: need count of quantities, and total plan cost, frequency, product ID
+      // query db for remaining quantity on that same plan, and every subscription & item ID to update with new price ID
+      // delete this subscription from db
+      subscription = event.data.object;
+      const { metadata } = subscription;
+      console.log('subscription obj:', subscription);
+      console.log('--------> metadata', metadata);
+      break;
     default:
       console.log(`Unhandled event type ${event.type}`);
   }

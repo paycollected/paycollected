@@ -14,9 +14,10 @@ export async function archivePriceId(prevPriceId) {
 };
 
 
-async function updateStripePrice(row, price) {
+async function updateStripePrice(row, price, cycleFrequency, productTotalQuantity, perCycleCost, productId) {
   const {
     username,
+    email,
     subscriptionId,
     subscriptionItemId,
     quantity
@@ -32,6 +33,15 @@ async function updateStripePrice(row, price) {
           quantity
         }
       ],
+      metadata: {
+        productId,
+        priceId: price,
+        productTotalQuantity,
+        username,
+        email,
+        cycleFrequency,
+        perCycleCost,
+      },
       proration_behavior: 'none',
     }
   );
@@ -42,9 +52,9 @@ async function updateStripePrice(row, price) {
 // update product w/ new price ID (our db)
 // query all other existing users on this same plan (db)
 // and update their subscriptions with new price (stripe system)
-export async function processQuantChange(productId, quantity, subscriptionId, subscriptionItemId, username, newPriceId) {
+export async function processQuantChange(productId, quantity, subscriptionId, subscriptionItemId, username, newPriceId, cycleFrequency, productTotalQuantity, perCycleCost) {
   const { rows } = await models.updateOnQuantChange(productId, quantity, subscriptionId, subscriptionItemId, username, newPriceId);
   if (rows.length > 0) {
-    await Promise.all(rows.map((row) => updateStripePrice(row, newPriceId)));
+    await Promise.all(rows.map((row) => updateStripePrice(row, newPriceId, cycleFrequency, productTotalQuantity, perCycleCost, productId)));
   }
 }
