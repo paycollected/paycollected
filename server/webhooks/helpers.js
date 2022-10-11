@@ -52,9 +52,16 @@ async function updateStripePrice(row, price, cycleFrequency, productTotalQuantit
 // update product w/ new price ID (our db)
 // query all other existing users on this same plan (db)
 // and update their subscriptions with new price (stripe system)
-export async function processQuantChange(productId, quantity, subscriptionId, subscriptionItemId, username, newPriceId, cycleFrequency, productTotalQuantity, perCycleCost) {
-  const { rows } = await models.updateOnQuantChange(productId, quantity, subscriptionId, subscriptionItemId, username, newPriceId);
+export async function processQuantChange(
+  productId, quantity, subscriptionId, subscriptionItemId, username, newPriceId,
+  cycleFrequency, productTotalQuantity, perCycleCost
+  ) {
+  const { rows } = await models.updateOnQuantChange(
+    productId, quantity, subscriptionId, subscriptionItemId, username, newPriceId
+  );
   if (rows.length > 0) {
-    await Promise.all(rows.map((row) => updateStripePrice(row, newPriceId, cycleFrequency, productTotalQuantity, perCycleCost, productId)));
+    await Promise.all(
+      rows.map((row) => updateStripePrice(row, newPriceId, cycleFrequency, productTotalQuantity, perCycleCost, productId))
+    );
   }
 }
