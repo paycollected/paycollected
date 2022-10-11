@@ -39,7 +39,7 @@ export default {
           console.log(asyncError);
           throw new ApolloError('Unable to retrieve plan information');
         }
-      } else if (err === 'Incorrect token') {
+      } else if (err === 'Incorrect token' || err === 'Token has expired') {
         throw new AuthenticationError(err);
       } else if (err === 'Unauthorized request') {
         throw new ForbiddenError(err);
@@ -58,7 +58,7 @@ export default {
           console.log(asyncError);
           throw new ApolloError('Unable to retrieve plans information');
         }
-      } else if (err === 'Incorrect token') {
+      } else if (err === 'Incorrect token' || err === 'Token has expired') {
         throw new AuthenticationError(err);
       } else if (err === 'Unauthorized request') {
         throw new ForbiddenError(err);
@@ -76,7 +76,7 @@ export default {
           console.log(asyncError);
           throw new ApolloError('Unable to retrieve plan information');
         }
-      } else if (err === 'Incorrect token') {
+      } else if (err === 'Incorrect token' || err === 'Token has expired') {
         throw new AuthenticationError(err);
       } else if (err === 'Unauthorized request') {
         throw new ForbiddenError(err);
@@ -215,7 +215,7 @@ export default {
           console.log(asyncError);
           throw new ApolloError('Unable to create new plan');
         }
-      } else if (err === 'Incorrect token') {
+      } else if (err === 'Incorrect token' || err === 'Token has expired') {
         throw new AuthenticationError(err);
       } else if (err === 'Unauthorized request') {
         throw new ForbiddenError(err);
@@ -298,18 +298,19 @@ export default {
           throw new ApolloError('Unable to create subscription');
         }
 
-      } else if (err === 'Incorrect token') {
+      } else if (err === 'Incorrect token' || err === 'Token has expired') {
         throw new AuthenticationError(err);
       } else if (err === 'Unauthorized request') {
         throw new ForbiddenError(err);
       }
     },
 
-    editPayment: async (_, __, { username, err }) => {
+    editPayment: async (_, __, { username, stripeCusId: customer, err }) => {
       if (username) {
         try {
-          const { rows } = await models.getUserInfo(username);
-          const { stripeCusId: customer } = rows[0];
+          /* still debating whether we should store stripeCusId in JWT since it's public */
+          // const { rows } = await models.getUserInfo(username);
+          // const { stripeCusId: customer } = rows[0];
           /*
           Note that we're skipping programmatically configure the session here
           and did that manually in Stripe dev portal.
@@ -324,7 +325,7 @@ export default {
           throw new ApolloError('Unable to get customer portal link');
         }
 
-      } else if (err === 'Incorrect token') {
+      } else if (err === 'Incorrect token' || err === 'Token has expired') {
         throw new AuthenticationError(err);
       } else if (err === 'Unauthorized request') {
         throw new ForbiddenError(err);
