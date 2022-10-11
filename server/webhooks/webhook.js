@@ -41,7 +41,7 @@ webhook.post('/webhook', express.raw({type: 'application/json'}), async (req, re
       try {
         // archivePriceId and processQuantChange don't depend on each other so we can await them simultaneously
       await Promise.all([
-        helpers.archivePriceId(productId, prevPriceId, newPriceId),
+        helpers.archivePriceId(prevPriceId),
         helpers.processQuantChange(
           productId, quantity, subscriptionId, subscriptionItemId, username, newPriceId
         )
