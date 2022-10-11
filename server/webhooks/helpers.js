@@ -14,7 +14,7 @@ export async function archivePriceId(prevPriceId) {
 };
 
 
-async function updateStripePrice(row, price, cycleFrequency, productTotalQuantity, perCycleCost, productId) {
+async function updateStripePrice(row, price, cycleFrequency, productTotalQuantity, perCycleCost) {
   const {
     username,
     email,
@@ -34,11 +34,8 @@ async function updateStripePrice(row, price, cycleFrequency, productTotalQuantit
         }
       ],
       metadata: {
-        productId,
-        priceId: price,
         productTotalQuantity,
         username,
-        email,
         cycleFrequency,
         perCycleCost,
       },
@@ -56,12 +53,50 @@ export async function processQuantChange(
   productId, quantity, subscriptionId, subscriptionItemId, username, newPriceId,
   cycleFrequency, productTotalQuantity, perCycleCost
   ) {
-  const { rows } = await models.updateOnQuantChange(
+  const { rows } = await models.startSubscription(
     productId, quantity, subscriptionId, subscriptionItemId, username, newPriceId
   );
   if (rows.length > 0) {
     await Promise.all(
-      rows.map((row) => updateStripePrice(row, newPriceId, cycleFrequency, productTotalQuantity, perCycleCost, productId))
+      rows.map((row) => updateStripePrice(row, newPriceId, cycleFrequency, productTotalQuantity, perCycleCost))
+    );
+  }
+}
+
+export async function handleSubscriptionDelete(subscription) {
+  // priceID --> archive that price
+  // create a new price: need count of quantities, and total plan cost, frequency, product ID
+  // --> update new price ID for product in db
+  // query db for every subscription & item ID to update with new price ID + new totalQuantity (subtract cancelled from total)
+  // delete this subscription from db
+  const { id: subscriptionId, items } = subscription;
+  const { price, quantity } = items.data[0];
+  const { id: prevPriceId, product: productId } = price;
+  const { cycleFrequency, username } = subscription.metadata;
+  const productTotalQuantity = Number(subscription.metadata.productTotalQuantity);
+  const perCycleCost = Number(subscription.metadata.perCycleCost);
+  console.log('subscription obj:', subscription);
+  console.log('--------> metadata', metadata);
+  const newProductTotalQuantity = productTotalQuantity - quantity;
+
+
+  const [{ id: newPriceId }, _] = await Promise.all([
+    stripe.prices.create({
+      currency: 'usd',
+      product: productId,
+      unit_amount: Math.ceil(perCycleCost / newProductTotalQuantity),
+      recurring: {
+        interval: cycleFrequency,
+        // could consider allowing customers to do interval count in the future?
+      },
+    }),
+    archivePriceId(prevPriceId)
+  ]);
+
+  const { rows } = models.deleteSubscription(subscriptionId, newPriceId, productId);
+  if (rows.length > 0) {
+    await Promise.all(
+      rows.map((row) => updateStripePrice(row, newPriceId, cycleFrequency, newProductTotalQuantity, perCycleCost))
     );
   }
 }

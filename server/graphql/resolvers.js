@@ -270,11 +270,8 @@ export default {
             trial_end: nextStartDate,
             expand: ['pending_setup_intent'],
             metadata: {
-              productId: planId,
-              priceId,
               productTotalQuantity: count + newQuantity,
               username,
-              email,
               cycleFrequency: recurringInterval[cycleFrequency],
               perCycleCost,
             }

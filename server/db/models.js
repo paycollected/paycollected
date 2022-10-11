@@ -155,7 +155,7 @@ export function joinPlan(username, planId) {
 }
 
 
-export function updateOnQuantChange(planId, quantity, subscriptionId, subscriptionItemId, username, newPriceId) {
+export function startSubscription(planId, quantity, subscriptionId, subscriptionItemId, username, newPriceId) {
   /*
   this query does 3 things:
   1) the first INSERT / UPDATE clauses store information about incoming subscription plan in our datastore
@@ -188,5 +188,30 @@ export function updateOnQuantChange(planId, quantity, subscriptionId, subscripti
     WHERE plan_id = $4 AND up.username != $5
   `;
 
-  return pool.query(query, [quantity, subscriptionId, subscriptionItemId, planId, username, newPriceId]);
+  const args = [quantity, subscriptionId, subscriptionItemId, planId, username, newPriceId];
+
+  return pool.query(query, args);
+}
+
+export function deleteSubscription(subscriptionId, newPriceId, productId) {
+  const query = `
+    WITH delete_sub AS (
+      DELETE FROM user_plan WHERE subscription_id = $1
+    ),
+    update_price_id AS (
+      UPDATE plans SET s_price_id = $2 WHERE s_prod_id = $3
+    )
+    SELECT
+      up.username,
+      u.email,
+      up.subscription_id AS "subscriptionId",
+      up.subscription_item_id AS "subscriptionItemId",
+      up.quantity
+    FROM user_plan up
+    JOIN users u
+    ON up.username = u.username
+    WHERE plan_id = $3
+  `;
+  const args = [subscriptionId, newPriceId, productId];
+  return pool.query(query, args);
 }

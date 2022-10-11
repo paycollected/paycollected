@@ -53,14 +53,8 @@ webhook.post('/webhook', express.raw({type: 'application/json'}), async (req, re
       };
       break;
     case 'customer.subscription.deleted':
-      // priceID --> archive that price
-      // create a new price: need count of quantities, and total plan cost, frequency, product ID
-      // query db for remaining quantity on that same plan, and every subscription & item ID to update with new price ID
-      // delete this subscription from db
       subscription = event.data.object;
-      const { metadata } = subscription;
-      console.log('subscription obj:', subscription);
-      console.log('--------> metadata', metadata);
+      helpers.handleSubscriptionDelete(subscription);
       break;
     default:
       console.log(`Unhandled event type ${event.type}`);
