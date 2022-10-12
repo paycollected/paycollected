@@ -289,8 +289,6 @@ export default {
                 subscriptionId,
                 subscriptionItemId,
                 username,
-                cycleFrequency: recurringInterval[cycleFrequency],
-                perCycleCost,
                 productId: planId,
                 quantity: newQuantity,
                 productTotalQuantity: count + newQuantity,
