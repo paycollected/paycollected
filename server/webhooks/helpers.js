@@ -69,7 +69,7 @@ export async function handleSubscriptionDelete(subscription) {
   const { id: subscriptionId, items } = subscription;
   const { price, quantity } = items.data[0];
   const { id: prevPriceId, product: productId } = price;
-  const { cycleFrequency, username } = subscription.metadata;
+  const { cycleFrequency } = subscription.metadata;
   const productTotalQuantity = Number(subscription.metadata.productTotalQuantity);
   const perCycleCost = Number(subscription.metadata.perCycleCost);
   const newProductTotalQuantity = productTotalQuantity - quantity;
