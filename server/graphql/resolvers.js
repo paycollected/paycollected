@@ -271,7 +271,6 @@ export default {
             expand: ['pending_setup_intent'],
             metadata: {
               productTotalQuantity: count + newQuantity,
-              username,
               cycleFrequency: recurringInterval[cycleFrequency],
               perCycleCost,
             }

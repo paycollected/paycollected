@@ -35,9 +35,8 @@ async function updateStripePrice(row, price, cycleFrequency, productTotalQuantit
       ],
       metadata: {
         productTotalQuantity,
-        username,
-        cycleFrequency,
-        perCycleCost,
+        // cycleFrequency,
+        // perCycleCost,
       },
       proration_behavior: 'none',
     }
@@ -76,7 +75,7 @@ export async function handleSubscriptionDelete(subscription) {
   const productTotalQuantity = Number(subscription.metadata.productTotalQuantity);
   const perCycleCost = Number(subscription.metadata.perCycleCost);
   console.log('subscription obj:', subscription);
-  console.log('--------> metadata', metadata);
+  console.log('--------> metadata', subscription.metadata);
   const newProductTotalQuantity = productTotalQuantity - quantity;
 
 
@@ -87,13 +86,12 @@ export async function handleSubscriptionDelete(subscription) {
       unit_amount: Math.ceil(perCycleCost / newProductTotalQuantity),
       recurring: {
         interval: cycleFrequency,
-        // could consider allowing customers to do interval count in the future?
       },
     }),
     archivePriceId(prevPriceId)
   ]);
 
-  const { rows } = models.deleteSubscription(subscriptionId, newPriceId, productId);
+  const { rows } = await models.deleteSubscription(subscriptionId, newPriceId, productId);
   if (rows.length > 0) {
     await Promise.all(
       rows.map((row) => updateStripePrice(row, newPriceId, cycleFrequency, newProductTotalQuantity, perCycleCost))

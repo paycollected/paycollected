@@ -185,7 +185,7 @@ export function startSubscription(planId, quantity, subscriptionId, subscription
     FROM user_plan up
     JOIN users u
     ON up.username = u.username
-    WHERE plan_id = $4 AND up.username != $5
+    WHERE up.plan_id = $4 AND up.username != $5
   `;
 
   const args = [quantity, subscriptionId, subscriptionItemId, planId, username, newPriceId];
@@ -210,7 +210,7 @@ export function deleteSubscription(subscriptionId, newPriceId, productId) {
     FROM user_plan up
     JOIN users u
     ON up.username = u.username
-    WHERE plan_id = $3
+    WHERE up.plan_id = $3 AND up.subscription_id != $1
   `;
   const args = [subscriptionId, newPriceId, productId];
   return pool.query(query, args);
