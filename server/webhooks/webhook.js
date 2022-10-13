@@ -35,26 +35,13 @@ webhook.post('/webhook', express.raw({type: 'application/json'}), async (req, re
     case 'setup_intent.succeeded': // someone new joining plan
       setupIntent = event.data.object;
       helpers.handleSubscriptionStart(setupIntent);
-      // const {
-      //   subscriptionId, prevPriceId, newPriceId, subscriptionItemId, productId, username,
-      // } = setupIntent.metadata;
-      // const quantity = Number(setupIntent.metadata.quantity);
-      // const productTotalQuantity = Number(setupIntent.metadata.productTotalQuantity);
-      // try {
-      //   // archivePriceId and processQuantChange don't depend on each other so we can await them simultaneously
-      //   await Promise.all([
-      //     helpers.archivePriceId(prevPriceId),
-      //     helpers.processQuantChange(
-      //       productId, quantity, subscriptionId, subscriptionItemId, username, newPriceId, productTotalQuantity
-      //     )
-      //   ]);
-      // } catch (err) {
-      //   console.log(err);
-      // };
       break;
     case 'customer.subscription.deleted':
       subscription = event.data.object;
-      helpers.handleSubscriptionDelete(subscription);
+      // handle special case of plan owner deleting subscription!
+      // if plan owner and there are still active members --> transfer ownership
+      // if plan owner and no active members --> disable option to transfer ownership, cancellation will also delete plan
+      helpers.handleSubscriptionCancel(subscription);
       break;
     default:
       console.log(`Unhandled event type ${event.type}`);

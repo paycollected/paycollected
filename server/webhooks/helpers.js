@@ -80,7 +80,7 @@ export async function handleSubscriptionStart(setupIntent) {
 }
 
 
-export async function handleSubscriptionDelete(subscription) {
+export async function handleSubscriptionCancel(subscription) {
   // priceID --> archive that price
   // create a new price: need count of quantities, and total plan cost, frequency, product ID
   // --> update new price ID for product in db
