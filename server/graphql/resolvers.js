@@ -18,8 +18,8 @@ const recurringInterval = {
 
 export default {
   Query: {
-    viewOnePlan: async (_, { planId }, { username, err }) => {
-      if (username) {
+    viewOnePlan: async (_, { planId }, { user, err }) => {
+      if (user) {
         let errMsg;
         try {
           const { rows } = await models.viewOnePlan(planId);
@@ -46,8 +46,9 @@ export default {
       }
     },
 
-    viewAllPlans: async (_, __, { username, err }) => {
-      if (username) {
+    viewAllPlans: async (_, __, { user, err }) => {
+      if (user) {
+        const { username } = user;
         try {
           const { rows } = await models.viewAllPlans(username);
           rows.forEach((row) => {
@@ -67,8 +68,8 @@ export default {
   },
 
   Plan: {
-    activeMembers: async ({ planId }, _, { username, err }) => {
-      if (username) {
+    activeMembers: async ({ planId }, _, { user, err }) => {
+      if (user) {
         try {
           const { rows } = await models.membersOnOnePlan(planId);
           return rows;
@@ -111,9 +112,11 @@ export default {
             // expires after 2 weeks
             exp: Math.floor(Date.now() / 1000) + (60 * 60 * 24 * 14),
             // storing user's info in token so we can easily obtain it from context in any resolver
-            username,
-            email,
-            stripeCusId,
+            user: {
+              username,
+              email,
+              stripeCusId,
+            }
           }, process.env.SECRET_KEY);
           return { username, email, token };
         // username or email exist --> return error
@@ -165,9 +168,11 @@ export default {
         const token = jwt.sign({
           // expires after 2 weeks
           exp: Math.floor(Date.now() / 1000) + (60 * 60 * 24 * 14),
-          username,
-          email,
-          stripeCusId,
+          user: {
+            username,
+            email,
+            stripeCusId,
+          }
         }, process.env.SECRET_KEY);
 
         return {
@@ -189,8 +194,8 @@ export default {
 
     createPlan: async (_, {
       planName, cycleFrequency, perCycleCost, startDate
-    }, { username, err }) => {
-      if (username) {
+    }, { user, err }) => {
+      if (user) {
         try {
           planName = planName.trim();
           cycleFrequency = cycleFrequency.toLowerCase();
@@ -222,9 +227,10 @@ export default {
       }
     },
 
-    joinPlan: async (_, { planId, quantity: newQuantity }, { username, email, stripeCusId, err }) => {
+    joinPlan: async (_, { planId, quantity: newQuantity }, { user, err }) => {
       let errMsg;
-      if (username) {
+      if (user) {
+        const { username, email, stripeCusId } = user;
         try {
           // check that user is NOT already subscribed to plan
           const { rows } = await models.joinPlan(username, planId);
@@ -312,8 +318,9 @@ export default {
       }
     },
 
-    editPayment: async (_, __, { username, stripeCusId: customer, err }) => {
-      if (username) {
+    editPayment: async (_, __, { user, err }) => {
+      if (user) {
+        const { username, stripeCusId: customer } = user
         try {
           /* still debating whether we should store stripeCusId in JWT since it's public */
           // const { rows } = await models.getUserInfo(username);
