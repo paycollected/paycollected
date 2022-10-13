@@ -24,8 +24,6 @@ export default function ViewPlans() {
     onError: ({ message }) => { console.log(message); }
   });
 
-  const { viewAllPlans } = data;
-
   const handleSubscriptionCancel = (subscriptionId) => {
     console.log(subscriptionId);
   };
@@ -56,7 +54,7 @@ export default function ViewPlans() {
             )}
             {plan.activeMembers.length === 0
               && (<div>There are currently no members on this plan.</div>)}
-            {/* <button type="button" onClick={() => { handleSubscriptionCancel(plan.subscriptionId); }}>Cancel subscription</button> */}
+            <button type="button" onClick={() => { handleSubscriptionCancel(plan.subscriptionId); }}>Cancel subscription</button>
           </div>
         )))}
       {data && data.viewAllPlans.length === 0
