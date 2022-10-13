@@ -86,7 +86,10 @@ export function viewAllPlans(username) {
           p.s_prod_id AS "planId",
           p.plan_name AS name,
           UPPER(p.cycle_frequency::VARCHAR) AS "cycleFrequency",
-          p.per_cycle_cost AS "perCycleCost"
+          p.per_cycle_cost AS "perCycleCost",
+          up.subscription_id AS "subscriptionId",
+          up.subscription_item_id AS "subscriptionItemId",
+          up.quantity
         FROM plans p
         JOIN user_plan up
         ON p.s_prod_id = up.plan_id
@@ -97,6 +100,9 @@ export function viewAllPlans(username) {
       name,
       "cycleFrequency",
       "perCycleCost",
+      "subscriptionId",
+      "subscriptionItemId",
+      select1.quantity,
       json_build_object
       (
         'firstName', u.first_name,

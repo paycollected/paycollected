@@ -38,7 +38,7 @@ async function startApolloServer() {
           return {
             user: {
               username, email, stripeCusId,
-            }
+            },
             err: null
           };
         } catch {

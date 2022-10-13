@@ -24,6 +24,12 @@ export default function ViewPlans() {
     onError: ({ message }) => { console.log(message); }
   });
 
+  const { viewAllPlans } = data;
+
+  const handleSubscriptionCancel = (subscriptionId) => {
+    console.log(subscriptionId);
+  };
+
   return (
     <div>
       <h1>This is the ViewSubscriptions page to list all subscriptions</h1>
@@ -50,8 +56,11 @@ export default function ViewPlans() {
             )}
             {plan.activeMembers.length === 0
               && (<div>There are currently no members on this plan.</div>)}
+            {/* <button type="button" onClick={() => { handleSubscriptionCancel(plan.subscriptionId); }}>Cancel subscription</button> */}
           </div>
         )))}
+      {data && data.viewAllPlans.length === 0
+        && (<div>You are not enrolled in any plans at the moment.</div>)}
     </div>
   );
 }

@@ -46,6 +46,9 @@ export default gql`
     cycleFrequency: CycleFrequency!
     perCycleCost: Float!
     activeMembers: [PlanMember]! # can include owner, will only include members whose quantity > 0
+    subscriptionId: String
+    subscriptionItemId: String
+    quantity: Int
   }
 
   type Mutation {
