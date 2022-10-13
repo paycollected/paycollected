@@ -61,7 +61,8 @@ export function viewOnePlan(planId) {
 }
 
 
-export function membersOnOnePlan(planId) {
+export function membersOnOnePlan(planId, username) {
+  // does not include the user requesting this info
   const query = `
     SELECT
       up.username AS username,
@@ -72,9 +73,9 @@ export function membersOnOnePlan(planId) {
     FROM user_plan up
     JOIN users u
     ON up.username = u.username
-    WHERE up.quantity > 0 AND up.plan_id = $1`;
+    WHERE up.quantity > 0 AND up.plan_id = $1 AND up.username != $2`;
 
-  return pool.query(query, [planId]);
+  return pool.query(query, [planId, username]);
 }
 
 
@@ -162,13 +163,6 @@ export function joinPlan(username, planId) {
 
 
 export function startSubscription(planId, quantity, subscriptionId, subscriptionItemId, username, newPriceId) {
-  /*
-  this query does 3 things:
-  1) the first INSERT / UPDATE clauses store information about incoming subscription plan in our datastore
-  2) update the product with the new price ID
-  3) the SELECT clause return all the stripe subscriptions that are on the same product (plan),
-  so we can call stripe API to update their prices later
-  */
   const query = `
     WITH update_sub_id AS
     (
@@ -198,6 +192,7 @@ export function startSubscription(planId, quantity, subscriptionId, subscription
 
   return pool.query(query, args);
 }
+
 
 export function deleteSubscription(subscriptionId, newPriceId, productId) {
   const query = `

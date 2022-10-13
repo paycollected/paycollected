@@ -5,7 +5,7 @@ import Button from '@mui/material/Button';
 import { ViewAllPlans as GET_ALL_PLANS } from '../graphql/queries.gql';
 import { EditPayment as EDIT_PAYMENT } from '../graphql/mutations.gql';
 
-export default function ViewPlans() {
+export default function ViewPlans({ user }) {
   const navigate = useNavigate();
 
   const { loading, data, error } = useQuery(GET_ALL_PLANS, {
@@ -24,12 +24,14 @@ export default function ViewPlans() {
     onError: ({ message }) => { console.log(message); }
   });
 
-  const handleSubscriptionCancel = (subscriptionId) => {
+  const handleSubscriptionCancel = (plan) => {
+    const { subscriptionId } = plan;
     console.log(subscriptionId);
   };
 
   return (
     <div>
+      {console.log(user)}
       <h1>This is the ViewSubscriptions page to list all subscriptions</h1>
       <Button variant="contained" onClick={() => { navigate('/dashboard'); }}>Dashboard</Button>
       <Button variant="contained" onClick={() => { submitEditPayment(); }}>Manage Payment Methods</Button>
@@ -39,7 +41,7 @@ export default function ViewPlans() {
             <h2>{plan.name}</h2>
             <div>
               Owned by:&nbsp;
-              {plan.owner.firstName.concat(' ', plan.owner.lastName)}
+              {plan.owner.username !== user ? plan.owner.firstName.concat(' ', plan.owner.lastName) : 'you'}
             </div>
             <div>{`Total Plan Cost: $${plan.perCycleCost} ${plan.cycleFrequency.toLowerCase()}`}</div>
             {plan.activeMembers.length > 0 && (
@@ -49,12 +51,13 @@ export default function ViewPlans() {
                   {plan.activeMembers.map((member) => (
                     <li key={member.username}>{`${member.firstName} ${member.lastName} x ${member.quantity}`}</li>
                   ))}
+                  <li>{`you x ${plan.quantity}`}</li>
                 </ul>
               </>
             )}
             {plan.activeMembers.length === 0
               && (<div>There are currently no members on this plan.</div>)}
-            <button type="button" onClick={() => { handleSubscriptionCancel(plan.subscriptionId); }}>Cancel subscription</button>
+            <button type="button" onClick={() => { handleSubscriptionCancel(plan); }}>Cancel subscription</button>
           </div>
         )))}
       {data && data.viewAllPlans.length === 0

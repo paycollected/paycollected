@@ -70,8 +70,9 @@ export default {
   Plan: {
     activeMembers: async ({ planId }, _, { user, err }) => {
       if (user) {
+        const { username } = user;
         try {
-          const { rows } = await models.membersOnOnePlan(planId);
+          const { rows } = await models.membersOnOnePlan(planId, username);
           return rows;
         } catch (asyncError) {
           console.log(asyncError);
