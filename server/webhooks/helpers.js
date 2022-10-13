@@ -6,8 +6,8 @@ dotenv.config();
 const stripe = stripeSDK(process.env.STRIPE_SECRET_KEY);
 
 
-// 1. archive old price ID (on stripe system)
-export async function archivePriceId(prevPriceId) {
+// archive old price ID (on stripe system)
+async function archivePriceId(prevPriceId) {
   if (prevPriceId) {
     await stripe.prices.update(prevPriceId, { active: false });
   }
@@ -46,7 +46,7 @@ async function updateStripePrice(row, price, productTotalQuantity) {
 // update product w/ new price ID (our db)
 // query all other existing users on this same plan (db)
 // and update their subscriptions with new price (stripe system)
-export async function processQuantChange(
+async function processQuantChange(
   productId, quantity, subscriptionId, subscriptionItemId, username, newPriceId, productTotalQuantity,
   ) {
   const { rows } = await models.startSubscription(
@@ -57,6 +57,26 @@ export async function processQuantChange(
       rows.map((row) => updateStripePrice(row, newPriceId, productTotalQuantity))
     );
   }
+}
+
+
+export async function handleSubscriptionStart(setupIntent) {
+  const {
+    subscriptionId, prevPriceId, newPriceId, subscriptionItemId, productId, username,
+  } = setupIntent.metadata;
+  const quantity = Number(setupIntent.metadata.quantity);
+  const productTotalQuantity = Number(setupIntent.metadata.productTotalQuantity);
+  try {
+    // archivePriceId and processQuantChange don't depend on each other so we can await them simultaneously
+    await Promise.all([
+      archivePriceId(prevPriceId),
+      processQuantChange(
+        productId, quantity, subscriptionId, subscriptionItemId, username, newPriceId, productTotalQuantity
+      )
+    ]);
+  } catch (err) {
+    console.log(err);
+  };
 }
 
 

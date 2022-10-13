@@ -34,22 +34,23 @@ webhook.post('/webhook', express.raw({type: 'application/json'}), async (req, re
       break;
     case 'setup_intent.succeeded': // someone new joining plan
       setupIntent = event.data.object;
-      const {
-        subscriptionId, prevPriceId, newPriceId, subscriptionItemId, productId, username,
-      } = setupIntent.metadata;
-      const quantity = Number(setupIntent.metadata.quantity);
-      const productTotalQuantity = Number(setupIntent.metadata.productTotalQuantity);
-      try {
-        // archivePriceId and processQuantChange don't depend on each other so we can await them simultaneously
-        await Promise.all([
-          helpers.archivePriceId(prevPriceId),
-          helpers.processQuantChange(
-            productId, quantity, subscriptionId, subscriptionItemId, username, newPriceId, productTotalQuantity
-          )
-        ]);
-      } catch (err) {
-        console.log(err);
-      };
+      helpers.handleSubscriptionStart(setupIntent);
+      // const {
+      //   subscriptionId, prevPriceId, newPriceId, subscriptionItemId, productId, username,
+      // } = setupIntent.metadata;
+      // const quantity = Number(setupIntent.metadata.quantity);
+      // const productTotalQuantity = Number(setupIntent.metadata.productTotalQuantity);
+      // try {
+      //   // archivePriceId and processQuantChange don't depend on each other so we can await them simultaneously
+      //   await Promise.all([
+      //     helpers.archivePriceId(prevPriceId),
+      //     helpers.processQuantChange(
+      //       productId, quantity, subscriptionId, subscriptionItemId, username, newPriceId, productTotalQuantity
+      //     )
+      //   ]);
+      // } catch (err) {
+      //   console.log(err);
+      // };
       break;
     case 'customer.subscription.deleted':
       subscription = event.data.object;

@@ -185,7 +185,7 @@ export function startSubscription(planId, quantity, subscriptionId, subscription
     FROM user_plan up
     JOIN users u
     ON up.username = u.username
-    WHERE up.plan_id = $4 AND up.username != $5
+    WHERE up.plan_id = $4 AND up.subscription_id != $2
   `;
 
   const args = [quantity, subscriptionId, subscriptionItemId, planId, username, newPriceId];
