@@ -91,7 +91,6 @@ export default gql`
 
     editQuantity(
       subscriptionId: String!
-      subscriptionItemId: String!
       newQuantity: Int!
     ): String!
   }

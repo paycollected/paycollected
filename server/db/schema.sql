@@ -46,7 +46,6 @@ CREATE VIEW user_on_plan AS
     u.email,
     up.plan_id,
     up.subscription_id,
-    up.subscription_item_id,
     up.quantity
   FROM user_plan up
   JOIN users u

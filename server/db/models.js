@@ -86,7 +86,6 @@ export function viewAllPlans(username) {
           UPPER(p.cycle_frequency::VARCHAR) AS "cycleFrequency",
           p.per_cycle_cost AS "perCycleCost",
           up.subscription_id AS "subscriptionId",
-          up.subscription_item_id AS "subscriptionItemId",
           up.quantity
         FROM plans p
         JOIN user_plan up
@@ -99,7 +98,6 @@ export function viewAllPlans(username) {
       "cycleFrequency",
       "perCycleCost",
       "subscriptionId",
-      "subscriptionItemId",
       select1.quantity,
       json_build_object
       (
@@ -175,7 +173,6 @@ export function startSubscription(planId, quantity, subscriptionId, subscription
     SELECT
       username,
       email,
-      subscription_id AS "subscriptionId",
       quantity
     FROM user_on_plan
     WHERE plan_id = $4 AND subscription_id != $2
