@@ -268,3 +268,14 @@ export function getSubsItemIdAndProductInfo(subscriptionId, username) {
     WHERE up.subscription_id = $1 and up.username = $2`;
   return pool.query(query, [subscriptionId, username]);
 }
+
+
+export function updatePriceIdAndSubsQuant(newPriceId, productId, newQuantity, subscriptionId) {
+  const query = `
+    WITH update_price AS (
+      UPDATE plans SET s_price_id = $1 WHERE s_prod_id = $2
+    )
+    UPDATE user_plan SET quantity = $3 WHERE subscription_id = $4
+  `;
+  return pool.query(query, [newPriceId, productId, newQuantity, subscriptionId])
+}

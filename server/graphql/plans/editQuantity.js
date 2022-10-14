@@ -3,7 +3,7 @@ import {
   ApolloError, UserInputError, AuthenticationError, ForbiddenError
 } from 'apollo-server-core';
 import {
-  getSubsItemIdAndProductInfo
+  getSubsItemIdAndProductInfo, updatePriceIdAndSubsQuant
 } from '../../db/models.js';
 
 const stripe = stripeSDK(process.env.STRIPE_SECRET_KEY);
@@ -20,7 +20,7 @@ export default async function (subscriptionId, newQuantity, username) {
   // Step 2:
   // (1) call stripe API to edit quantity and price ID for this subscription,
   // subs metadata: update totalQuantity
-  // and (2) edit quantity of this subscription in our db
+  // and (2) edit quantity of this subscription in our db & update priceId
   // Webhook:
   // need to know that this is for an incoming quantity change
   // query all existing users on plan and
@@ -48,21 +48,26 @@ export default async function (subscriptionId, newQuantity, username) {
     stripe.prices.update(prevPriceId, { active: false })
   ]);
 
-  await stripe.subscriptions.update(
-    subscriptionId,
-    {
-      items: [
-        {
-          id: subscriptionItemId,
-          price,
-          quantity: newQuantity,
-        }
-      ],
-      metadata: {
-        productTotalQuantity,
-        quantChanged: true,
-      },
-      proration_behavior: 'none',
-    }
-  );
+  await Promise.all([
+    stripe.subscriptions.update(
+      subscriptionId,
+      {
+        items: [
+          {
+            id: subscriptionItemId,
+            price,
+            quantity: newQuantity,
+          }
+        ],
+        metadata: {
+          productTotalQuantity,
+          quantChanged: true,
+        },
+        proration_behavior: 'none',
+      }
+    ),
+    updatePriceIdAndSubsQuant(price, product, newQuantity, subscriptionId)
+  ]);
+
+  return subscriptionId;
 }
