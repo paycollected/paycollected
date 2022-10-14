@@ -176,7 +176,6 @@ export function startSubscription(planId, quantity, subscriptionId, subscription
       username,
       email,
       subscription_id AS "subscriptionId",
-      subscription_item_id AS "subscriptionItemId",
       quantity
     FROM user_on_plan
     WHERE plan_id = $4 AND subscription_id != $2
@@ -197,7 +196,6 @@ export function updatePriceIdGetMembers(subscriptionId, newPriceId, productId) {
       username,
       email,
       subscription_id AS "subscriptionId",
-      subscription_item_id AS "subscriptionItemId",
       quantity
     FROM user_on_plan
     WHERE plan_id = $3 AND subscription_id != $1

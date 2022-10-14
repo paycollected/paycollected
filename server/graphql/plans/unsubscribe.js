@@ -4,7 +4,7 @@ import {
 } from 'apollo-server-core';
 import {
   checkPlanOwner, delSubUpdatePlanOwner, checkNewOwner, checkSubOnPlan, deleteSubscription
-} from '../db/models.js';
+} from '../../db/models.js';
 
 const stripe = stripeSDK(process.env.STRIPE_SECRET_KEY);
 

@@ -88,5 +88,11 @@ export default gql`
       planId: String!
       newOwner: String!
     ): String!
+
+    editQuantity(
+      subscriptionId: String!
+      subscriptionItemId: String!
+      newQuantity: Int!
+    ): String!
   }
 `;

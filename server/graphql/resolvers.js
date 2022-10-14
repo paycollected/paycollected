@@ -8,7 +8,7 @@ import { isFuture } from 'date-fns';
 import * as models from '../db/models.js';
 import {
   unsubscribe as unsubscribeResolver, unsubscribeAsOwner as unsubscribeAsOwnerResolver
-} from './unsubscribe.js';
+} from './plans/unsubscribe.js';
 
 const saltRounds = 10;
 const stripe = stripeSDK(process.env.STRIPE_SECRET_KEY);
@@ -394,5 +394,15 @@ export default {
         throw new ForbiddenError(err);
       }
     },
+
+    editQuantity: async (_, { }, { user, err }) => {
+      if (user) {
+
+      } else if (err === 'Incorrect token' || err === 'Token has expired') {
+        throw new AuthenticationError(err);
+      } else if (err === 'Unauthorized request') {
+        throw new ForbiddenError(err);
+      }
+    }
   }
 };

@@ -37,6 +37,7 @@ CREATE TABLE IF NOT EXISTS user_plan (
   UNIQUE (username, plan_id)
 );
 
+
 CREATE VIEW user_on_plan AS
   SELECT
     up.username,
