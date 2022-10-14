@@ -398,6 +398,7 @@ export default {
     editQuantity: async (_, { }, { user, err }) => {
       if (user) {
 
+
       } else if (err === 'Incorrect token' || err === 'Token has expired') {
         throw new AuthenticationError(err);
       } else if (err === 'Unauthorized request') {
