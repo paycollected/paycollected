@@ -6,6 +6,7 @@ import {
 } from 'apollo-server-core';
 import { isFuture } from 'date-fns';
 import * as models from '../db/models.js';
+import { unsubscribe as unsubscribeResolver } from './unsubscribe.js';
 
 const saltRounds = 10;
 const stripe = stripeSDK(process.env.STRIPE_SECRET_KEY);
@@ -321,7 +322,7 @@ export default {
 
     editPayment: async (_, __, { user, err }) => {
       if (user) {
-        const { username, stripeCusId: customer } = user
+        const { username, stripeCusId: customer } = user;
         try {
           /* still debating whether we should store stripeCusId in JWT since it's public */
           // const { rows } = await models.getUserInfo(username);
@@ -347,5 +348,15 @@ export default {
       }
     },
 
+    unsubscribe: (_, { subscriptionId }, { user, err }) => {
+      if (user) {
+        const { username } = user;
+        unsubscribeResolver(subscriptionId, username);
+      } else if (err === 'Incorrect token' || err === 'Token has expired') {
+        throw new AuthenticationError(err);
+      } else if (err === 'Unauthorized request') {
+        throw new ForbiddenError(err);
+      }
+    },
   }
 };

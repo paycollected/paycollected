@@ -79,5 +79,16 @@ export default gql`
     ): PaymentIntent! # returning client secret
 
     editPayment: PortalSession!
+
+    unsubscribe(
+      subscriptionId: ID!
+      # planId: String!
+    ): Boolean!
+
+    unsubscribeAsOwner(
+      subscriptionId: ID!
+      # planId: ID!
+      newOwner: String!
+    ): Boolean!
   }
 `;

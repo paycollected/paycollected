@@ -24,14 +24,18 @@ export default function ViewPlans({ user }) {
     onError: ({ message }) => { console.log(message); }
   });
 
-  const handleSubscriptionCancel = (plan) => {
+  const handleSubsCancelNotOwner = (plan) => {
+    const { subscriptionId } = plan;
+    console.log(subscriptionId);
+  };
+
+  const handleSubsCancelOwner = (plan) => {
     const { subscriptionId } = plan;
     console.log(subscriptionId);
   };
 
   return (
     <div>
-      {console.log(user)}
       <h1>This is the ViewSubscriptions page to list all subscriptions</h1>
       <Button variant="contained" onClick={() => { navigate('/dashboard'); }}>Dashboard</Button>
       <Button variant="contained" onClick={() => { submitEditPayment(); }}>Manage Payment Methods</Button>
@@ -57,7 +61,10 @@ export default function ViewPlans({ user }) {
             )}
             {plan.activeMembers.length === 0
               && (<div>There are currently no members on this plan.</div>)}
-            <button type="button" onClick={() => { handleSubscriptionCancel(plan); }}>Cancel subscription</button>
+            {plan.owner.username !== user
+              ? (<button type="button" onClick={() => { handleSubsCancelNotOwner(plan); }}>Cancel subscription</button>)
+              : (<button type="button" onClick={() => { handleSubsCancelOwner(plan); }}>Cancel subscription</button>)
+            }
           </div>
         )))}
       {data && data.viewAllPlans.length === 0
