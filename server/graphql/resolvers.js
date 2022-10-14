@@ -5,6 +5,9 @@ import {
   ApolloError, UserInputError, AuthenticationError, ForbiddenError
 } from 'apollo-server-core';
 import * as models from '../db/models.js';
+import {
+  unsubscribe as unsubscribeResolver, unsubscribeAsOwner as unsubscribeAsOwnerResolver
+} from './unsubscribe.js';
 
 const saltRounds = 10;
 const stripe = stripeSDK(process.env.STRIPE_SECRET_KEY);
@@ -17,8 +20,8 @@ const recurringInterval = {
 
 export default {
   Query: {
-    viewOnePlan: async (_, { planId }, { username, err }) => {
-      if (username) {
+    viewOnePlan: async (_, { planId }, { user, err }) => {
+      if (user) {
         let errMsg;
         try {
           const { rows } = await models.viewOnePlan(planId);
@@ -45,8 +48,9 @@ export default {
       }
     },
 
-    viewAllPlans: async (_, __, { username, err }) => {
-      if (username) {
+    viewAllPlans: async (_, __, { user, err }) => {
+      if (user) {
+        const { username } = user;
         try {
           const { rows } = await models.viewAllPlans(username);
           rows.forEach((row) => {
@@ -66,10 +70,11 @@ export default {
   },
 
   Plan: {
-    activeMembers: async ({ planId }, _, { username, err }) => {
-      if (username) {
+    activeMembers: async ({ planId }, _, { user, err }) => {
+      if (user) {
+        const { username } = user;
         try {
-          const { rows } = await models.membersOnOnePlan(planId);
+          const { rows } = await models.membersOnOnePlan(planId, username);
           return rows;
         } catch (asyncError) {
           console.log(asyncError);
@@ -110,9 +115,11 @@ export default {
             // expires after 2 weeks
             exp: Math.floor(Date.now() / 1000) + (60 * 60 * 24 * 14),
             // storing user's info in token so we can easily obtain it from context in any resolver
-            username,
-            email,
-            stripeCusId,
+            user: {
+              username,
+              email,
+              stripeCusId,
+            }
           }, process.env.SECRET_KEY);
           return { username, email, token };
         // username or email exist --> return error
@@ -164,9 +171,11 @@ export default {
         const token = jwt.sign({
           // expires after 2 weeks
           exp: Math.floor(Date.now() / 1000) + (60 * 60 * 24 * 14),
-          username,
-          email,
-          stripeCusId,
+          user: {
+            username,
+            email,
+            stripeCusId,
+          }
         }, process.env.SECRET_KEY);
 
         return {
@@ -188,8 +197,9 @@ export default {
 
     createPlan: async (_, {
       planName, cycleFrequency, perCycleCost, startDate
-    }, { username, err }) => {
-      if (username) {
+    }, { user, err }) => {
+      if (user) {
+        const { username } = user;
         try {
           planName = planName.trim();
           cycleFrequency = cycleFrequency.toLowerCase();
@@ -221,9 +231,10 @@ export default {
       }
     },
 
-    joinPlan: async (_, { planId, quantity: newQuantity }, { username, email, stripeCusId, err }) => {
+    joinPlan: async (_, { planId, quantity: newQuantity }, { user, err }) => {
       let errMsg;
-      if (username) {
+      if (user) {
+        const { username, email, stripeCusId } = user;
         try {
           // check that user is NOT already subscribed to plan
           const { rows } = await models.joinPlan(username, planId);
@@ -284,9 +295,18 @@ export default {
               save_default_payment_method: 'on_subscription',
               payment_method_types: ['link', 'card'],
             },
+            proration_behavior: 'none',
             trial_end: nextStartDate,
             expand: ['pending_setup_intent'],
+<<<<<<< HEAD
             proration_behavior: 'none',
+=======
+            metadata: {
+              productTotalQuantity: count + newQuantity,
+              cycleFrequency: recurringInterval[cycleFrequency],
+              perCycleCost,
+            }
+>>>>>>> main
           });
 
           const { id: setupIntentId, client_secret: clientSecret } = pending_setup_intent;
@@ -304,6 +324,7 @@ export default {
                 username,
                 productId: planId,
                 quantity: newQuantity,
+                productTotalQuantity: count + newQuantity,
               }
             }
           );
@@ -324,8 +345,9 @@ export default {
       }
     },
 
-    editPayment: async (_, __, { username, stripeCusId: customer, err }) => {
-      if (username) {
+    editPayment: async (_, __, { user, err }) => {
+      if (user) {
+        const { username, stripeCusId: customer } = user;
         try {
           /* still debating whether we should store stripeCusId in JWT since it's public */
           // const { rows } = await models.getUserInfo(username);
@@ -351,5 +373,47 @@ export default {
       }
     },
 
+    unsubscribe: async (_, { subscriptionId }, { user, err }) => {
+      if (user) {
+        const { username } = user;
+        try {
+          return await unsubscribeResolver(subscriptionId, username);
+        } catch (e) {
+          if (e.message === "Subscription doesn't belong to user" || e.message === 'Wrong mutation call') {
+            throw new ForbiddenError(e.message);
+          } else {
+            throw new ApolloError('Cannot unsubscribe');
+          }
+        }
+      } else if (err === 'Incorrect token' || err === 'Token has expired') {
+        throw new AuthenticationError(err);
+      } else if (err === 'Unauthorized request') {
+        throw new ForbiddenError(err);
+      }
+    },
+
+    unsubscribeAsOwner: async (_, { subscriptionId, planId, newOwner }, { user, err }) => {
+      if (user) {
+        const { username } = user;
+        try {
+          return await unsubscribeAsOwnerResolver(subscriptionId, planId, username, newOwner);
+        } catch (e) {
+          if (e.message === "Subscription doesn't belong to user"
+          || e.message === 'Wrong mutation call') {
+            throw new ForbiddenError(e.message);
+          } else if (e.message === 'New owner is not active member of this plan'
+          || e.message === 'Incorrect subscription and plan combination'
+          || e.message === 'Cannot transfer ownership to self') {
+            throw new UserInputError(e.message);
+          } else {
+          throw new ApolloError('Cannot unsubscribe');
+          }
+        }
+      } else if (err === 'Incorrect token' || err === 'Token has expired') {
+        throw new AuthenticationError(err);
+      } else if (err === 'Unauthorized request') {
+        throw new ForbiddenError(err);
+      }
+    },
   }
 };

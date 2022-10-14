@@ -16,7 +16,8 @@ mutation LogIn ($username: String!, $password: String!) {
 }
 
 
-mutation CreatePlanMutation ($planName: String!, $cycleFrequency: CycleFrequency!, $perCycleCost: Float!, $startDate: String!) {
+mutation CreatePlanMutation (
+  $planName: String!, $cycleFrequency: CycleFrequency!, $perCycleCost: Float!, $startDate: String!) {
   createPlan(planName: $planName, cycleFrequency: $cycleFrequency, perCycleCost: $perCycleCost, startDate: $startDate) {
     productId
   }
@@ -34,4 +35,12 @@ mutation EditPayment {
   editPayment {
     portalSessionURL
   }
+}
+
+mutation Unsubscribe ($subscriptionId: String!) {
+  unsubscribe(subscriptionId: $subscriptionId)
+}
+
+mutation UnsubscribeAsPlanOwner($subscriptionId: String!, $planId: String!, $newOwner: String!) {
+  unsubscribeAsOwner(subscriptionId: $subscriptionId, planId: $planId, newOwner: $newOwner)
 }
