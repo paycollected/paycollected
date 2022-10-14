@@ -17,9 +17,7 @@ export default function ConfirmCancel({ planToCancel: plan, setModal, user }) {
     : members[0];
 
   const [confirmUnsubscribe, { data, loading, error }] = useMutation(UNSUBSCRIBE, {
-    onCompleted: () => {
-      setModal(null);
-    },
+    onCompleted: () => { setModal(null); },
     refetchQueries: [{ query: GET_ALL_PLANS }, 'ViewAllPlans'],
   });
 
@@ -27,9 +25,7 @@ export default function ConfirmCancel({ planToCancel: plan, setModal, user }) {
     confirmUnsubscribeAsOwner,
     { data: ownerData, loading: ownerLoading, error: ownerError}
   ] = useMutation(UNSUBSCRIBE_AS_OWNER, {
-    onCompleted: () => {
-      setModal(null);
-    },
+    onCompleted: () => { setModal(null); },
     refetchQueries: [{ query: GET_ALL_PLANS }, 'ViewAllPlans'],
   });
 

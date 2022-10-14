@@ -31,7 +31,6 @@ export default function ViewPlans({ user }) {
     const { subscriptionId } = plan;
     setModal('confirmCancel');
     setPlanToCancel(plan);
-    console.log(subscriptionId);
   };
 
   return (
