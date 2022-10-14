@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation } from '@apollo/client';
-import Button from '@mui/material/Button';
+import { Button } from '@chakra-ui/react';
 import { ViewAllPlans as GET_ALL_PLANS } from '../graphql/queries.gql';
 import { EditPayment as EDIT_PAYMENT } from '../graphql/mutations.gql';
 

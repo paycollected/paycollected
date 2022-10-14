@@ -34,9 +34,9 @@ const root = createRoot(document.getElementById('root'));
 root.render(
   <ApolloProvider client={client}>
     <BrowserRouter>
-      {/* <ChakraProvider> */}
+      <ChakraProvider>
         <App />
-      {/* </ChakraProvider> */}
+      </ChakraProvider>
     </BrowserRouter>
   </ApolloProvider>
 );

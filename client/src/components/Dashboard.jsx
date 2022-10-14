@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Button from '@mui/material/Button';
-import TextField from '@mui/material/TextField';
+import { Button, Input } from '@chakra-ui/react';
 
 export default function Dashboard({ username, setUser, setPlanToJoin }) {
   const navigate = useNavigate();
@@ -35,7 +34,7 @@ export default function Dashboard({ username, setUser, setPlanToJoin }) {
       <div>
         {showCodeInput && (
         <form onSubmit={codeInputSubmit}>
-          <TextField
+          <Input
             type="text"
             label="Plan Code"
             placeholder="Plan Code"

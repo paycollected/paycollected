@@ -2,12 +2,9 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMutation } from '@apollo/client';
 import { useForm } from 'react-hook-form';
-import Button from '@mui/material/Button';
-import InputAdornment from '@mui/material/InputAdornment';
-import IconButton from '@mui/material/IconButton';
-import Visibility from '@mui/icons-material/Visibility';
-import VisibilityOff from '@mui/icons-material/VisibilityOff';
-import TextField from '@mui/material/TextField';
+import {
+  Button, Input, InputGroup, InputRightElement
+} from '@chakra-ui/react';
 import { LogIn as LOG_IN } from '../graphql/mutations.gql';
 
 export default function Login({ setUser, planToJoin }) {
@@ -71,7 +68,7 @@ export default function Login({ setUser, planToJoin }) {
         autoComplete="off"
         onSubmit={handleSubmit(onSubmit)}
       >
-        <TextField
+        <Input
           name="username"
           label="Username"
           required
@@ -82,34 +79,24 @@ export default function Login({ setUser, planToJoin }) {
           error={!!errors?.username}
           helperText={errors?.username ? errors.username.message : ' '}
         />
-        <TextField
-          name="password"
-          label="Password"
-          required
-          type={showPassword ? 'text' : 'password'}
-          variant="outlined"
-          defaultValue=""
-          {...register('password', { required: 'Password required' })}
-          error={!!errors?.password}
-          helperText={errors?.password ? errors.password.message : ' '}
-          InputProps={{
-            endAdornment:
-            (
-              <InputAdornment position="end">
-                <IconButton
-                  aria-label="toggle password visibility"
-                  onClick={() => {
-                    setShowPassword(!showPassword);
-                  }}
-                  onMouseDown={(e) => e.preventDefault()}
-                  edge="end"
-                >
-                  {showPassword ? <VisibilityOff /> : <Visibility />}
-                </IconButton>
-              </InputAdornment>
-            ),
-          }}
-        />
+        <InputGroup>
+          <Input
+            name="password"
+            label="Password"
+            required
+            type={showPassword ? 'text' : 'password'}
+            variant="outlined"
+            defaultValue=""
+            {...register('password', { required: 'Password required' })}
+            error={!!errors?.password}
+            helperText={errors?.password ? errors.password.message : ' '}
+          />
+          <InputRightElement>
+            <Button onClick={() => setShowPassword(!showPassword)}>
+              {showPassword ? 'Hide' : 'Show'}
+            </Button>
+          </InputRightElement>
+        </InputGroup>
         {errorMessage.length > 0 ? (
           <div>{errorMessage}</div>
         ) : (

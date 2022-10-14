@@ -2,8 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMutation } from '@apollo/client';
 import { useForm } from 'react-hook-form';
-import Button from '@mui/material/Button';
-import TextField from '@mui/material/TextField';
+import { Button, Input } from '@chakra-ui/react';
 import { CreateUser as SIGN_UP } from '../graphql/mutations.gql';
 
 export default function Signup({ setUser, planToJoin }) {
@@ -68,7 +67,7 @@ export default function Signup({ setUser, planToJoin }) {
         autoComplete="off"
         onSubmit={handleSubmit(onSubmit)}
       >
-        <TextField
+        <Input
           name="firstName"
           label="First Name"
           required
@@ -79,7 +78,7 @@ export default function Signup({ setUser, planToJoin }) {
           error={!!errors?.firstName}
           helperText={errors?.firstName ? errors.firstName.message : ' '}
         />
-        <TextField
+        <Input
           name="lastName"
           label="Last Name"
           required
@@ -90,7 +89,7 @@ export default function Signup({ setUser, planToJoin }) {
           error={!!errors?.lastName}
           helperText={errors?.lastName ? errors.lastName.message : ' '}
         />
-        <TextField
+        <Input
           name="username"
           label="Username"
           required
@@ -101,7 +100,7 @@ export default function Signup({ setUser, planToJoin }) {
           error={!!errors?.username}
           helperText={errors?.username ? errors.username.message : ' '}
         />
-        <TextField
+        <Input
           name="password"
           label="Password"
           required
@@ -112,7 +111,7 @@ export default function Signup({ setUser, planToJoin }) {
           error={!!errors?.password}
           helperText={errors?.password ? errors.password.message : ' '}
         />
-        <TextField
+        <Input
           name="password2"
           label="Confirm Password"
           required
@@ -123,7 +122,7 @@ export default function Signup({ setUser, planToJoin }) {
           error={!!errors?.password2}
           helperText={errors?.password2 ? errors.password2.message : ' '}
         />
-        <TextField
+        <Input
           name="email"
           label="Email"
           required

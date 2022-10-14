@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import Button from '@mui/material/Button';
+import { Button } from '@chakra-ui/react';
 
 export default function MagicLink({ planToJoin, setShowMagicLink }) {
   const navigate = useNavigate();
