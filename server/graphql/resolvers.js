@@ -4,7 +4,6 @@ import stripeSDK from 'stripe';
 import {
   ApolloError, UserInputError, AuthenticationError, ForbiddenError
 } from 'apollo-server-core';
-import { isFuture } from 'date-fns';
 import * as models from '../db/models.js';
 
 const saltRounds = 10;
@@ -236,11 +235,30 @@ export default {
             errMsg = 'User is already subscribed to this plan';
             throw new Error();
           }
-
-          let nextStartDate = Number(startDate);
-          if (!isFuture(nextStartDate * 1000)) {
-            // TO-DO!! adjust nextStartDate here
-
+          let nextStartDate = new Date(startDate * 1000);
+          const today = new Date();
+          // adjust startDate to be in the future based on subscription frequency
+          if (nextStartDate < today) {
+            if (cycleFrequency === 'weekly') {
+              const targetDay = nextStartDate.getDay();
+              const todayDay = today.getDay();
+              // find the next occurrence of the target day
+              nextStartDate.setDate(today.getDate() + (((7 - todayDay) + targetDay) % 7));
+            } else if (cycleFrequency === 'monthly') {
+              const targetDate = nextStartDate.getDate();
+              // if current date is past the target, then set target to next month
+              if (today.getDate() >= targetDate) {
+                nextStartDate.setMonth(today.getMonth() + 1);
+                nextStartDate.setDate(targetDate);
+                // otherwise set the date with the current month
+              } else {
+                nextStartDate.setDate(targetDate);
+              }
+            } else { // cycleFrequency === yearly
+              // set to next year if current date is past the start date
+              nextStartDate.setYear(today.getYear() + 1);
+            }
+            console.log('next start date: ', nextStartDate);
           }
 
           // create a stripe price ID
