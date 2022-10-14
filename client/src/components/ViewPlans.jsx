@@ -1,12 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation } from '@apollo/client';
 import Button from '@mui/material/Button';
 import { ViewAllPlans as GET_ALL_PLANS } from '../graphql/queries.gql';
 import { EditPayment as EDIT_PAYMENT } from '../graphql/mutations.gql';
+import ConfirmCancel from './ConfirmCancel.jsx';
 
-export default function ViewPlans() {
+export default function ViewPlans({ user }) {
   const navigate = useNavigate();
+  const [modal, setModal] = useState(null);
+  const [planToCancel, setPlanToCancel] = useState(null);
 
   const { loading, data, error } = useQuery(GET_ALL_PLANS, {
     fetchPolicy: 'network-only',
@@ -24,9 +27,16 @@ export default function ViewPlans() {
     onError: ({ message }) => { console.log(message); }
   });
 
+  const handleSubsCancel = (plan) => {
+    const { subscriptionId } = plan;
+    setModal('confirmCancel');
+    setPlanToCancel(plan);
+  };
+
   return (
     <div>
       <h1>This is the ViewSubscriptions page to list all subscriptions</h1>
+      {modal === 'confirmCancel' && (<ConfirmCancel planToCancel={planToCancel} setModal={setModal} user={user} />)}
       <Button variant="contained" onClick={() => { navigate('/dashboard'); }}>Dashboard</Button>
       <Button variant="contained" onClick={() => { submitEditPayment(); }}>Manage Payment Methods</Button>
       {data
@@ -35,7 +45,7 @@ export default function ViewPlans() {
             <h2>{plan.name}</h2>
             <div>
               Owned by:&nbsp;
-              {plan.owner.firstName.concat(' ', plan.owner.lastName)}
+              {plan.owner.username !== user ? plan.owner.firstName.concat(' ', plan.owner.lastName) : 'you'}
             </div>
             <div>{`Total Plan Cost: $${plan.perCycleCost} ${plan.cycleFrequency.toLowerCase()}`}</div>
             {plan.activeMembers.length > 0 && (
@@ -45,13 +55,23 @@ export default function ViewPlans() {
                   {plan.activeMembers.map((member) => (
                     <li key={member.username}>{`${member.firstName} ${member.lastName} x ${member.quantity}`}</li>
                   ))}
+                  <li>{`you x ${plan.quantity}`}</li>
                 </ul>
               </>
             )}
             {plan.activeMembers.length === 0
               && (<div>There are currently no members on this plan.</div>)}
+            <button
+              type="button"
+              onClick={() => { handleSubsCancel(plan); }}
+              disabled={plan.activeMembers.length === 0}
+            >
+              Cancel subscription
+            </button>
           </div>
         )))}
+      {data && data.viewAllPlans.length === 0
+        && (<div>You are not enrolled in any plans at the moment.</div>)}
     </div>
   );
 }

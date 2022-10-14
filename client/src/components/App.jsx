@@ -65,7 +65,7 @@ function App() {
       />
       <Route path="/cards" element={user ? <Cards /> : <Navigate to="/" />} />
       <Route path="/checkout" element={user ? <Checkout stripeClientSecret={stripeClientSecret} /> : <Navigate to="/" />} />
-      <Route path="/plan/all" element={user ? <ViewPlans /> : <Navigate to="/" />} />
+      <Route path="/plan/all" element={user ? <ViewPlans user={user} /> : <Navigate to="/" />} />
       <Route path="/payment-success" element={user ? <PaymentSuccess /> : <Navigate to="/" />} />
       <Route path="/404" element={<FourOhFour />} />
       <Route path="*" element={<FourOhFour />} />

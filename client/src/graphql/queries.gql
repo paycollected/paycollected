@@ -39,5 +39,8 @@ query ViewAllPlans {
       username
       quantity
     }
+    quantity
+    subscriptionId
+    subscriptionItemId
   }
 }
