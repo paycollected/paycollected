@@ -9,6 +9,7 @@ import * as models from '../db/models.js';
 import {
   unsubscribe as unsubscribeResolver, unsubscribeAsOwner as unsubscribeAsOwnerResolver
 } from './plans/unsubscribe.js';
+import editQuantityResolver from './plans/editQuantity';
 
 const saltRounds = 10;
 const stripe = stripeSDK(process.env.STRIPE_SECRET_KEY);
@@ -395,10 +396,14 @@ export default {
       }
     },
 
-    editQuantity: async (_, { }, { user, err }) => {
+    editQuantity: async (_, { subscriptionId, newQuantity }, { user, err }) => {
       if (user) {
-
-
+        const { username } = user;
+        try {
+          return await editQuantityResolver(subscriptionId, newQuantity, username);
+        } catch (e) {
+          throw new ApolloError('Cannot change quantity');
+        }
       } else if (err === 'Incorrect token' || err === 'Token has expired') {
         throw new AuthenticationError(err);
       } else if (err === 'Unauthorized request') {

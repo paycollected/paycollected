@@ -173,6 +173,8 @@ export function startSubscription(planId, quantity, subscriptionId, subscription
     SELECT
       username,
       email,
+      subscription_id AS "subscriptionId",
+      subscription_item_id AS "subscriptionItemId",
       quantity
     FROM user_on_plan
     WHERE plan_id = $4 AND subscription_id != $2
@@ -193,6 +195,7 @@ export function updatePriceIdGetMembers(subscriptionId, newPriceId, productId) {
       username,
       email,
       subscription_id AS "subscriptionId",
+      subscription_item_id AS "subscriptionItemId",
       quantity
     FROM user_on_plan
     WHERE plan_id = $3 AND subscription_id != $1
@@ -240,4 +243,12 @@ export function delSubUpdatePlanOwner(newOwner, planId, subscriptionId) {
     SET plan_owner = True
     WHERE username = $1 AND plan_id =$2`;
   return pool.query(query, [newOwner, planId, subscriptionId]);
+}
+
+export function getSubsItemId(subscriptionId, username) {
+  const query = `
+    SELECT subscription_item_id AS "subscriptionItemId"
+    FROM user_plan
+    WHERE subscription_id = $1 AND username = $2`;
+  return pool.query(query, [subscriptionId, username]);
 }

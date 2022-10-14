@@ -34,15 +34,15 @@ webhook.post('/webhook', express.raw({type: 'application/json'}), async (req, re
       break;
     case 'setup_intent.succeeded': // someone new joining plan
       setupIntent = event.data.object;
-      helpers.handleSubscriptionStart(setupIntent);
+      await helpers.handleSubscriptionStart(setupIntent);
       break;
     case 'customer.subscription.deleted':
       subscription = event.data.object;
       // handle special case of plan owner deleting subscription!
       // if plan owner and there are still active members --> transfer ownership
-      // if plan owner and no active members --> disable option to transfer ownership & manually cancel subscription
+      // if plan owner and no active members --> disable option to transfer ownership
       // can only delete entire plan at this point
-      helpers.handleSubscriptionCancel(subscription);
+      await helpers.handleSubscriptionCancel(subscription);
       break;
     default:
       console.log(`Unhandled event type ${event.type}`);
