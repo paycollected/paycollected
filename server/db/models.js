@@ -279,3 +279,17 @@ export function updatePriceIdAndSubsQuant(newPriceId, productId, newQuantity, su
   `;
   return pool.query(query, [newPriceId, productId, newQuantity, subscriptionId])
 }
+
+export function getMembersOnPlan(planId, subscriptionId) {
+  const query = `
+  SELECT
+    username,
+    email,
+    subscription_id AS "subscriptionId",
+    subscription_item_id AS "subscriptionItemId",
+    quantity
+  FROM user_on_plan
+  WHERE plan_id = $1 AND subscription_id != $2
+  `;
+  return pool.query(query, [planId, subscriptionId]);
+}

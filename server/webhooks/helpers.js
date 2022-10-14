@@ -104,7 +104,7 @@ export async function handleSubscriptionCancel(subscription) {
           interval: cycleFrequency,
         },
       }),
-      archivePriceId(prevPriceId)
+      stripe.prices.update(prevPriceId, { active: false })
     ]);
 
     const { rows } = await models.updatePriceIdGetMembers(subscriptionId, newPriceId, productId);
@@ -116,5 +116,34 @@ export async function handleSubscriptionCancel(subscription) {
 
   } catch (err) {
     console.log(err);
+  }
+}
+
+
+export async function handleSubscriptionQuantChange(subscription) {
+  // need to know that this is for an incoming quantity change
+  // query all existing users on plan and
+  // adjust their price (need to know new priceId, which is the same as incoming event)
+  // metadata: totalQuantity will be equal to this incoming event's totalQuantity
+  const { id: subscriptionId, items, metadata } = subscription;
+  // console.log('--------------->', JSON.parse(metadata.quantChanged), typeof JSON.parse(metadata.quantChanged));
+  // console.log(JSON.parse(metadata.productTotalQuantity), typeof JSON.parse(metadata.productTotalQuantity));
+
+  if (JSON.parse(metadata.quantChanged)) {
+    const productTotalQuantity = Number(metadata.productTotalQuantity);
+    const { price, quantity } = items.data[0];
+    const { id: priceId, product: productId } = price;
+
+    try {
+      const { rows } = await models.getMembersOnPlan(productId, subscriptionId);
+      if (rows.length > 0) {
+        await Promise.all([
+          ...rows.map((row) => updateStripePrice(row, priceId, productTotalQuantity)),
+          stripe.subscriptions.update(subscriptionId, { metadata: { quantChanged: false } })
+        ]);
+      }
+    } catch (err) {
+      console.log(err);
+    }
   }
 }

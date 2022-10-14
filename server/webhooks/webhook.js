@@ -36,6 +36,10 @@ webhook.post('/webhook', express.raw({type: 'application/json'}), async (req, re
       setupIntent = event.data.object;
       await helpers.handleSubscriptionStart(setupIntent);
       break;
+    case 'customer.subscription.updated':
+      subscription = event.data.object;
+      await helpers.handleSubscriptionQuantChange(subscription);
+      break;
     case 'customer.subscription.deleted':
       subscription = event.data.object;
       // handle special case of plan owner deleting subscription!

@@ -36,7 +36,7 @@ export default async function (subscriptionId, newQuantity, username) {
   } = rows[0];
 
   if (quantity === newQuantity) {
-    throw new Error("No change in quantity");
+    throw new Error('No change in quantity');
   }
 
   const productTotalQuantity = count - quantity + newQuantity;

@@ -285,6 +285,7 @@ export default {
               productTotalQuantity: count + newQuantity,
               cycleFrequency: recurringInterval[cycleFrequency],
               perCycleCost,
+              quantChanged: false,
             }
           });
 
@@ -361,6 +362,7 @@ export default {
           if (e.message === "Subscription doesn't belong to user" || e.message === 'Wrong mutation call') {
             throw new ForbiddenError(e.message);
           } else {
+            console.log(e);
             throw new ApolloError('Cannot unsubscribe');
           }
         }
@@ -402,7 +404,14 @@ export default {
         try {
           return await editQuantityResolver(subscriptionId, newQuantity, username);
         } catch (e) {
-          throw new ApolloError('Cannot change quantity');
+          if (e.message === "Subscription doesn't belong to user") {
+            throw new ForbiddenError(e.message);
+          } else if (e.message === 'No change in quantity') {
+            throw new UserInputError(e.message);
+          } else {
+            console.log(e);
+            throw new ApolloError('Cannot change quantity');
+          }
         }
       } else if (err === 'Incorrect token' || err === 'Token has expired') {
         throw new AuthenticationError(err);
