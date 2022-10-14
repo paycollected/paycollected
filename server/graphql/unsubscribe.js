@@ -2,7 +2,7 @@ import stripeSDK from 'stripe';
 import {
   ApolloError, UserInputError, AuthenticationError, ForbiddenError
 } from 'apollo-server-core';
-import { checkPlanOwner, updatePlanOwner, checkNewOwner } from '../db/models.js';
+import { checkPlanOwner, updatePlanOwner, checkNewOwner, checkSubOnPlan } from '../db/models.js';
 
 const stripe = stripeSDK(process.env.STRIPE_SECRET_KEY);
 
@@ -32,18 +32,25 @@ export async function unsubscribeAsOwner(subscriptionId, planId, username, newOw
 
   const [
     { rows: prevOwnerRows },
-    { rows: newOwnerRows }
+    { rows: newOwnerRows },
+    { rows: planSubRows }
   ] = await Promise.all([
     checkPlanOwner(subscriptionId, username),
-    checkNewOwner(newOwner, planId)
+    // check that this user owns this subscription, and they are indeed owner of this plan
+    checkNewOwner(newOwner, planId),
+    // check that the declared new owner is already a member on the plan
+    checkSubOnPlan(planId, subscriptionId)
+    // check that the planId and subscriptionId combo is valid
   ]);
 
   if (prevOwnerRows.length === 0) {
-    throw new Error('Unauthorized request');
+    throw new Error ('Unauthorized request');
   } else if (!prevOwnerRows[0].planOwner) {
+    // have to call unsubscribe instead of this function
     throw new Error ('Wrong mutation call');
+  } else if (planSubRows.length === 0) {
+    throw new Error ('Incorrect subscription and plan combination');
   } else if (newOwnerRows.length === 0) {
-    // also check that the declared new owner is already a member on the plan
     throw new Error ('New owner is not active member of this plan');
   }
 

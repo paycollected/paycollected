@@ -234,6 +234,14 @@ export function checkNewOwner(newOwner, planId) {
 }
 
 
+export function checkSubOnPlan(planId, subscriptionId) {
+  const query = `
+    SELECT plan_id FROM user_plan WHERE plan_id = $1 AND subscription_id = $2
+  `;
+  return pool.query(query, [planId, subscriptionId]);
+}
+
+
 export function updatePlanOwner(newOwner, planId) {
   const query = `
     UPDATE user_plan
