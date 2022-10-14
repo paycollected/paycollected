@@ -107,7 +107,7 @@ export async function handleSubscriptionCancel(subscription) {
       archivePriceId(prevPriceId)
     ]);
 
-    const { rows } = await models.deleteSubscription(subscriptionId, newPriceId, productId);
+    const { rows } = await models.updatePriceIdGetMembers(subscriptionId, newPriceId, productId);
     if (rows.length > 0) {
       await Promise.all(
         rows.map((row) => updateStripePrice(row, newPriceId, newProductTotalQuantity))

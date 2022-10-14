@@ -200,6 +200,7 @@ export default {
       planName, cycleFrequency, perCycleCost, startDate
     }, { user, err }) => {
       if (user) {
+        const { username } = user;
         try {
           planName = planName.trim();
           cycleFrequency = cycleFrequency.toLowerCase();

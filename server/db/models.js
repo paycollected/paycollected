@@ -194,12 +194,9 @@ export function startSubscription(planId, quantity, subscriptionId, subscription
 }
 
 
-export function deleteSubscription(subscriptionId, newPriceId, productId) {
+export function updatePriceIdGetMembers(subscriptionId, newPriceId, productId) {
   const query = `
-    WITH delete_sub AS (
-      DELETE FROM user_plan WHERE subscription_id = $1
-    ),
-    update_price_id AS (
+    WITH update_price_id AS (
       UPDATE plans SET s_price_id = $2 WHERE s_prod_id = $3
     )
     SELECT
@@ -215,6 +212,11 @@ export function deleteSubscription(subscriptionId, newPriceId, productId) {
   `;
   const args = [subscriptionId, newPriceId, productId];
   return pool.query(query, args);
+}
+
+
+export function deleteSubscription(subscriptionId) {
+  return pool.query('DELETE FROM user_plan WHERE subscription_id = $1', [subscriptionId]);
 }
 
 
@@ -242,10 +244,13 @@ export function checkSubOnPlan(planId, subscriptionId) {
 }
 
 
-export function updatePlanOwner(newOwner, planId) {
+export function delSubUpdatePlanOwner(newOwner, planId, subscriptionId) {
   const query = `
+    WITH del_sub AS (
+      DELETE FROM user_plan WHERE subscription_id = $3
+    )
     UPDATE user_plan
     SET plan_owner = True
     WHERE username = $1 AND plan_id =$2`;
-  return pool.query(query, [newOwner, planId]);
+  return pool.query(query, [newOwner, planId, subscriptionId]);
 }
