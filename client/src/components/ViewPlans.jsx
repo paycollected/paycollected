@@ -62,7 +62,13 @@ export default function ViewPlans({ user }) {
             )}
             {plan.activeMembers.length === 0
               && (<div>There are currently no members on this plan.</div>)}
-            <button type="button" onClick={() => { handleSubsCancel(plan); }}>Cancel subscription</button>
+            <button
+              type="button"
+              onClick={() => { handleSubsCancel(plan); }}
+              disabled={plan.activeMembers.length === 0}
+            >
+              Cancel subscription
+            </button>
           </div>
         )))}
       {data && data.viewAllPlans.length === 0
