@@ -7,10 +7,9 @@ export default gql`
   }
 
   type PlanMember {
-    stripeCusId: ID # nullable for plan owner who has just joined and does not have Stripe Cus ID yet
     firstName: String!
     lastName: String!
-    username: String!
+    username: ID!
     quantity: Int # 0 means not paying # nullable because quantity for owner field is null
   }
 

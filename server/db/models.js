@@ -49,7 +49,7 @@ export function viewOnePlan(planId) {
       p.plan_name AS name,
       UPPER(p.cycle_frequency::VARCHAR) AS "cycleFrequency",
       p.per_cycle_cost AS "perCycleCost",
-      json_build_object('firstName', u.first_name, 'lastName', u.last_name, 'username', u.username, 'stripeCusId', u.s_cus_id) AS owner
+      json_build_object('firstName', u.first_name, 'lastName', u.last_name, 'username', u.username) AS owner
     FROM plans p
     JOIN user_plan up
     ON p.s_prod_id = up.plan_id
@@ -65,15 +65,12 @@ export function membersOnOnePlan(planId, username) {
   // does not include the user requesting this info
   const query = `
     SELECT
-      up.username AS username,
-      u.s_cus_id AS "stripeCusId",
-      u.first_name AS "firstName",
-      u.last_name AS "lastName",
-      up.quantity AS quantity
-    FROM user_plan up
-    JOIN users u
-    ON up.username = u.username
-    WHERE up.quantity > 0 AND up.plan_id = $1 AND up.username != $2`;
+      username,
+      first_name AS "firstName",
+      last_name AS "lastName",
+      quantity
+    FROM user_on_plan
+    WHERE quantity > 0 AND plan_id = $1 AND username != $2`;
 
   return pool.query(query, [planId, username]);
 }
@@ -108,8 +105,7 @@ export function viewAllPlans(username) {
       (
         'firstName', u.first_name,
         'lastName', u.last_name,
-        'username', u.username,
-        'stripeCusId', u.s_cus_id
+        'username', u.username
       ) AS owner
     FROM select1
     JOIN user_plan up
@@ -177,15 +173,13 @@ export function startSubscription(planId, quantity, subscriptionId, subscription
       UPDATE plans SET s_price_id = $6 WHERE s_prod_id = $4
     )
     SELECT
-      up.username,
-      u.email,
-      up.subscription_id AS "subscriptionId",
-      up.subscription_item_id AS "subscriptionItemId",
-      up.quantity
-    FROM user_plan up
-    JOIN users u
-    ON up.username = u.username
-    WHERE up.plan_id = $4 AND up.subscription_id != $2
+      username,
+      email,
+      subscription_id AS "subscriptionId",
+      subscription_item_id AS "subscriptionItemId",
+      quantity
+    FROM user_on_plan
+    WHERE plan_id = $4 AND subscription_id != $2
   `;
 
   const args = [quantity, subscriptionId, subscriptionItemId, planId, username, newPriceId];
@@ -200,15 +194,13 @@ export function updatePriceIdGetMembers(subscriptionId, newPriceId, productId) {
       UPDATE plans SET s_price_id = $2 WHERE s_prod_id = $3
     )
     SELECT
-      up.username,
-      u.email,
-      up.subscription_id AS "subscriptionId",
-      up.subscription_item_id AS "subscriptionItemId",
-      up.quantity
-    FROM user_plan up
-    JOIN users u
-    ON up.username = u.username
-    WHERE up.plan_id = $3 AND up.subscription_id != $1
+      username,
+      email,
+      subscription_id AS "subscriptionId",
+      subscription_item_id AS "subscriptionItemId",
+      quantity
+    FROM user_on_plan
+    WHERE plan_id = $3 AND subscription_id != $1
   `;
   const args = [subscriptionId, newPriceId, productId];
   return pool.query(query, args);
