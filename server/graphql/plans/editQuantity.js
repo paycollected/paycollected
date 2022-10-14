@@ -21,11 +21,6 @@ export default async function (subscriptionId, newQuantity, username) {
   // (1) call stripe API to edit quantity and price ID for this subscription,
   // subs metadata: update totalQuantity
   // and (2) edit quantity of this subscription in our db & update priceId
-  // Webhook:
-  // need to know that this is for an incoming quantity change
-  // query all existing users on plan and
-  // adjust their price (need to know new priceId, which is the same as incoming event)
-  // metadata: totalQuantity will be equal to this incoming event's totalQuantity
   const { rows } = await getSubsItemIdAndProductInfo(subscriptionId, username);
   if (rows.length === 0) {
     throw new Error("Subscription doesn't belong to user");
