@@ -1,12 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation } from '@apollo/client';
 import Button from '@mui/material/Button';
 import { ViewAllPlans as GET_ALL_PLANS } from '../graphql/queries.gql';
 import { EditPayment as EDIT_PAYMENT } from '../graphql/mutations.gql';
+import ConfirmCancel from './ConfirmCancel.jsx';
 
 export default function ViewPlans({ user }) {
   const navigate = useNavigate();
+  const [modal, setModal] = useState(null);
+  const [planToCancel, setPlanToCancel] = useState(null);
 
   const { loading, data, error } = useQuery(GET_ALL_PLANS, {
     fetchPolicy: 'network-only',
@@ -24,19 +27,17 @@ export default function ViewPlans({ user }) {
     onError: ({ message }) => { console.log(message); }
   });
 
-  const handleSubsCancelNotOwner = (plan) => {
+  const handleSubsCancel = (plan) => {
     const { subscriptionId } = plan;
-    console.log(subscriptionId);
-  };
-
-  const handleSubsCancelOwner = (plan) => {
-    const { subscriptionId } = plan;
+    setModal('confirmCancel');
+    setPlanToCancel(plan);
     console.log(subscriptionId);
   };
 
   return (
     <div>
       <h1>This is the ViewSubscriptions page to list all subscriptions</h1>
+      {modal === 'confirmCancel' && (<ConfirmCancel planToCancel={planToCancel} setModal={setModal} user={user} />)}
       <Button variant="contained" onClick={() => { navigate('/dashboard'); }}>Dashboard</Button>
       <Button variant="contained" onClick={() => { submitEditPayment(); }}>Manage Payment Methods</Button>
       {data
@@ -61,10 +62,7 @@ export default function ViewPlans({ user }) {
             )}
             {plan.activeMembers.length === 0
               && (<div>There are currently no members on this plan.</div>)}
-            {plan.owner.username !== user
-              ? (<button type="button" onClick={() => { handleSubsCancelNotOwner(plan); }}>Cancel subscription</button>)
-              : (<button type="button" onClick={() => { handleSubsCancelOwner(plan); }}>Cancel subscription</button>)
-            }
+            <button type="button" onClick={() => { handleSubsCancel(plan); }}>Cancel subscription</button>
           </div>
         )))}
       {data && data.viewAllPlans.length === 0

@@ -40,7 +40,8 @@ webhook.post('/webhook', express.raw({type: 'application/json'}), async (req, re
       subscription = event.data.object;
       // handle special case of plan owner deleting subscription!
       // if plan owner and there are still active members --> transfer ownership
-      // if plan owner and no active members --> disable option to transfer ownership, cancellation will also delete plan
+      // if plan owner and no active members --> disable option to transfer ownership & manually cancel subscription
+      // can only delete entire plan at this point
       helpers.handleSubscriptionCancel(subscription);
       break;
     default:
