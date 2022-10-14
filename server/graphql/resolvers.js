@@ -384,7 +384,8 @@ export default {
           || e.message === 'Cannot transfer ownership to self') {
             throw new UserInputError(e.message);
           } else {
-          throw new ApolloError('Cannot unsubscribe');
+            console.log(e);
+            throw new ApolloError('Cannot unsubscribe');
           }
         }
       } else if (err === 'Incorrect token' || err === 'Token has expired') {
