@@ -15,7 +15,7 @@ export async function unsubscribe(subscriptionId, username) {
   const { rows } = await checkPlanOwner(subscriptionId, username);
   if (rows.length === 0) {
     // if signed-in user is not actually owner of this subscription, rows.length = 0
-    throw new Error('Unauthorized request');
+    throw new Error("Subscription doesn't belong to user");
   } else if (rows[0].planOwner) {
     // if signed-in user is plan owner of this plan, will return true
     // --> cannot call this function but have to call unsubscribeAsOwner to transfer ownership
@@ -47,7 +47,7 @@ export async function unsubscribeAsOwner(subscriptionId, planId, username, newOw
   ]);
 
   if (prevOwnerRows.length === 0) {
-    throw new Error ('Unauthorized request');
+    throw new Error ("Subscription doesn't belong to user");
   } else if (!prevOwnerRows[0].planOwner) {
     // have to call unsubscribe instead of this function
     throw new Error ('Wrong mutation call');
