@@ -126,8 +126,7 @@ export async function handleSubscriptionQuantChange(subscription) {
   // adjust their price (need to know new priceId, which is the same as incoming event)
   // metadata: totalQuantity will be equal to this incoming event's totalQuantity
   const { id: subscriptionId, items, metadata } = subscription;
-  // console.log('--------------->', JSON.parse(metadata.quantChanged), typeof JSON.parse(metadata.quantChanged));
-  // console.log(JSON.parse(metadata.productTotalQuantity), typeof JSON.parse(metadata.productTotalQuantity));
+
 
   if (JSON.parse(metadata.quantChanged)) {
     const productTotalQuantity = Number(metadata.productTotalQuantity);
