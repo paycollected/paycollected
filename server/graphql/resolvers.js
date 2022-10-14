@@ -252,7 +252,6 @@ export default {
               interval: recurringInterval[cycleFrequency],
               // could consider allowing customers to do interval count in the future?
             },
-            proration_behavior: 'none',
           });
 
           // create a Stripe subscription
@@ -268,7 +267,8 @@ export default {
               payment_method_types: ['link', 'card'],
             },
             trial_end: nextStartDate,
-            expand: ['pending_setup_intent']
+            expand: ['pending_setup_intent'],
+            proration_behavior: 'none',
           });
 
           const { id: setupIntentId, client_secret: clientSecret } = pending_setup_intent;
