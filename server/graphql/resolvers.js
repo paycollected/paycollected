@@ -357,8 +357,8 @@ export default {
         try {
           return await unsubscribeResolver(subscriptionId, username);
         } catch (e) {
-          if (e.message === 'Unauthorized request' || 'Wrong mutation call') {
-            throw new ForbiddenError(e);
+          if (e.message === 'Unauthorized request' || e.message === 'Wrong mutation call') {
+            throw new ForbiddenError(e.message);
           } else {
             throw new ApolloError('Cannot unsubscribe');
           }
@@ -376,8 +376,13 @@ export default {
         try {
           return await unsubscribeAsOwnerResolver(subscriptionId, planId, username, newOwner);
         } catch (e) {
-          if (e.message === 'Unauthorized request' || 'Wrong mutation call' || 'Impossible request') {
-            throw new ForbiddenError(e);
+          if (e.message === 'Unauthorized request'
+          || e.message === 'Wrong mutation call'
+          || e.message === 'Cannot transfer ownership to self') {
+            throw new ForbiddenError(e.message);
+          } else if (e.message === 'New owner is not active member of this plan'
+          || e.message === 'Incorrect subscription and plan combination') {
+            throw new UserInputError(e.message);
           } else {
           throw new ApolloError('Cannot unsubscribe');
           }
