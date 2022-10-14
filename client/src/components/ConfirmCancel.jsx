@@ -4,6 +4,7 @@ import {
   Unsubscribe as UNSUBSCRIBE,
   UnsubscribeAsPlanOwner as UNSUBSCRIBE_AS_OWNER
 } from '../graphql/mutations.gql';
+import { ViewAllPlans as GET_ALL_PLANS } from '../graphql/queries.gql';
 
 export default function ConfirmCancel({ planToCancel: plan, setModal, user }) {
   // const { plan, owner } = planToCancel;
@@ -16,7 +17,8 @@ export default function ConfirmCancel({ planToCancel: plan, setModal, user }) {
   const [confirmUnsubscribe, { data, loading, error }] = useMutation(UNSUBSCRIBE, {
     onCompleted: () => {
       setModal(null);
-    }
+    },
+    refetchQueries: [{ query: GET_ALL_PLANS }, 'ViewAllPlans'],
   });
 
   const [
