@@ -83,12 +83,12 @@ export default gql`
     unsubscribe(
       subscriptionId: ID!
       # planId: String!
-    ): Boolean!
+    ): String!
 
     unsubscribeAsOwner(
       subscriptionId: ID!
       # planId: ID!
       newOwner: String!
-    ): Boolean!
+    ): String!
   }
 `;

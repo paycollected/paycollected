@@ -35,3 +35,7 @@ mutation EditPayment {
     portalSessionURL
   }
 }
+
+mutation Unsubscribe ($subscriptionId: ID!) {
+  unsubscribe(subscriptionId: $subscriptionId)
+}

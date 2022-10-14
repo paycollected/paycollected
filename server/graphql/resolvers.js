@@ -348,10 +348,18 @@ export default {
       }
     },
 
-    unsubscribe: (_, { subscriptionId }, { user, err }) => {
+    unsubscribe: async (_, { subscriptionId }, { user, err }) => {
       if (user) {
         const { username } = user;
-        unsubscribeResolver(subscriptionId, username);
+        try {
+          return await unsubscribeResolver(subscriptionId, username);
+        } catch (e) {
+          if (e.message === 'Unauthorized request' || 'Wrong mutation call') {
+            throw new ForbiddenError(e);
+          } else {
+            throw new ApolloError('Cannot unsubscribe');
+          }
+        }
       } else if (err === 'Incorrect token' || err === 'Token has expired') {
         throw new AuthenticationError(err);
       } else if (err === 'Unauthorized request') {
