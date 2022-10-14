@@ -8,7 +8,9 @@ import { ViewAllPlans as GET_ALL_PLANS } from '../graphql/queries.gql';
 
 export default function ConfirmCancel({ planToCancel: plan, setModal, user }) {
   const { subscriptionId, planId, activeMembers, owner } = plan;
-  const [newOwner, setNewOwner] = useState(activeMembers.length > 0 ? activeMembers[0].username : null);
+  const [newOwner, setNewOwner] = useState(
+    activeMembers.length > 0 ? activeMembers[0].username : null
+  );
   const members = activeMembers.map((member) => (member.firstName));
   const membersStr = members.length > 1
     ? members.slice(0, -1).join(', ').concat(', and ', members[members.length - 1])
@@ -42,8 +44,6 @@ export default function ConfirmCancel({ planToCancel: plan, setModal, user }) {
       });
     }
   };
-
-  console.log(newOwner);
 
   return (
     <div
