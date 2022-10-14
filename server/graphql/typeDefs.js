@@ -81,13 +81,12 @@ export default gql`
     editPayment: PortalSession!
 
     unsubscribe(
-      subscriptionId: ID!
-      # planId: String!
+      subscriptionId: String!
     ): String!
 
     unsubscribeAsOwner(
-      subscriptionId: ID!
-      # planId: ID!
+      subscriptionId: String!
+      planId: String!
       newOwner: String!
     ): String!
   }

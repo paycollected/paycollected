@@ -6,7 +6,9 @@ import {
 } from 'apollo-server-core';
 import { isFuture } from 'date-fns';
 import * as models from '../db/models.js';
-import { unsubscribe as unsubscribeResolver } from './unsubscribe.js';
+import {
+  unsubscribe as unsubscribeResolver, unsubscribeAsOwner as unsubscribeAsOwnerResolver
+} from './unsubscribe.js';
 
 const saltRounds = 10;
 const stripe = stripeSDK(process.env.STRIPE_SECRET_KEY);
@@ -358,6 +360,25 @@ export default {
             throw new ForbiddenError(e);
           } else {
             throw new ApolloError('Cannot unsubscribe');
+          }
+        }
+      } else if (err === 'Incorrect token' || err === 'Token has expired') {
+        throw new AuthenticationError(err);
+      } else if (err === 'Unauthorized request') {
+        throw new ForbiddenError(err);
+      }
+    },
+
+    unsubscribeAsOwner: async (_, { subscriptionId, planId, newOwner }, { user, err }) => {
+      if (user) {
+        const { username } = user;
+        try {
+          return await unsubscribeAsOwnerResolver(subscriptionId, planId, username, newOwner);
+        } catch (e) {
+          if (e.message === 'Unauthorized request' || 'Wrong mutation call' || 'Impossible request') {
+            throw new ForbiddenError(e);
+          } else {
+          throw new ApolloError('Cannot unsubscribe');
           }
         }
       } else if (err === 'Incorrect token' || err === 'Token has expired') {

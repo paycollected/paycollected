@@ -219,6 +219,25 @@ export function deleteSubscription(subscriptionId, newPriceId, productId) {
 
 
 export function checkPlanOwner(subscriptionId, username) {
-  const query = `SELECT plan_owner AS "planOwner" FROM user_plan WHERE subscription_id = $1 AND username = $2`;
+  const query = `
+    SELECT plan_owner AS "planOwner"
+    FROM user_plan
+    WHERE subscription_id = $1 AND username = $2`;
   return pool.query(query, [subscriptionId, username]);
+}
+
+export function checkNewOwner(newOwner, planId) {
+  const query = `
+    SELECT username FROM user_plan WHERE username = $1 AND plan_id = $2
+  `;
+  return pool.query(query, [newOwner, planId]);
+}
+
+
+export function updatePlanOwner(newOwner, planId) {
+  const query = `
+    UPDATE user_plan
+    SET plan_owner = True
+    WHERE username = $1 AND plan_id =$2`;
+  return pool.query(query, [newOwner, planId]);
 }
