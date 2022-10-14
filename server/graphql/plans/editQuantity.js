@@ -34,6 +34,11 @@ export default async function (subscriptionId, newQuantity, username) {
   const {
     product, subscriptionItemId, cycleFrequency, perCycleCost, count, quantity, prevPriceId
   } = rows[0];
+
+  if (quantity === newQuantity) {
+    throw new Error("No change in quantity");
+  }
+
   const productTotalQuantity = count - quantity + newQuantity;
 
   const [{ id: price }, _] = await Promise.all([
