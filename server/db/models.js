@@ -49,7 +49,11 @@ export function viewOnePlan(planId) {
       p.plan_name AS name,
       UPPER(p.cycle_frequency::VARCHAR) AS "cycleFrequency",
       p.per_cycle_cost AS "perCycleCost",
-      json_build_object('firstName', u.first_name, 'lastName', u.last_name, 'username', u.username) AS owner
+      json_build_object(
+        'firstName', u.first_name,
+        'lastName', u.last_name,
+        'username', u.username
+      ) AS owner
     FROM plans p
     JOIN user_plan up
     ON p.s_prod_id = up.plan_id
@@ -118,7 +122,12 @@ export function viewAllPlans(username) {
 
 export function getUserInfo(username) {
   const query = `
-    SELECT s_cus_id AS "stripeCusId", first_name AS "firstName", last_name AS "lastName", email, password
+    SELECT
+      s_cus_id AS "stripeCusId",
+      first_name AS "firstName",
+      last_name AS "lastName",
+      email,
+      password
     FROM users
     WHERE username = $1`;
   return pool.query(query, [username]);
@@ -128,12 +137,21 @@ export function getUserInfo(username) {
 export function joinPlan(username, planId) {
   const query = `
     WITH pup AS (
-      SELECT p.cycle_frequency, p.per_cycle_cost, p.start_date, p.s_price_id, SUM (up.quantity) AS count
+      SELECT
+        p.cycle_frequency,
+        p.per_cycle_cost,
+        p.start_date,
+        p.s_price_id,
+        SUM (up.quantity) AS count
       FROM plans p
       JOIN user_plan up
       ON p.s_prod_id = up.plan_id
       WHERE p.s_prod_id = $2
-      GROUP BY p.cycle_frequency, p.per_cycle_cost, p.start_date, p.s_price_id
+      GROUP BY
+        p.cycle_frequency,
+        p.per_cycle_cost,
+        p.start_date,
+        p.s_price_id
     ),
     up AS (
       SELECT quantity
@@ -149,7 +167,14 @@ export function joinPlan(username, planId) {
         (SELECT count::INTEGER FROM pup),
         (SELECT quantity FROM up)
       )
-    ) AS t ("cycleFrequency", "perCycleCost", "startDate", "prevPriceId", count, quantity)
+    ) AS t (
+      "cycleFrequency",
+      "perCycleCost",
+      "startDate",
+      "prevPriceId",
+      count,
+      quantity
+    )
   `;
 
   return pool.query(query, [username, planId]);
