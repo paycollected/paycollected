@@ -37,6 +37,5 @@ query ViewAllPlans {
     }
     quantity
     subscriptionId
-    subscriptionItemId
   }
 }
