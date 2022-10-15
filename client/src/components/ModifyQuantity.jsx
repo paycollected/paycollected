@@ -9,11 +9,7 @@ export default function ModifyQuantity({
   const [inputErr, setInputErr] = useState(null);
 
   useEffect(() => {
-    if (!regex.test(quantity)) {
-      setInputErr('Invalid input! Only 1 through 6 please.');
-    } else if (inputErr && regex.test(quantity)) {
-      setInputErr(null);
-    }
+    setInputErr(null);
   }, [quantity]);
 
   // maybe allow only up to 6 units per plan
@@ -21,6 +17,8 @@ export default function ModifyQuantity({
   const handleSubmit = () => {
     if (quantity === originalQuant.toString()) {
       setInputErr('Please submit a quantity different from your original.');
+    } else if (!regex.test(quantity) || quantity.length > 1) {
+      setInputErr('Invalid input! Only 1 through 6 please.');
     } else {
       setPlanToModify(plan);
       setNewQuant(Number(quantity));
@@ -38,6 +36,7 @@ export default function ModifyQuantity({
     }}
     >
       {inputErr && (<p>{inputErr}</p>)}
+      {console.log(inputErr)}
       <div style={{
         display: 'grid',
         gridRow: '2 / 3',
@@ -48,7 +47,7 @@ export default function ModifyQuantity({
       >
         <button
           type="button"
-          disabled={Number(quantity) === 1 }
+          disabled={Number(quantity) === 1}
           onClick={
             () => {
               if (!isNaN(Number(quantity))) {
@@ -61,10 +60,11 @@ export default function ModifyQuantity({
         </button>
         <input
           type="text"
+          maxLength="1"
           value={quantity}
           onChange={(e) => {
             setQuantity(e.target.value);
-            setInputErr(null);
+            // setInputErr(null);
           }}
           style={{ width: '20px' }}
         />
