@@ -298,15 +298,11 @@ export default {
             proration_behavior: 'none',
             trial_end: nextStartDate,
             expand: ['pending_setup_intent'],
-<<<<<<< HEAD
-            proration_behavior: 'none',
-=======
             metadata: {
               productTotalQuantity: count + newQuantity,
               cycleFrequency: recurringInterval[cycleFrequency],
               perCycleCost,
             }
->>>>>>> main
           });
 
           const { id: setupIntentId, client_secret: clientSecret } = pending_setup_intent;
