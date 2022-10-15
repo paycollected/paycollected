@@ -6,6 +6,7 @@ import { ViewAllPlans as GET_ALL_PLANS } from '../graphql/queries.gql';
 import { EditPayment as EDIT_PAYMENT } from '../graphql/mutations.gql';
 import ConfirmCancel from './ConfirmCancel.jsx';
 import ModifyQuantity from './ModifyQuantity.jsx';
+import ConfirmModifyQuant from './ConfirmModifyQuant.jsx';
 
 export default function ViewPlans({ user }) {
   const navigate = useNavigate();
@@ -38,6 +39,7 @@ export default function ViewPlans({ user }) {
     <div>
       <h1>This is the ViewSubscriptions page to list all subscriptions</h1>
       {modal === 'confirmCancel' && (<ConfirmCancel plan={planToModify} setModal={setModal} user={user} />)}
+      {modal === 'confirmQuantChange' && (<ConfirmModifyQuant plan={planToModify} setModal={setModal} newQuantity={newQuant} />)}
       <Button variant="contained" onClick={() => { navigate('/dashboard'); }}>Dashboard</Button>
       <Button variant="contained" onClick={() => { submitEditPayment(); }}>Manage Payment Methods</Button>
       {data
@@ -75,6 +77,8 @@ export default function ViewPlans({ user }) {
                 quantity={plan.quantity}
                 setModal={setModal}
                 setNewQuant={setNewQuant}
+                plan={plan}
+                setPlanToModify={setPlanToModify}
               />
               <button
                 type="button"

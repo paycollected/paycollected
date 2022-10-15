@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 
 const regex = /[1-6]/;
 
-export default function ModifyQuantity({ quantity: originalQuant, setModal, setNewQuant }) {
+export default function ModifyQuantity({
+  quantity: originalQuant, setModal, setNewQuant, plan, setPlanToModify
+}) {
   const [quantity, setQuantity] = useState(originalQuant.toString());
   const [inputErr, setInputErr] = useState(null);
 
@@ -20,6 +22,7 @@ export default function ModifyQuantity({ quantity: originalQuant, setModal, setN
     if (quantity === originalQuant.toString()) {
       setInputErr('Please submit a quantity different from your original.');
     } else {
+      setPlanToModify(plan);
       setNewQuant(Number(quantity));
       setModal('confirmQuantChange');
     }
