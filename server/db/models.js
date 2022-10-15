@@ -264,7 +264,8 @@ export function getSubsItemIdAndProductInfo(subscriptionId, username) {
     FROM user_plan up
     JOIN plans p
     ON up.plan_id = p.s_prod_id
-    JOIN c ON up.plan_id = c.plan_id
+    JOIN c
+    ON up.plan_id = c.plan_id
     WHERE up.subscription_id = $1 and up.username = $2`;
   return pool.query(query, [subscriptionId, username]);
 }
