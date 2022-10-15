@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form';
 import {
   Button, Input, InputGroup, InputRightElement
 } from '@chakra-ui/react';
+import { ViewIcon, ViewOffIcon } from '@chakra-ui/icons';
 import { LogIn as LOG_IN } from '../graphql/mutations.gql';
 
 export default function Login({ setUser, planToJoin }) {
@@ -93,7 +94,7 @@ export default function Login({ setUser, planToJoin }) {
           />
           <InputRightElement>
             <Button onClick={() => setShowPassword(!showPassword)}>
-              {showPassword ? 'Hide' : 'Show'}
+              {showPassword ? <ViewIcon /> : <ViewOffIcon />}
             </Button>
           </InputRightElement>
         </InputGroup>
