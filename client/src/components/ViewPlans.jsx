@@ -11,6 +11,7 @@ export default function ViewPlans({ user }) {
   const navigate = useNavigate();
   const [modal, setModal] = useState(null);
   const [planToModify, setPlanToModify] = useState(null);
+  const [newQuant, setNewQuant] = useState(null);
 
   const { loading, data, error } = useQuery(GET_ALL_PLANS, {
     fetchPolicy: 'network-only',
@@ -70,7 +71,11 @@ export default function ViewPlans({ user }) {
                 && (<div>There are currently no other members on this plan.</div>)}
             </div>
             <div style={{ display: 'grid', alignContent: 'center' }}>
-              <ModifyQuantity quantity={plan.quantity} subscriptionId={plan.planId} />
+              <ModifyQuantity
+                quantity={plan.quantity}
+                setModal={setModal}
+                setNewQuant={setNewQuant}
+              />
               <button
                 type="button"
                 onClick={() => { handleSubsModification(plan, 'confirmCancel'); }}

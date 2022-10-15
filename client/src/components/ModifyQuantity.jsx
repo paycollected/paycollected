@@ -1,14 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { useMutation } from '@apollo/client';
-import {
-  Unsubscribe as UNSUBSCRIBE,
-  UnsubscribeAsPlanOwner as UNSUBSCRIBE_AS_OWNER
-} from '../graphql/mutations.gql';
-import { ViewAllPlans as GET_ALL_PLANS } from '../graphql/queries.gql';
 
 const regex = /[1-6]/;
 
-export default function ModifyQuantity({ quantity: originalQuant, subscriptionId }) {
+export default function ModifyQuantity({ quantity: originalQuant, setModal, setNewQuant }) {
   const [quantity, setQuantity] = useState(originalQuant.toString());
   const [inputErr, setInputErr] = useState(null);
 
@@ -21,6 +15,15 @@ export default function ModifyQuantity({ quantity: originalQuant, subscriptionId
   }, [quantity]);
 
   // maybe allow only up to 6 units per plan
+
+  const handleSubmit = () => {
+    if (quantity === originalQuant.toString()) {
+      setInputErr('Please submit a quantity different from your original.');
+    } else {
+      setNewQuant(Number(quantity));
+      setModal('confirmQuantChange');
+    }
+  };
 
   return (
     <div style={{
@@ -78,8 +81,9 @@ export default function ModifyQuantity({ quantity: originalQuant, subscriptionId
       </div>
       <button
         type="button"
-        onClick={() => { }}
+        onClick={handleSubmit}
         style={{ gridRow: '3 / 4' }}
+        disabled={!!inputErr}
       >
         Change quantity
       </button>
