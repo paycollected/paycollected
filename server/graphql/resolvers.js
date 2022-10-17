@@ -89,6 +89,23 @@ export default {
         throw new ForbiddenError(err);
       }
     },
+
+    quantity: async ({ planId }, _ , { user, err }) => {
+      if (user) {
+        const { username } = user;
+        try {
+          const { rows } = await models.quantForUserOnPlan(planId, username);
+          return rows.length > 0 ? rows[0].quantity : 0;
+        } catch (e) {
+          console.log(e);
+          throw new ApolloError('Cannot resolve field quantity for plan');
+        }
+      } else if (err === 'Incorrect token' || err === 'Token has expired') {
+        throw new AuthenticationError(err);
+      } else if (err === 'Unauthorized request') {
+        throw new ForbiddenError(err);
+      }
+    },
   },
 
   Mutation: {

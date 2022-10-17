@@ -28,7 +28,6 @@ export default function ModifyQuantity({
 
   return (
     <div style={{
-      // margin: '1.5rem',
       width: '150px',
       display: 'grid',
       gridTemplateRows: 'repeat(3, max-content)',
