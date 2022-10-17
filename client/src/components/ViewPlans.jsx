@@ -7,6 +7,7 @@ import { EditPayment as EDIT_PAYMENT } from '../graphql/mutations.gql';
 import ConfirmCancel from './ConfirmCancel.jsx';
 import ModifyQuantity from './ModifyQuantity.jsx';
 import ConfirmModifyQuant from './ConfirmModifyQuant.jsx';
+import ConfirmDeletePlan from './ConfirmDeletePlan.jsx';
 
 export default function ViewPlans({ user }) {
   const navigate = useNavigate();
@@ -40,6 +41,7 @@ export default function ViewPlans({ user }) {
       <h1>This is the ViewSubscriptions page to list all subscriptions</h1>
       {modal === 'confirmCancel' && (<ConfirmCancel plan={planToModify} setModal={setModal} user={user} />)}
       {modal === 'confirmQuantChange' && (<ConfirmModifyQuant plan={planToModify} setModal={setModal} newQuantity={newQuant} />)}
+      {modal === 'confirmDeletePlan' && (<ConfirmDeletePlan plan={planToModify} setModal={setModal} />)}
       <Button variant="contained" onClick={() => { navigate('/dashboard'); }}>Dashboard</Button>
       <Button variant="contained" onClick={() => { submitEditPayment(); }}>Manage Payment Methods</Button>
       {data
@@ -72,7 +74,7 @@ export default function ViewPlans({ user }) {
               {plan.activeMembers.length === 0
                 && (<div>There are currently no other members on this plan.</div>)}
             </div>
-            <div style={{ display: 'grid', alignContent: 'center' }}>
+            <div style={{ display: 'grid', alignContent: 'center', gap: '1.5rem' }}>
               <ModifyQuantity
                 quantity={plan.quantity}
                 setModal={setModal}
@@ -88,6 +90,15 @@ export default function ViewPlans({ user }) {
               >
                 Cancel subscription
               </button>
+              {plan.owner.username === user && (
+                <button
+                  type="button"
+                  onClick={() => { handleSubsModification(plan, 'confirmDeletePlan'); }}
+                  style={{ width: '150px', justifySelf: 'center' }}
+                >
+                  Delete plan
+                </button>
+              )}
             </div>
           </div>
         )))}

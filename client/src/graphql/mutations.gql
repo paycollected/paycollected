@@ -52,3 +52,8 @@ mutation UnsubscribeAsPlanOwner($subscriptionId: String!, $planId: String!, $new
 mutation EditQuantity($subscriptionId: String!, $newQuantity: Int!) {
   editQuantity(subscriptionId: $subscriptionId, newQuantity: $newQuantity)
 }
+
+
+mutation DeletePlan($planId: ID!) {
+  deletePlan(planId: $planId)
+}
