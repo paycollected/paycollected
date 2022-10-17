@@ -21,6 +21,8 @@ export default async function (subscriptionId, newQuantity, username) {
   // (1) call stripe API to edit quantity and price ID for this subscription,
   // subs metadata: update totalQuantity
   // and (2) edit quantity of this subscription in our db & update priceId
+
+  // still need to perform check on quantity here to make sure conform to upper limit
   let rows;
   try {
     ({ rows } = await getSubsItemIdAndProductInfo(subscriptionId, username));
