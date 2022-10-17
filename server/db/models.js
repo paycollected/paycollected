@@ -361,11 +361,3 @@ export function deletePlanGetAllSubs(planId) {
   `;
   return pool.query(query, [planId]);
 }
-
-export function quantForUserOnPlan(planId, username) {
-  const query = `
-    SELECT quantity FROM user_plan WHERE plan_id = $1 AND username = $2
-  `;
-  console.log('------------> I was called');
-  return pool.query(query, [planId, username]);
-}
