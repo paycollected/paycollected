@@ -132,15 +132,15 @@ export async function handleSubscriptionQuantChange(subscription) {
   const { id: priceId, product: productId } = price;
 
   try {
-    const { rows } = await models.getMembersOnPlan(productId, subscriptionId);
+    const [{ rows }, _] = await Promise.all([
+      models.getMembersOnPlan(productId, subscriptionId),
+      stripe.subscriptions.update(subscriptionId, { metadata: { quantChanged: false } })
+    ]);
+
     if (rows.length > 0) {
-      await Promise.all([
-        ...rows.map((row) => updateStripePrice(row, priceId, productTotalQuantity)),
-        stripe.subscriptions.update(subscriptionId, { metadata: { quantChanged: false } })
-      ]);
-    } else {
-      await stripe.subscriptions.update(subscriptionId, { metadata: { quantChanged: false } });
+      await Promise.all(rows.map((row) => updateStripePrice(row, priceId, productTotalQuantity)));
     }
+
   } catch (err) {
     console.log(err);
   }
