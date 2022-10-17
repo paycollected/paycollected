@@ -37,3 +37,18 @@ CREATE TABLE IF NOT EXISTS user_plan (
   UNIQUE (username, plan_id)
 );
 
+
+CREATE VIEW user_on_plan AS
+  SELECT
+    up.username,
+    u.first_name,
+    u.last_name,
+    u.email,
+    up.plan_id,
+    up.subscription_id,
+    up.subscription_item_id,
+    up.quantity
+  FROM user_plan up
+  JOIN users u
+  ON up.username = u.username;
+

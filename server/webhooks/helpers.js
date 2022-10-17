@@ -95,7 +95,7 @@ export async function handleSubscriptionCancel(subscription) {
   const newProductTotalQuantity = productTotalQuantity - quantity;
 
   try {
-    const [{ id: newPriceId }, _] = await Promise.all([
+    const [{ id: newPriceId }, _, __] = await Promise.all([
       stripe.prices.create({
         currency: 'usd',
         product: productId,
@@ -104,10 +104,11 @@ export async function handleSubscriptionCancel(subscription) {
           interval: cycleFrequency,
         },
       }),
-      archivePriceId(prevPriceId)
+      stripe.prices.update(prevPriceId, { active: false }),
+      stripe.subscriptions.del(subscriptionId)
     ]);
 
-    const { rows } = await models.updatePriceIdGetMembers(subscriptionId, newPriceId, productId);
+    const { rows } = await models.updatePriceIdGetMembers(newPriceId, productId);
     if (rows.length > 0) {
       await Promise.all(
         rows.map((row) => updateStripePrice(row, newPriceId, newProductTotalQuantity))
@@ -116,5 +117,66 @@ export async function handleSubscriptionCancel(subscription) {
 
   } catch (err) {
     console.log(err);
+  }
+}
+
+
+export async function handleSubscriptionQuantChange(subscription) {
+  // need to know that this is for an incoming quantity change
+  // query all existing users on plan and
+  // adjust their price (need to know new priceId, which is the same as incoming event)
+  // metadata: totalQuantity will be equal to this incoming event's totalQuantity
+  const { id: subscriptionId, items, metadata } = subscription;
+  const productTotalQuantity = Number(metadata.productTotalQuantity);
+  const { price } = items.data[0];
+  const { id: priceId, product: productId } = price;
+
+  try {
+    const { rows } = await models.getMembersOnPlan(productId, subscriptionId);
+    if (rows.length > 0) {
+      await Promise.all([
+        ...rows.map((row) => updateStripePrice(row, priceId, productTotalQuantity)),
+        stripe.subscriptions.update(subscriptionId, { metadata: { quantChanged: false } })
+      ]);
+    } else {
+      await stripe.subscriptions.update(subscriptionId, { metadata: { quantChanged: false } });
+    }
+  } catch (err) {
+    console.log(err);
+  }
+}
+
+
+async function cancelSubsAndNotify(row) {
+  const {
+    firstName,
+    email,
+    subscriptionId,
+  } = row;
+
+  await stripe.subscriptions.del(subscriptionId);
+}
+
+
+export async function handlePlanDelete(subscription) {
+  // archive product
+  // cancel subscriptions for ALL members on plan
+  // delete product in db
+  const { id: subscriptionId, items } = subscription;
+  const { product: productId } = items.data[0].price;
+
+  try {
+    const [{ rows }, _, __] = await Promise.all([
+      models.deletePlanGetAllSubs(productId),
+      stripe.subscriptions.del(subscriptionId),
+      stripe.products.update(productId, { active: false })
+    ]);
+
+    if (rows.length > 0) {
+      await Promise.all(rows.map((row) => cancelSubsAndNotify(row)));
+    }
+
+  } catch(e) {
+    console.log(e);
   }
 }

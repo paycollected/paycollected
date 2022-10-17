@@ -24,6 +24,7 @@ async function startApolloServer() {
     resolvers,
     csrfPrevention: true,
     cache: 'bounded',
+    nodeEnv: 'test',
     context: ({ req }) => {
       const token = req.headers.authorization || '';
       // no Authorization (may be signing up)

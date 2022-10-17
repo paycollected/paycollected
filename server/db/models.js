@@ -43,21 +43,36 @@ export function addPlan(username, planName, cycleFrequency, perCycleCost, produc
 }
 
 
-export function viewOnePlan(planId) {
+export function viewOnePlan(planId, username) {
   const query = `
-    SELECT
-      p.plan_name AS name,
-      UPPER(p.cycle_frequency::VARCHAR) AS "cycleFrequency",
-      p.per_cycle_cost AS "perCycleCost",
-      json_build_object('firstName', u.first_name, 'lastName', u.last_name, 'username', u.username, 'stripeCusId', u.s_cus_id) AS owner
+    WITH select_owner AS (
+      SELECT
+        JSON_BUILD_OBJECT(
+          'firstName', u.first_name,
+          'lastName', u.last_name,
+          'username', u.username
+        ) AS owner
+      FROM users u
+      JOIN user_plan up
+      ON u.username = up.username
+      WHERE up.plan_owner = True AND up.plan_id = $1
+    )
+    SELECT p.s_prod_id AS "planId",
+    p.plan_name AS name,
+    UPPER(p.cycle_frequency::VARCHAR) AS "cycleFrequency",
+    p.per_cycle_cost AS "perCycleCost",
+    COALESCE(
+      ( SELECT quantity
+        FROM user_on_plan
+        WHERE username = $2 AND plan_id = $1
+      ),
+      0
+    ) AS quantity,
+    (SELECT owner FROM select_owner)
     FROM plans p
-    JOIN user_plan up
-    ON p.s_prod_id = up.plan_id
-    JOIN users u
-    ON up.username = u.username
-    WHERE up.plan_owner = True AND p.s_prod_id = $1`;
+    WHERE p.s_prod_id = $1`;
 
-  return pool.query(query, [planId]);
+  return pool.query(query, [planId, username]);
 }
 
 
@@ -65,15 +80,12 @@ export function membersOnOnePlan(planId, username) {
   // does not include the user requesting this info
   const query = `
     SELECT
-      up.username AS username,
-      u.s_cus_id AS "stripeCusId",
-      u.first_name AS "firstName",
-      u.last_name AS "lastName",
-      up.quantity AS quantity
-    FROM user_plan up
-    JOIN users u
-    ON up.username = u.username
-    WHERE up.quantity > 0 AND up.plan_id = $1 AND up.username != $2`;
+      username,
+      first_name AS "firstName",
+      last_name AS "lastName",
+      quantity
+    FROM user_on_plan
+    WHERE quantity > 0 AND plan_id = $1 AND username != $2`;
 
   return pool.query(query, [planId, username]);
 }
@@ -89,7 +101,6 @@ export function viewAllPlans(username) {
           UPPER(p.cycle_frequency::VARCHAR) AS "cycleFrequency",
           p.per_cycle_cost AS "perCycleCost",
           up.subscription_id AS "subscriptionId",
-          up.subscription_item_id AS "subscriptionItemId",
           up.quantity
         FROM plans p
         JOIN user_plan up
@@ -102,21 +113,20 @@ export function viewAllPlans(username) {
       "cycleFrequency",
       "perCycleCost",
       "subscriptionId",
-      "subscriptionItemId",
       select1.quantity,
-      json_build_object
+      JSON_BUILD_OBJECT
       (
         'firstName', u.first_name,
         'lastName', u.last_name,
-        'username', u.username,
-        'stripeCusId', u.s_cus_id
+        'username', u.username
       ) AS owner
     FROM select1
     JOIN user_plan up
     ON "planId" = up.plan_id
     JOIN users u
     ON up.username = u.username
-    WHERE up.plan_owner = True`;
+    WHERE up.plan_owner = True
+    ORDER BY name ASC`;
 
   return pool.query(query, [username]);
 }
@@ -124,7 +134,12 @@ export function viewAllPlans(username) {
 
 export function getUserInfo(username) {
   const query = `
-    SELECT s_cus_id AS "stripeCusId", first_name AS "firstName", last_name AS "lastName", email, password
+    SELECT
+      s_cus_id AS "stripeCusId",
+      first_name AS "firstName",
+      last_name AS "lastName",
+      email,
+      password
     FROM users
     WHERE username = $1`;
   return pool.query(query, [username]);
@@ -134,12 +149,21 @@ export function getUserInfo(username) {
 export function joinPlan(username, planId) {
   const query = `
     WITH pup AS (
-      SELECT p.cycle_frequency, p.per_cycle_cost, p.start_date, p.s_price_id, SUM (up.quantity) AS count
+      SELECT
+        p.cycle_frequency,
+        p.per_cycle_cost,
+        p.start_date,
+        p.s_price_id,
+        SUM (up.quantity) AS count
       FROM plans p
       JOIN user_plan up
       ON p.s_prod_id = up.plan_id
       WHERE p.s_prod_id = $2
-      GROUP BY p.cycle_frequency, p.per_cycle_cost, p.start_date, p.s_price_id
+      GROUP BY
+        p.cycle_frequency,
+        p.per_cycle_cost,
+        p.start_date,
+        p.s_price_id
     ),
     up AS (
       SELECT quantity
@@ -155,7 +179,14 @@ export function joinPlan(username, planId) {
         (SELECT count::INTEGER FROM pup),
         (SELECT quantity FROM up)
       )
-    ) AS t ("cycleFrequency", "perCycleCost", "startDate", "prevPriceId", count, quantity)
+    ) AS t (
+      "cycleFrequency",
+      "perCycleCost",
+      "startDate",
+      "prevPriceId",
+      count,
+      quantity
+    )
   `;
 
   return pool.query(query, [username, planId]);
@@ -177,15 +208,13 @@ export function startSubscription(planId, quantity, subscriptionId, subscription
       UPDATE plans SET s_price_id = $6 WHERE s_prod_id = $4
     )
     SELECT
-      up.username,
-      u.email,
-      up.subscription_id AS "subscriptionId",
-      up.subscription_item_id AS "subscriptionItemId",
-      up.quantity
-    FROM user_plan up
-    JOIN users u
-    ON up.username = u.username
-    WHERE up.plan_id = $4 AND up.subscription_id != $2
+      username,
+      email,
+      subscription_id AS "subscriptionId",
+      subscription_item_id AS "subscriptionItemId",
+      quantity
+    FROM user_on_plan
+    WHERE plan_id = $4 AND subscription_id != $2
   `;
 
   const args = [quantity, subscriptionId, subscriptionItemId, planId, username, newPriceId];
@@ -194,23 +223,21 @@ export function startSubscription(planId, quantity, subscriptionId, subscription
 }
 
 
-export function updatePriceIdGetMembers(subscriptionId, newPriceId, productId) {
+export function updatePriceIdGetMembers(newPriceId, productId) {
   const query = `
     WITH update_price_id AS (
-      UPDATE plans SET s_price_id = $2 WHERE s_prod_id = $3
+      UPDATE plans SET s_price_id = $1 WHERE s_prod_id = $2
     )
     SELECT
-      up.username,
-      u.email,
-      up.subscription_id AS "subscriptionId",
-      up.subscription_item_id AS "subscriptionItemId",
-      up.quantity
-    FROM user_plan up
-    JOIN users u
-    ON up.username = u.username
-    WHERE up.plan_id = $3 AND up.subscription_id != $1
+      username,
+      email,
+      subscription_id AS "subscriptionId",
+      subscription_item_id AS "subscriptionItemId",
+      quantity
+    FROM user_on_plan
+    WHERE plan_id = $2
   `;
-  const args = [subscriptionId, newPriceId, productId];
+  const args = [newPriceId, productId];
   return pool.query(query, args);
 }
 
@@ -220,7 +247,7 @@ export function deleteSubscription(subscriptionId) {
 }
 
 
-export function checkPlanOwner(subscriptionId, username) {
+export function checkPlanOwnerUsingSubsId(subscriptionId, username) {
   const query = `
     SELECT plan_owner AS "planOwner"
     FROM user_plan
@@ -253,4 +280,87 @@ export function delSubUpdatePlanOwner(newOwner, planId, subscriptionId) {
     SET plan_owner = True
     WHERE username = $1 AND plan_id =$2`;
   return pool.query(query, [newOwner, planId, subscriptionId]);
+}
+
+
+export function getSubsItemIdAndProductInfo(subscriptionId, username) {
+  const query = `
+    WITH c AS (
+      SELECT plan_id, SUM(quantity)
+      FROM user_plan
+      GROUP BY plan_id
+    )
+    SELECT
+      up.plan_id AS "product",
+      up.subscription_item_id AS "subscriptionItemId",
+      up.quantity,
+      p.cycle_frequency::VARCHAR AS "cycleFrequency",
+      p.per_cycle_cost AS "perCycleCost",
+      p.s_price_id AS "prevPriceId",
+      c.sum AS count
+    FROM user_plan up
+    JOIN plans p
+    ON up.plan_id = p.s_prod_id
+    JOIN c
+    ON up.plan_id = c.plan_id
+    WHERE up.subscription_id = $1 and up.username = $2`;
+  return pool.query(query, [subscriptionId, username]);
+}
+
+
+export function updatePriceIdAndSubsQuant(newPriceId, productId, newQuantity, subscriptionId) {
+  const query = `
+    WITH update_price AS (
+      UPDATE plans SET s_price_id = $1 WHERE s_prod_id = $2
+    )
+    UPDATE user_plan SET quantity = $3 WHERE subscription_id = $4
+  `;
+  return pool.query(query, [newPriceId, productId, newQuantity, subscriptionId])
+}
+
+export function getMembersOnPlan(planId, subscriptionId) {
+  const query = `
+  SELECT
+    username,
+    email,
+    subscription_id AS "subscriptionId",
+    subscription_item_id AS "subscriptionItemId",
+    quantity
+  FROM user_on_plan
+  WHERE plan_id = $1 AND subscription_id != $2
+  `;
+  return pool.query(query, [planId, subscriptionId]);
+}
+
+
+export function checkPlanOwnerUsingPlanIdAndDelSub(planId, username) {
+  const query = `
+    WITH del_subs AS (
+      DELETE FROM user_plan
+      WHERE plan_id = $1 AND username = $2 AND plan_owner = True
+      RETURNING subscription_id
+    )
+    SELECT up.plan_owner AS "planOwner",
+    del_subs.subscription_id AS "subscriptionId"
+    FROM user_plan up
+    JOIN del_subs
+    ON up.subscription_id = up.subscription_id
+    WHERE up.plan_id = $1 AND up.username = $2`;
+  return pool.query(query, [planId, username]);
+}
+
+
+export function deletePlanGetAllSubs(planId) {
+  const query = `
+    WITH del_plan AS (
+      DELETE FROM plans WHERE s_prod_id = $1
+    )
+    SELECT
+      first_name AS "firstName",
+      email,
+      subscription_id AS "subscriptionId"
+    FROM user_on_plan
+    WHERE plan_id = $1
+  `;
+  return pool.query(query, [planId]);
 }
