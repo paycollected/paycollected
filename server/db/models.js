@@ -46,11 +46,12 @@ export function addPlan(username, planName, cycleFrequency, perCycleCost, produc
 export function viewOnePlan(planId, username) {
   const query = `
     WITH select_owner AS (
-      SELECT JSON_BUILD_OBJECT(
-        'firstName', u.first_name,
-        'lastName', u.last_name,
-        'username', u.username
-      ) AS owner
+      SELECT
+        JSON_BUILD_OBJECT(
+          'firstName', u.first_name,
+          'lastName', u.last_name,
+          'username', u.username
+        ) AS owner
       FROM users u
       JOIN user_plan up
       ON u.username = up.username
@@ -65,7 +66,8 @@ export function viewOnePlan(planId, username) {
         FROM user_on_plan
         WHERE username = $2 AND plan_id = $1
       ),
-    0) AS quantity,
+      0
+    ) AS quantity,
     (SELECT owner FROM select_owner)
     FROM plans p
     WHERE p.s_prod_id = $1`;
@@ -112,7 +114,7 @@ export function viewAllPlans(username) {
       "perCycleCost",
       "subscriptionId",
       select1.quantity,
-      json_build_object
+      JSON_BUILD_OBJECT
       (
         'firstName', u.first_name,
         'lastName', u.last_name,
