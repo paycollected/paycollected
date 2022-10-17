@@ -39,14 +39,19 @@ webhook.post('/webhook', express.raw({type: 'application/json'}), async (req, re
     case 'customer.subscription.updated':
       subscription = event.data.object;
       const { metadata } = subscription;
-      if (JSON.parse(metadata.quantChanged)) {
-        await helpers.handleSubscriptionQuantChange(subscription);
-      } else if (JSON.parse(metadata.cancelSubs)) {
-        // handle special case of plan owner deleting subscription!
-        // if plan owner and there are still active members --> transfer ownership
-        // if plan owner and no active members --> disable option to transfer ownership
-        // can only delete entire plan at this point
-        await helpers.handleSubscriptionCancel(subscription);
+      switch(true) {
+        case (JSON.parse(metadata.quantChanged)):
+          await helpers.handleSubscriptionQuantChange(subscription);
+          break;
+        case (JSON.parse(metadata.cancelSubs)):
+          // handle special case of plan owner deleting subscription!
+          // if plan owner and there are still active members --> transfer ownership
+          // if plan owner and no active members --> disable option to transfer ownership
+          // can only delete entire plan at this point
+          await helpers.handleSubscriptionCancel(subscription);
+          break;
+        default:
+          break;
       }
       break;
     case 'customer.subscription.deleted':

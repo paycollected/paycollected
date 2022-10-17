@@ -235,7 +235,7 @@ export function deleteSubscription(subscriptionId) {
 }
 
 
-export function checkPlanOwner(subscriptionId, username) {
+export function checkPlanOwnerUsingSubsId(subscriptionId, username) {
   const query = `
     SELECT plan_owner AS "planOwner"
     FROM user_plan
@@ -319,3 +319,21 @@ export function getMembersOnPlan(planId, subscriptionId) {
   `;
   return pool.query(query, [planId, subscriptionId]);
 }
+
+
+export function checkPlanOwnerUsingPlanIdAndDelSub(planId, username) {
+  const query = `
+    WITH del_subs AS (
+      DELETE FROM user_plan
+      WHERE plan_id = $1 AND username = $2 AND plan_owner = True
+      RETURNING subscription_id
+    )
+    SELECT up.plan_owner AS "planOwner",
+    del_subs.subscription_id AS "subscriptionId"
+    FROM user_plan up
+    JOIN del_subs
+    ON up.subscription_id = up.subscription_id
+    WHERE up.plan_id = $1 AND up.username = $2`;
+  return pool.query(query, [planId, username]);
+}
+

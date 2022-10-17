@@ -288,6 +288,7 @@ export default {
               perCycleCost,
               quantChanged: false,
               cancelSubs: false,
+              deletePlan: false,
             }
           });
 
