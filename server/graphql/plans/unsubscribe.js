@@ -29,7 +29,7 @@ export async function unsubscribe(subscriptionId, username) {
       // Alternative is to update metadata for this subscription before deleting it on stripe system here (2 API calls)
       // but that will double the number of API calls to use this same webhook event in user account deletion scenario.
       deleteSubscription(subscriptionId)]);
-    // delete this subscription in both Stripe system and in our db
+    // delete this subscription in our db
     return subscriptionId;
 };
 
