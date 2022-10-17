@@ -14,8 +14,6 @@ export default async function (planId, username) {
   }
 
   if (rows.length === 0) {
-    throw new ForbiddenError('User is not active member of this plan');
-  } else if (!rows[0].planOwner) {
     throw new ForbiddenError('User is not owner of this plan');
   }
 

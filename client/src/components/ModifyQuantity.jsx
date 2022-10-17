@@ -36,7 +36,6 @@ export default function ModifyQuantity({
     }}
     >
       {inputErr && (<p>{inputErr}</p>)}
-      {console.log(inputErr)}
       <div style={{
         display: 'grid',
         gridRow: '2 / 3',
