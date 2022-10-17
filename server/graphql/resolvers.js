@@ -25,9 +25,10 @@ export default {
   Query: {
     viewOnePlan: async (_, { planId }, { user, err }) => {
       if (user) {
+        const { username } = user;
         let errMsg;
         try {
-          const { rows } = await models.viewOnePlan(planId);
+          const { rows } = await models.viewOnePlan(planId, username);
           if (rows.length === 0) { // no match
             errMsg = 'No plan matched search';
             throw new Error();
@@ -82,23 +83,6 @@ export default {
         } catch (asyncError) {
           console.log(asyncError);
           throw new ApolloError('Unable to retrieve plan information');
-        }
-      } else if (err === 'Incorrect token' || err === 'Token has expired') {
-        throw new AuthenticationError(err);
-      } else if (err === 'Unauthorized request') {
-        throw new ForbiddenError(err);
-      }
-    },
-
-    quantity: async ({ planId }, _ , { user, err }) => {
-      if (user) {
-        const { username } = user;
-        try {
-          const { rows } = await models.quantForUserOnPlan(planId, username);
-          return rows.length > 0 ? rows[0].quantity : 0;
-        } catch (e) {
-          console.log(e);
-          throw new ApolloError('Cannot resolve field quantity for plan');
         }
       } else if (err === 'Incorrect token' || err === 'Token has expired') {
         throw new AuthenticationError(err);

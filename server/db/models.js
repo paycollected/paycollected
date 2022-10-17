@@ -43,25 +43,34 @@ export function addPlan(username, planName, cycleFrequency, perCycleCost, produc
 }
 
 
-export function viewOnePlan(planId) {
+export function viewOnePlan(planId, username) {
   const query = `
-    SELECT
-      p.plan_name AS name,
-      UPPER(p.cycle_frequency::VARCHAR) AS "cycleFrequency",
-      p.per_cycle_cost AS "perCycleCost",
-      json_build_object(
+    WITH select_owner AS (
+      SELECT JSON_BUILD_OBJECT(
         'firstName', u.first_name,
         'lastName', u.last_name,
         'username', u.username
       ) AS owner
+      FROM users u
+      JOIN user_plan up
+      ON u.username = up.username
+      WHERE up.plan_owner = True AND up.plan_id = $1
+    )
+    SELECT p.s_prod_id AS "planId",
+    p.plan_name AS name,
+    UPPER(p.cycle_frequency::VARCHAR) AS "cycleFrequency",
+    p.per_cycle_cost AS "perCycleCost",
+    COALESCE(
+      ( SELECT quantity
+        FROM user_on_plan
+        WHERE username = $2 AND plan_id = $1
+      ),
+    0) AS quantity,
+    (SELECT owner FROM select_owner)
     FROM plans p
-    JOIN user_plan up
-    ON p.s_prod_id = up.plan_id
-    JOIN users u
-    ON up.username = u.username
-    WHERE up.plan_owner = True AND p.s_prod_id = $1`;
+    WHERE p.s_prod_id = $1`;
 
-  return pool.query(query, [planId]);
+  return pool.query(query, [planId, username]);
 }
 
 
@@ -357,5 +366,6 @@ export function quantForUserOnPlan(planId, username) {
   const query = `
     SELECT quantity FROM user_plan WHERE plan_id = $1 AND username = $2
   `;
+  console.log('------------> I was called');
   return pool.query(query, [planId, username]);
 }
