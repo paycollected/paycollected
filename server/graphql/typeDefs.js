@@ -7,10 +7,9 @@ export default gql`
   }
 
   type PlanMember {
-    stripeCusId: ID # nullable for plan owner who has just joined and does not have Stripe Cus ID yet
     firstName: String!
     lastName: String!
-    username: String!
+    username: ID!
     quantity: Int # 0 means not paying # nullable because quantity for owner field is null
   }
 
@@ -45,10 +44,11 @@ export default gql`
     owner: PlanMember!
     cycleFrequency: CycleFrequency!
     perCycleCost: Float!
-    activeMembers: [PlanMember]! # can include owner, will only include members whose quantity > 0
+    activeMembers: [PlanMember]!
+    # can include owner, will only include members whose quantity > 0
+    # does not include user requesting this info
     subscriptionId: String
-    subscriptionItemId: String
-    quantity: Int
+    quantity: Int! # unit quant of this plan for current user
   }
 
   type Mutation {
@@ -88,6 +88,15 @@ export default gql`
       subscriptionId: String!
       planId: String!
       newOwner: String!
+    ): String!
+
+    editQuantity(
+      subscriptionId: String!
+      newQuantity: Int!
+    ): String!
+
+    deletePlan(
+      planId: ID!
     ): String!
   }
 `;

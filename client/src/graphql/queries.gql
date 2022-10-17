@@ -2,7 +2,6 @@ query ViewOnePlan ($planId: ID!) {
   viewOnePlan(planId: $planId) {
     name
     owner {
-      stripeCusId
       firstName
       lastName
       username
@@ -10,12 +9,12 @@ query ViewOnePlan ($planId: ID!) {
     cycleFrequency
     perCycleCost
     activeMembers {
-      stripeCusId
       firstName
       lastName
       username
       quantity
     }
+    quantity
   }
 }
 
@@ -25,7 +24,6 @@ query ViewAllPlans {
     planId
     name
     owner {
-      stripeCusId
       firstName
       lastName
       username
@@ -33,7 +31,6 @@ query ViewAllPlans {
     cycleFrequency
     perCycleCost
     activeMembers {
-      stripeCusId
       firstName
       lastName
       username
@@ -41,6 +38,5 @@ query ViewAllPlans {
     }
     quantity
     subscriptionId
-    subscriptionItemId
   }
 }

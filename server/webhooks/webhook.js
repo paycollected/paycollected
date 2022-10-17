@@ -6,7 +6,6 @@ import * as helpers from './helpers.js';
 dotenv.config();
 const webhook = express.Router();
 const endpointSecret = process.env.STRIPE_WEBHOOK_ENDPOINT_SECRET;
-const stripe = stripeSDK(process.env.STRIPE_SECRET_KEY);
 
 webhook.post('/webhook', express.raw({type: 'application/json'}), async (req, res) => {
   const signature = req.headers['stripe-signature'];
@@ -34,15 +33,32 @@ webhook.post('/webhook', express.raw({type: 'application/json'}), async (req, re
       break;
     case 'setup_intent.succeeded': // someone new joining plan
       setupIntent = event.data.object;
-      helpers.handleSubscriptionStart(setupIntent);
+      await helpers.handleSubscriptionStart(setupIntent);
+      break;
+    case 'customer.subscription.updated':
+      subscription = event.data.object;
+      const { metadata } = subscription;
+      const { quantChanged, cancelSubs, deletePlan } = metadata;
+      switch(true) {
+        case (JSON.parse(quantChanged)):
+          await helpers.handleSubscriptionQuantChange(subscription);
+          break;
+        case (JSON.parse(cancelSubs)):
+          // handle special case of plan owner deleting subscription!
+          // if plan owner and there are still active members --> transfer ownership
+          // if plan owner and no active members --> disable option to transfer ownership
+          // can only delete entire plan at this point
+          await helpers.handleSubscriptionCancel(subscription);
+          break;
+        case (JSON.parse(deletePlan)):
+          await helpers.handlePlanDelete(subscription);
+          break;
+        default:
+          break;
+      }
       break;
     case 'customer.subscription.deleted':
       subscription = event.data.object;
-      // handle special case of plan owner deleting subscription!
-      // if plan owner and there are still active members --> transfer ownership
-      // if plan owner and no active members --> disable option to transfer ownership & manually cancel subscription
-      // can only delete entire plan at this point
-      helpers.handleSubscriptionCancel(subscription);
       break;
     default:
       console.log(`Unhandled event type ${event.type}`);

@@ -8,7 +8,9 @@ import { isFuture } from 'date-fns';
 import * as models from '../db/models.js';
 import {
   unsubscribe as unsubscribeResolver, unsubscribeAsOwner as unsubscribeAsOwnerResolver
-} from './unsubscribe.js';
+} from './subscriptions/unsubscribe.js';
+import editQuantityResolver from './subscriptions/editQuantity';
+import deletePlanResolver from './plans/delete.js';
 
 const saltRounds = 10;
 const stripe = stripeSDK(process.env.STRIPE_SECRET_KEY);
@@ -23,9 +25,10 @@ export default {
   Query: {
     viewOnePlan: async (_, { planId }, { user, err }) => {
       if (user) {
+        const { username } = user;
         let errMsg;
         try {
-          const { rows } = await models.viewOnePlan(planId);
+          const { rows } = await models.viewOnePlan(planId, username);
           if (rows.length === 0) { // no match
             errMsg = 'No plan matched search';
             throw new Error();
@@ -284,6 +287,9 @@ export default {
               productTotalQuantity: count + newQuantity,
               cycleFrequency: recurringInterval[cycleFrequency],
               perCycleCost,
+              quantChanged: false,
+              cancelSubs: false,
+              deletePlan: false,
             }
           });
 
@@ -354,15 +360,7 @@ export default {
     unsubscribe: async (_, { subscriptionId }, { user, err }) => {
       if (user) {
         const { username } = user;
-        try {
-          return await unsubscribeResolver(subscriptionId, username);
-        } catch (e) {
-          if (e.message === "Subscription doesn't belong to user" || e.message === 'Wrong mutation call') {
-            throw new ForbiddenError(e.message);
-          } else {
-            throw new ApolloError('Cannot unsubscribe');
-          }
-        }
+        return await unsubscribeResolver(subscriptionId, username);
       } else if (err === 'Incorrect token' || err === 'Token has expired') {
         throw new AuthenticationError(err);
       } else if (err === 'Unauthorized request') {
@@ -373,25 +371,34 @@ export default {
     unsubscribeAsOwner: async (_, { subscriptionId, planId, newOwner }, { user, err }) => {
       if (user) {
         const { username } = user;
-        try {
-          return await unsubscribeAsOwnerResolver(subscriptionId, planId, username, newOwner);
-        } catch (e) {
-          if (e.message === "Subscription doesn't belong to user"
-          || e.message === 'Wrong mutation call') {
-            throw new ForbiddenError(e.message);
-          } else if (e.message === 'New owner is not active member of this plan'
-          || e.message === 'Incorrect subscription and plan combination'
-          || e.message === 'Cannot transfer ownership to self') {
-            throw new UserInputError(e.message);
-          } else {
-          throw new ApolloError('Cannot unsubscribe');
-          }
-        }
+        return await unsubscribeAsOwnerResolver(subscriptionId, planId, username, newOwner);
       } else if (err === 'Incorrect token' || err === 'Token has expired') {
         throw new AuthenticationError(err);
       } else if (err === 'Unauthorized request') {
         throw new ForbiddenError(err);
       }
     },
+
+    editQuantity: async (_, { subscriptionId, newQuantity }, { user, err }) => {
+      if (user) {
+        const { username } = user;
+        return await editQuantityResolver(subscriptionId, newQuantity, username);
+      } else if (err === 'Incorrect token' || err === 'Token has expired') {
+        throw new AuthenticationError(err);
+      } else if (err === 'Unauthorized request') {
+        throw new ForbiddenError(err);
+      }
+    },
+
+    deletePlan: async (_, { planId }, { user, err }) => {
+      if (user) {
+        const { username } = user;
+        return await deletePlanResolver(planId, username);
+      } else if (err === 'Incorrect token' || err === 'Token has expired') {
+        throw new AuthenticationError(err);
+      } else if (err === 'Unauthorized request') {
+        throw new ForbiddenError(err);
+      }
+    }
   }
 };
