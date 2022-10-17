@@ -286,6 +286,7 @@ export default {
               cycleFrequency: recurringInterval[cycleFrequency],
               perCycleCost,
               quantChanged: false,
+              cancelSubs: false,
             }
           });
 

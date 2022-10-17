@@ -66,6 +66,10 @@ export default async function (subscriptionId, newQuantity, username) {
         proration_behavior: 'none',
       }
     ),
+    // any update in db related to this particular subscription MUST occur
+    // in HTTP response w/ client as opposed to webhook because refetching queries
+    // for UI display depends on db info
+    // if using webhook, client will fall out of sync and requires user refreshing browser for updates
     updatePriceIdAndSubsQuant(price, product, newQuantity, subscriptionId)
   ]);
 

@@ -21,7 +21,14 @@ export async function unsubscribe(subscriptionId, username) {
     // --> cannot call this function but have to call unsubscribeAsOwner to transfer ownership
     throw new Error ('Wrong mutation call');
   }
-    await Promise.all([stripe.subscriptions.del(subscriptionId), deleteSubscription(subscriptionId)]);
+    await Promise.all([
+      stripe.subscriptions.update(subscriptionId, { metadata: { cancelSubs: true }}),
+      // Mark this subscription for delete by webhook instead of at client-serving step here
+      // because we don't want to trigger price recalculation and update for all members
+      // if subscription cancellation is part of plan deletion by plan owner.
+      // Alternative is to update metadata for this subscription before deleting it on stripe system here (2 API calls)
+      // but that will double the number of API calls to use this same webhook event in user account deletion scenario.
+      deleteSubscription(subscriptionId)]);
     // delete this subscription in both Stripe system and in our db
     return subscriptionId;
 };
@@ -60,7 +67,7 @@ export async function unsubscribeAsOwner(subscriptionId, planId, username, newOw
   await Promise.all([
     delSubUpdatePlanOwner(newOwner, planId, subscriptionId),
     // delete this subscription in our db & update plan with new owner in db
-    stripe.subscriptions.del(subscriptionId)
+    stripe.subscriptions.update(subscriptionId, { metadata: { cancelSubs: true }})
     // delete this subscription in Stripe system
   ]);
   return subscriptionId;

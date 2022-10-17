@@ -95,7 +95,7 @@ export async function handleSubscriptionCancel(subscription) {
   const newProductTotalQuantity = productTotalQuantity - quantity;
 
   try {
-    const [{ id: newPriceId }, _] = await Promise.all([
+    const [{ id: newPriceId }, _, __] = await Promise.all([
       stripe.prices.create({
         currency: 'usd',
         product: productId,
@@ -104,10 +104,11 @@ export async function handleSubscriptionCancel(subscription) {
           interval: cycleFrequency,
         },
       }),
-      stripe.prices.update(prevPriceId, { active: false })
+      stripe.prices.update(prevPriceId, { active: false }),
+      stripe.subscriptions.del(subscriptionId)
     ]);
 
-    const { rows } = await models.updatePriceIdGetMembers(subscriptionId, newPriceId, productId);
+    const { rows } = await models.updatePriceIdGetMembers(newPriceId, productId);
     if (rows.length > 0) {
       await Promise.all(
         rows.map((row) => updateStripePrice(row, newPriceId, newProductTotalQuantity))
@@ -126,23 +127,19 @@ export async function handleSubscriptionQuantChange(subscription) {
   // adjust their price (need to know new priceId, which is the same as incoming event)
   // metadata: totalQuantity will be equal to this incoming event's totalQuantity
   const { id: subscriptionId, items, metadata } = subscription;
+  const productTotalQuantity = Number(metadata.productTotalQuantity);
+  const { price, quantity } = items.data[0];
+  const { id: priceId, product: productId } = price;
 
-
-  if (JSON.parse(metadata.quantChanged)) {
-    const productTotalQuantity = Number(metadata.productTotalQuantity);
-    const { price, quantity } = items.data[0];
-    const { id: priceId, product: productId } = price;
-
-    try {
-      const { rows } = await models.getMembersOnPlan(productId, subscriptionId);
-      if (rows.length > 0) {
-        await Promise.all([
-          ...rows.map((row) => updateStripePrice(row, priceId, productTotalQuantity)),
-          stripe.subscriptions.update(subscriptionId, { metadata: { quantChanged: false } })
-        ]);
-      }
-    } catch (err) {
-      console.log(err);
+  try {
+    const { rows } = await models.getMembersOnPlan(productId, subscriptionId);
+    if (rows.length > 0) {
+      await Promise.all([
+        ...rows.map((row) => updateStripePrice(row, priceId, productTotalQuantity)),
+        stripe.subscriptions.update(subscriptionId, { metadata: { quantChanged: false } })
+      ]);
     }
+  } catch (err) {
+    console.log(err);
   }
 }
