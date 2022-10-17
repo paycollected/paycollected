@@ -357,16 +357,7 @@ export default {
     unsubscribe: async (_, { subscriptionId }, { user, err }) => {
       if (user) {
         const { username } = user;
-        try {
-          return await unsubscribeResolver(subscriptionId, username);
-        } catch (e) {
-          if (e.message === "Subscription doesn't belong to user" || e.message === 'Wrong mutation call') {
-            throw new ForbiddenError(e.message);
-          } else {
-            console.log(e);
-            throw new ApolloError('Cannot unsubscribe');
-          }
-        }
+        return await unsubscribeResolver(subscriptionId, username);
       } else if (err === 'Incorrect token' || err === 'Token has expired') {
         throw new AuthenticationError(err);
       } else if (err === 'Unauthorized request') {
@@ -377,21 +368,7 @@ export default {
     unsubscribeAsOwner: async (_, { subscriptionId, planId, newOwner }, { user, err }) => {
       if (user) {
         const { username } = user;
-        try {
-          return await unsubscribeAsOwnerResolver(subscriptionId, planId, username, newOwner);
-        } catch (e) {
-          if (e.message === "Subscription doesn't belong to user"
-          || e.message === 'Wrong mutation call') {
-            throw new ForbiddenError(e.message);
-          } else if (e.message === 'New owner is not active member of this plan'
-          || e.message === 'Incorrect subscription and plan combination'
-          || e.message === 'Cannot transfer ownership to self') {
-            throw new UserInputError(e.message);
-          } else {
-            console.log(e);
-            throw new ApolloError('Cannot unsubscribe');
-          }
-        }
+        return await unsubscribeAsOwnerResolver(subscriptionId, planId, username, newOwner);
       } else if (err === 'Incorrect token' || err === 'Token has expired') {
         throw new AuthenticationError(err);
       } else if (err === 'Unauthorized request') {
