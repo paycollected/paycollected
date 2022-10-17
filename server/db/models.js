@@ -337,3 +337,19 @@ export function checkPlanOwnerUsingPlanIdAndDelSub(planId, username) {
   return pool.query(query, [planId, username]);
 }
 
+
+export function deletePlanGetAllSubs(planId) {
+  const query = `
+    WITH del_plan AS (
+      DELETE FROM plans WHERE s_prod_id = $1
+    )
+    SELECT
+      first_name AS "firstName",
+      email,
+      subscription_id AS "subscriptionId"
+    FROM user_on_plan
+    WHERE plan_id = $1
+  `;
+  return pool.query(planId);
+}
+

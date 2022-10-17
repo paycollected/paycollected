@@ -128,7 +128,7 @@ export async function handleSubscriptionQuantChange(subscription) {
   // metadata: totalQuantity will be equal to this incoming event's totalQuantity
   const { id: subscriptionId, items, metadata } = subscription;
   const productTotalQuantity = Number(metadata.productTotalQuantity);
-  const { price, quantity } = items.data[0];
+  const { price } = items.data[0];
   const { id: priceId, product: productId } = price;
 
   try {
@@ -138,8 +138,45 @@ export async function handleSubscriptionQuantChange(subscription) {
         ...rows.map((row) => updateStripePrice(row, priceId, productTotalQuantity)),
         stripe.subscriptions.update(subscriptionId, { metadata: { quantChanged: false } })
       ]);
+    } else {
+      await stripe.subscriptions.update(subscriptionId, { metadata: { quantChanged: false } });
     }
   } catch (err) {
     console.log(err);
+  }
+}
+
+
+async function cancelSubsAndNotify(row) {
+  const {
+    firstName,
+    email,
+    subscriptionId,
+  } = row;
+
+  await stripe.subscriptions.del(subscriptionId);
+}
+
+
+export async function handlePlanDelete(subscription) {
+  // archive product
+  // cancel subscriptions for ALL members on plan
+  // delete product in db
+  const { id: subscriptionId, items } = subscription;
+  const { product: productId } = items.data[0].price;
+
+  try {
+    const [{ rows }, _, __] = await Promise.all([
+      models.deletePlanGetAllSubs(productId),
+      stripe.subscriptions.del(subscriptionId),
+      stripe.products.update(productId, { active: false })
+    ]);
+
+    if (rows.length > 0) {
+      await Promise.all(rows.map((row) => cancelSubsAndNotify(row)));
+    }
+
+  } catch(e) {
+    console.log(e);
   }
 }

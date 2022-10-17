@@ -1,17 +1,10 @@
 import stripeSDK from 'stripe';
-import {
-  ApolloError, UserInputError, ForbiddenError
-} from 'apollo-server-core';
-import {
-  checkPlanOwnerUsingPlanIdAndDelSub, getSubsItemIdAndProductInfo, updatePriceIdAndSubsQuant
-} from '../../db/models.js';
+import { ApolloError, UserInputError, ForbiddenError } from 'apollo-server-core';
+import { checkPlanOwnerUsingPlanIdAndDelSub } from '../../db/models.js';
 
 const stripe = stripeSDK(process.env.STRIPE_SECRET_KEY);
 
 export default async function (planId, username) {
-  // archive product
-  // cancel subscriptions for ALL members on plan
-  // delete product in db
   let rows;
   try {
     ({ rows } = await checkPlanOwnerUsingPlanIdAndDelSub(planId, username));

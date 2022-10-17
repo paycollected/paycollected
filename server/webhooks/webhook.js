@@ -6,7 +6,6 @@ import * as helpers from './helpers.js';
 dotenv.config();
 const webhook = express.Router();
 const endpointSecret = process.env.STRIPE_WEBHOOK_ENDPOINT_SECRET;
-const stripe = stripeSDK(process.env.STRIPE_SECRET_KEY);
 
 webhook.post('/webhook', express.raw({type: 'application/json'}), async (req, res) => {
   const signature = req.headers['stripe-signature'];
@@ -39,16 +38,20 @@ webhook.post('/webhook', express.raw({type: 'application/json'}), async (req, re
     case 'customer.subscription.updated':
       subscription = event.data.object;
       const { metadata } = subscription;
+      const { quantChanged, cancelSubs, deletePlan } = metadata;
       switch(true) {
-        case (JSON.parse(metadata.quantChanged)):
+        case (JSON.parse(quantChanged)):
           await helpers.handleSubscriptionQuantChange(subscription);
           break;
-        case (JSON.parse(metadata.cancelSubs)):
+        case (JSON.parse(cancelSubs)):
           // handle special case of plan owner deleting subscription!
           // if plan owner and there are still active members --> transfer ownership
           // if plan owner and no active members --> disable option to transfer ownership
           // can only delete entire plan at this point
           await helpers.handleSubscriptionCancel(subscription);
+          break;
+        case (JSON.parse(deletePlan)):
+          await helpers.handlePlanDelete(subscription);
           break;
         default:
           break;
