@@ -23,6 +23,7 @@ export default async function (planId, username) {
       subscriptionId,
       { metadata: { deletePlan: true } }
     );
+    return planId;
   } catch (e) {
     console.log(e);
     throw new ApolloError('Cannot delete plan');

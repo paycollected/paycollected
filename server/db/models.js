@@ -350,6 +350,6 @@ export function deletePlanGetAllSubs(planId) {
     FROM user_on_plan
     WHERE plan_id = $1
   `;
-  return pool.query(planId);
+  return pool.query(query, [planId]);
 }
 
