@@ -125,7 +125,8 @@ export function viewAllPlans(username) {
     ON "planId" = up.plan_id
     JOIN users u
     ON up.username = u.username
-    WHERE up.plan_owner = True`;
+    WHERE up.plan_owner = True
+    ORDER BY name ASC`;
 
   return pool.query(query, [username]);
 }
