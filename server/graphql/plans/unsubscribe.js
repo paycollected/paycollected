@@ -68,7 +68,7 @@ export async function unsubscribeAsOwner(subscriptionId, planId, username, newOw
     delSubUpdatePlanOwner(newOwner, planId, subscriptionId),
     // delete this subscription in our db & update plan with new owner in db
     stripe.subscriptions.update(subscriptionId, { metadata: { cancelSubs: true }})
-    // delete this subscription in Stripe system
+    // mark this subscription for deletion by webhook
   ]);
   return subscriptionId;
 }
