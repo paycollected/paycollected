@@ -74,12 +74,11 @@ export default function JoinPlan({ setPlanToJoin, setStripeClientSecret }) {
         )}
         {activeMembers.length === 0
           && (<div>There are currently no members on this plan.</div>)}
-        {quantity && (
+        {quantity > 0 && (
           <div>
             <p>{`Your quantity on this plan: ${quantity}`}</p>
             <p>You cannot join this plan again. Please use the dashboard to adjust your membership on this plan.</p>
           </div>
-
         )}
         <form onSubmit={onSubmit}>
           <input
