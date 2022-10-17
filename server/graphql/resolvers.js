@@ -243,9 +243,7 @@ export default {
           // check that user is NOT already subscribed to plan
           const { rows } = await models.joinPlan(username, planId);
           const { cycleFrequency, perCycleCost, startDate, prevPriceId, quantity, count } = rows[0];
-          if (quantity) {
-            // if owner and haven't joined plan, quantity = 0
-            // if not owner and haven't joined plan, quantity is null
+          if (quantity > 0) {
             // front end will need to display a msg telling user to use 'adjust quantity' in dashboard instead
             errMsg = 'User is already subscribed to this plan';
             throw new Error();
