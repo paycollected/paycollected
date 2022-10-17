@@ -92,5 +92,9 @@ export default gql`
       subscriptionId: String!
       newQuantity: Int!
     ): String!
+
+    deletePlan(
+      planId: ID!
+    ): String!
   }
 `;

@@ -8,8 +8,9 @@ import { isFuture } from 'date-fns';
 import * as models from '../db/models.js';
 import {
   unsubscribe as unsubscribeResolver, unsubscribeAsOwner as unsubscribeAsOwnerResolver
-} from './plans/unsubscribe.js';
-import editQuantityResolver from './plans/editQuantity';
+} from './subscriptions/unsubscribe.js';
+import editQuantityResolver from './subscriptions/editQuantity';
+import deletePlanResolver from './plans/delete.js';
 
 const saltRounds = 10;
 const stripe = stripeSDK(process.env.STRIPE_SECRET_KEY);
@@ -380,6 +381,17 @@ export default {
       if (user) {
         const { username } = user;
         return await editQuantityResolver(subscriptionId, newQuantity, username);
+      } else if (err === 'Incorrect token' || err === 'Token has expired') {
+        throw new AuthenticationError(err);
+      } else if (err === 'Unauthorized request') {
+        throw new ForbiddenError(err);
+      }
+    },
+
+    deletePlan: async (_, { planId }, { user, err }) => {
+      if (user) {
+        const { username } = user;
+        return await deletePlanResolver(planId, username);
       } else if (err === 'Incorrect token' || err === 'Token has expired') {
         throw new AuthenticationError(err);
       } else if (err === 'Unauthorized request') {
