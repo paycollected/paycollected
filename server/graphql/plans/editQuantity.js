@@ -21,9 +21,16 @@ export default async function (subscriptionId, newQuantity, username) {
   // (1) call stripe API to edit quantity and price ID for this subscription,
   // subs metadata: update totalQuantity
   // and (2) edit quantity of this subscription in our db & update priceId
-  const { rows } = await getSubsItemIdAndProductInfo(subscriptionId, username);
+  let rows;
+  try {
+    ({ rows } = await getSubsItemIdAndProductInfo(subscriptionId, username));
+  } catch (e) {
+    console.log(e);
+    throw new ApolloError('Cannot update quantity');
+  }
+
   if (rows.length === 0) {
-    throw new Error("Subscription doesn't belong to user");
+    throw new ForbiddenError("Subscription doesn't belong to user");
   }
 
   const {
@@ -31,47 +38,56 @@ export default async function (subscriptionId, newQuantity, username) {
   } = rows[0];
 
   if (quantity === newQuantity) {
-    throw new Error('No change in quantity');
+    throw new UserInputError('No change in quantity');
   }
 
   const productTotalQuantity = count - quantity + newQuantity;
 
-  const [{ id: price }, _] = await Promise.all([
-    stripe.prices.create({
-      currency: 'usd',
-      product,
-      unit_amount: Math.ceil(perCycleCost / productTotalQuantity),
-      recurring: {
-        interval: recurringInterval[cycleFrequency],
-      },
-    }),
-    stripe.prices.update(prevPriceId, { active: false })
-  ]);
-
-  await Promise.all([
-    stripe.subscriptions.update(
-      subscriptionId,
-      {
-        items: [
-          {
-            id: subscriptionItemId,
-            price,
-            quantity: newQuantity,
-          }
-        ],
-        metadata: {
-          productTotalQuantity,
-          quantChanged: true,
+  try {
+    const [{ id: price }, _] = await Promise.all([
+      stripe.prices.create({
+        currency: 'usd',
+        product,
+        unit_amount: Math.ceil(perCycleCost / productTotalQuantity),
+        recurring: {
+          interval: recurringInterval[cycleFrequency],
         },
-        proration_behavior: 'none',
-      }
-    ),
-    // any update in db related to this particular subscription MUST occur
-    // in HTTP response w/ client as opposed to webhook because refetching queries
-    // for UI display depends on db info
-    // if using webhook, client will fall out of sync and requires user refreshing browser for updates
-    updatePriceIdAndSubsQuant(price, product, newQuantity, subscriptionId)
-  ]);
+      }),
+      stripe.prices.update(prevPriceId, { active: false })
+    ]);
 
-  return subscriptionId;
+    await Promise.all([
+      stripe.subscriptions.update(
+        subscriptionId,
+        {
+          items: [
+            {
+              id: subscriptionItemId,
+              price,
+              quantity: newQuantity,
+            }
+          ],
+          metadata: {
+            productTotalQuantity,
+            quantChanged: true,
+          },
+          proration_behavior: 'none',
+        }
+      ),
+      // Any update in db related to this particular subscription MUST occur
+      // in HTTP response w/ client as opposed to webhook because refetching queries
+      // for UI display depends on db info.
+      // If using webhook, client will fall out of sync and requires user refreshing browser for updates.
+      // Alternative is, once client-side caching is figured out, return the mutated subscription and update client cache.
+      // Only at this point can db update be moved to webhook.
+      updatePriceIdAndSubsQuant(price, product, newQuantity, subscriptionId)
+    ]);
+
+    return subscriptionId;
+  }
+
+  catch(e) {
+    console.log(e);
+    throw new ApolloError('Cannot update quantity');
+  }
 }
