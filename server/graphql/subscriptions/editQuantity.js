@@ -1,6 +1,6 @@
 import stripeSDK from 'stripe';
 import {
-  ApolloError, UserInputError, AuthenticationError, ForbiddenError
+  ApolloError, UserInputError, ForbiddenError
 } from 'apollo-server-core';
 import {
   getSubsItemIdAndProductInfo, updatePriceIdAndSubsQuant
