@@ -50,7 +50,7 @@ export default function JoinPlan({ setPlanToJoin, setStripeClientSecret }) {
 
   if (getPlanData) {
     const {
-      name, owner, cycleFrequency, perCycleCost, activeMembers,
+      name, owner, cycleFrequency, perCycleCost, activeMembers, quantity
     } = getPlanData.viewOnePlan;
 
     return (
@@ -74,6 +74,13 @@ export default function JoinPlan({ setPlanToJoin, setStripeClientSecret }) {
         )}
         {activeMembers.length === 0
           && (<div>There are currently no members on this plan.</div>)}
+        {quantity && (
+          <div>
+            <p>{`Your quantity on this plan: ${quantity}`}</p>
+            <p>You cannot join this plan again. Please use the dashboard to adjust your membership on this plan.</p>
+          </div>
+
+        )}
         <form onSubmit={onSubmit}>
           <input
             type="number"
@@ -82,7 +89,7 @@ export default function JoinPlan({ setPlanToJoin, setStripeClientSecret }) {
             min="1"
             onChange={(e) => { setQuantity(Number(e.target.value)); }}
           />
-          <button type="submit">Join</button>
+          <button type="submit" disabled={!!quantity}>Join</button>
         </form>
         <button type="button" onClick={() => { navigate('/dashboard'); }}>Cancel</button>
       </>
