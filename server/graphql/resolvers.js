@@ -7,9 +7,16 @@ import {
 import { isFuture } from 'date-fns';
 import * as models from '../db/models.js';
 import authResolverWrapper from './authResolverWrapper';
+import createAccount from './users/createAccount';
+import loginResolver from './users/login';
 import {
   unsubscribe as unsubscribeResolver, unsubscribeAsOwner as unsubscribeAsOwnerResolver
 } from './subscriptions/unsubscribe.js';
+import {
+  viewOnePlan as viewOnePlanResolver,
+  viewAllPlans as viewAllPlansResolver,
+  activeMembers as activeMembersResolver,
+} from './plans/view.js';
 import editQuantityResolver from './subscriptions/editQuantity';
 import deletePlanResolver from './plans/delete.js';
 
@@ -25,158 +32,27 @@ const recurringInterval = {
 export default {
   Query: {
     viewOnePlan: authResolverWrapper(async (_, { planId }, { user: { username } }) => {
-      let errMsg;
-      try {
-        const { rows } = await models.viewOnePlan(planId, username);
-        if (rows.length === 0) { // no match
-          errMsg = 'No plan matched search';
-          throw new Error();
-        }
-        const result = { ...rows[0], planId };
-        result.perCycleCost /= 100;
-        return result;
-      } catch (asyncError) {
-        if (errMsg) {
-          throw new ApolloError(errMsg);
-          // will need to handle this error in front end
-          // where the join page will send this query request
-        }
-        console.log(asyncError);
-        throw new ApolloError('Unable to retrieve plan information');
-      }
+      return await viewOnePlanResolver(planId, username);
     }),
 
     viewAllPlans: authResolverWrapper(async (_, __, { user: { username } }) => {
-      try {
-        const { rows } = await models.viewAllPlans(username);
-        rows.forEach((row) => {
-          row.perCycleCost /= 100;
-        });
-        return rows;
-      } catch (asyncError) {
-        console.log(asyncError);
-        throw new ApolloError('Unable to retrieve plans information');
-      }
+      return await viewAllPlansResolver(username);
     }),
   },
 
   Plan: {
     activeMembers: authResolverWrapper(async ({ planId }, _, { user: { username } }) => {
-      try {
-        const { rows } = await models.membersOnOnePlan(planId, username);
-        return rows;
-      } catch (asyncError) {
-        console.log(asyncError);
-        throw new ApolloError('Unable to retrieve plan information');
-      }
+      return await activeMembersResolver(planId, username);
     }),
   },
 
   Mutation: {
-    createUser: async (_, {
-      firstName, lastName, username, password, email
-    }) => {
-      let errMsg;
-      username = username.trim().toLowerCase();
-      email = email.trim().toLowerCase();
-      try {
-        const { rows } = await models.checkUser(username, email);
-        // username and email do not exist -> create user
-        if (rows.length === 0) {
-          const [
-            { id: stripeCusId },
-            hashedPass
-          ] = await Promise.all([
-            stripe.customers.create({
-              name: `${firstName} ${lastName}`,
-              email
-            }),
-            bcrypt.hash(password, saltRounds)
-          ]);
-
-          await models.createUser(firstName, lastName, username, hashedPass, email, stripeCusId);
-          const token = jwt.sign({
-            // expires after 2 weeks
-            exp: Math.floor(Date.now() / 1000) + (60 * 60 * 24 * 14),
-            // storing user's info in token so we can easily obtain it from context in any resolver
-            user: {
-              username,
-              email,
-              stripeCusId,
-            }
-          }, process.env.SECRET_KEY);
-          return { username, email, token };
-        // username or email exist --> return error
-        } else if (rows[0].username === username) {
-          errMsg = 'This username already exists';
-          throw new Error();
-        } else {
-          errMsg = 'This email already exists';
-          throw new Error();
-        }
-      } catch (asyncError) {
-        /*
-        Because this entire process depends on many async operations
-        (2 database queries + 1 bcrypt here),
-        this catch block will catch ALL errors from any of these async operations
-        and throw a generic error message.
-        According to Apollo docs, this should generate an error with code 'INTERNAL_SERVER_ERROR'.
-        */
-
-        // if this is an anticipated bad input error
-        if (errMsg) {
-          throw new UserInputError(errMsg);
-        } else {
-        // catch all from the rest of async operations
-          console.log(asyncError);
-          throw new ApolloError('Unable to create user');
-        }
-      }
+    createUser: async (_, { firstName, lastName, username, password, email }) => {
+      return await createAccount(firstName, lastName, username, password, email);
     },
 
     login: async (_, { username, password }) => {
-      let errMsg;
-      username = username.trim().toLowerCase();
-      try {
-        const { rows } = await models.getUserInfo(username);
-        // if username does not exist, throw error
-        if (rows.length === 0) {
-          errMsg = 'This username does not exist';
-          throw new Error();
-        }
-        // if username exists but password doesn't match, return null
-        const { password: savedPass, stripeCusId, email } = rows[0];
-        const result = await bcrypt.compare(password, savedPass);
-        if (!result) {
-          return null;
-        }
-
-        // if password is correct, return a signed token so user can sign in
-        const token = jwt.sign({
-          // expires after 2 weeks
-          exp: Math.floor(Date.now() / 1000) + (60 * 60 * 24 * 14),
-          user: {
-            username,
-            email,
-            stripeCusId,
-          }
-        }, process.env.SECRET_KEY);
-
-        return {
-          username,
-          email,
-          token
-        };
-      } catch (asyncError) {
-        if (errMsg) {
-          // if anticipated bad input error
-          throw new UserInputError(errMsg);
-        } else {
-          // catch all from rest of async
-          console.log(asyncError);
-          throw new ApolloError('Unable to log in');
-        }
-      }
+      return await loginResolver(username, password);
     },
 
     createPlan: authResolverWrapper(async (_, {
@@ -315,7 +191,7 @@ export default {
     }),
 
     unsubscribe: authResolverWrapper(async (_, { subscriptionId }, { user: { username } }) => {
-        return await unsubscribeResolver(subscriptionId, username);
+      return await unsubscribeResolver(subscriptionId, username);
     }),
 
     unsubscribeAsOwner: authResolverWrapper(async (_, { subscriptionId, planId, newOwner }, { user: { username } }) => {
