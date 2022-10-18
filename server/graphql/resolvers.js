@@ -6,6 +6,7 @@ import {
 } from 'apollo-server-core';
 import { isFuture } from 'date-fns';
 import * as models from '../db/models.js';
+import authResolverWrapper from './authResolverWrapper';
 import {
   unsubscribe as unsubscribeResolver, unsubscribeAsOwner as unsubscribeAsOwnerResolver
 } from './subscriptions/unsubscribe.js';
@@ -23,73 +24,52 @@ const recurringInterval = {
 
 export default {
   Query: {
-    viewOnePlan: async (_, { planId }, { user, err }) => {
-      if (user) {
-        const { username } = user;
-        let errMsg;
-        try {
-          const { rows } = await models.viewOnePlan(planId, username);
-          if (rows.length === 0) { // no match
-            errMsg = 'No plan matched search';
-            throw new Error();
-          }
-          const result = { ...rows[0], planId };
-          result.perCycleCost /= 100;
-          return result;
-        } catch (asyncError) {
-          if (errMsg) {
-            throw new ApolloError(errMsg);
-            // will need to handle this error in front end
-            // where the join page will send this query request
-          }
-          console.log(asyncError);
-          throw new ApolloError('Unable to retrieve plan information');
+    viewOnePlan: authResolverWrapper(async (_, { planId }, { user: { username } }) => {
+      let errMsg;
+      try {
+        const { rows } = await models.viewOnePlan(planId, username);
+        if (rows.length === 0) { // no match
+          errMsg = 'No plan matched search';
+          throw new Error();
         }
-      } else if (err === 'Incorrect token' || err === 'Token has expired') {
-        throw new AuthenticationError(err);
-      } else if (err === 'Unauthorized request') {
-        throw new ForbiddenError(err);
+        const result = { ...rows[0], planId };
+        result.perCycleCost /= 100;
+        return result;
+      } catch (asyncError) {
+        if (errMsg) {
+          throw new ApolloError(errMsg);
+          // will need to handle this error in front end
+          // where the join page will send this query request
+        }
+        console.log(asyncError);
+        throw new ApolloError('Unable to retrieve plan information');
       }
-    },
+    }),
 
-    viewAllPlans: async (_, __, { user, err }) => {
-      if (user) {
-        const { username } = user;
-        try {
-          const { rows } = await models.viewAllPlans(username);
-          rows.forEach((row) => {
-            row.perCycleCost /= 100;
-          });
-          return rows;
-        } catch (asyncError) {
-          console.log(asyncError);
-          throw new ApolloError('Unable to retrieve plans information');
-        }
-      } else if (err === 'Incorrect token' || err === 'Token has expired') {
-        throw new AuthenticationError(err);
-      } else if (err === 'Unauthorized request') {
-        throw new ForbiddenError(err);
+    viewAllPlans: authResolverWrapper(async (_, __, { user: { username } }) => {
+      try {
+        const { rows } = await models.viewAllPlans(username);
+        rows.forEach((row) => {
+          row.perCycleCost /= 100;
+        });
+        return rows;
+      } catch (asyncError) {
+        console.log(asyncError);
+        throw new ApolloError('Unable to retrieve plans information');
       }
-    },
+    }),
   },
 
   Plan: {
-    activeMembers: async ({ planId }, _, { user, err }) => {
-      if (user) {
-        const { username } = user;
-        try {
-          const { rows } = await models.membersOnOnePlan(planId, username);
-          return rows;
-        } catch (asyncError) {
-          console.log(asyncError);
-          throw new ApolloError('Unable to retrieve plan information');
-        }
-      } else if (err === 'Incorrect token' || err === 'Token has expired') {
-        throw new AuthenticationError(err);
-      } else if (err === 'Unauthorized request') {
-        throw new ForbiddenError(err);
+    activeMembers: authResolverWrapper(async ({ planId }, _, { user: { username } }) => {
+      try {
+        const { rows } = await models.membersOnOnePlan(planId, username);
+        return rows;
+      } catch (asyncError) {
+        console.log(asyncError);
+        throw new ApolloError('Unable to retrieve plan information');
       }
-    },
+    }),
   },
 
   Mutation: {
@@ -199,136 +179,121 @@ export default {
       }
     },
 
-    createPlan: async (_, {
+    createPlan: authResolverWrapper(async (_, {
       planName, cycleFrequency, perCycleCost, startDate
-    }, { user, err }) => {
-      if (user) {
-        const { username } = user;
-        try {
-          planName = planName.trim();
-          cycleFrequency = cycleFrequency.toLowerCase();
+    }, { user: { username } }) => {
+      planName = planName.trim();
+      cycleFrequency = cycleFrequency.toLowerCase();
+      perCycleCost *= 100; // store in cents
 
-          // create stripe product
-          perCycleCost *= 100; // store in cents
-          const { id: productId } = await stripe.products.create({
-            name: planName
-          });
+      try {
+        // create stripe product
+        const { id: productId } = await stripe.products.create({
+          name: planName
+        });
 
-          await models.addPlan(
-            username,
-            planName,
-            cycleFrequency,
-            perCycleCost,
-            productId,
-            startDate
-          );
+        await models.addPlan(
+          username,
+          planName,
+          cycleFrequency,
+          perCycleCost,
+          productId,
+          startDate
+        );
 
-          return { productId };
-        } catch (asyncError) {
-          console.log(asyncError);
-          throw new ApolloError('Unable to create new plan');
-        }
-      } else if (err === 'Incorrect token' || err === 'Token has expired') {
-        throw new AuthenticationError(err);
-      } else if (err === 'Unauthorized request') {
-        throw new ForbiddenError(err);
+        return { productId };
+      } catch (asyncError) {
+        console.log(asyncError);
+        throw new ApolloError('Unable to create new plan');
       }
-    },
+    }),
 
-    joinPlan: async (_, { planId, quantity: newQuantity }, { user, err }) => {
+    joinPlan: authResolverWrapper(async (_, { planId, quantity: newQuantity }, { user }) => {
       let errMsg;
-      if (user) {
-        const { username, email, stripeCusId } = user;
-        try {
-          // check that user is NOT already subscribed to plan
-          const { rows } = await models.joinPlan(username, planId);
-          const { cycleFrequency, perCycleCost, startDate, prevPriceId, quantity, count } = rows[0];
-          if (quantity > 0) {
-            // front end will need to display a msg telling user to use 'adjust quantity' in dashboard instead
-            errMsg = 'User is already subscribed to this plan';
-            throw new Error();
-          }
-
-          let nextStartDate = Number(startDate);
-          if (!isFuture(nextStartDate * 1000)) {
-            // TO-DO!! adjust nextStartDate here
-
-          }
-
-          // create a stripe price ID
-          const { id: priceId } = await stripe.prices.create({
-            currency: 'usd',
-            product: planId,
-            unit_amount: Math.ceil(perCycleCost / (count + newQuantity)),
-            recurring: {
-              interval: recurringInterval[cycleFrequency],
-              // could consider allowing customers to do interval count in the future?
-            },
-          });
-
-          // create a Stripe subscription
-          const { id: subscriptionId, items, pending_setup_intent } = await stripe.subscriptions.create({
-            customer: stripeCusId,
-            items: [{
-              price: priceId,
-              quantity: newQuantity,
-            }],
-            payment_behavior: 'default_incomplete',
-            payment_settings: {
-              save_default_payment_method: 'on_subscription',
-              payment_method_types: ['link', 'card'],
-            },
-            proration_behavior: 'none',
-            trial_end: nextStartDate,
-            expand: ['pending_setup_intent'],
-            metadata: {
-              productTotalQuantity: count + newQuantity,
-              cycleFrequency: recurringInterval[cycleFrequency],
-              perCycleCost,
-              quantChanged: false,
-              cancelSubs: false,
-              deletePlan: false,
-            }
-          });
-
-          const { id: setupIntentId, client_secret: clientSecret } = pending_setup_intent;
-          const { id: subscriptionItemId } = items.data[0];
-
-          // storing information needed for webhook in metadata for setupIntent so we don't have to query db too often later
-          await stripe.setupIntents.update(
-            setupIntentId,
-            {
-              metadata: {
-                prevPriceId,
-                newPriceId: priceId,
-                subscriptionId,
-                subscriptionItemId,
-                username,
-                productId: planId,
-                quantity: newQuantity,
-                productTotalQuantity: count + newQuantity,
-              }
-            }
-          );
-          return { clientSecret, email };
-
-        } catch (asyncError) {
-          if (errMsg) {
-            throw new ForbiddenError(errMsg);
-          }
-          console.log(asyncError);
-          throw new ApolloError('Unable to create subscription');
+      const { username, email, stripeCusId } = user;
+      try {
+        // check that user is NOT already subscribed to plan
+        const { rows } = await models.joinPlan(username, planId);
+        const { cycleFrequency, perCycleCost, startDate, prevPriceId, quantity, count } = rows[0];
+        if (quantity > 0) {
+          // front end will need to display a msg telling user to use 'adjust quantity' in dashboard instead
+          errMsg = 'User is already subscribed to this plan';
+          throw new Error();
         }
 
-      } else if (err === 'Incorrect token' || err === 'Token has expired') {
-        throw new AuthenticationError(err);
-      } else if (err === 'Unauthorized request') {
-        throw new ForbiddenError(err);
-      }
-    },
+        let nextStartDate = Number(startDate);
+        if (!isFuture(nextStartDate * 1000)) {
+          // TO-DO!! adjust nextStartDate here
 
-    editPayment: async (_, __, { user, err }) => {
-      if (user) {
+        }
+
+        // create a stripe price ID
+        const { id: priceId } = await stripe.prices.create({
+          currency: 'usd',
+          product: planId,
+          unit_amount: Math.ceil(perCycleCost / (count + newQuantity)),
+          recurring: {
+            interval: recurringInterval[cycleFrequency],
+            // could consider allowing customers to do interval count in the future?
+          },
+        });
+
+        // create a Stripe subscription
+        const { id: subscriptionId, items, pending_setup_intent } = await stripe.subscriptions.create({
+          customer: stripeCusId,
+          items: [{
+            price: priceId,
+            quantity: newQuantity,
+          }],
+          payment_behavior: 'default_incomplete',
+          payment_settings: {
+            save_default_payment_method: 'on_subscription',
+            payment_method_types: ['link', 'card'],
+          },
+          proration_behavior: 'none',
+          trial_end: nextStartDate,
+          expand: ['pending_setup_intent'],
+          metadata: {
+            productTotalQuantity: count + newQuantity,
+            cycleFrequency: recurringInterval[cycleFrequency],
+            perCycleCost,
+            quantChanged: false,
+            cancelSubs: false,
+            deletePlan: false,
+          }
+        });
+
+        const { id: setupIntentId, client_secret: clientSecret } = pending_setup_intent;
+        const { id: subscriptionItemId } = items.data[0];
+
+        // storing information needed for webhook in metadata for setupIntent so we don't have to query db too often later
+        await stripe.setupIntents.update(
+          setupIntentId,
+          {
+            metadata: {
+              prevPriceId,
+              newPriceId: priceId,
+              subscriptionId,
+              subscriptionItemId,
+              username,
+              productId: planId,
+              quantity: newQuantity,
+              productTotalQuantity: count + newQuantity,
+            }
+          }
+        );
+        return { clientSecret, email };
+
+      } catch (asyncError) {
+        if (errMsg) {
+          throw new ForbiddenError(errMsg);
+        }
+        console.log(asyncError);
+        throw new ApolloError('Unable to create subscription');
+      }
+    }),
+
+    editPayment: authResolverWrapper(async (_, __, { user }) => {
         const { username, stripeCusId: customer } = user;
         try {
           /* still debating whether we should store stripeCusId in JWT since it's public */
@@ -347,56 +312,22 @@ export default {
           console.log(asyncError);
           throw new ApolloError('Unable to get customer portal link');
         }
+    }),
 
-      } else if (err === 'Incorrect token' || err === 'Token has expired') {
-        throw new AuthenticationError(err);
-      } else if (err === 'Unauthorized request') {
-        throw new ForbiddenError(err);
-      }
-    },
-
-    unsubscribe: async (_, { subscriptionId }, { user, err }) => {
-      if (user) {
-        const { username } = user;
+    unsubscribe: authResolverWrapper(async (_, { subscriptionId }, { user: { username } }) => {
         return await unsubscribeResolver(subscriptionId, username);
-      } else if (err === 'Incorrect token' || err === 'Token has expired') {
-        throw new AuthenticationError(err);
-      } else if (err === 'Unauthorized request') {
-        throw new ForbiddenError(err);
-      }
-    },
+    }),
 
-    unsubscribeAsOwner: async (_, { subscriptionId, planId, newOwner }, { user, err }) => {
-      if (user) {
-        const { username } = user;
-        return await unsubscribeAsOwnerResolver(subscriptionId, planId, username, newOwner);
-      } else if (err === 'Incorrect token' || err === 'Token has expired') {
-        throw new AuthenticationError(err);
-      } else if (err === 'Unauthorized request') {
-        throw new ForbiddenError(err);
-      }
-    },
+    unsubscribeAsOwner: authResolverWrapper(async (_, { subscriptionId, planId, newOwner }, { user: { username } }) => {
+      return await unsubscribeAsOwnerResolver(subscriptionId, planId, username, newOwner);
+    }),
 
-    editQuantity: async (_, { subscriptionId, newQuantity }, { user, err }) => {
-      if (user) {
-        const { username } = user;
-        return await editQuantityResolver(subscriptionId, newQuantity, username);
-      } else if (err === 'Incorrect token' || err === 'Token has expired') {
-        throw new AuthenticationError(err);
-      } else if (err === 'Unauthorized request') {
-        throw new ForbiddenError(err);
-      }
-    },
+    editQuantity: authResolverWrapper(async (_, { subscriptionId, newQuantity }, { user: { username } }) => {
+      return await editQuantityResolver(subscriptionId, newQuantity, username);
+    }),
 
-    deletePlan: async (_, { planId }, { user, err }) => {
-      if (user) {
-        const { username } = user;
-        return await deletePlanResolver(planId, username);
-      } else if (err === 'Incorrect token' || err === 'Token has expired') {
-        throw new AuthenticationError(err);
-      } else if (err === 'Unauthorized request') {
-        throw new ForbiddenError(err);
-      }
-    }
+    deletePlan: authResolverWrapper(async (_, { planId }, { user: { username } }) => {
+      return await deletePlanResolver(planId, username);
+    }),
   }
 };
