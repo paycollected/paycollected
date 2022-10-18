@@ -53,10 +53,7 @@ root.render(
         <Box
           w="100%"
           h="100vh"
-          bgGradient={[
-            'linear(to-br, rgba(75, 232, 48, 0.76), rgba(46, 71, 249, 0.72))',
-            'linear(to-br, rgba(75, 232, 48, 0.76), rgba(46, 71, 249, 0.72)'
-          ]}
+          bg="#A6E1FA"
         >
           <App />
         </Box>

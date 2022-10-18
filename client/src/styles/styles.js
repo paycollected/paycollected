@@ -25,24 +25,27 @@ export const buttonTheme = defineStyleConfig({
   variants: {
     outline: {
       border: '2px solid',
-      borderColor: 'green.900',
-      background: 'green.500',
-      color: 'green.900',
+      borderRadius: 5,
+      background: 'white',
+      color: '#001C55',
       _hover: {
-        bg: 'gray.50',
-        color: 'green.800'
+        bg: '#001C55',
+        color: '#A6E1FA'
       }
     },
     solid: {
-      bg: 'green.500',
+      background: '#001C55',
       color: 'white',
+      border: '2px solid transparent',
       _hover: {
-        color: 'green.900'
+        bg: '#A6E1FA',
+        color: '#001C55',
+        border: '2px solid #001C55'
       }
     }
   },
   defaultProps: {
-    variant: 'outline',
+    variant: 'solid',
     size: 'md'
   }
 });

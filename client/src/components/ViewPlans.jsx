@@ -42,8 +42,8 @@ export default function ViewPlans({ user }) {
       {modal === 'confirmCancel' && (<ConfirmCancel plan={planToModify} setModal={setModal} user={user} />)}
       {modal === 'confirmQuantChange' && (<ConfirmModifyQuant plan={planToModify} setModal={setModal} newQuantity={newQuant} />)}
       {modal === 'confirmDeletePlan' && (<ConfirmDeletePlan plan={planToModify} setModal={setModal} />)}
-      <Button variant="contained" onClick={() => { navigate('/dashboard'); }}>Dashboard</Button>
-      <Button variant="contained" onClick={() => { submitEditPayment(); }}>Manage Payment Methods</Button>
+      <Button onClick={() => { navigate('/dashboard'); }}>Dashboard</Button>
+      <Button onClick={() => { submitEditPayment(); }}>Manage Payment Methods</Button>
       {data
         && (data.viewAllPlans.map((plan) => (
           <div

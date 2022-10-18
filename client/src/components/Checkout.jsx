@@ -29,7 +29,7 @@ function CheckoutForm() {
         },
       });
 
-      if (error) {// error processing payment from Stripe
+      if (error) { // error processing payment from Stripe
         console.log(error);
         // may want to navigate to a payment Error page here
       }
@@ -37,6 +37,10 @@ function CheckoutForm() {
       console.log('This is a client side error:', err);
     }
   };
+
+  const handleCancel = async () => {
+
+  }
 
   return (
     <>
@@ -55,6 +59,7 @@ function CheckoutForm() {
           }
         />
         <button type="submit" disabled={!stripe}>Make payment</button>
+        <button type="button" onClick={handleCancel}>Cancel</button>
       </form>
     </>
   );

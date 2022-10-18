@@ -66,7 +66,7 @@ export default function Login({ setUser, planToJoin }) {
 
   return (
     <Flex width="full" align="center" justifyContent="center">
-      <Box p={2} my={8} width="40%" bg="white" borderRadius="5">
+      <Box p={2} my={8} width="40%" bg="white" borderRadius="15">
         <Box textAlign="center">
           <Heading>Login</Heading>
         </Box>

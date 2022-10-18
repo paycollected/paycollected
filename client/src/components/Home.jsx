@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Button } from '@chakra-ui/react';
+import { Button, Box } from '@chakra-ui/react';
 
 export default function Home({ setPlanToJoin }) {
   const navigate = useNavigate();
