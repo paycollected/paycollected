@@ -11,8 +11,16 @@ export default function ConfirmModifyQuant({ plan, setModal, newQuantity }) {
     : members[0];
 
   const [confirmQuantChange, { data, loading, error }] = useMutation(EDIT_QUANTITY, {
-    onCompleted: () => { setModal(null); },
-    refetchQueries: [{ query: GET_ALL_PLANS }, 'ViewAllPlans'],
+    onCompleted: ({ data: { quantity: resultQuantC }}) => { setModal(null); },
+    update: (cache, { data: { planId, quantity: resultQuant } }) => {
+      cache.modify({
+        id: `Plan:{"planId":"${planId}"}`,
+        fields: {
+          quantity() { return resultQuant; },
+        }
+      });
+    },
+    // refetchQueries: [{ query: GET_ALL_PLANS }, 'ViewAllPlans'],
   });
 
   const handleConfirmQuantChange = () => {

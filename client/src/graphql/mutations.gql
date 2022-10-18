@@ -50,7 +50,10 @@ mutation UnsubscribeAsPlanOwner($subscriptionId: String!, $planId: String!, $new
 
 
 mutation EditQuantity($subscriptionId: String!, $newQuantity: Int!) {
-  editQuantity(subscriptionId: $subscriptionId, newQuantity: $newQuantity)
+  editQuantity(subscriptionId: $subscriptionId, newQuantity: $newQuantity) {
+    planId
+    quantity
+  }
 }
 
 

@@ -32,6 +32,11 @@ export default gql`
     portalSessionURL: String!
   }
 
+  type EditQuantResponse {
+    planId: ID!
+    quantity: Int!
+  }
+
   enum CycleFrequency {
     WEEKLY
     MONTHLY
@@ -93,7 +98,7 @@ export default gql`
     editQuantity(
       subscriptionId: String!
       newQuantity: Int!
-    ): String!
+    ): EditQuantResponse!
 
     deletePlan(
       planId: ID!
