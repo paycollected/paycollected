@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMutation } from '@apollo/client';
 import { useForm } from 'react-hook-form';
-import { Button, Input } from '@chakra-ui/react';
+import { Button, Input, FormControl, FormLabel, FormErrorMessage } from '@chakra-ui/react';
 import { CreateUser as SIGN_UP } from '../graphql/mutations.gql';
 
 export default function Signup({ setUser, planToJoin }) {
@@ -67,68 +67,104 @@ export default function Signup({ setUser, planToJoin }) {
         autoComplete="off"
         onSubmit={handleSubmit(onSubmit)}
       >
-        <Input
-          name="firstName"
-          label="First Name"
-          required
-          type="text"
-          variant="outlined"
-          defaultValue=""
-          {...register('firstName', { required: 'First name required' })}
-          error={!!errors?.firstName}
-          helperText={errors?.firstName ? errors.firstName.message : ' '}
-        />
-        <Input
-          name="lastName"
-          label="Last Name"
-          required
-          type="text"
-          variant="outlined"
-          defaultValue=""
-          {...register('lastName', { required: 'Last name required' })}
-          error={!!errors?.lastName}
-          helperText={errors?.lastName ? errors.lastName.message : ' '}
-        />
-        <Input
-          name="username"
-          label="Username"
-          required
-          type="text"
-          variant="outlined"
-          defaultValue=""
-          {...register('username', { required: 'Username required' })}
-          error={!!errors?.username}
-          helperText={errors?.username ? errors.username.message : ' '}
-        />
-        <Input
-          name="password"
-          label="Password"
-          required
-          type="password"
-          variant="outlined"
-          defaultValue=""
-          {...register('password', { required: 'Password required' })}
-          error={!!errors?.password}
-          helperText={errors?.password ? errors.password.message : ' '}
-        />
+        <FormControl
+          isRequired
+          isInvalid={errors.firstName}
+        >
+          <FormLabel>First Name</FormLabel>
+          <Input
+            name="firstName"
+            placeholder="Enter First Name"
+            type="text"
+            {...register('firstName', { required: 'First name required' })}
+          />
+          {errors.firstName ? (
+            <div>
+              <FormErrorMessage>
+                {errors.firstName.message}
+              </FormErrorMessage>
+            </div>
+          ) : (
+            <div>&nbsp;</div>
+          )}
+        </FormControl>
+        <FormControl
+          isRequired
+          isInvalid={errors.lastName}
+        >
+          <FormLabel>Last Name</FormLabel>
+          <Input
+            name="lastName"
+            placeholder="Enter Last Name"
+            type="text"
+            {...register('lastName', { required: 'Last name required' })}
+          />
+          {errors.lastName ? (
+            <div>
+              <FormErrorMessage>
+                {errors.lastName.message}
+              </FormErrorMessage>
+            </div>
+          ) : (
+            <div>&nbsp;</div>
+          )}
+        </FormControl>
+        <FormControl
+          isRequired
+          isInvalid={errors.username  || errorMessage === 'Username already exists'}
+        >
+          <FormLabel>Username</FormLabel>
+          <Input
+            name="username"
+            placeholder="Enter Username"
+            type="text"
+            {...register('username', { required: 'Username required' })}
+          />
+          {errors.username ? (
+            <div>
+              <FormErrorMessage>
+                {errors.username.message}
+              </FormErrorMessage>
+            </div>
+          ) : (
+            <div>&nbsp;</div>
+          )}
+        </FormControl>
+        <FormControl
+          isRequired
+          isInvalid={errors.password || errorMessage === 'Passwords must match'}
+        >
+          <Input
+            name="password"
+            placeholder="Enter Password"
+            type="password"
+            {...register('password', { required: 'Password required' })}
+          />
+          {errors.password ? (
+            <div>
+              <FormErrorMessage>
+                {errors.password.message}
+              </FormErrorMessage>
+            </div>
+          ) : (
+            <div>&nbsp;</div>
+          )}
+        </FormControl>
+
         <Input
           name="password2"
-          label="Confirm Password"
+          placeholder="Confirm Password"
           required
           type="password"
-          variant="outlined"
-          defaultValue=""
           {...register('password2', { required: 'Enter password again' })}
           error={!!errors?.password2}
           helperText={errors?.password2 ? errors.password2.message : ' '}
         />
         <Input
           name="email"
-          label="Email"
+          placeholder="Enter Email"
           required
           type="email"
-          variant="outlined"
-          defaultValue=""
           {...register('email', { required: 'Email required' })}
           error={!!errors?.email}
           helperText={errors?.email ? errors.email.message : ' '}
@@ -138,7 +174,7 @@ export default function Signup({ setUser, planToJoin }) {
         ) : (
           <div>&nbsp;</div>
         )}
-        <Button type="submit" variant="contained" disabled={loading}>Join</Button>
+        <Button type="submit" isLoading={loading}>Join</Button>
       </form>
     </div>
   );

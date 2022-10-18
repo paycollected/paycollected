@@ -66,7 +66,7 @@ export default function Login({ setUser, planToJoin }) {
 
   return (
     <Flex width="full" align="center" justifyContent="center">
-      <Box p={2} my={8} width="40%">
+      <Box p={2} my={8} width="40%" bg="white" borderRadius="5">
         <Box textAlign="center">
           <Heading>Login</Heading>
         </Box>
@@ -89,7 +89,7 @@ export default function Login({ setUser, planToJoin }) {
               {errors.username ? (
                 <div>
                   <FormErrorMessage>
-                    {errors.username && errors.username.message}
+                    {errors.username.message}
                   </FormErrorMessage>
                 </div>
               ) : (
@@ -120,7 +120,7 @@ export default function Login({ setUser, planToJoin }) {
               {errors.password ? (
                 <div>
                   <FormErrorMessage>
-                    {errors.password && errors.password.message}
+                    {errors.password.message}
                   </FormErrorMessage>
                 </div>
               ) : (

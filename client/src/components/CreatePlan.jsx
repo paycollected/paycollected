@@ -8,7 +8,7 @@ import { CreatePlanMutation as CREATE_PLAN } from '../graphql/mutations.gql';
 const today = new Date();
 const nextMonth = new Date();
 nextMonth.setMonth(nextMonth.getMonth() + 1);
-// we'll limit users to only be able to pick a start date that is between tomorrow and 1 month from then
+// we'll limit users to a start date that is between tomorrow and 1 month from then
 
 const processDateStr = (date) => {
   const year = date.getFullYear().toString();
