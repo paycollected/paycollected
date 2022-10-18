@@ -3,13 +3,8 @@ import { ApolloError, UserInputError, ForbiddenError } from 'apollo-server-core'
 import { joinPlan } from '../../db/models.js';
 
 const stripe = stripeSDK(process.env.STRIPE_SECRET_KEY);
-const recurringInterval = {
-  weekly: 'week',
-  monthly: 'month',
-  yearly: 'year'
-};
 
-export default function startSubscription(planId, newQuantity, user) {
+export default function startSubscription(planId, newQuantity, user, recurringInterval) {
   let errMsg;
   const { username, email, stripeCusId } = user;
   try {

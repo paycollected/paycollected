@@ -22,7 +22,6 @@ import {
 import createPlanResolver from './plans/create.js';
 import deletePlanResolver from './plans/delete.js';
 
-const saltRounds = 10;
 const stripe = stripeSDK(process.env.STRIPE_SECRET_KEY);
 
 const recurringInterval = {
@@ -64,7 +63,7 @@ export default {
     }),
 
     joinPlan: authResolverWrapper(async (_, { planId, quantity }, { user }) => {
-      return await startSubscription(planId, quantity, user);
+      return await startSubscription(planId, quantity, user, recurringInterval);
     }),
 
     editPayment: authResolverWrapper(async (_, __, { user }) => {
@@ -100,7 +99,7 @@ export default {
 
     editQuantity: authResolverWrapper(
       async (_, { subscriptionId, newQuantity }, { user: { username } }) => {
-        return await editQuantityResolver(subscriptionId, newQuantity, username);
+        return await editQuantityResolver(subscriptionId, newQuantity, username, recurringInterval);
     }),
 
     deletePlan: authResolverWrapper(
