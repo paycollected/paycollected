@@ -3,7 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { useMutation } from '@apollo/client';
 import { useForm } from 'react-hook-form';
 import {
-  Button, Input, InputGroup, InputRightElement
+  Button, Input, InputGroup, InputRightElement,
+  FormControl, FormLabel, FormErrorMessage,
+  Box, Heading, Flex
 } from '@chakra-ui/react';
 import { ViewIcon, ViewOffIcon } from '@chakra-ui/icons';
 import { LogIn as LOG_IN } from '../graphql/mutations.gql';
@@ -63,51 +65,80 @@ export default function Login({ setUser, planToJoin }) {
   };
 
   return (
-    <div>
-      <h1>This is the Login page</h1>
-      <form
-        autoComplete="off"
-        onSubmit={handleSubmit(onSubmit)}
-      >
-        <Input
-          name="username"
-          label="Username"
-          required
-          type="text"
-          variant="outlined"
-          defaultValue=""
-          {...register('username', { required: 'Username required' })}
-          error={!!errors?.username}
-          helperText={errors?.username ? errors.username.message : ' '}
-        />
-        <InputGroup>
-          <Input
-            name="password"
-            label="Password"
-            required
-            type={showPassword ? 'text' : 'password'}
-            variant="outlined"
-            defaultValue=""
-            {...register('password', { required: 'Password required' })}
-            error={!!errors?.password}
-            helperText={errors?.password ? errors.password.message : ' '}
-          />
-          <InputRightElement>
-            <Button onClick={() => setShowPassword(!showPassword)}>
-              {showPassword ? <ViewIcon /> : <ViewOffIcon />}
-            </Button>
-          </InputRightElement>
-        </InputGroup>
-        {errorMessage.length > 0 ? (
-          <div>{errorMessage}</div>
-        ) : (
-          <div>&nbsp;</div>
-        )}
-        <Button type="submit" variant="contained" disabled={loading}>Sign in</Button>
-      </form>
-      <p>Don&apos;t have an account? Sign up!</p>
-      <Button variant="contained" onClick={() => { navigate('/signup'); }}>Sign up</Button>
-      <Button variant="contained" onClick={() => { navigate('/home'); }}>Cancel</Button>
-    </div>
+    <Flex width="full" align="center" justifyContent="center">
+      <Box p={2} my={8} width="40%">
+        <Box textAlign="center">
+          <Heading>Login</Heading>
+        </Box>
+        <Box my={4} textAlign="left">
+          <form
+            autoComplete="off"
+            onSubmit={handleSubmit(onSubmit)}
+          >
+            <FormControl
+              isRequired
+              isInvalid={errors.username || errorMessage === 'Please verify username' || errorMessage === 'Incorrect username and password'}
+            >
+              <FormLabel>Username</FormLabel>
+              <Input
+                name="username"
+                placeholder="Enter Username"
+                type="text"
+                {...register('username', { required: 'Username required' })}
+              />
+              {errors.username ? (
+                <div>
+                  <FormErrorMessage>
+                    {errors.username && errors.username.message}
+                  </FormErrorMessage>
+                </div>
+              ) : (
+                <div>&nbsp;</div>
+              )}
+            </FormControl>
+            <FormControl
+              isRequired
+              isInvalid={errors.password || errorMessage === 'Incorrect username and password'}
+            >
+              <FormLabel>Password</FormLabel>
+              <InputGroup>
+                <Input
+                  name="password"
+                  placeholder="Enter password"
+                  type={showPassword ? 'text' : 'password'}
+                  {...register('password', {
+                    required: 'Password required',
+                    minLength: { value: 3, message: 'Password must be at least 3 characters' }
+                  })}
+                />
+                <InputRightElement>
+                  <Button onClick={() => setShowPassword(!showPassword)}>
+                    {showPassword ? <ViewIcon /> : <ViewOffIcon />}
+                  </Button>
+                </InputRightElement>
+              </InputGroup>
+              {errors.password ? (
+                <div>
+                  <FormErrorMessage>
+                    {errors.password && errors.password.message}
+                  </FormErrorMessage>
+                </div>
+              ) : (
+                <div>&nbsp;</div>
+              )}
+            </FormControl>
+            {errorMessage.length > 0 ? (
+              <div>{errorMessage}</div>
+            ) : (
+              <div>&nbsp;</div>
+            )}
+            <Button type="submit" isLoading={loading}>Sign in</Button>
+          </form>
+          <p>Don&apos;t have an account? Sign up!</p>
+          <Button onClick={() => { navigate('/signup'); }}>Sign up</Button>
+          <Button onClick={() => { navigate('/'); }}>Cancel</Button>
+        </Box>
+      </Box>
+    </Flex>
   );
 }
