@@ -23,9 +23,21 @@ const authLink = setContext((_, { headers }) => {
   };
 });
 
+const cache = new InMemoryCache({
+  typePolicies: {
+    Plan: {
+      keyFields: ['planId'],
+    },
+    PlanMember: {
+      keyFields: ['username'],
+    },
+  },
+});
+
 const client = new ApolloClient({
   link: authLink.concat(httpLink),
-  cache: new InMemoryCache(),
+  // cache: new InMemoryCache(),
+  cache,
   connectToDevTools: true,
 });
 
