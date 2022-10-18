@@ -5,6 +5,7 @@ import {
 import { checkUser, createUser } from '../../db/models.js';
 
 const stripe = stripeSDK(process.env.STRIPE_SECRET_KEY);
+const saltRounds = 10;
 
 export default async function createAccount(firstName, lastName, username, password, email) {
   let errMsg;
