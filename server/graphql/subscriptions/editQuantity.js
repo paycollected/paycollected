@@ -7,13 +7,8 @@ import {
 } from '../../db/models.js';
 
 const stripe = stripeSDK(process.env.STRIPE_SECRET_KEY);
-const recurringInterval = {
-  weekly: 'week',
-  monthly: 'month',
-  yearly: 'year'
-};
 
-export default async function (subscriptionId, newQuantity, username) {
+export default async function (subscriptionId, newQuantity, username, recurringInterval) {
   // Step 1:
   // (1) check that requesting user does own subscription, also query corresponding subscription item id,
   // (2) create new stripe price ID, archive old price ID with Stripe

@@ -147,46 +147,30 @@ export function getUserInfo(username) {
 
 
 export function joinPlan(username, planId) {
+
   const query = `
-    WITH pup AS (
-      SELECT
-        p.cycle_frequency,
-        p.per_cycle_cost,
-        p.start_date,
-        p.s_price_id,
-        SUM (up.quantity) AS count
-      FROM plans p
-      JOIN user_plan up
-      ON p.s_prod_id = up.plan_id
-      WHERE p.s_prod_id = $2
-      GROUP BY
-        p.cycle_frequency,
-        p.per_cycle_cost,
-        p.start_date,
-        p.s_price_id
-    ),
-    up AS (
-      SELECT quantity
-      FROM user_plan
-      WHERE plan_id = $2 AND username = $1
-    )
-    SELECT * FROM (
-      VALUES (
-        (SELECT cycle_frequency FROM pup),
-        (SELECT per_cycle_cost FROM pup),
-        (SELECT start_date FROM pup),
-        (SELECT s_price_id FROM pup),
-        (SELECT count::INTEGER FROM pup),
-        (SELECT quantity FROM up)
-      )
-    ) AS t (
-      "cycleFrequency",
-      "perCycleCost",
-      "startDate",
-      "prevPriceId",
-      count,
-      quantity
-    )
+    SELECT
+      p.cycle_frequency AS "cycleFrequency",
+      p.per_cycle_cost AS "perCycleCost",
+      p.start_date AS "startDate",
+      p.s_price_id AS "prevPriceId",
+      SUM (up.quantity)::INTEGER AS count,
+      COALESCE(
+        ( SELECT quantity
+          FROM user_plan
+          WHERE plan_id = $2 AND username = $1
+        ),
+        0
+      ) AS quantity
+    FROM plans p
+    JOIN user_plan up
+    ON p.s_prod_id = up.plan_id
+    WHERE p.s_prod_id = $2
+    GROUP BY
+      p.cycle_frequency,
+      p.per_cycle_cost,
+      p.start_date,
+      p.s_price_id
   `;
 
   return pool.query(query, [username, planId]);

@@ -47,7 +47,7 @@ async function startApolloServer() {
           ('fail to create context' etc.). Moving this error handling to resolvers to 'standardize'
           error msgs.
           */
-          return { user: null, err: 'Incorrect token'}
+          return { user: null, err: 'Incorrect token' }
         }
       }
       return { user: null, err: 'Unauthorized request' };
