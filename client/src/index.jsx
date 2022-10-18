@@ -7,7 +7,7 @@ import { setContext } from '@apollo/client/link/context';
 import { BrowserRouter } from 'react-router-dom';
 import { ChakraProvider, extendTheme, Box } from '@chakra-ui/react';
 import App from './components/App.jsx';
-import { buttonTheme } from './styles/styles.js';
+import { buttonTheme, inputTheme } from './styles/styles.js';
 
 const httpLink = createHttpLink({
   // TODO: will need to find out how to 'hide' server URI when deployed
@@ -33,6 +33,7 @@ const client = new ApolloClient({
 const theme = extendTheme({
   components: {
     Button: buttonTheme,
+    Input: inputTheme
   }
 });
 
@@ -43,7 +44,7 @@ root.render(
       <ChakraProvider theme={theme}>
         <Box
           w="100%"
-          h="1000px"
+          h="100vh"
           bgGradient={[
             'linear(to-br, rgba(75, 232, 48, 0.76), rgba(46, 71, 249, 0.72))',
             'linear(to-br, rgba(75, 232, 48, 0.76), rgba(46, 71, 249, 0.72)'
