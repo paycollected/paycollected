@@ -1,10 +1,11 @@
 import stripeSDK from 'stripe';
 import { ApolloError, UserInputError, ForbiddenError } from 'apollo-server-core';
+import { isFuture } from 'date-fns';
 import { joinPlan } from '../../db/models.js';
 
 const stripe = stripeSDK(process.env.STRIPE_SECRET_KEY);
 
-export default function startSubscription(planId, newQuantity, user, recurringInterval) {
+export default async function startSubscription(planId, newQuantity, user, recurringInterval) {
   let errMsg;
   const { username, email, stripeCusId } = user;
   try {

@@ -6,7 +6,7 @@ import { addPlan } from '../../db/models.js';
 
 const stripe = stripeSDK(process.env.STRIPE_SECRET_KEY);
 
-export default function createPlanResolver(
+export default async function createPlanResolver(
   planName, cycleFrequency, perCycleCost, startDate, username
 ) {
   planName = planName.trim();
