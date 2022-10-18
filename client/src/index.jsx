@@ -28,15 +28,11 @@ const cache = new InMemoryCache({
     Plan: {
       keyFields: ['planId'],
     },
-    PlanMember: {
-      keyFields: ['username'],
-    },
   },
 });
 
 const client = new ApolloClient({
   link: authLink.concat(httpLink),
-  // cache: new InMemoryCache(),
   cache,
   connectToDevTools: true,
 });
