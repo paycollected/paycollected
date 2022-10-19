@@ -154,7 +154,9 @@ async function cancelSubsAndNotify(row) {
     subscriptionId,
   } = row;
 
-  await stripe.subscriptions.del(subscriptionId);
+  if (subscriptionId) {
+    await stripe.subscriptions.del(subscriptionId);
+  }
 }
 
 
@@ -166,9 +168,8 @@ export async function handlePlanDelete(subscription) {
   const { product: productId } = items.data[0].price;
 
   try {
-    const [{ rows }, _, __] = await Promise.all([
+    const [{ rows }, _] = await Promise.all([
       models.deletePlanGetAllSubs(productId),
-      stripe.subscriptions.del(subscriptionId),
       stripe.products.update(productId, { active: false })
     ]);
 

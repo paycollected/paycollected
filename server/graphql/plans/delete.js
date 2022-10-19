@@ -1,6 +1,6 @@
 import stripeSDK from 'stripe';
 import { ApolloError, UserInputError, ForbiddenError } from 'apollo-server-core';
-import { checkPlanOwnerUsingPlanIdAndDelSub } from '../../db/models.js';
+import { checkPlanOwnerUsingPlanIdGetOneSub, deletePlan } from '../../db/models.js';
 
 const stripe = stripeSDK(process.env.STRIPE_SECRET_KEY);
 
@@ -9,17 +9,27 @@ export default async function (planId, username) {
   // when there are and aren't other members on plan
   let rows;
   try {
-    ({ rows } = await checkPlanOwnerUsingPlanIdAndDelSub(planId, username));
+    ({ rows } = await checkPlanOwnerUsingPlanIdGetOneSub(planId, username));
   } catch (e) {
     console.log(e);
     throw new ApolloError('Cannot delete plan');
   }
 
-  if (rows.length === 0) {
+  const { ownerQuantity, subscriptionId } = rows[0];
+  if (ownerQuantity === null) {
     throw new ForbiddenError('User is not owner of this plan');
+  } else if (subscriptionId === null) {
+    // case when plan was just created with no subscribers
+    // --> just delete from db && archive on stripe
+    try {
+      await Promise.all([deletePlan(planId), stripe.products.update(planId, { active: false })]);
+      return { planId };
+    } catch (e) {
+      console.log(e);
+      throw new ApolloError('Cannot delete plan');
+    }
   }
 
-  const { subscriptionId } = rows[0];
   try {
     await stripe.subscriptions.update(
       subscriptionId,

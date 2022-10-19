@@ -4,7 +4,6 @@ import {
   Unsubscribe as UNSUBSCRIBE,
   UnsubscribeAsPlanOwner as UNSUBSCRIBE_AS_OWNER
 } from '../graphql/mutations.gql';
-import { ViewAllPlans as GET_ALL_PLANS } from '../graphql/queries.gql';
 
 export default function ConfirmCancel({ plan, setModal, user }) {
   const { subscriptionId, planId, activeMembers, owner } = plan;
