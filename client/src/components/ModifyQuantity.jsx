@@ -48,7 +48,7 @@ export default function ModifyQuantity({
           disabled={Number(quantity) === 1}
           onClick={
             () => {
-              if (!isNaN(Number(quantity))) {
+              if (!Number.isNaN(Number(quantity))) {
                 setQuantity((Number(quantity) - 1).toString());
               }
             }

@@ -1,6 +1,5 @@
 import stripeSDK from 'stripe';
 import { ApolloError, UserInputError, ForbiddenError } from 'apollo-server-core';
-import { isFuture } from 'date-fns';
 import { joinPlan } from '../../db/models.js';
 
 const stripe = stripeSDK(process.env.STRIPE_SECRET_KEY);
@@ -19,11 +18,30 @@ export default async function startSubscription(planId, newQuantity, user, recur
       errMsg = 'User is already subscribed to this plan';
       throw new Error();
     }
-
-    let nextStartDate = Number(startDate);
-    if (!isFuture(nextStartDate * 1000)) {
-      // TO-DO!! adjust nextStartDate here
-
+    let nextStartDate = new Date(startDate * 1000);
+    const today = new Date();
+    // adjust startDate to be in the future based on subscription frequency
+    if (nextStartDate < today) {
+      if (cycleFrequency === 'weekly') {
+        const targetDay = nextStartDate.getDay();
+        const todayDay = today.getDay();
+        // find the next occurrence of the target day
+        nextStartDate.setDate(today.getDate() + (((7 - todayDay) + targetDay) % 7));
+      } else if (cycleFrequency === 'monthly') {
+        const targetDate = nextStartDate.getDate();
+        // if current date is past the target, then set target to next month
+        if (today.getDate() >= targetDate) {
+          nextStartDate.setMonth(today.getMonth() + 1);
+          nextStartDate.setDate(targetDate);
+          // otherwise set the date with the current month
+        } else {
+          nextStartDate.setDate(targetDate);
+        }
+      } else { // cycleFrequency === yearly
+        // set to next year if current date is past the start date
+        nextStartDate.setYear(today.getFullYear() + 1);
+      }
+      nextStartDate = Math.ceil(nextStartDate.valueOf()/1000);
     }
 
     // create a stripe price ID
@@ -63,9 +81,11 @@ export default async function startSubscription(planId, newQuantity, user, recur
         deletePlan: false,
       }
     });
-
+    console.log(subscriptionId, '<------------- subscriptionId');
     const { id: setupIntentId, client_secret: clientSecret } = pending_setup_intent;
+    console.log('-------------->', pending_setup_intent);
     const { id: subscriptionItemId } = items.data[0];
+    console.log('------------> subscriptionItemId', subscriptionItemId);
 
     // storing information needed for webhook in metadata for setupIntent so we don't have to query db too often later
     await stripe.setupIntents.update(
@@ -84,7 +104,6 @@ export default async function startSubscription(planId, newQuantity, user, recur
       }
     );
     return { clientSecret, email };
-
   } catch (asyncError) {
     if (errMsg) {
       throw new ForbiddenError(errMsg);

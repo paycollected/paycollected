@@ -2,16 +2,13 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMutation } from '@apollo/client';
 import { useForm } from 'react-hook-form';
-import Button from '@mui/material/Button';
-import TextField from '@mui/material/TextField';
-import InputAdornment from '@mui/material/InputAdornment';
-import MenuItem from '@mui/material/MenuItem';
+import { Button, Input, Select } from '@chakra-ui/react';
 import { CreatePlanMutation as CREATE_PLAN } from '../graphql/mutations.gql';
 
 const today = new Date();
 const nextMonth = new Date();
 nextMonth.setMonth(nextMonth.getMonth() + 1);
-// we'll limit users to only be able to pick a start date that is between tomorrow and 1 month from then
+// we'll limit users to a start date that is between tomorrow and 1 month from then
 
 const processDateStr = (date) => {
   const year = date.getFullYear().toString();
@@ -47,6 +44,7 @@ export default function CreatePlan({ setPlanToJoin, setShowMagicLink }) {
   }) => {
     const formattedStartDate = new Date(...startDate.split('-'));
     formattedStartDate.setMonth(formattedStartDate.getMonth() - 1); // month is zero-th indexed
+    formattedStartDate.setHours(23, 59, 59); // set time to 23:59:59 almost at midnight
     createNewPlan({
       variables: {
         planName,
@@ -66,7 +64,7 @@ export default function CreatePlan({ setPlanToJoin, setShowMagicLink }) {
         autoComplete="off"
         onSubmit={handleSubmit(onSubmit)}
       >
-        <TextField
+        <Input
           name="planName"
           label="Plan Name"
           placeholder="Plan Name"
@@ -78,25 +76,24 @@ export default function CreatePlan({ setPlanToJoin, setShowMagicLink }) {
           error={!!errors?.planName}
           helperText={errors?.planName ? errors.planName.message : ' '}
         />
-        <TextField
+        <Select
           sx={{ width: '25ch' }}
           name="cycleFrequency"
           label="Cycle Frequency"
           placeholder="Cycle Frequency"
           required
-          select
           defaultValue=""
           {...register('cycleFrequency', { required: 'Select cycle frequency' })}
           error={!!errors?.cycleFrequency}
           helperText={errors?.cycleFrequency ? errors.cycleFrequency.message : ' '}
         >
           {['Weekly', 'Monthly', 'Yearly'].map((freq) => (
-            <MenuItem key={freq} value={freq}>
+            <option key={freq} value={freq}>
               {freq}
-            </MenuItem>
+            </option>
           ))}
-        </TextField>
-        <TextField
+        </Select>
+        <Input
           name="perCycleCost"
           label="Per-Cycle Cost"
           placeholder="Per-Cycle Cost"
@@ -106,10 +103,6 @@ export default function CreatePlan({ setPlanToJoin, setShowMagicLink }) {
           {...register('perCycleCost', { required: 'Enter total cost per pay cycle' })}
           error={!!errors?.perCycleCost}
           helperText={errors?.perCycleCost ? errors.perCycleCost.message : ' '}
-          InputProps={{
-            inputProps: { min: 0, step: 0.01 },
-            startAdornment: <InputAdornment position="start">$</InputAdornment>,
-          }}
         />
         <input
           type="date"

@@ -1,8 +1,5 @@
 import stripeSDK from 'stripe';
-import {
-  ApolloError, UserInputError, AuthenticationError, ForbiddenError
-} from 'apollo-server-core';
-import * as models from '../db/models.js';
+import { ApolloError } from 'apollo-server-core';
 import authResolverWrapper from './authResolverWrapper';
 import createAccount from './users/createAccount';
 import loginResolver from './users/login';
@@ -29,79 +26,81 @@ const recurringInterval = {
 
 export default {
   Query: {
-    viewOnePlan: authResolverWrapper(async (_, { planId }, { user: { username } }) => {
-      return await viewOnePlanResolver(planId, username);
-    }),
+    viewOnePlan: authResolverWrapper((_, { planId }, { user: { username } }) => (
+      viewOnePlanResolver(planId, username)
+    )),
 
-    viewAllPlans: authResolverWrapper(async (_, __, { user: { username } }) => {
-      return await viewAllPlansResolver(username);
-    }),
+    viewAllPlans: authResolverWrapper((_, __, { user: { username } }) => (
+      viewAllPlansResolver(username)
+    )),
   },
 
   Plan: {
-    activeMembers: authResolverWrapper(async ({ planId }, _, { user: { username } }) => {
-      return await activeMembersResolver(planId, username);
-    }),
+    activeMembers: authResolverWrapper(({ planId }, _, { user: { username } }) => (
+      activeMembersResolver(planId, username)
+    )),
   },
 
   Mutation: {
-    createUser: async (_, { firstName, lastName, username, password, email }) => {
-      return await createAccount(firstName, lastName, username, password, email);
-    },
+    createUser: (_, {
+      firstName, lastName, username, password, email
+    }) => (
+      createAccount(firstName, lastName, username, password, email)
+    ),
 
-    login: async (_, { username, password }) => {
-      return await loginResolver(username, password);
-    },
+    login: (_, { username, password }) => (loginResolver(username, password)),
 
-    createPlan: authResolverWrapper(async (_, {
+    createPlan: authResolverWrapper((_, {
       planName, cycleFrequency, perCycleCost, startDate
-    }, { user: { username } }) => {
-      return await createPlanResolver(planName, cycleFrequency, perCycleCost, startDate, username);
-    }),
+    }, { user: { username } }) => (
+      createPlanResolver(planName, cycleFrequency, perCycleCost, startDate, username)
+    )),
 
-    joinPlan: authResolverWrapper(async (_, { planId, quantity }, { user }) => {
-      return await startSubscription(planId, quantity, user, recurringInterval);
-    }),
+    joinPlan: authResolverWrapper(async (_, { planId, quantity }, { user }) => (
+      startSubscription(planId, quantity, user, recurringInterval)
+    )),
 
     editPayment: authResolverWrapper(async (_, __, { user }) => {
-        const { username, stripeCusId: customer } = user;
-        try {
-          /* still debating whether we should store stripeCusId in JWT since it's public */
-          // const { rows } = await models.getUserInfo(username);
-          // const { stripeCusId: customer } = rows[0];
-          /*
-          Note that we're skipping programmatically configure the session here
-          and did that manually in Stripe dev portal.
-          */
-          const { url } = await stripe.billingPortal.sessions.create({
-            customer,
-            return_url: 'http://localhost:5647/dashboard/',
-          });
-          return { portalSessionURL: url };
-        } catch (asyncError) {
-          console.log(asyncError);
-          throw new ApolloError('Unable to get customer portal link');
-        }
+      const { username, stripeCusId: customer } = user;
+      try {
+        /* still debating whether we should store stripeCusId in JWT since it's public */
+        // const { rows } = await models.getUserInfo(username);
+        // const { stripeCusId: customer } = rows[0];
+        /*
+        Note that we're skipping programmatically configure the session here
+        and did that manually in Stripe dev portal.
+        */
+        const { url } = await stripe.billingPortal.sessions.create({
+          customer,
+          return_url: 'http://localhost:5647/dashboard/',
+        });
+        return { portalSessionURL: url };
+      } catch (asyncError) {
+        console.log(asyncError);
+        throw new ApolloError('Unable to get customer portal link');
+      }
     }),
 
-    unsubscribe: authResolverWrapper(
-      async (_, { subscriptionId }, { user: { username } }) => {
-        return await unsubscribeResolver(subscriptionId, username);
-    }),
+    unsubscribe: authResolverWrapper((_, { subscriptionId }, { user: { username } }) => (
+      unsubscribeResolver(subscriptionId, username)
+    )),
 
     unsubscribeAsOwner: authResolverWrapper(
-      async (_, { subscriptionId, planId, newOwner }, { user: { username } }) => {
-        return await unsubscribeAsOwnerResolver(subscriptionId, planId, username, newOwner);
-      }),
+      (_, { subscriptionId, planId, newOwner }, { user: { username } }) => (
+        unsubscribeAsOwnerResolver(subscriptionId, planId, username, newOwner)
+      )
+    ),
 
     editQuantity: authResolverWrapper(
-      async (_, { subscriptionId, newQuantity }, { user: { username } }) => {
-        return await editQuantityResolver(subscriptionId, newQuantity, username, recurringInterval);
-    }),
+      (_, { subscriptionId, newQuantity }, { user: { username } }) => (
+        editQuantityResolver(subscriptionId, newQuantity, username, recurringInterval)
+      )
+    ),
 
     deletePlan: authResolverWrapper(
-      async (_, { planId }, { user: { username } }) => {
-        return await deletePlanResolver(planId, username);
-    }),
+      (_, { planId }, { user: { username } }) => (
+        deletePlanResolver(planId, username)
+      )
+    ),
   }
 };

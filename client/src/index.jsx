@@ -5,8 +5,9 @@ import {
 } from '@apollo/client';
 import { setContext } from '@apollo/client/link/context';
 import { BrowserRouter } from 'react-router-dom';
-import { ChakraProvider } from '@chakra-ui/react';
+import { ChakraProvider, extendTheme, Box } from '@chakra-ui/react';
 import App from './components/App.jsx';
+import { buttonTheme, inputTheme } from './styles/styles.js';
 
 const httpLink = createHttpLink({
   // TODO: will need to find out how to 'hide' server URI when deployed
@@ -37,14 +38,26 @@ const client = new ApolloClient({
   connectToDevTools: true,
 });
 
-// ChakraProvider will break all MUI components
+const theme = extendTheme({
+  components: {
+    Button: buttonTheme,
+    Input: inputTheme
+  }
+});
+
 const root = createRoot(document.getElementById('root'));
 root.render(
   <ApolloProvider client={client}>
     <BrowserRouter>
-      {/* <ChakraProvider> */}
-        <App />
-      {/* </ChakraProvider> */}
+      <ChakraProvider theme={theme}>
+        <Box
+          w="100%"
+          h="100vh"
+          bg="#A6E1FA"
+        >
+          <App />
+        </Box>
+      </ChakraProvider>
     </BrowserRouter>
   </ApolloProvider>
 );

@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Button from '@mui/material/Button';
-import TextField from '@mui/material/TextField';
+import { Button, Input } from '@chakra-ui/react';
 
 export default function Dashboard({ username, setUser, setPlanToJoin }) {
   const navigate = useNavigate();
@@ -24,18 +23,18 @@ export default function Dashboard({ username, setUser, setPlanToJoin }) {
 
   return (
     <div>
-      <Button variant="contained" onClick={logUserOut}>Log Out</Button>
+      <Button onClick={logUserOut}>Log Out</Button>
       <h1>
         {username}
         &apos;s Dashboard
       </h1>
-      <Button variant="contained" onClick={() => { navigate('/plan/create'); }}>Create a New Plan</Button>
-      <Button variant="contained" onClick={() => { navigate('/plan/all'); }}>Your Current Plans</Button>
-      <Button variant="contained" onClick={() => { setShowCodeInput(true); }}>Have a Code? Join a Plan!</Button>
+      <Button onClick={() => { navigate('/plan/create'); }}>Create a New Plan</Button>
+      <Button onClick={() => { navigate('/plan/all'); }}>Your Current Plans</Button>
+      <Button onClick={() => { setShowCodeInput(true); }}>Have a Code? Join a Plan!</Button>
       <div>
         {showCodeInput && (
         <form onSubmit={codeInputSubmit}>
-          <TextField
+          <Input
             type="text"
             label="Plan Code"
             placeholder="Plan Code"
@@ -44,7 +43,7 @@ export default function Dashboard({ username, setUser, setPlanToJoin }) {
             variant="outlined"
             onChange={(e) => { setCode(e.target.value); }}
           />
-          <Button variant="contained" type="submit">Join!</Button>
+          <Button type="submit">Join!</Button>
         </form>
         )}
       </div>
