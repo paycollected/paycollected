@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useMutation } from '@apollo/client';
 import { EditQuantity as EDIT_QUANTITY } from '../graphql/mutations.gql';
-import { ViewAllPlans as GET_ALL_PLANS } from '../graphql/queries.gql';
+// import { ViewAllPlans as GET_ALL_PLANS } from '../graphql/queries.gql';
 
 export default function ConfirmModifyQuant({ plan, setModal, newQuantity }) {
   const { subscriptionId, activeMembers, quantity } = plan;
@@ -11,8 +11,11 @@ export default function ConfirmModifyQuant({ plan, setModal, newQuantity }) {
     : members[0];
 
   const [confirmQuantChange, { data, loading, error }] = useMutation(EDIT_QUANTITY, {
-    onCompleted: ({ data: { quantity: resultQuantC }}) => { setModal(null); },
-    update: (cache, { data: { planId, quantity: resultQuant } }) => {
+    onCompleted: () => { setModal(null); },
+    update: (cache, { data: { editQuantity }}) => {
+      const { planId, quantity: resultQuant } = editQuantity;
+      console.log('----------> this is cache', cache);
+      console.log(planId, resultQuant);
       cache.modify({
         id: `Plan:{"planId":"${planId}"}`,
         fields: {

@@ -41,7 +41,7 @@ export default async function startSubscription(planId, newQuantity, user, recur
         // set to next year if current date is past the start date
         nextStartDate.setYear(today.getFullYear() + 1);
       }
-      nextStartDate = Math.ceil(nextStartDate.valueOf()/1000);
+      nextStartDate = Math.ceil(nextStartDate.valueOf() / 1000);
     }
 
     // create a stripe price ID
@@ -81,11 +81,9 @@ export default async function startSubscription(planId, newQuantity, user, recur
         deletePlan: false,
       }
     });
-    console.log(subscriptionId, '<------------- subscriptionId');
+
     const { id: setupIntentId, client_secret: clientSecret } = pending_setup_intent;
-    console.log('-------------->', pending_setup_intent);
     const { id: subscriptionItemId } = items.data[0];
-    console.log('------------> subscriptionItemId', subscriptionItemId);
 
     // storing information needed for webhook in metadata for setupIntent so we don't have to query db too often later
     await stripe.setupIntents.update(
