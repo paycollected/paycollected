@@ -79,7 +79,6 @@ export default async function (subscriptionId, newQuantity, username, recurringI
       // Only at this point can db update be moved to webhook.
       updatePriceIdAndSubsQuant(price, product, newQuantity, subscriptionId)
     ]);
-    console.log(product);
     return { planId: product, quantity: newQuantity };
   }
 
