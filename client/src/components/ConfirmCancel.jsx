@@ -18,7 +18,16 @@ export default function ConfirmCancel({ plan, setModal, user }) {
 
   const [confirmUnsubscribe, { data, loading, error }] = useMutation(UNSUBSCRIBE, {
     onCompleted: () => { setModal(null); },
-    refetchQueries: [{ query: GET_ALL_PLANS }, 'ViewAllPlans'],
+    update: (cache, { data: { unsubscribe } }) => {
+      const { planId: resultPlanId } = unsubscribe;
+      cache.modify({
+        fields: {
+          viewAllPlans(allPlanRefs, { readField }) {
+            return allPlanRefs.filter((planRef) => resultPlanId !== readField('planId', planRef));
+          }
+        }
+      });
+    },
   });
 
   const [
@@ -26,7 +35,16 @@ export default function ConfirmCancel({ plan, setModal, user }) {
     { data: ownerData, loading: ownerLoading, error: ownerError}
   ] = useMutation(UNSUBSCRIBE_AS_OWNER, {
     onCompleted: () => { setModal(null); },
-    refetchQueries: [{ query: GET_ALL_PLANS }, 'ViewAllPlans'],
+    update: (cache, { data: { unsubscribeAsOwner } }) => {
+      const { planId: resultPlanId } = unsubscribeAsOwner;
+      cache.modify({
+        fields: {
+          viewAllPlans(allPlanRefs, { readField }) {
+            return allPlanRefs.filter((planRef) => resultPlanId !== readField('planId', planRef));
+          }
+        }
+      });
+    },
   });
 
   const handleConfirmUnsubscribe = () => {

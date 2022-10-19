@@ -18,10 +18,12 @@ export default async function startSubscription(planId, newQuantity, user, recur
       errMsg = 'User is already subscribed to this plan';
       throw new Error();
     }
+
     let nextStartDate = new Date(startDate * 1000);
     const today = new Date();
     // adjust startDate to be in the future based on subscription frequency
     if (nextStartDate < today) {
+      console.log('aaaaaaaaa');
       if (cycleFrequency === 'weekly') {
         const targetDay = nextStartDate.getDay();
         const todayDay = today.getDay();
@@ -41,8 +43,9 @@ export default async function startSubscription(planId, newQuantity, user, recur
         // set to next year if current date is past the start date
         nextStartDate.setYear(today.getFullYear() + 1);
       }
-      nextStartDate = Math.ceil(nextStartDate.valueOf() / 1000);
     }
+    nextStartDate = Math.ceil(nextStartDate.valueOf() / 1000);
+
 
     // create a stripe price ID
     const { id: priceId } = await stripe.prices.create({
