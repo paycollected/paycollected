@@ -56,7 +56,7 @@ export default {
       createPlanResolver(planName, cycleFrequency, perCycleCost, startDate, username)
     )),
 
-    joinPlan: authResolverWrapper(async (_, { planId, quantity }, { user }) => (
+    joinPlan: authResolverWrapper((_, { planId, quantity }, { user }) => (
       startSubscription(planId, quantity, user, recurringInterval)
     )),
 
