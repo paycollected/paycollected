@@ -23,7 +23,6 @@ export default async function (planId, username) {
     // case when plan was just created with no subscribers
     // --> just delete from db && archive on stripe
     try {
-      console.log('I was run');
       await Promise.all([deletePlan(planId), stripe.products.update(planId, { active: false })]);
       return { planId };
     } catch (e) {
@@ -33,7 +32,6 @@ export default async function (planId, username) {
   }
 
   try {
-    console.log('aaaaaaa');
     await stripe.subscriptions.update(
       subscriptionId,
       { metadata: { deletePlan: true } }
