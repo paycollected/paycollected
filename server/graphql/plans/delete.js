@@ -16,12 +16,14 @@ export default async function (planId, username) {
   }
 
   const { ownerQuantity, subscriptionId } = rows[0];
+  console.log(subscriptionId);
   if (ownerQuantity === null) {
     throw new ForbiddenError('User is not owner of this plan');
   } else if (subscriptionId === null) {
     // case when plan was just created with no subscribers
     // --> just delete from db && archive on stripe
     try {
+      console.log('I was run');
       await Promise.all([deletePlan(planId), stripe.products.update(planId, { active: false })]);
       return { planId };
     } catch (e) {
@@ -31,6 +33,7 @@ export default async function (planId, username) {
   }
 
   try {
+    console.log('aaaaaaa');
     await stripe.subscriptions.update(
       subscriptionId,
       { metadata: { deletePlan: true } }

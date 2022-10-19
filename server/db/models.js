@@ -332,7 +332,7 @@ export function checkPlanOwnerUsingPlanIdGetOneSub(planId, username) {
       (
         SELECT subscription_id
         FROM user_plan
-        WHERE plan_id = $1
+        WHERE plan_id = $1 AND quantity > 0
         LIMIT 1
       )
     )

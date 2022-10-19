@@ -172,7 +172,7 @@ export async function handlePlanDelete(subscription) {
       models.deletePlanGetAllSubs(productId),
       stripe.products.update(productId, { active: false })
     ]);
-
+    console.log(rows);
     if (rows.length > 0) {
       await Promise.all(rows.map((row) => cancelSubsAndNotify(row)));
     }
