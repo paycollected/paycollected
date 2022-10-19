@@ -38,7 +38,8 @@ export async function unsubscribe(subscriptionId, username) {
       // but that will double the number of API calls to use this same webhook event in user account deletion scenario.
       deleteSubscription(subscriptionId)]);
     // delete this subscription in our db
-    return subscriptionId;
+    const { planId } = rows[0];
+    return { planId };
   } catch(e) {
     console.log(e);
     throw new ApolloError('Cannot unsubscribe');
@@ -92,7 +93,7 @@ export async function unsubscribeAsOwner(subscriptionId, planId, username, newOw
       stripe.subscriptions.update(subscriptionId, { metadata: { cancelSubs: true }})
       // mark this subscription for deletion by webhook
     ]);
-    return subscriptionId;
+    return { planId };
   } catch (e) {
     console.log(e);
     throw new ApolloError('Cannot unsubscribe');

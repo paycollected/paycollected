@@ -11,7 +11,7 @@ export default function ConfirmModifyQuant({ plan, setModal, newQuantity }) {
 
   const [confirmQuantChange, { data, loading, error }] = useMutation(EDIT_QUANTITY, {
     onCompleted: () => { setModal(null); },
-    update: (cache, { data: { editQuantity }}) => {
+    update: (cache, { data: { editQuantity } }) => {
       const { planId, quantity: resultQuant } = editQuantity;
       cache.modify({
         id: `Plan:{"planId":"${planId}"}`,

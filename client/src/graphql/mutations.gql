@@ -40,12 +40,16 @@ mutation EditPayment {
 
 
 mutation Unsubscribe ($subscriptionId: String!) {
-  unsubscribe(subscriptionId: $subscriptionId)
+  unsubscribe(subscriptionId: $subscriptionId) {
+    planId
+  }
 }
 
 
 mutation UnsubscribeAsPlanOwner($subscriptionId: String!, $planId: String!, $newOwner: String!) {
-  unsubscribeAsOwner(subscriptionId: $subscriptionId, planId: $planId, newOwner: $newOwner)
+  unsubscribeAsOwner(subscriptionId: $subscriptionId, planId: $planId, newOwner: $newOwner) {
+    planId
+  }
 }
 
 
@@ -58,5 +62,7 @@ mutation EditQuantity($subscriptionId: String!, $newQuantity: Int!) {
 
 
 mutation DeletePlan($planId: ID!) {
-  deletePlan(planId: $planId)
+  deletePlan(planId: $planId) {
+    planId
+  }
 }

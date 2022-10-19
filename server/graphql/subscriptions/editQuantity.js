@@ -36,6 +36,9 @@ export default async function (subscriptionId, newQuantity, username, recurringI
 
   if (quantity === newQuantity) {
     throw new UserInputError('No change in quantity');
+  } else if (quantity === 0) {
+    throw new ForbiddenError('Wrong mutation call');
+    // have to call joinPlan mutation instead
   }
 
   const productTotalQuantity = count - quantity + newQuantity;

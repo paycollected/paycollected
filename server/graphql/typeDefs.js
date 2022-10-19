@@ -37,6 +37,10 @@ export default gql`
     quantity: Int!
   }
 
+  type SubsModificationResponse {
+    planId: ID!
+  }
+
   enum CycleFrequency {
     WEEKLY
     MONTHLY
@@ -87,13 +91,13 @@ export default gql`
 
     unsubscribe(
       subscriptionId: String!
-    ): String!
+    ): SubsModificationResponse!
 
     unsubscribeAsOwner(
       subscriptionId: String!
       planId: String!
       newOwner: String!
-    ): String!
+    ): SubsModificationResponse!
 
     editQuantity(
       subscriptionId: String!
@@ -102,6 +106,6 @@ export default gql`
 
     deletePlan(
       planId: ID!
-    ): String!
+    ): SubsModificationResponse!
   }
 `;

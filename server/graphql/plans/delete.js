@@ -5,6 +5,8 @@ import { checkPlanOwnerUsingPlanIdAndDelSub } from '../../db/models.js';
 const stripe = stripeSDK(process.env.STRIPE_SECRET_KEY);
 
 export default async function (planId, username) {
+  // still need to consider when quantity = 0 (owner)
+  // when there are and aren't other members on plan
   let rows;
   try {
     ({ rows } = await checkPlanOwnerUsingPlanIdAndDelSub(planId, username));
@@ -23,7 +25,7 @@ export default async function (planId, username) {
       subscriptionId,
       { metadata: { deletePlan: true } }
     );
-    return planId;
+    return { planId };
   } catch (e) {
     console.log(e);
     throw new ApolloError('Cannot delete plan');

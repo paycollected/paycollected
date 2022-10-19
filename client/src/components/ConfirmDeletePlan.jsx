@@ -12,7 +12,16 @@ export default function ConfirmDeletePlan({ plan, setModal }) {
 
   const [confirmDelete, { data, loading, error }] = useMutation(DELETE_PLAN, {
     onCompleted: () => { setModal(null); },
-    refetchQueries: [{ query: GET_ALL_PLANS }, 'ViewAllPlans'],
+    update: (cache, { data: { deletePlan } }) => {
+      const { planId: resultPlanId } = deletePlan;
+      cache.modify({
+        fields: {
+          viewAllPlans(allPlanRefs, { readField }) {
+            return allPlanRefs.filter((planRef) => resultPlanId !== readField('planId', planRef));
+          }
+        }
+      });
+    },
   });
 
   const handleConfirmDelete = () => {

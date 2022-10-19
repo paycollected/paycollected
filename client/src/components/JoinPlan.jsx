@@ -13,7 +13,7 @@ export default function JoinPlan({ setPlanToJoin, setStripeClientSecret }) {
   const { loading: getPlanLoading, data: getPlanData, error: getPlanError } = useQuery(GET_PLAN, {
     variables: { planId: planId.toString().trim() },
     fetchPolicy: 'network-only',
-    nextFetchPolicy: 'cache-and-network',
+    nextFetchPolicy: 'cache-only',
   });
 
   // will need to handle this payLoading state on client side so user knows what to expect

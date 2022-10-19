@@ -233,7 +233,9 @@ export function deleteSubscription(subscriptionId) {
 
 export function checkPlanOwnerUsingSubsId(subscriptionId, username) {
   const query = `
-    SELECT plan_owner AS "planOwner"
+    SELECT
+      plan_owner AS "planOwner",
+      plan_id AS "planId"
     FROM user_plan
     WHERE subscription_id = $1 AND username = $2`;
   return pool.query(query, [subscriptionId, username]);
