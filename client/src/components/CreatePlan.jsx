@@ -44,6 +44,7 @@ export default function CreatePlan({ setPlanToJoin, setShowMagicLink }) {
   }) => {
     const formattedStartDate = new Date(...startDate.split('-'));
     formattedStartDate.setMonth(formattedStartDate.getMonth() - 1); // month is zero-th indexed
+    formattedStartDate.setHours(23, 59, 59); // set time to 23:59:59 almost at midnight
     createNewPlan({
       variables: {
         planName,

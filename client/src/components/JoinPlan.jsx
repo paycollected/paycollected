@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation } from '@apollo/client';
+import { Flex, Box, FormControl, FormLabel, FormErrorMessage, Button, Input } from '@chakra-ui/react';
 import { JoinPlan as JOIN_PLAN } from '../graphql/mutations.gql';
 import { ViewOnePlan as GET_PLAN } from '../graphql/queries.gql';
 
@@ -88,9 +89,9 @@ export default function JoinPlan({ setPlanToJoin, setStripeClientSecret }) {
             min="1"
             onChange={(e) => { setQuantity(Number(e.target.value)); }}
           />
-          <button type="submit" disabled={!!quantity}>Join</button>
+          <Button type="submit" disabled={!!quantity}>Join</Button>
         </form>
-        <button type="button" onClick={() => { navigate('/dashboard'); }}>Cancel</button>
+        <Button onClick={() => { navigate('/dashboard'); }}>Cancel</Button>
       </>
     );
   }

@@ -7,7 +7,8 @@
     "start": "webpack --mode development --watch & nodemon --exec babel-node ./server/index",
     "build": "npx webpack",
     "db-schema": "psql postgres -f ./server/db/schema.sql",
-    "start-webhook": "stripe list --forward-to http://localhost:5647/webhook"
+    "start-webhook": "stripe listen --forward-to http://localhost:5647/webhook",
+    "time-sim": "node timeSimulator.js"
   },
   "repository": {
     "type": "git",

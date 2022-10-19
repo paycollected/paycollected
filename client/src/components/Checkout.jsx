@@ -2,6 +2,7 @@ import React from 'react';
 import {
   useStripe, useElements, Elements, PaymentElement, LinkAuthenticationElement,
 } from '@stripe/react-stripe-js';
+import { Flex, Box, FormControl, FormLabel, FormErrorMessage, Button, Input } from '@chakra-ui/react';
 import { loadStripe } from '@stripe/stripe-js';
 
 const stripePromise = loadStripe(process.env.STRIPE_PUBLISHABLE_KEY);
@@ -39,7 +40,8 @@ function CheckoutForm() {
   };
 
   const handleCancel = async () => {
-
+    // TODO: navigate back to dashboard or join plan page
+    // delete subscription
   }
 
   return (
