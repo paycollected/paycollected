@@ -5,8 +5,6 @@ import { checkPlanOwnerUsingPlanIdGetOneSub, deletePlan } from '../../db/models.
 const stripe = stripeSDK(process.env.STRIPE_SECRET_KEY);
 
 export default async function (planId, username) {
-  // still need to consider when quantity = 0 (owner)
-  // when there are and aren't other members on plan
   let rows;
   try {
     ({ rows } = await checkPlanOwnerUsingPlanIdGetOneSub(planId, username));
