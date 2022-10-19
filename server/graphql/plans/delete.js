@@ -16,7 +16,6 @@ export default async function (planId, username) {
   }
 
   const { ownerQuantity, subscriptionId } = rows[0];
-  console.log(subscriptionId);
   if (ownerQuantity === null) {
     throw new ForbiddenError('User is not owner of this plan');
   } else if (subscriptionId === null) {
