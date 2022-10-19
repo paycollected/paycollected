@@ -111,7 +111,6 @@ export default function CreatePlan({ setPlanToJoin, setShowMagicLink }) {
           max={nextMonthFullDate}
           onChange={(e) => { setStartDate(e.target.value); }}
         />
-        {console.log(startDate)}
         <Button type="submit" variant="contained" disabled={loading}>Submit</Button>
       </form>
       <Button variant="contained" onClick={() => { navigate('/dashboard'); }}>Cancel</Button>

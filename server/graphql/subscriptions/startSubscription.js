@@ -23,7 +23,6 @@ export default async function startSubscription(planId, newQuantity, user, recur
     const today = new Date();
     // adjust startDate to be in the future based on subscription frequency
     if (nextStartDate < today) {
-      console.log('aaaaaaaaa');
       if (cycleFrequency === 'weekly') {
         const targetDay = nextStartDate.getDay();
         const todayDay = today.getDay();
