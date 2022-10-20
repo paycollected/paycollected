@@ -321,13 +321,26 @@ export function getMembersOnPlan(planId, subscriptionId) {
 
 export function checkPlanOwnerUsingPlanIdGetOneSub(planId, username) {
   const query = `
+  WITH owner AS (
+    SELECT quantity, subscription_id
+    FROM user_plan
+    WHERE plan_id = $1 AND username = $2 AND plan_owner = True
+  )
   SELECT *
   FROM (
     VALUES (
       (
         SELECT quantity
-        FROM user_plan
-        WHERE plan_id = $1 AND username = $2 AND plan_owner = True
+        FROM owner
+      ),
+      (
+        SELECT subscription_id
+        FROM owner
+      ),
+      (
+        SELECT s_price_id
+        FROM plans
+        WHERE s_prod_id = $1
       ),
       (
         SELECT subscription_id
@@ -338,8 +351,10 @@ export function checkPlanOwnerUsingPlanIdGetOneSub(planId, username) {
     )
   )
   AS temp (
-    "ownerQuantity",
-    "subscriptionId"
+    "ownerQuant",
+    "ownerSubsId",
+    "priceId",
+    "memberSubsId"
   )
   `;
   return pool.query(query, [planId, username]);

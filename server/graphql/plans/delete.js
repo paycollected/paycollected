@@ -13,14 +13,34 @@ export default async function (planId, username) {
     throw new ApolloError('Cannot delete plan');
   }
 
-  const { ownerQuantity, subscriptionId } = rows[0];
-  if (ownerQuantity === null) {
+  const { ownerQuant, ownerSubsId, priceId, memberSubsId } = rows[0];
+  if (ownerQuant === null) {
     throw new ForbiddenError('User is not owner of this plan');
-  } else if (subscriptionId === null) {
-    // case when plan was just created with no subscribers
-    // --> just delete from db && archive on stripe
+  } else if (priceId === null) {
+    // plan have never been used and therefore does not have a price ID
+    // --> delete from both db & stripe
     try {
-      await Promise.all([deletePlan(planId), stripe.products.update(planId, { active: false })]);
+      await Promise.all([deletePlan(planId), stripe.products.del(planId)]);
+      return { planId };
+    } catch (e) {
+      console.log(e);
+      throw new ApolloError('Cannot delete plan');
+    }
+  } else if (memberSubsId === null) {
+    try {
+      if (!ownerSubsId) {
+        // nobody is currently active on plan, but plan has been used in the past
+        await Promise.all([
+          deletePlan(planId),
+          stripe.products.update(planId, { active: false })]);
+      } else {
+      // owner is the only active member on plan
+        await Promise.all([
+          deletePlan(planId),
+          stripe.products.update(planId, { active: false }),
+          stripe.subscriptions.del(ownerSubsId)
+        ]);
+      }
       return { planId };
     } catch (e) {
       console.log(e);
@@ -28,9 +48,10 @@ export default async function (planId, username) {
     }
   }
 
+  // there are other active members on plan, including or not including owner
   try {
     await stripe.subscriptions.update(
-      subscriptionId,
+      memberSubsId,
       { metadata: { deletePlan: true } }
     );
     return { planId };
