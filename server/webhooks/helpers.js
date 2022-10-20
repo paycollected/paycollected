@@ -122,7 +122,6 @@ export async function handleSubscriptionCancel(subscription) {
       // this is the last active member on plan, there is still a plan owner with quant 0 remaining
       await Promise.all([
         models.deleteSubscription(subscriptionId),
-        stripe.prices.update(prevPriceId, { active: false }),
         stripe.subscriptions.del(subscriptionId)
       ]);
     }
