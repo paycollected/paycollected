@@ -85,7 +85,7 @@ export default function ViewPlans({ user }) {
               <button
                 type="button"
                 onClick={() => { handleSubsModification(plan, 'confirmCancel'); }}
-                disabled={plan.activeMembers.length === 0}
+                disabled={plan.owner.username === user && plan.activeMembers.length === 0}
                 style={{ width: '150px', justifySelf: 'center' }}
               >
                 Cancel subscription
