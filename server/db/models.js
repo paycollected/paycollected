@@ -343,21 +343,10 @@ export function checkPlanOwnerUsingPlanIdGetOneSub(planId, username) {
   SELECT *
   FROM (
     VALUES (
-      (
-        SELECT quantity
-        FROM owner
-      ),
-      (
-        SELECT subscription_id
-        FROM owner
-      ),
-      (
-        SELECT s_price_id
-        FROM plans
-        WHERE s_prod_id = $1
-      ),
-      (
-        SELECT subscription_id
+      (SELECT quantity FROM owner),
+      (SELECT subscription_id FROM owner),
+      (SELECT s_price_id FROM plans WHERE s_prod_id = $1),
+      (SELECT subscription_id
         FROM user_plan
         WHERE plan_id = $1 AND plan_owner = False
         LIMIT 1
