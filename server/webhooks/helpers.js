@@ -86,7 +86,8 @@ export async function handleSubscriptionCancel(subscription) {
   // priceID --> archive that price
   // create a new price: need count of quantities, and total plan cost, frequency, product ID
   // --> update new price ID for product in db
-  // query db for every subscription & item ID to update with new price ID + new totalQuantity (subtract cancelled from total)
+  // query db for every subscription & item ID to update with new price ID + new totalQuantity
+  // (subtract cancelled from total)
   // delete this subscription from db
   const { id: subscriptionId, items } = subscription;
   const { price, quantity } = items.data[0];
@@ -123,7 +124,7 @@ export async function handleSubscriptionCancel(subscription) {
       await Promise.all([
         models.deleteSubscription(subscriptionId),
         stripe.subscriptions.del(subscriptionId)
-        // we don't archive the price ID here in more people will be joining in the future
+        // we don't archive the price ID here in case more people will be joining in the future
         // which will archive the old price ID in db
         // or if owner decide to delete plan, price ID is also archived then
       ]);
