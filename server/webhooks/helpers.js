@@ -23,22 +23,24 @@ async function updateStripePrice(row, price, productTotalQuantity) {
     quantity
   } = row;
 
-  await stripe.subscriptions.update(
-    subscriptionId,
-    {
-      items: [
-        {
-          id: subscriptionItemId,
-          price,
-          quantity
-        }
-      ],
-      metadata: {
-        productTotalQuantity,
-      },
-      proration_behavior: 'none',
-    }
-  );
+  if (subscriptionId) {
+    await stripe.subscriptions.update(
+      subscriptionId,
+      {
+        items: [
+          {
+            id: subscriptionItemId,
+            price,
+            quantity
+          }
+        ],
+        metadata: {
+          productTotalQuantity,
+        },
+        proration_behavior: 'none',
+      }
+    );
+  }
 };
 
 

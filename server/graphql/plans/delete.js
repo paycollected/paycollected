@@ -20,6 +20,7 @@ export default async function (planId, username) {
     // plan have never been used and therefore does not have a price ID
     // --> delete from both db & stripe
     try {
+      console.log('aaaaa');
       await Promise.all([deletePlan(planId), stripe.products.del(planId)]);
       return { planId };
     } catch (e) {
@@ -30,11 +31,13 @@ export default async function (planId, username) {
     try {
       if (!ownerSubsId) {
         // nobody is currently active on plan, but plan has been used in the past
+        console.log('--------------------> bbbbb');
         await Promise.all([
           deletePlan(planId),
           stripe.products.update(planId, { active: false })]);
       } else {
       // owner is the only active member on plan
+        console.log('--------------------> cccc');
         await Promise.all([
           deletePlan(planId),
           stripe.products.update(planId, { active: false }),
@@ -50,6 +53,7 @@ export default async function (planId, username) {
 
   // there are other active members on plan, including or not including owner
   try {
+    console.log('--------------------> dddddd');
     await stripe.subscriptions.update(
       memberSubsId,
       { metadata: { deletePlan: true } }
