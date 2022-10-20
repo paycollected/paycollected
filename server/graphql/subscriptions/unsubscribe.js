@@ -29,15 +29,7 @@ export async function unsubscribe(subscriptionId, username) {
   }
 
   try {
-    await Promise.all([
-      stripe.subscriptions.update(subscriptionId, { metadata: { cancelSubs: true }}),
-      // Mark this subscription for delete by webhook instead of at client-serving step here
-      // because we don't want to trigger price recalculation and update for all members
-      // if subscription cancellation is part of plan deletion by plan owner.
-      // Alternative is to update metadata for this subscription before deleting it on stripe system here (2 API calls)
-      // but that will double the number of API calls to use this same webhook event in user account deletion scenario.
-      deleteSubscription(subscriptionId)]);
-    // delete this subscription in our db
+    await stripe.subscriptions.update(subscriptionId, { metadata: { cancelSubs: true }});
     const { planId } = rows[0];
     return { planId };
   } catch(e) {

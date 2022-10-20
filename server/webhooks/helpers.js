@@ -97,24 +97,34 @@ export async function handleSubscriptionCancel(subscription) {
   const newProductTotalQuantity = productTotalQuantity - quantity;
 
   try {
-    const [{ id: newPriceId }, _, __] = await Promise.all([
-      stripe.prices.create({
-        currency: 'usd',
-        product: productId,
-        unit_amount: Math.ceil(perCycleCost / newProductTotalQuantity),
-        recurring: {
-          interval: cycleFrequency,
-        },
-      }),
-      stripe.prices.update(prevPriceId, { active: false }),
-      stripe.subscriptions.del(subscriptionId)
-    ]);
+    if (newProductTotalQuantity > 0) {
+      // if there are still active members even after this person has dropped out
+      const [{ id: newPriceId }, _, __] = await Promise.all([
+        stripe.prices.create({
+          currency: 'usd',
+          product: productId,
+          unit_amount: Math.ceil(perCycleCost / newProductTotalQuantity),
+          recurring: {
+            interval: cycleFrequency,
+          },
+        }),
+        stripe.prices.update(prevPriceId, { active: false }),
+        stripe.subscriptions.del(subscriptionId)
+      ]);
 
-    const { rows } = await models.updatePriceIdGetMembers(newPriceId, productId);
-    if (rows.length > 0) {
-      await Promise.all(
-        rows.map((row) => updateStripePrice(row, newPriceId, newProductTotalQuantity))
-      );
+      const { rows } = await models.updatePriceIdDelSubsGetMembers(newPriceId, productId, subscriptionId);
+      if (rows.length > 0) {
+        await Promise.all(
+          rows.map((row) => updateStripePrice(row, newPriceId, newProductTotalQuantity))
+        );
+      }
+    } else {
+      // this is the last active member on plan, there is still a plan owner with quant 0 remaining
+      await Promise.all([
+        models.deleteSubscription(subscriptionId),
+        stripe.prices.update(prevPriceId, { active: false }),
+        stripe.subscriptions.del(subscriptionId)
+      ]);
     }
 
   } catch (err) {

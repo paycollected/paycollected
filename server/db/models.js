@@ -207,10 +207,13 @@ export function startSubscription(planId, quantity, subscriptionId, subscription
 }
 
 
-export function updatePriceIdGetMembers(newPriceId, productId) {
+export function updatePriceIdDelSubsGetMembers(newPriceId, productId, subscriptionId) {
   const query = `
     WITH update_price_id AS (
       UPDATE plans SET s_price_id = $1 WHERE s_prod_id = $2
+    ), del_sub AS (
+      DELETE FROM user_plan
+      WHERE subscription_id = $3
     )
     SELECT
       username,
@@ -221,7 +224,7 @@ export function updatePriceIdGetMembers(newPriceId, productId) {
     FROM user_on_plan
     WHERE plan_id = $2
   `;
-  const args = [newPriceId, productId];
+  const args = [newPriceId, productId, subscriptionId];
   return pool.query(query, args);
 }
 
