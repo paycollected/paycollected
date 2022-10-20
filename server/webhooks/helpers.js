@@ -123,6 +123,9 @@ export async function handleSubscriptionCancel(subscription) {
       await Promise.all([
         models.deleteSubscription(subscriptionId),
         stripe.subscriptions.del(subscriptionId)
+        // we don't archive the price ID here in more people will be joining in the future
+        // which will archive the old price ID in db
+        // or if owner decide to delete plan, price ID is also archived then
       ]);
     }
 

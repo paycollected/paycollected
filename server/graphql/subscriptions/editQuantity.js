@@ -17,7 +17,15 @@ export default async function (subscriptionId, newQuantity, username, recurringI
   // subs metadata: update totalQuantity
   // and (2) edit quantity of this subscription in our db & update priceId
 
-  // still need to perform check on quantity here to make sure conform to upper limit
+  // Validating quantity input
+  if (newQuantity > 6) {
+    // upper limit for our system
+    throw new UserInputError('New quantity must be less than 7');
+  } else if (newQuantity <= 0) {
+    throw new UserInputError('Invalid quantity');
+  }
+
+
   let rows;
   try {
     ({ rows } = await getSubsItemIdAndProductInfo(subscriptionId, username));
