@@ -125,7 +125,7 @@ export async function handleSubscriptionCancel(subscription) {
         models.deleteSubscription(subscriptionId),
         stripe.subscriptions.del(subscriptionId)
         // we don't archive the price ID here in case more people will be joining in the future
-        // which will archive the old price ID in db
+        // which will archive the old price ID in db then
         // or if owner decide to delete plan, price ID is also archived then
       ]);
     }
