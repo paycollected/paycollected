@@ -222,7 +222,7 @@ export function updatePriceIdDelSubsGetMembers(newPriceId, productId, subscripti
       subscription_item_id AS "subscriptionItemId",
       quantity
     FROM user_on_plan
-    WHERE plan_id = $2
+    WHERE plan_id = $2 and subscription_id != $3
   `;
   const args = [newPriceId, productId, subscriptionId];
   return pool.query(query, args);
