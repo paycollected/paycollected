@@ -21,9 +21,16 @@ CREATE TABLE IF NOT EXISTS plans (
   cycle_frequency CYCLE_FREQ NOT NULL,
   per_cycle_cost INTEGER NOT NULL,
   s_prod_id VARCHAR(255) PRIMARY KEY,
-  s_price_id VARCHAR(255) UNIQUE, -- corresponds to per_user_per_cycle_cost
+  s_price_id VARCHAR(255) UNIQUE,
   start_date BIGINT NOT NULL -- in UTC format
 );
+
+CREATE TABLE IF NOT EXISTS pending_subs (
+  subscription_id VARCHAR(255) PRIMARY KEY,
+  price_id VARCHAR(255) NOT NULL UNIQUE,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
 
 -- relational tables
 CREATE TABLE IF NOT EXISTS user_plan (
