@@ -181,15 +181,26 @@ export function startSubscription(planId, quantity, subscriptionId, subscription
   const query = `
     WITH update_sub_id AS
     (
-      INSERT INTO user_plan (quantity, subscription_id, subscription_item_id, plan_id, username)
-      VALUES ($1, $2, $3, $4, $5)
-      ON CONFLICT (username, plan_id)
-      DO UPDATE SET quantity = $1, subscription_id = $2, subscription_item_id = $3
+      INSERT INTO user_plan
+        (quantity, subscription_id, subscription_item_id, plan_id, username)
+      VALUES
+        ($1, $2, $3, $4, $5)
+      ON CONFLICT
+        (username, plan_id)
+      DO UPDATE SET
+        quantity = $1, subscription_id = $2, subscription_item_id = $3
       WHERE user_plan.username = $5 AND user_plan.plan_id = $4
     ),
     update_price_id AS
     (
-      UPDATE plans SET s_price_id = $6 WHERE s_prod_id = $4
+      UPDATE plans
+      SET s_price_id = $6
+      WHERE s_prod_id = $4
+    ),
+    update_pending_subs AS (
+      UPDATE pending_subs
+      SET paid = True
+      WHERE subscription_id = $2
     )
     SELECT
       username,
@@ -383,4 +394,28 @@ export function deletePlanGetAllSubs(planId) {
 export function deletePlan(planId) {
   const query = `DELETE FROM plans WHERE s_prod_id = $1`;
   return pool.query(query, [planId]);
+}
+
+export function queuePendingSubs(subscriptionId, priceId) {
+  const query = `
+    INSERT INTO pending_subs
+      (subscription_id, price_id)
+    VALUES
+      ($1, $2)
+  `;
+  return pool.query(query, [subscriptionId, priceId]);
+}
+
+
+export function getExpiredPendingSubs() {
+  const query = `
+    WITH del_valid_subs AS (
+      DELETE FROM pending_subs
+      WHERE created_at < (CURRENT_TIMESTAMP - interval '1 day') AND paid = True
+    )
+    DELETE FROM pending_subs
+    WHERE created_at < (CURRENT_TIMESTAMP - interval '1 day') AND paid = False
+    RETURNING subscription_id AS "subscriptionId", price_id AS "priceId"
+  `;
+  return pool.query(query);
 }

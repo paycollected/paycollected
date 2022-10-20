@@ -1,6 +1,6 @@
 import stripeSDK from 'stripe';
 import { ApolloError, UserInputError, ForbiddenError } from 'apollo-server-core';
-import { joinPlan } from '../../db/models.js';
+import { joinPlan, queuePendingSubs } from '../../db/models.js';
 
 const stripe = stripeSDK(process.env.STRIPE_SECRET_KEY);
 
@@ -87,22 +87,28 @@ export default async function startSubscription(planId, newQuantity, user, recur
     const { id: setupIntentId, client_secret: clientSecret } = pending_setup_intent;
     const { id: subscriptionItemId } = items.data[0];
 
-    // storing information needed for webhook in metadata for setupIntent so we don't have to query db too often later
-    await stripe.setupIntents.update(
-      setupIntentId,
-      {
-        metadata: {
-          prevPriceId,
-          newPriceId: priceId,
-          subscriptionId,
-          subscriptionItemId,
-          username,
-          productId: planId,
-          quantity: newQuantity,
-          productTotalQuantity: count + newQuantity,
+    await Promise.all([
+      // add this pending subscription to db
+      // to keep track of whether payment was followed up in following 24 hrs
+      queuePendingSubs(subscriptionId, priceId),
+      // storing information needed for webhook in metadata for setupIntent
+      // so we don't have to query db too often later
+      stripe.setupIntents.update(
+        setupIntentId,
+        {
+          metadata: {
+            prevPriceId,
+            newPriceId: priceId,
+            subscriptionId,
+            subscriptionItemId,
+            username,
+            productId: planId,
+            quantity: newQuantity,
+            productTotalQuantity: count + newQuantity,
+          }
         }
-      }
-    );
+      )
+    ]);
     return { clientSecret, email };
   } catch (asyncError) {
     if (errMsg) {
