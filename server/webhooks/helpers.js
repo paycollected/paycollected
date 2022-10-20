@@ -179,8 +179,9 @@ export async function handlePlanDelete(subscription) {
   const { product: productId } = items.data[0].price;
 
   try {
-    const [{ rows }, _] = await Promise.all([
+    const [{ rows }, _, __] = await Promise.all([
       models.deletePlanGetAllSubs(productId),
+      stripe.prices.update(priceId, { active: false }),
       stripe.products.update(productId, { active: false })
     ]);
 
