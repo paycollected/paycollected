@@ -1,11 +1,16 @@
 import stripeSDK from 'stripe';
-import { ApolloError, ForbiddenError } from 'apollo-server-core';
+import { ApolloError, ForbiddenError, UserInputError } from 'apollo-server-core';
 import { joinPlan, queuePendingSubs } from '../../db/models.js';
 
 const stripe = stripeSDK(process.env.STRIPE_SECRET_KEY);
 
 export default async function startSubscription(planId, newQuantity, user, recurringInterval) {
   let errMsg;
+  if (newQuantity <= 0) {
+    errMsg = 'Invalid input';
+    throw new Error();
+  }
+
   const { username, stripeCusId } = user;
   try {
     // check that user is NOT already subscribed to plan
@@ -64,7 +69,7 @@ export default async function startSubscription(planId, newQuantity, user, recur
       trial_end: nextStartDate,
       expand: ['pending_setup_intent'],
       metadata: {
-        productTotalQuantity: 0, // will need to get latest number from webhook
+        productTotalQuantity: newQuantity, // will need to get latest number from webhook
         cycleFrequency: recurringInterval[cycleFrequency],
         perCycleCost,
         quantChanged: false,
@@ -87,11 +92,11 @@ export default async function startSubscription(planId, newQuantity, user, recur
         {
           metadata: {
             perCycleCost,
-            priceId,
             subscriptionId,
             subscriptionItemId,
             username,
-            productId: planId,
+            planId,
+            cycleFrequency: recurringInterval[cycleFrequency],
             quantity: newQuantity,
           }
         }
@@ -99,8 +104,10 @@ export default async function startSubscription(planId, newQuantity, user, recur
     ]);
     return { clientSecret, subscriptionId };
   } catch (asyncError) {
-    if (errMsg) {
+    if (errMsg === 'User is already subscribed to this plan') {
       throw new ForbiddenError(errMsg);
+    } else if (errMsg === 'Invalid input') {
+      throw new UserInputError(errMsg);
     }
     console.log(asyncError);
     throw new ApolloError('Unable to create subscription');

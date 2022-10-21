@@ -5,13 +5,6 @@ import * as models from '../db/models.js';
 dotenv.config();
 const stripe = stripeSDK(process.env.STRIPE_SECRET_KEY);
 
-// archive old price ID (on stripe system)
-async function archivePriceId(prevPriceId) {
-  if (prevPriceId) {
-    await stripe.prices.update(prevPriceId, { active: false });
-  }
-}
-
 async function updateStripePrice(row, price, productTotalQuantity) {
   const {
     username,
@@ -41,6 +34,7 @@ async function updateStripePrice(row, price, productTotalQuantity) {
   }
 }
 
+
 // 2. save new subscription details (our db),
 // update product w/ new price ID (our db)
 // query all other existing users on this same plan (db)
@@ -55,8 +49,15 @@ async function processQuantChange(
   productTotalQuantity,
 ) {
   const { rows } = await models.startSubscription(
-    productId, quantity, subscriptionId, subscriptionItemId, username, newPriceId
+    productId,
+    quantity,
+    subscriptionId,
+    subscriptionItemId,
+    username,
+    newPriceId
   );
+
+  // have to update this current guy if his quantity is > 1
   if (rows.length > 0) {
     await Promise.all(
       rows.map((row) => updateStripePrice(row, newPriceId, productTotalQuantity))
@@ -66,27 +67,77 @@ async function processQuantChange(
 
 export async function handleSubscriptionStart(setupIntent) {
   const {
-    subscriptionId, priceId, subscriptionItemId, productId, username,
+    subscriptionId, subscriptionItemId, planId, username, cycleFrequency
   } = setupIntent.metadata;
   const quantity = Number(setupIntent.metadata.quantity);
   const perCycleCost = Number(setupIntent.metadata.perCycleCost);
+
   try {
-    // archivePriceId and processQuantChange don't depend on each other
-    // so we can await them simultaneously
-    await Promise.all([
-      archivePriceId(prevPriceId),
-      processQuantChange(
-        productId,
+    const { rows } = await models.checkCountGetPriceIdOfPlan(planId);
+    const { count, prevPriceId } = rows[0];
+    const productTotalQuantity = quantity + count;
+
+    if (count > 0 || quantity > 1) {
+      const [{ id: newPriceId }, _] = await Promise.all([
+        stripe.prices.create({
+          currency: 'usd',
+          product: planId,
+          unit_amount: Math.ceil(perCycleCost / productTotalQuantity),
+          recurring: { interval: cycleFrequency },
+        }),
+        // create new price ID;
+        stripe.prices.update(prevPriceId, { active: false }),
+        // archive old price ID
+      ]);
+
+      await Promise.all([
+        processQuantChange(
+          planId,
+          quantity,
+          subscriptionId,
+          subscriptionItemId,
+          username,
+          newPriceId,
+          productTotalQuantity,
+        ),
+        // write new changes to db
+        // and update all existing plan members
+        stripe.subscriptions.update(
+          subscriptionId,
+          {
+            items: [
+              {
+                id: subscriptionItemId,
+                price: newPriceId,
+                quantity
+              }
+            ],
+            metadata: {
+              productTotalQuantity,
+            },
+            proration_behavior: 'none',
+          }
+        ),
+        // update this incoming new subscription
+      ]);
+    } else {
+    // if count = 0, and quantity = 1
+    // meaning this is the first subscription on this plan
+    // until now (when payment succeeds)
+    // --> no need to create a new price ID
+    // also no need to archive current price ID
+    // no other plan members to update
+    // --> only need to update db
+      await models.startSubscriptionWithNoPriceUpdate(
+        planId,
         quantity,
         subscriptionId,
         subscriptionItemId,
         username,
-        newPriceId,
-        productTotalQuantity
-      )
-    ]);
-  } catch (err) {
-    console.log(err);
+      );
+    }
+  } catch (e) {
+    console.log(e);
   }
 }
 

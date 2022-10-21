@@ -181,7 +181,7 @@ export function joinPlan(username, planId) {
 export function checkCountGetPriceIdOfPlan(planId) {
   const query = `
     SELECT
-      p.price_id AS "priceId",
+      p.price_id AS "prevPriceId",
       SUM (up.quantity)::INTEGER AS count
     FROM plans p
     JOIN user_plan up
@@ -190,6 +190,41 @@ export function checkCountGetPriceIdOfPlan(planId) {
     GROUP BY p.price_id
   `;
   return pool.query(query, [planId]);
+}
+
+
+export function updatePriceId(priceId, planId) {
+  const query = 'UPDATE plans SET price_id = $1 WHERE plan_id = $2';
+  return pool.query(query, [priceId, planId]);
+}
+
+
+export function startSubscriptionWithNoPriceUpdate(
+  planId,
+  quantity,
+  subscriptionId,
+  subscriptionItemId,
+  username,
+) {
+  const query = `
+    WITH update_sub_id AS
+    (
+      INSERT INTO user_plan
+        (quantity, subscription_id, subscription_item_id, plan_id, username)
+      VALUES
+        ($1, $2, $3, $4, $5)
+      ON CONFLICT
+        (username, plan_id)
+      DO UPDATE SET
+        quantity = $1, subscription_id = $2, subscription_item_id = $3
+      WHERE user_plan.username = $5 AND user_plan.plan_id = $4
+    ),
+    UPDATE pending_subs
+    SET paid = True
+    WHERE subscription_id = $2
+  `;
+  const args = [quantity, subscriptionId, subscriptionItemId, planId, username];
+  return pool.query(query, args);
 }
 
 
@@ -234,9 +269,7 @@ export function startSubscription(
     FROM user_on_plan
     WHERE plan_id = $4 AND subscription_id != $2
   `;
-
   const args = [quantity, subscriptionId, subscriptionItemId, planId, username, newPriceId];
-
   return pool.query(query, args);
 }
 
