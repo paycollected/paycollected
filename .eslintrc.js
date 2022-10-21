@@ -24,5 +24,6 @@ module.exports = {
     'comma-dangle': 'off',
     'react/prop-types': 'off',
     'no-multiple-empty-lines': 'off',
+    'no-console': 'off',
   },
 };
