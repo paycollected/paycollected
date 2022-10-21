@@ -193,12 +193,6 @@ export function checkCountGetPriceIdOfPlan(planId) {
 }
 
 
-export function updatePriceId(priceId, planId) {
-  const query = 'UPDATE plans SET price_id = $1 WHERE plan_id = $2';
-  return pool.query(query, [priceId, planId]);
-}
-
-
 export function startSubscriptionWithNoPriceUpdate(
   planId,
   quantity,
