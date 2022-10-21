@@ -17,12 +17,8 @@ export default async function cancelTransactionResolver(subscriptionId, username
     throw new ForbiddenError('User does not own this subscription');
   }
 
-  const { priceId } = rows[0];
   try {
-    await Promise.all([
-      stripe.subscriptions.del(subscriptionId),
-      stripe.prices.update(priceId, { active: false })
-    ]);
+    await stripe.subscriptions.del(subscriptionId);
     return { subscriptionId };
   } catch (e) {
     console.log(e);

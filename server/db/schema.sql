@@ -17,8 +17,7 @@ CREATE TYPE cycle_freq AS ENUM ('weekly', 'monthly', 'yearly');
 
 CREATE TABLE IF NOT EXISTS plans (
   plan_id VARCHAR(255) PRIMARY KEY,
-  total_price_id VARCHAR(255) UNIQUE NOT NULL,
-  curr_price_id VARCHAR(255) UNIQUE,
+  price_id VARCHAR(255) NOT NULL UNIQUE,
   plan_name VARCHAR(50) NOT NULL,
   cycle_frequency CYCLE_FREQ NOT NULL,
   per_cycle_cost INTEGER NOT NULL,
@@ -27,7 +26,6 @@ CREATE TABLE IF NOT EXISTS plans (
 
 CREATE TABLE IF NOT EXISTS pending_subs (
   subscription_id VARCHAR(255) PRIMARY KEY,
-  price_id VARCHAR(255) NOT NULL UNIQUE,
   username VARCHAR(100) NOT NULL REFERENCES users(username) ON DELETE CASCADE,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   paid BOOLEAN NOT NULL DEFAULT FALSE

@@ -46,7 +46,12 @@ async function updateStripePrice(row, price, productTotalQuantity) {
 // query all other existing users on this same plan (db)
 // and update their subscriptions with new price (stripe system)
 async function processQuantChange(
-  productId, quantity, subscriptionId, subscriptionItemId, username, newPriceId,
+  productId,
+  quantity,
+  subscriptionId,
+  subscriptionItemId,
+  username,
+  newPriceId,
   productTotalQuantity,
 ) {
   const { rows } = await models.startSubscription(
@@ -61,10 +66,10 @@ async function processQuantChange(
 
 export async function handleSubscriptionStart(setupIntent) {
   const {
-    subscriptionId, prevPriceId, newPriceId, subscriptionItemId, productId, username,
+    subscriptionId, priceId, subscriptionItemId, productId, username,
   } = setupIntent.metadata;
   const quantity = Number(setupIntent.metadata.quantity);
-  const productTotalQuantity = Number(setupIntent.metadata.productTotalQuantity);
+  const perCycleCost = Number(setupIntent.metadata.perCycleCost);
   try {
     // archivePriceId and processQuantChange don't depend on each other
     // so we can await them simultaneously

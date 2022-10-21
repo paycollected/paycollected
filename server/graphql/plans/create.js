@@ -17,6 +17,7 @@ export default async function createPlanResolver(
   perCycleCost *= 100; // store in cents
 
   try {
+    // create both a Stripe product ID & price ID in 1 API call
     const { id: priceId, product: productId } = await stripe.prices.create({
       currency: 'usd',
       unit_amount: perCycleCost,

@@ -37,7 +37,7 @@ export function addPlan(
     WITH first_insert AS
       (
         INSERT INTO plans
-          (plan_name, cycle_frequency, per_cycle_cost, plan_id, start_date, total_price_id)
+          (plan_name, cycle_frequency, per_cycle_cost, plan_id, start_date, price_id)
         VALUES
           ($2, $3, $4, $5, $6::BIGINT, $7)
       )
@@ -155,14 +155,12 @@ export function getUserInfo(username) {
 
 
 export function joinPlan(username, planId) {
-
   const query = `
     SELECT
       p.cycle_frequency AS "cycleFrequency",
       p.per_cycle_cost AS "perCycleCost",
       p.start_date AS "startDate",
-      p.s_price_id AS "prevPriceId",
-      SUM (up.quantity)::INTEGER AS count,
+      p.price_id AS "priceId",
       COALESCE(
         ( SELECT quantity
           FROM user_plan
@@ -174,18 +172,35 @@ export function joinPlan(username, planId) {
     JOIN user_plan up
     ON p.plan_id = up.plan_id
     WHERE p.plan_id = $2
-    GROUP BY
-      p.cycle_frequency,
-      p.per_cycle_cost,
-      p.start_date,
-      p.s_price_id
   `;
 
   return pool.query(query, [username, planId]);
 }
 
 
-export function startSubscription(planId, quantity, subscriptionId, subscriptionItemId, username, newPriceId) {
+export function checkCountGetPriceIdOfPlan(planId) {
+  const query = `
+    SELECT
+      p.price_id AS "priceId",
+      SUM (up.quantity)::INTEGER AS count
+    FROM plans p
+    JOIN user_plan up
+    ON p.plan_id = up.plan_id
+    WHERE p.plan_id = $1
+    GROUP BY p.price_id
+  `;
+  return pool.query(query, [planId]);
+}
+
+
+export function startSubscription(
+  planId,
+  quantity,
+  subscriptionId,
+  subscriptionItemId,
+  username,
+  newPriceId
+) {
   const query = `
     WITH update_sub_id AS
     (
@@ -393,14 +408,14 @@ export function deletePlan(planId) {
   return pool.query(query, [planId]);
 }
 
-export function queuePendingSubs(subscriptionId, priceId, username) {
+export function queuePendingSubs(subscriptionId, username) {
   const query = `
     INSERT INTO pending_subs
-      (subscription_id, price_id, username)
+      (subscription_id, username)
     VALUES
-      ($1, $2, $3)
+      ($1, $2)
   `;
-  return pool.query(query, [subscriptionId, priceId, username]);
+  return pool.query(query, [subscriptionId, username]);
 }
 
 
@@ -412,7 +427,7 @@ export function getExpiredPendingSubs() {
     )
     DELETE FROM pending_subs
     WHERE created_at < (CURRENT_TIMESTAMP - interval '1 day') AND paid = False
-    RETURNING subscription_id AS "subscriptionId", price_id AS "priceId"
+    RETURNING subscription_id AS "subscriptionId"
   `;
   return pool.query(query);
 }
@@ -422,7 +437,7 @@ export function delPendingSubs(subscriptionId, username) {
   const query = `
     DELETE FROM pending_subs
     WHERE subscription_id = $1 AND username = $2
-    RETURNING price_id AS "priceId"
+    RETURNING subscription_id
   `;
   return pool.query(query, [subscriptionId, username]);
 }

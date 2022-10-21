@@ -11,7 +11,7 @@ export default async function startSubscription(planId, newQuantity, user, recur
     // check that user is NOT already subscribed to plan
     const { rows } = await joinPlan(username, planId);
     const {
-      cycleFrequency, perCycleCost, startDate, prevPriceId, quantity, count
+      cycleFrequency, perCycleCost, startDate, priceId, quantity,
     } = rows[0];
     if (quantity > 0) {
       // front end will need to display a msg telling user to use 'adjust quantity' in dashboard instead
@@ -45,24 +45,14 @@ export default async function startSubscription(planId, newQuantity, user, recur
     }
     nextStartDate = Math.ceil(nextStartDate.valueOf() / 1000);
 
-    // create a stripe price ID
-    const { id: priceId } = await stripe.prices.create({
-      currency: 'usd',
-      product: planId,
-      unit_amount: Math.ceil(perCycleCost / (count + newQuantity)),
-      recurring: {
-        interval: recurringInterval[cycleFrequency],
-        // could consider allowing customers to do interval count in the future?
-      },
-    });
-
     // create a Stripe subscription
     const {
       id: subscriptionId, items, pending_setup_intent: pendingSetupIntent
     } = await stripe.subscriptions.create({
       customer: stripeCusId,
       items: [{
-        price: priceId,
+        price: priceId, // just use whatever latest priceId is in db
+        // will have to recalculate at webhook anyway
         quantity: newQuantity,
       }],
       payment_behavior: 'default_incomplete',
@@ -74,7 +64,7 @@ export default async function startSubscription(planId, newQuantity, user, recur
       trial_end: nextStartDate,
       expand: ['pending_setup_intent'],
       metadata: {
-        productTotalQuantity: count + newQuantity,
+        productTotalQuantity: 0, // will need to get latest number from webhook
         cycleFrequency: recurringInterval[cycleFrequency],
         perCycleCost,
         quantChanged: false,
@@ -89,21 +79,20 @@ export default async function startSubscription(planId, newQuantity, user, recur
     await Promise.all([
       // add this pending subscription to db
       // to keep track of whether payment was followed up in following 24 hrs
-      queuePendingSubs(subscriptionId, priceId, username),
+      queuePendingSubs(subscriptionId, username),
       // storing information needed for webhook in metadata for setupIntent
       // so we don't have to query db too often later
       stripe.setupIntents.update(
         setupIntentId,
         {
           metadata: {
-            prevPriceId,
-            newPriceId: priceId,
+            perCycleCost,
+            priceId,
             subscriptionId,
             subscriptionItemId,
             username,
             productId: planId,
             quantity: newQuantity,
-            productTotalQuantity: count + newQuantity,
           }
         }
       )
