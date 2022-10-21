@@ -17,7 +17,7 @@ CREATE TYPE cycle_freq AS ENUM ('weekly', 'monthly', 'yearly');
 
 CREATE TABLE IF NOT EXISTS plans (
   plan_id VARCHAR(255) PRIMARY KEY,
-  total_price_id VARCHAR(255) UNIQUE,
+  total_price_id VARCHAR(255) UNIQUE NOT NULL,
   curr_price_id VARCHAR(255) UNIQUE,
   plan_name VARCHAR(50) NOT NULL,
   cycle_frequency CYCLE_FREQ NOT NULL,

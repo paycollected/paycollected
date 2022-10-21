@@ -28,8 +28,8 @@ export default async function createAccount(firstName, lastName, username, passw
 
       await createUser(firstName, lastName, username, hashedPass, email, stripeCusId);
       const token = jwt.sign({
-        // expires after 10 mins
-        exp: Math.floor(Date.now() / 1000) + (60 * 10),
+        // expires after 30 mins
+        exp: Math.floor(Date.now() / 1000) + (60 * 30),
         // storing user's info in token so we can easily obtain it from context in any resolver
         user: {
           username,
@@ -37,8 +37,13 @@ export default async function createAccount(firstName, lastName, username, passw
           stripeCusId,
         }
       }, process.env.SECRET_KEY);
-      return { username, email, token };
-    // username or email exist --> return error
+      return { username, token };
+      // username or email exist --> return error
+
+    // note: Security docs recommend that we should only display a generic msg
+    // saying that username OR email exists - instead of specifying which
+    // because the former can increase the likelihood that a brute force attacker
+    // can correctly guess the username
     } else if (rows[0].username === username) {
       errMsg = 'This username already exists';
       throw new Error();

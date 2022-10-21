@@ -54,7 +54,14 @@ export default {
     createPlan: authResolverWrapper((_, {
       planName, cycleFrequency, perCycleCost, startDate
     }, { user: { username } }) => (
-      createPlanResolver(planName, cycleFrequency, perCycleCost, startDate, username)
+      createPlanResolver(
+        planName,
+        cycleFrequency,
+        perCycleCost,
+        startDate,
+        username,
+        recurringInterval
+      )
     )),
 
     joinPlan: authResolverWrapper((_, { planId, quantity }, { user }) => (

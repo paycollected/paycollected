@@ -5,16 +5,29 @@ import { addPlan } from '../../db/models.js';
 const stripe = stripeSDK(process.env.STRIPE_SECRET_KEY);
 
 export default async function createPlanResolver(
-  planName, cycleFrequency, perCycleCost, startDate, username
+  planName,
+  cycleFrequency,
+  perCycleCost,
+  startDate,
+  username,
+  recurringInterval
 ) {
   planName = planName.trim();
   cycleFrequency = cycleFrequency.toLowerCase();
   perCycleCost *= 100; // store in cents
 
   try {
-    // create stripe product
-    const { id: productId } = await stripe.products.create({
-      name: planName
+    const { id: priceId, product: productId } = await stripe.prices.create({
+      currency: 'usd',
+      unit_amount: perCycleCost,
+      recurring: {
+        interval: recurringInterval[cycleFrequency],
+        // could consider allowing customers to do interval count in the future?
+        // meaning every 2 weeks, every 3 months etc.
+      },
+      product_data: {
+        name: planName,
+      }
     });
 
     await addPlan(
@@ -23,7 +36,8 @@ export default async function createPlanResolver(
       cycleFrequency,
       perCycleCost,
       productId,
-      startDate
+      startDate,
+      priceId
     );
 
     return { productId };
