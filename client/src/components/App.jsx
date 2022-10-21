@@ -29,7 +29,7 @@ if (token) {
 
 function App() {
   const [user, setUser] = useState(token ? username : null);
-  const [email, setEmail] = useState(token ? emailFromToken: null);
+  const [email, setEmail] = useState(token ? emailFromToken : null);
   const [planToJoin, setPlanToJoin] = useState(null);
   const [showMagicLink, setShowMagicLink] = useState(false);
   const [stripeClientSecret, setStripeClientSecret] = useState(null);
