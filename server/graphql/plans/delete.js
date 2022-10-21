@@ -4,7 +4,7 @@ import { checkPlanOwnerUsingPlanIdGetOneSub, deletePlan } from '../../db/models.
 
 const stripe = stripeSDK(process.env.STRIPE_SECRET_KEY);
 
-export default async function (planId, username) {
+export default async function deletePlanResolve(planId, username) {
   let rows;
   try {
     ({ rows } = await checkPlanOwnerUsingPlanIdGetOneSub(planId, username));
@@ -13,7 +13,9 @@ export default async function (planId, username) {
     throw new ApolloError('Cannot delete plan');
   }
 
-  const { ownerQuant, ownerSubsId, priceId, memberSubsId } = rows[0];
+  const {
+    ownerQuant, ownerSubsId, priceId, memberSubsId
+  } = rows[0];
   if (ownerQuant === null) {
     throw new ForbiddenError('User is not owner of this plan');
   } else if (priceId === null) {
