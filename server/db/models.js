@@ -246,7 +246,7 @@ export function startSubscription(
     update_price_id AS
     (
       UPDATE plans
-      SET s_price_id = $6
+      SET price_id = $6
       WHERE plan_id = $4
     ),
     update_pending_subs AS (
@@ -271,7 +271,7 @@ export function startSubscription(
 export function updatePriceIdDelSubsGetMembers(newPriceId, productId, subscriptionId) {
   const query = `
     WITH update_price_id AS (
-      UPDATE plans SET s_price_id = $1 WHERE plan_id = $2
+      UPDATE plans SET price_id = $1 WHERE plan_id = $2
     ), del_sub AS (
       DELETE FROM user_plan
       WHERE subscription_id = $3
@@ -346,7 +346,7 @@ export function getSubsItemIdAndProductInfo(subscriptionId, username) {
       up.quantity,
       p.cycle_frequency::VARCHAR AS "cycleFrequency",
       p.per_cycle_cost AS "perCycleCost",
-      p.s_price_id AS "prevPriceId",
+      p.price_id AS "prevPriceId",
       c.sum AS count
     FROM user_plan up
     JOIN plans p
@@ -361,7 +361,7 @@ export function getSubsItemIdAndProductInfo(subscriptionId, username) {
 export function updatePriceIdAndSubsQuant(newPriceId, productId, newQuantity, subscriptionId) {
   const query = `
     WITH update_price AS (
-      UPDATE plans SET s_price_id = $1 WHERE plan_id = $2
+      UPDATE plans SET price_id = $1 WHERE plan_id = $2
     )
     UPDATE user_plan SET quantity = $3 WHERE subscription_id = $4
   `;

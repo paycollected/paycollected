@@ -37,7 +37,7 @@ export default async function createAccount(firstName, lastName, username, passw
           stripeCusId,
         }
       }, process.env.SECRET_KEY);
-      return { username, token };
+      return { username, email, token };
       // username or email exist --> return error
 
     // note: Security docs recommend that we should only display a generic msg

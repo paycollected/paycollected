@@ -15,11 +15,11 @@ import FourOhFour from './404.jsx';
 
 // check that token is still valid before displaying logged-in state
 let token = localStorage.getItem('token');
-let email;
+let emailFromToken;
 let username;
 if (token) {
   const { exp, user } = jwtDecode(token);
-  ({ email, username } = user);
+  ({ email: emailFromToken, username } = user);
   const today = new Date();
   if (today.valueOf() > (exp * 1000)) {
     localStorage.clear();
@@ -29,6 +29,7 @@ if (token) {
 
 function App() {
   const [user, setUser] = useState(token ? username : null);
+  const [email, setEmail] = useState(token ? emailFromToken: null);
   const [planToJoin, setPlanToJoin] = useState(null);
   const [showMagicLink, setShowMagicLink] = useState(false);
   const [stripeClientSecret, setStripeClientSecret] = useState(null);
@@ -37,18 +38,40 @@ function App() {
   return (
     <Routes>
       <Route path="/" element={!user ? <Home /> : <Navigate to="/dashboard" />} />
-      <Route path="/login" element={!user ? <Login setUser={setUser} planToJoin={planToJoin} /> : <Navigate to="/dashboard" />} />
-      <Route path="/signup" element={!user ? <Signup setUser={setUser} planToJoin={planToJoin} /> : <Navigate to="/dashboard" />} />
+      <Route
+        path="/login"
+        element={!user
+          ? <Login setUser={setUser} planToJoin={planToJoin} setEmail={setEmail} />
+          : <Navigate to="/dashboard" />}
+      />
+      <Route
+        path="/signup"
+        element={!user
+          ? <Signup setUser={setUser} planToJoin={planToJoin} setEmail={setEmail} />
+          : <Navigate to="/dashboard" />}
+      />
       <Route
         path="/dashboard"
-        element={user ? <Dashboard username={user} setUser={setUser} setPlanToJoin={setPlanToJoin} /> : <Navigate to="/" />}
+        element={user
+          ? (
+            <Dashboard
+              username={user}
+              setUser={setUser}
+              setPlanToJoin={setPlanToJoin}
+              setEmail={setEmail}
+            />
+          )
+          : <Navigate to="/" />}
       />
       <Route
         path="/plan/create"
-        element={
-          !showMagicLink
+        element={user
+          ?
+          (!showMagicLink
             ? <CreatePlan setPlanToJoin={setPlanToJoin} setShowMagicLink={setShowMagicLink} />
             : <MagicLink planToJoin={planToJoin} setShowMagicLink={setShowMagicLink} />
+          )
+          : <Navigate to="/" />
           }
       />
       <Route
@@ -68,7 +91,7 @@ function App() {
       <Route path="/cards" element={user ? <Cards /> : <Navigate to="/" />} />
       <Route
         path="/checkout"
-        element={user
+        element={user && stripeClientSecret
           ? (
             <Checkout
               stripeClientSecret={stripeClientSecret}

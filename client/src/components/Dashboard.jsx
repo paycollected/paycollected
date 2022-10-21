@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button, Input } from '@chakra-ui/react';
 
-export default function Dashboard({ username, setUser, setPlanToJoin }) {
+export default function Dashboard({ username, setUser, setPlanToJoin, setEmail }) {
   const navigate = useNavigate();
   const [showCodeInput, setShowCodeInput] = useState(false);
   const [code, setCode] = useState('');
@@ -17,6 +17,7 @@ export default function Dashboard({ username, setUser, setPlanToJoin }) {
   const logUserOut = () => {
     localStorage.clear();
     setUser(null);
+    setEmail(null);
     setPlanToJoin(null);
     navigate('/');
   };

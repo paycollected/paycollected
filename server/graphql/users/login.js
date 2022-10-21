@@ -31,10 +31,7 @@ export default async function loginResolver(username, password) {
       }
     }, process.env.SECRET_KEY);
 
-    return {
-      username,
-      token
-    };
+    return { username, email, token };
   } catch (asyncError) {
     if (errMsg) {
       // if anticipated bad input error
