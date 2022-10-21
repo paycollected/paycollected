@@ -5,7 +5,9 @@ import { Flex, Box, FormControl, FormLabel, FormErrorMessage, Button, Input } fr
 import { JoinPlan as JOIN_PLAN } from '../graphql/mutations.gql';
 import { ViewOnePlan as GET_PLAN } from '../graphql/queries.gql';
 
-export default function JoinPlan({ setPlanToJoin, setStripeClientSecret }) {
+export default function JoinPlan({
+  setPlanToJoin, setStripeClientSecret, setSubscriptionInTransaction
+}) {
   const navigate = useNavigate();
   const { planId } = useParams();
   const [quantity, setQuantity] = useState(0);
@@ -18,9 +20,9 @@ export default function JoinPlan({ setPlanToJoin, setStripeClientSecret }) {
 
   // will need to handle this payLoading state on client side so user knows what to expect
   const [makePayment, { data: payData, loading: payLoading, error: payError}] = useMutation(JOIN_PLAN, {
-    onCompleted: ({ joinPlan }) => {
-      setStripeClientSecret(joinPlan.clientSecret);
-      localStorage.setItem('clientSecret', joinPlan.clientSecret);
+    onCompleted: ({ joinPlan: { clientSecret, subscriptionId } }) => {
+      setStripeClientSecret(clientSecret);
+      setSubscriptionInTransaction(subscriptionId);
       navigate('/checkout');
     },
     onError: ({ message }) => { console.log(message); },

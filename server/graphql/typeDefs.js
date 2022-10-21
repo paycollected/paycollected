@@ -15,14 +15,12 @@ export default gql`
 
   type LoginInfo {
     username: String!
-    email: String!
     token: String!
   }
 
   type PaymentIntent {
     clientSecret: String!
     subscriptionId: String!
-    email: String!
   }
 
   type ProductId {

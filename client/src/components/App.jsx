@@ -17,7 +17,8 @@ function App() {
   const [user, setUser] = useState(localStorage.getItem('username'));
   const [planToJoin, setPlanToJoin] = useState(null);
   const [showMagicLink, setShowMagicLink] = useState(false);
-  const [stripeClientSecret, setStripeClientSecret] = useState(localStorage.getItem('clientSecret'));
+  const [stripeClientSecret, setStripeClientSecret] = useState(null);
+  const [subscriptionInTransaction, setSubscriptionInTransaction] = useState(null);
   /*
   Note from Stripe API: The client secret can be used to complete a payment from your frontend.
   It should not be stored, logged, or exposed to anyone other than the customer.
@@ -59,12 +60,23 @@ function App() {
               <JoinPlan
                 setPlanToJoin={setPlanToJoin}
                 setStripeClientSecret={setStripeClientSecret}
+                setSubscriptionInTransaction={setSubscriptionInTransaction}
               />
             )
           }
       />
       <Route path="/cards" element={user ? <Cards /> : <Navigate to="/" />} />
-      <Route path="/checkout" element={user ? <Checkout stripeClientSecret={stripeClientSecret} /> : <Navigate to="/" />} />
+      <Route
+        path="/checkout"
+        element={user
+          ? (
+            <Checkout
+              stripeClientSecret={stripeClientSecret}
+              subscriptionInTransaction={subscriptionInTransaction}
+            />
+          )
+          : <Navigate to="/" />}
+      />
       <Route path="/plan/all" element={user ? <ViewPlans user={user} /> : <Navigate to="/" />} />
       <Route path="/payment-success" element={user ? <PaymentSuccess /> : <Navigate to="/" />} />
       <Route path="/404" element={<FourOhFour />} />
