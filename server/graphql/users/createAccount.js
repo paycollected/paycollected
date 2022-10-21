@@ -30,8 +30,8 @@ export default async function createAccount(firstName, lastName, username, passw
 
       await createUser(firstName, lastName, username, hashedPass, email, stripeCusId);
       const token = jwt.sign({
-        // expires after 2 weeks
-        exp: Math.floor(Date.now() / 1000) + (60 * 60 * 24 * 14),
+        // expires after 10 mins
+        exp: Math.floor(Date.now() / 1000) + (60 * 10),
         // storing user's info in token so we can easily obtain it from context in any resolver
         user: {
           username,

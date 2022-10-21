@@ -64,3 +64,10 @@ mutation DeletePlan($planId: ID!) {
     planId
   }
 }
+
+
+mutation CancelTransaction($subscriptionId: String!) {
+  cancelTransaction(subscription: $subscription) {
+    subscriptionId
+  }
+}

@@ -23,7 +23,6 @@ export default function Login({ setUser, planToJoin }) {
       if (login) {
         const { username, token } = login;
         localStorage.setItem('token', token);
-        localStorage.setItem('username', username); // need access to username
         setErrorMessage('');
         setUser(username); // need access to username
         if (!planToJoin) {

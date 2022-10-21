@@ -7,6 +7,7 @@ import typeDefs from './graphql/typeDefs';
 import resolvers from './graphql/resolvers';
 import webhook from './webhooks/webhook';
 import expireSubs from './maintenance/expiredClientSecret';
+import auth from './auth';
 
 dotenv.config();
 
@@ -31,24 +32,24 @@ async function startApolloServer() {
       // no Authorization (may be signing up)
       if (token.length > 0) {
         try {
-          const { user , exp } = jwt.verify(token, process.env.SECRET_KEY);
+          const { user } = jwt.verify(token, process.env.SECRET_KEY);
           const { username, email, stripeCusId } = user;
-          if (new Date(exp * 1000) < new Date()) {
-            return { user: null, err: 'Token has expired' };
-          }
           return {
             user: {
               username, email, stripeCusId,
             },
             err: null
           };
-        } catch {
+        } catch ({ name, message }) {
           /* If handling authentication error at context level as opposed to at resolvers level,
           error message appears slightly different from what we're used to with the other errors
           ('fail to create context' etc.). Moving this error handling to resolvers to 'standardize'
           error msgs.
           */
-          return { user: null, err: 'Incorrect token' }
+          if (name === 'TokenExpiredError') {
+            return { user: null, err: 'Token has expired' };
+          }
+          return { user: null, err: 'Incorrect token' };
         }
       }
       return { user: null, err: 'Unauthorized request' };
@@ -56,8 +57,12 @@ async function startApolloServer() {
   });
 
   await server.start();
-  server.applyMiddleware({ app, cors: { origin: true, credentials: true } });
+  // protected page
+  app.get('/dashboard', auth);
 
+  // protected API resource
+  // app.post('/graphql', auth);
+  server.applyMiddleware({ app, cors: { origin: true, credentials: true } });
 
   // serving web client
   // these needs to go AFTER Apollo server and webhook middlewares

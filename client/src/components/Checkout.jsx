@@ -2,14 +2,26 @@ import React from 'react';
 import {
   useStripe, useElements, Elements, PaymentElement, LinkAuthenticationElement,
 } from '@stripe/react-stripe-js';
+import { useMutation } from '@apollo/client';
+import { useNavigate } from 'react-router-dom';
 import { Flex, Box, FormControl, FormLabel, FormErrorMessage, Button, Input } from '@chakra-ui/react';
 import { loadStripe } from '@stripe/stripe-js';
+import { CancelTransaction as CANCEL_TRANSC } from '../graphql/mutations.gql';
 
 const stripePromise = loadStripe(process.env.STRIPE_PUBLISHABLE_KEY);
 
-function CheckoutForm() {
+function CheckoutForm({ email, subscriptionInTransaction: subscriptionId }) {
+  const navigate = useNavigate();
   const stripe = useStripe();
   const elements = useElements();
+  const [cancel, { loading }] = useMutation(CANCEL_TRANSC, {
+    onCompleted: () => {
+      navigate('/dashboard');
+    },
+    onError: ({ message }) => {
+      console.log(message);
+    },
+  });
 
   const handlePaymentSubmit = async (e) => {
     e.preventDefault();
@@ -39,10 +51,9 @@ function CheckoutForm() {
     }
   };
 
-  const handleCancel = async () => {
-    // TODO: navigate back to dashboard or join plan page
-    // delete subscription
-  }
+  const handleCancel = () => {
+    cancel({ variables: { subscriptionId } });
+  };
 
   return (
     <>
@@ -54,7 +65,7 @@ function CheckoutForm() {
             {
               defaultValues: {
                 billingDetails: {
-                  email: localStorage.getItem('email'),
+                  email,
                 }
               }
             }
@@ -76,7 +87,7 @@ on another note, subscription will expire if not followed up with payment
 how does this affect what we store in db?
 */
 
-export default function Checkout({ stripeClientSecret }) {
+export default function Checkout({ stripeClientSecret, email, subscriptionInTransaction }) {
   const options = {
     clientSecret: stripeClientSecret
   };
@@ -85,7 +96,7 @@ export default function Checkout({ stripeClientSecret }) {
     return (
       <Elements stripe={stripePromise} options={options}>
         <h1>This is the Checkout page with a Client Secret</h1>
-        <CheckoutForm />
+        <CheckoutForm email={email} subscriptionInTransaction={subscriptionInTransaction} />
       </Elements>
     );
   }

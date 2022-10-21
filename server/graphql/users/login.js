@@ -1,12 +1,7 @@
-import stripeSDK from 'stripe';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import {
-  ApolloError, UserInputError, ForbiddenError
-} from 'apollo-server-core';
+import { ApolloError, UserInputError } from 'apollo-server-core';
 import { getUserInfo } from '../../db/models.js';
-
-const stripe = stripeSDK(process.env.STRIPE_SECRET_KEY);
 
 export default async function loginResolver(username, password) {
   let errMsg;
@@ -27,8 +22,8 @@ export default async function loginResolver(username, password) {
 
     // if password is correct, return a signed token so user can sign in
     const token = jwt.sign({
-      // expires after 2 weeks
-      exp: Math.floor(Date.now() / 1000) + (60 * 60 * 24 * 14),
+      // expires after 10 mins
+      exp: Math.floor(Date.now() / 1000) + (60 * 1),
       user: {
         username,
         email,
@@ -52,4 +47,3 @@ export default async function loginResolver(username, password) {
     }
   }
 }
-

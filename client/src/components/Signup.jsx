@@ -14,7 +14,6 @@ export default function Signup({ setUser, planToJoin }) {
     onCompleted: ({ createUser }) => {
       const { username, token } = createUser;
       localStorage.setItem('token', token);
-      localStorage.setItem('username', username);
       setUser(username);
       setErrorMessage('');
       if (!planToJoin) {
