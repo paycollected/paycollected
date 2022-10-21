@@ -15,6 +15,7 @@ import {
 } from './plans/view.js';
 import createPlanResolver from './plans/create.js';
 import deletePlanResolver from './plans/delete.js';
+import cancelTransactionResolver from './payment/cancel.js';
 
 const stripe = stripeSDK(process.env.STRIPE_SECRET_KEY);
 
@@ -100,6 +101,12 @@ export default {
     deletePlan: authResolverWrapper(
       (_, { planId }, { user: { username } }) => (
         deletePlanResolver(planId, username)
+      )
+    ),
+
+    cancelTransaction: authResolverWrapper(
+      (_, { subscriptionId, }, { user: { username }}) => (
+        cancelTransactionResolver(subscriptionId, username)
       )
     ),
   }

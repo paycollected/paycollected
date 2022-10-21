@@ -109,7 +109,7 @@ export default async function startSubscription(planId, newQuantity, user, recur
         }
       )
     ]);
-    return { clientSecret, email };
+    return { clientSecret, subscriptionId, email };
   } catch (asyncError) {
     if (errMsg) {
       throw new ForbiddenError(errMsg);

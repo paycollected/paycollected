@@ -1,4 +1,4 @@
-import pool from '../db/pool';
+import pool from './pool';
 
 export function checkUser(username, email) {
   const query = `SELECT
@@ -407,4 +407,14 @@ export function getExpiredPendingSubs() {
     RETURNING subscription_id AS "subscriptionId", price_id AS "priceId"
   `;
   return pool.query(query);
+}
+
+
+export function delPendingSubs(subscriptionId, username) {
+  const query = `
+    DELETE FROM pending_subs
+    WHERE subscription_id = $1 AND username = $2
+    RETURNING price_id AS "priceId"
+  `;
+  return pool.query(query, [subscriptionId, username]);
 }

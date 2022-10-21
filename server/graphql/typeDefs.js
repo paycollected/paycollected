@@ -21,6 +21,7 @@ export default gql`
 
   type PaymentIntent {
     clientSecret: String!
+    subscriptionId: String!
     email: String!
   }
 
@@ -39,6 +40,10 @@ export default gql`
 
   type SubsModificationResponse {
     planId: ID!
+  }
+
+  type CancelTransactionResponse {
+    subscriptionId: String!
   }
 
   enum CycleFrequency {
@@ -107,5 +112,9 @@ export default gql`
     deletePlan(
       planId: ID!
     ): SubsModificationResponse!
+
+    cancelTransaction(
+      subscriptionId: String!
+    ): CancelTransactionResponse!
   }
 `;
