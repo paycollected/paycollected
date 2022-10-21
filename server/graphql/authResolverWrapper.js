@@ -1,6 +1,6 @@
 import { AuthenticationError, ForbiddenError } from 'apollo-server-core';
 
-export default function (someResolver) {
+export default function(someResolver) {
   return function(parent, args, context, info) {
     const { user, err } = context;
     switch (true) {

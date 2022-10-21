@@ -385,14 +385,14 @@ export function deletePlan(planId) {
   return pool.query(query, [planId]);
 }
 
-export function queuePendingSubs(subscriptionId, priceId) {
+export function queuePendingSubs(subscriptionId, priceId, username) {
   const query = `
     INSERT INTO pending_subs
-      (subscription_id, price_id)
+      (subscription_id, price_id, username)
     VALUES
-      ($1, $2)
+      ($1, $2, $3)
   `;
-  return pool.query(query, [subscriptionId, priceId]);
+  return pool.query(query, [subscriptionId, priceId, username]);
 }
 
 

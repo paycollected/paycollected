@@ -90,7 +90,7 @@ export default async function startSubscription(planId, newQuantity, user, recur
     await Promise.all([
       // add this pending subscription to db
       // to keep track of whether payment was followed up in following 24 hrs
-      queuePendingSubs(subscriptionId, priceId),
+      queuePendingSubs(subscriptionId, priceId, username),
       // storing information needed for webhook in metadata for setupIntent
       // so we don't have to query db too often later
       stripe.setupIntents.update(

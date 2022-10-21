@@ -23,7 +23,7 @@ export default async function loginResolver(username, password) {
     // if password is correct, return a signed token so user can sign in
     const token = jwt.sign({
       // expires after 1 mins
-      exp: Math.floor(Date.now() / 1000) + (60 * 1),
+      exp: Math.floor(Date.now() / 1000) + (60 * 10),
       user: {
         username,
         email,
