@@ -4,7 +4,7 @@ export default function (someResolver) {
   return function(parent, args, context, info) {
     const { user, err } = context;
     switch (true) {
-      case (err === 'Incorrect token' || err === 'Token has expired'):
+      case (err === 'Incorrect token'):
         throw new AuthenticationError(err);
       case (err === 'Unauthorized request'):
         throw new ForbiddenError(err);

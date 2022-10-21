@@ -7,7 +7,6 @@ import typeDefs from './graphql/typeDefs';
 import resolvers from './graphql/resolvers';
 import webhook from './webhooks/webhook';
 import expireSubs from './maintenance/expiredClientSecret';
-import auth from './auth';
 
 dotenv.config();
 
@@ -40,15 +39,12 @@ async function startApolloServer() {
             },
             err: null
           };
-        } catch ({ name, message }) {
+        } catch (e) {
           /* If handling authentication error at context level as opposed to at resolvers level,
           error message appears slightly different from what we're used to with the other errors
           ('fail to create context' etc.). Moving this error handling to resolvers to 'standardize'
           error msgs.
           */
-          if (name === 'TokenExpiredError') {
-            return { user: null, err: 'Token has expired' };
-          }
           return { user: null, err: 'Incorrect token' };
         }
       }
@@ -57,11 +53,7 @@ async function startApolloServer() {
   });
 
   await server.start();
-  // protected page
-  app.get('/dashboard', auth);
 
-  // protected API resource
-  // app.post('/graphql', auth);
   server.applyMiddleware({ app, cors: { origin: true, credentials: true } });
 
   // serving web client

@@ -27,17 +27,6 @@ if (token) {
   }
 }
 
-// retrieve refreshToken from cookie
-async function getCookie() {
-  const cookie = await browser.cookies.get({
-    url: 'localhost:5647',
-    name: 'refreshToken',
-  });
-  if (cookie) {
-    console.log(cookie);
-  }
-}
-
 function App() {
   const [user, setUser] = useState(token ? username : null);
   const [planToJoin, setPlanToJoin] = useState(null);
@@ -50,13 +39,9 @@ function App() {
       <Route path="/" element={!user ? <Home /> : <Navigate to="/dashboard" />} />
       <Route path="/login" element={!user ? <Login setUser={setUser} planToJoin={planToJoin} /> : <Navigate to="/dashboard" />} />
       <Route path="/signup" element={!user ? <Signup setUser={setUser} planToJoin={planToJoin} /> : <Navigate to="/dashboard" />} />
-      {/* <Route
-        path="/dashboard"
-        element={user ? <Dashboard username={user} setUser={setUser} setPlanToJoin={setPlanToJoin} /> : <Navigate to="/" />}
-      /> */}
       <Route
         path="/dashboard"
-        element={<Dashboard username={user} setUser={setUser} setPlanToJoin={setPlanToJoin} />}
+        element={user ? <Dashboard username={user} setUser={setUser} setPlanToJoin={setPlanToJoin} /> : <Navigate to="/" />}
       />
       <Route
         path="/plan/create"
