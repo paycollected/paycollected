@@ -1,9 +1,7 @@
 import stripeSDK from 'stripe';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import {
-  ApolloError, UserInputError, ForbiddenError
-} from 'apollo-server-core';
+import { ApolloError, UserInputError } from 'apollo-server-core';
 import { checkUser, createUser } from '../../db/models.js';
 
 const stripe = stripeSDK(process.env.STRIPE_SECRET_KEY);
@@ -49,14 +47,6 @@ export default async function createAccount(firstName, lastName, username, passw
       throw new Error();
     }
   } catch (asyncError) {
-    /*
-    Because this entire process depends on many async operations
-    (2 database queries + 1 bcrypt here),
-    this catch block will catch ALL errors from any of these async operations
-    and throw a generic error message.
-    According to Apollo docs, this should generate an error with code 'INTERNAL_SERVER_ERROR'.
-    */
-
     // if this is an anticipated bad input error
     if (errMsg) {
       throw new UserInputError(errMsg);

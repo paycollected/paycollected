@@ -29,7 +29,7 @@ export function addPlan(username, planName, cycleFrequency, perCycleCost, produc
     WITH first_insert AS
       (
         INSERT INTO plans
-          (plan_name, cycle_frequency, per_cycle_cost, s_prod_id, start_date)
+          (plan_name, cycle_frequency, per_cycle_cost, plan_id, start_date)
         VALUES
           ($2, $3, $4, $5, $6::BIGINT)
       )
@@ -57,7 +57,7 @@ export function viewOnePlan(planId, username) {
       ON u.username = up.username
       WHERE up.plan_owner = True AND up.plan_id = $1
     )
-    SELECT p.s_prod_id AS "planId",
+    SELECT p.plan_id AS "planId",
     p.plan_name AS name,
     UPPER(p.cycle_frequency::VARCHAR) AS "cycleFrequency",
     p.per_cycle_cost AS "perCycleCost",
@@ -70,7 +70,7 @@ export function viewOnePlan(planId, username) {
     ) AS quantity,
     (SELECT owner FROM select_owner)
     FROM plans p
-    WHERE p.s_prod_id = $1`;
+    WHERE p.plan_id = $1`;
 
   return pool.query(query, [planId, username]);
 }
@@ -96,7 +96,7 @@ export function viewAllPlans(username) {
     WITH select1 AS
       (
         SELECT
-          p.s_prod_id AS "planId",
+          p.plan_id AS "planId",
           p.plan_name AS name,
           UPPER(p.cycle_frequency::VARCHAR) AS "cycleFrequency",
           p.per_cycle_cost AS "perCycleCost",
@@ -104,7 +104,7 @@ export function viewAllPlans(username) {
           up.quantity
         FROM plans p
         JOIN user_plan up
-        ON p.s_prod_id = up.plan_id
+        ON p.plan_id = up.plan_id
         WHERE up.username = $1
       )
     SELECT
@@ -164,8 +164,8 @@ export function joinPlan(username, planId) {
       ) AS quantity
     FROM plans p
     JOIN user_plan up
-    ON p.s_prod_id = up.plan_id
-    WHERE p.s_prod_id = $2
+    ON p.plan_id = up.plan_id
+    WHERE p.plan_id = $2
     GROUP BY
       p.cycle_frequency,
       p.per_cycle_cost,
@@ -195,7 +195,7 @@ export function startSubscription(planId, quantity, subscriptionId, subscription
     (
       UPDATE plans
       SET s_price_id = $6
-      WHERE s_prod_id = $4
+      WHERE plan_id = $4
     ),
     update_pending_subs AS (
       UPDATE pending_subs
@@ -221,7 +221,7 @@ export function startSubscription(planId, quantity, subscriptionId, subscription
 export function updatePriceIdDelSubsGetMembers(newPriceId, productId, subscriptionId) {
   const query = `
     WITH update_price_id AS (
-      UPDATE plans SET s_price_id = $1 WHERE s_prod_id = $2
+      UPDATE plans SET s_price_id = $1 WHERE plan_id = $2
     ), del_sub AS (
       DELETE FROM user_plan
       WHERE subscription_id = $3
@@ -300,7 +300,7 @@ export function getSubsItemIdAndProductInfo(subscriptionId, username) {
       c.sum AS count
     FROM user_plan up
     JOIN plans p
-    ON up.plan_id = p.s_prod_id
+    ON up.plan_id = p.plan_id
     JOIN c
     ON up.plan_id = c.plan_id
     WHERE up.subscription_id = $1 and up.username = $2`;
@@ -311,7 +311,7 @@ export function getSubsItemIdAndProductInfo(subscriptionId, username) {
 export function updatePriceIdAndSubsQuant(newPriceId, productId, newQuantity, subscriptionId) {
   const query = `
     WITH update_price AS (
-      UPDATE plans SET s_price_id = $1 WHERE s_prod_id = $2
+      UPDATE plans SET s_price_id = $1 WHERE plan_id = $2
     )
     UPDATE user_plan SET quantity = $3 WHERE subscription_id = $4
   `;
@@ -345,7 +345,7 @@ export function checkPlanOwnerUsingPlanIdGetOneSub(planId, username) {
     VALUES (
       (SELECT quantity FROM owner),
       (SELECT subscription_id FROM owner),
-      (SELECT s_price_id FROM plans WHERE s_prod_id = $1),
+      (SELECT s_price_id FROM plans WHERE plan_id = $1),
       (SELECT subscription_id
         FROM user_plan
         WHERE plan_id = $1 AND plan_owner = False
@@ -367,7 +367,7 @@ export function checkPlanOwnerUsingPlanIdGetOneSub(planId, username) {
 export function deletePlanGetAllSubs(planId) {
   const query = `
     WITH del_plan AS (
-      DELETE FROM plans WHERE s_prod_id = $1
+      DELETE FROM plans WHERE plan_id = $1
     )
     SELECT
       first_name AS "firstName",
@@ -381,7 +381,7 @@ export function deletePlanGetAllSubs(planId) {
 
 
 export function deletePlan(planId) {
-  const query = `DELETE FROM plans WHERE s_prod_id = $1`;
+  const query = 'DELETE FROM plans WHERE plan_id = $1';
   return pool.query(query, [planId]);
 }
 

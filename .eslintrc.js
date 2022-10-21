@@ -23,5 +23,6 @@ module.exports = {
     'react/jsx-filename-extension': 'off',
     'comma-dangle': 'off',
     'react/prop-types': 'off',
+    'no-multiple-empty-lines': 'off',
   },
 };

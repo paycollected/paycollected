@@ -16,8 +16,9 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE TYPE cycle_freq AS ENUM ('weekly', 'monthly', 'yearly');
 
 CREATE TABLE IF NOT EXISTS plans (
-  s_prod_id VARCHAR(255) PRIMARY KEY,
-  s_price_id VARCHAR(255) UNIQUE,
+  plan_id VARCHAR(255) PRIMARY KEY,
+  total_price_id VARCHAR(255) UNIQUE,
+  curr_price_id VARCHAR(255) UNIQUE,
   plan_name VARCHAR(50) NOT NULL,
   cycle_frequency CYCLE_FREQ NOT NULL,
   per_cycle_cost INTEGER NOT NULL,
@@ -37,7 +38,7 @@ CREATE TABLE IF NOT EXISTS pending_subs (
 CREATE TABLE IF NOT EXISTS user_plan (
   id SERIAL PRIMARY KEY,
   username VARCHAR(100) NOT NULL REFERENCES users(username) ON DELETE CASCADE,
-  plan_id VARCHAR(255) NOT NULL REFERENCES plans(s_prod_id) ON DELETE CASCADE,
+  plan_id VARCHAR(255) NOT NULL REFERENCES plans(plan_id) ON DELETE CASCADE,
   plan_owner BOOLEAN NOT NULL DEFAULT FALSE,
   quantity INTEGER NOT NULL DEFAULT 0,
   subscription_id VARCHAR(255) UNIQUE, -- stripe subscription id

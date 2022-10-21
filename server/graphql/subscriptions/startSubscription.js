@@ -1,12 +1,12 @@
 import stripeSDK from 'stripe';
-import { ApolloError, UserInputError, ForbiddenError } from 'apollo-server-core';
+import { ApolloError, ForbiddenError } from 'apollo-server-core';
 import { joinPlan, queuePendingSubs } from '../../db/models.js';
 
 const stripe = stripeSDK(process.env.STRIPE_SECRET_KEY);
 
 export default async function startSubscription(planId, newQuantity, user, recurringInterval) {
   let errMsg;
-  const { username, email, stripeCusId } = user;
+  const { username, stripeCusId } = user;
   try {
     // check that user is NOT already subscribed to plan
     const { rows } = await joinPlan(username, planId);
@@ -45,7 +45,6 @@ export default async function startSubscription(planId, newQuantity, user, recur
     }
     nextStartDate = Math.ceil(nextStartDate.valueOf() / 1000);
 
-
     // create a stripe price ID
     const { id: priceId } = await stripe.prices.create({
       currency: 'usd',
@@ -59,7 +58,7 @@ export default async function startSubscription(planId, newQuantity, user, recur
 
     // create a Stripe subscription
     const {
-      id: subscriptionId, items, pending_setup_intent
+      id: subscriptionId, items, pending_setup_intent: pendingSetupIntent
     } = await stripe.subscriptions.create({
       customer: stripeCusId,
       items: [{
@@ -84,7 +83,7 @@ export default async function startSubscription(planId, newQuantity, user, recur
       }
     });
 
-    const { id: setupIntentId, client_secret: clientSecret } = pending_setup_intent;
+    const { id: setupIntentId, client_secret: clientSecret } = pendingSetupIntent;
     const { id: subscriptionItemId } = items.data[0];
 
     await Promise.all([
