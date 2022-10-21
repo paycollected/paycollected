@@ -2,7 +2,7 @@ import jwt from 'jsonwebtoken';
 
 export default function auth(req, res, next) {
   const Authorization = req.get('Authorization');
-  console.log(Authorization);
+  console.log('------------>', Authorization);
   try {
     const {
       exp,

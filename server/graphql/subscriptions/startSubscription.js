@@ -19,7 +19,8 @@ export default async function startSubscription(planId, newQuantity, user, recur
       cycleFrequency, perCycleCost, startDate, priceId, quantity,
     } = rows[0];
     if (quantity > 0) {
-      // front end will need to display a msg telling user to use 'adjust quantity' in dashboard instead
+      // front end will need to display a msg telling user
+      // to use 'adjust quantity' in dashboard instead
       errMsg = 'User is already subscribed to this plan';
       throw new Error();
     }

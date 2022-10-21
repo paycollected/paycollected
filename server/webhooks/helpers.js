@@ -5,6 +5,8 @@ import * as models from '../db/models.js';
 dotenv.config();
 const stripe = stripeSDK(process.env.STRIPE_SECRET_KEY);
 
+// update all other active members' subscriptions
+// will potentially email members re: change later
 async function updateStripePrice(row, price, productTotalQuantity) {
   const {
     username,
@@ -15,6 +17,7 @@ async function updateStripePrice(row, price, productTotalQuantity) {
   } = row;
 
   if (subscriptionId) {
+    // will be null if owner and not active member of plan
     await stripe.subscriptions.update(
       subscriptionId,
       {
@@ -35,11 +38,7 @@ async function updateStripePrice(row, price, productTotalQuantity) {
 }
 
 
-// 2. save new subscription details (our db),
-// update product w/ new price ID (our db)
-// query all other existing users on this same plan (db)
-// and update their subscriptions with new price (stripe system)
-async function processQuantChange(
+async function processQuantChangeOnSubsStart(
   productId,
   quantity,
   subscriptionId,
@@ -56,8 +55,10 @@ async function processQuantChange(
     username,
     newPriceId
   );
+  // save new subscription details (our db),
+  // update product w/ new price ID (our db)
+  // query all other existing users on this same plan (db)
 
-  // have to update this current guy if his quantity is > 1
   if (rows.length > 0) {
     await Promise.all(
       rows.map((row) => updateStripePrice(row, newPriceId, productTotalQuantity))
@@ -91,7 +92,7 @@ export async function handleSubscriptionStart(setupIntent) {
       ]);
 
       await Promise.all([
-        processQuantChange(
+        processQuantChangeOnSubsStart(
           planId,
           quantity,
           subscriptionId,
@@ -142,16 +143,10 @@ export async function handleSubscriptionStart(setupIntent) {
 }
 
 export async function handleSubscriptionCancel(subscription) {
-  // priceID --> archive that price
-  // create a new price: need count of quantities, and total plan cost, frequency, product ID
-  // --> update new price ID for product in db
-  // query db for every subscription & item ID to update with new price ID + new totalQuantity
-  // (subtract cancelled from total)
-  // delete this subscription from db
   const { id: subscriptionId, items } = subscription;
   const { price, quantity } = items.data[0];
   const { id: prevPriceId, product: productId } = price;
-  const { cycleFrequency } = subscription.metadata;
+  const { cycleFrequency, newOwner } = subscription.metadata;
   const productTotalQuantity = Number(subscription.metadata.productTotalQuantity);
   const perCycleCost = Number(subscription.metadata.perCycleCost);
   const newProductTotalQuantity = productTotalQuantity - quantity;
@@ -172,11 +167,26 @@ export async function handleSubscriptionCancel(subscription) {
         stripe.subscriptions.del(subscriptionId)
       ]);
 
-      const { rows } = await models.updatePriceIdDelSubsGetMembers(
-        newPriceId,
-        productId,
-        subscriptionId
-      );
+      let rows;
+      if (!newOwner) {
+        ({ rows } = await models.updatePriceIdDelSubsGetMembers(
+          newPriceId,
+          productId,
+          subscriptionId
+        ));
+        // update product w/ new price ID
+        // delete this subscription
+        // get all other active members on plan
+      } else {
+        ({ rows } = await models.updatePriceOwnerDelSubsGetMembers(
+          newPriceId,
+          productId,
+          subscriptionId,
+          newOwner
+        ));
+        // similar as above, w/ addition of updating new plan owner
+      }
+
       if (rows.length > 0) {
         await Promise.all(
           rows.map((row) => updateStripePrice(row, newPriceId, newProductTotalQuantity))

@@ -290,6 +290,30 @@ export function updatePriceIdDelSubsGetMembers(newPriceId, productId, subscripti
 }
 
 
+export function updatePriceOwnerDelSubsGetMembers(newPriceId, planId, subscriptionId, newOwner) {
+  const query = `
+    WITH update_price_id AS (
+      UPDATE plans SET price_id = $1 WHERE plan_id = $2
+    ), del_sub AS (
+      DELETE FROM user_plan WHERE subscription_id = $3
+    ), update_owner AS (
+      UPDATE user_plan
+      SET plan_owner = True
+      WHERE username = $4 AND plan_id = $2
+    )
+    SELECT
+      username,
+      email,
+      subscription_id AS "subscriptionId",
+      subscription_item_id AS "subscriptionItemId",
+      quantity
+    FROM user_on_plan
+    WHERE plan_id = $2 and subscription_id != $3
+    `;
+  return pool.query(query, [newPriceId, planId, subscriptionId, newOwner]);
+}
+
+
 export function deleteSubscription(subscriptionId) {
   return pool.query('DELETE FROM user_plan WHERE subscription_id = $1', [subscriptionId]);
 }
@@ -297,40 +321,28 @@ export function deleteSubscription(subscriptionId) {
 
 export function checkPlanOwnerUsingSubsId(subscriptionId, username) {
   const query = `
-    SELECT
-      plan_owner AS "planOwner",
-      plan_id AS "planId"
+    SELECT plan_id AS "planId"
     FROM user_plan
-    WHERE subscription_id = $1 AND username = $2`;
+    WHERE subscription_id = $1 AND username = $2 AND plan_owner = False`;
   return pool.query(query, [subscriptionId, username]);
 }
 
 
-export function checkNewOwner(newOwner, planId) {
+export function checkPlanOwnerForCancel(username, planId, subscriptionId, newOwner) {
   const query = `
-    SELECT username FROM user_plan WHERE username = $1 AND plan_id = $2
+    SELECT username
+    FROM user_plan
+    WHERE username = $1
+      AND plan_id = $2
+      AND subscription_id = $3
+      AND plan_owner = True
+    UNION
+    SELECT username
+    FROM user_plan
+    WHERE username = $4
+      AND plan_id = $2
   `;
-  return pool.query(query, [newOwner, planId]);
-}
-
-
-export function checkSubOnPlan(planId, subscriptionId) {
-  const query = `
-    SELECT plan_id FROM user_plan WHERE plan_id = $1 AND subscription_id = $2
-  `;
-  return pool.query(query, [planId, subscriptionId]);
-}
-
-
-export function delSubUpdatePlanOwner(newOwner, planId, subscriptionId) {
-  const query = `
-    WITH del_sub AS (
-      DELETE FROM user_plan WHERE subscription_id = $3
-    )
-    UPDATE user_plan
-    SET plan_owner = True
-    WHERE username = $1 AND plan_id =$2`;
-  return pool.query(query, [newOwner, planId, subscriptionId]);
+  return pool.query(query, [username, planId, subscriptionId, newOwner]);
 }
 
 

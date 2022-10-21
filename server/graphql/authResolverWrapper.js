@@ -1,6 +1,6 @@
 import { AuthenticationError, ForbiddenError } from 'apollo-server-core';
 
-export default function(someResolver) {
+export default function authResolverWrapper(someResolver) {
   return function(parent, args, context, info) {
     const { user, err } = context;
     switch (true) {
@@ -13,5 +13,5 @@ export default function(someResolver) {
       default:
         break;
     }
-  }
+  };
 }
