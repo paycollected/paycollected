@@ -212,7 +212,7 @@ export function startSubscriptionWithNoPriceUpdate(
       DO UPDATE SET
         quantity = $1, subscription_id = $2, subscription_item_id = $3
       WHERE user_plan.username = $5 AND user_plan.plan_id = $4
-    ),
+    )
     UPDATE pending_subs
     SET paid = True
     WHERE subscription_id = $2
