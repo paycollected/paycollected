@@ -16,7 +16,8 @@ async function startApolloServer() {
   const app = express();
   app.use('/', webhook);
 
-  // Json middleware must be mounted AFTER webhook endpoint because req.body needs to be in json format
+  // Json middleware must be mounted AFTER webhook endpoint
+  // because req.body needs to be in json format
   // so that webhook could convert it into raw buffer
   app.use(express.json());
 
@@ -40,11 +41,7 @@ async function startApolloServer() {
             err: null
           };
         } catch (e) {
-          /* If handling authentication error at context level as opposed to at resolvers level,
-          error message appears slightly different from what we're used to with the other errors
-          ('fail to create context' etc.). Moving this error handling to resolvers to 'standardize'
-          error msgs.
-          */
+          // handling error at resolver level
           return { user: null, err: 'Incorrect token' };
         }
       }
