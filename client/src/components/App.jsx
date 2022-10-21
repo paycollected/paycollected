@@ -11,7 +11,6 @@ import Checkout from './Checkout.jsx';
 import ViewPlans from './ViewPlans.jsx';
 import MagicLink from './MagicLink.jsx';
 import FourOhFour from './404.jsx';
-import PaymentSuccess from './PaymentSuccess.jsx';
 
 function App() {
   const [user, setUser] = useState(localStorage.getItem('username'));
@@ -78,7 +77,6 @@ function App() {
           : <Navigate to="/" />}
       />
       <Route path="/plan/all" element={user ? <ViewPlans user={user} /> : <Navigate to="/" />} />
-      <Route path="/payment-success" element={user ? <PaymentSuccess /> : <Navigate to="/" />} />
       <Route path="/404" element={<FourOhFour />} />
       <Route path="*" element={<FourOhFour />} />
     </Routes>

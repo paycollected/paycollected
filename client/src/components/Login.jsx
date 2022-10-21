@@ -21,10 +21,9 @@ export default function Login({ setUser, planToJoin }) {
     onCompleted: ({ login }) => {
       // login = token returned; null if passwords do not match
       if (login) {
-        const { username, email, token } = login;
+        const { username, token } = login;
         localStorage.setItem('token', token);
         localStorage.setItem('username', username); // need access to username
-        localStorage.setItem('email', email);
         setErrorMessage('');
         setUser(username); // need access to username
         if (!planToJoin) {
