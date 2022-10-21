@@ -13,19 +13,19 @@ export default async function cancelTransactionResolver(subscriptionId, username
     throw new ApolloError('Cannot cancel transaction');
   }
 
-  const { priceId } = rows[0];
-  if (priceId) {
-    try {
-      await Promise.all([
-        stripe.subscriptions.del(subscriptionId),
-        stripe.prices.update(priceId, { active: false })
-      ]);
-      return { subscriptionId };
-    } catch (e) {
-      console.log(e);
-      throw new ApolloError('Cannot cancel transaction');
-    }
-  } else {
+  if (rows.length === 0) {
     throw new ForbiddenError('User does not own this subscription');
+  }
+
+  const { priceId } = rows[0];
+  try {
+    await Promise.all([
+      stripe.subscriptions.del(subscriptionId),
+      stripe.prices.update(priceId, { active: false })
+    ]);
+    return { subscriptionId };
+  } catch (e) {
+    console.log(e);
+    throw new ApolloError('Cannot cancel transaction');
   }
 }
