@@ -15,7 +15,7 @@ import {
 } from './plans/view.js';
 import createPlanResolver from './plans/create.js';
 import deletePlanResolver from './plans/delete.js';
-import cancelTransactionResolver from './payment/cancel.js';
+import cancelTransactionResolver from './payment/cancelTransaction';
 
 const stripe = stripeSDK(process.env.STRIPE_SECRET_KEY);
 
