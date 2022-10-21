@@ -198,23 +198,29 @@ export async function handleSubscriptionCancel(subscription) {
 }
 
 export async function handleSubscriptionQuantChange(subscription) {
-  // need to know that this is for an incoming quantity change
-  // query all existing users on plan and
-  // adjust their price (need to know new priceId, which is the same as incoming event)
-  // metadata: totalQuantity will be equal to this incoming event's totalQuantity
   const { id: subscriptionId, items, metadata } = subscription;
   const productTotalQuantity = Number(metadata.productTotalQuantity);
-  const { price } = items.data[0];
-  const { id: priceId, product: productId } = price;
+  const { prevPriceId } = metadata;
+  const { price, quantity } = items.data[0];
+  const { id: newPriceId, product: productId } = price;
 
   try {
-    const [{ rows }, _] = await Promise.all([
-      models.getMembersOnPlan(productId, subscriptionId),
-      stripe.subscriptions.update(subscriptionId, { metadata: { quantChanged: false } })
+    const [{ rows }, _, __] = await Promise.all([
+      models.updatePriceQuantGetMembers(productId, subscriptionId, quantity, newPriceId),
+      // edit quantity of this subscription in our db & update priceId, also get all members
+      stripe.prices.update(prevPriceId, { active: false }),
+      // archive old price ID
+      stripe.subscriptions.update(subscriptionId, { metadata: { quantChanged: false, prevPriceId: '' } })
+      // reset metadata for this subscription
     ]);
 
     if (rows.length > 0) {
-      await Promise.all(rows.map((row) => updateStripePrice(row, priceId, productTotalQuantity)));
+      // update price for all other members
+      await Promise.all(rows.map((row) => updateStripePrice(
+        row,
+        newPriceId,
+        productTotalQuantity
+      )));
     }
   } catch (err) {
     console.log(err);

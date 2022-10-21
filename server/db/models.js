@@ -305,6 +305,7 @@ export function checkPlanOwnerUsingSubsId(subscriptionId, username) {
   return pool.query(query, [subscriptionId, username]);
 }
 
+
 export function checkNewOwner(newOwner, planId) {
   const query = `
     SELECT username FROM user_plan WHERE username = $1 AND plan_id = $2
@@ -358,18 +359,13 @@ export function getSubsItemIdAndProductInfo(subscriptionId, username) {
 }
 
 
-export function updatePriceIdAndSubsQuant(newPriceId, productId, newQuantity, subscriptionId) {
+export function updatePriceQuantGetMembers(planId, subscriptionId, newQuantity, newPriceId) {
   const query = `
-    WITH update_price AS (
-      UPDATE plans SET price_id = $1 WHERE plan_id = $2
-    )
-    UPDATE user_plan SET quantity = $3 WHERE subscription_id = $4
-  `;
-  return pool.query(query, [newPriceId, productId, newQuantity, subscriptionId])
-}
-
-export function getMembersOnPlan(planId, subscriptionId) {
-  const query = `
+  WITH update_price AS (
+    UPDATE plans SET price_id = $4 WHERE plan_id = $1
+  ), update_quant AS (
+    UPDATE user_plan SET quantity = $3 WHERE subscription_id = $2
+  )
   SELECT
     username,
     email,
@@ -379,7 +375,7 @@ export function getMembersOnPlan(planId, subscriptionId) {
   FROM user_on_plan
   WHERE plan_id = $1 AND subscription_id != $2
   `;
-  return pool.query(query, [planId, subscriptionId]);
+  return pool.query(query, [planId, subscriptionId, newQuantity, newPriceId]);
 }
 
 
