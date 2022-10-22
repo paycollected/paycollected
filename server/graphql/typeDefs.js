@@ -2,8 +2,9 @@ import { gql } from 'apollo-server-core';
 
 export default gql`
   scalar PlanID
-
   scalar SubscriptionID
+  scalar Username
+  scalar Email
 
   type Query {
     viewOnePlan (planId: PlanID!): Plan!
@@ -14,12 +15,14 @@ export default gql`
     firstName: String!
     lastName: String!
     username: ID!
+    # username: Username
     quantity: Int # 0 means not paying # nullable because quantity for owner field is null
   }
 
   type LoginInfo {
     username: String!
-    email: String!
+    # username: Username!
+    email: Email!
     token: String!
   }
 
@@ -60,7 +63,7 @@ export default gql`
     activeMembers: [PlanMember]!
     # can include owner, will only include members whose quantity > 0
     # does not include user requesting this info
-    subscriptionId: String
+    subscriptionId: SubscriptionID
     quantity: Int! # unit quant of this plan for current user
   }
 
@@ -69,12 +72,14 @@ export default gql`
       firstName: String!
       lastName: String!
       username: String!
+      # username: Username!
       password: String!
-      email: String!
+      email: Email!
     ): LoginInfo!
 
     login(
       username: String!
+      # username: Username!
       password: String!
     ): LoginInfo
 
@@ -101,6 +106,7 @@ export default gql`
       subscriptionId: SubscriptionID!
       planId: PlanID!
       newOwner: String!
+      # newOwner: Username!
     ): PlanIdResponse!
 
     editQuantity(

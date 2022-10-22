@@ -1,7 +1,7 @@
 import { GraphQLScalarType, Kind } from 'graphql';
 import { UserInputError } from 'apollo-server-core';
 
-const generateValidationFn = (regEx) => ((input) => {
+const generateRegExValidationFn = (regEx) => ((input) => {
   if (typeof input === 'string' && regEx.test(input)) {
     return input;
   }
@@ -24,10 +24,23 @@ const generateCustomScalar = (scalarName, validationFn) => (
 
 export const planIdScalar = generateCustomScalar(
   'PlanID',
-  generateValidationFn(/^prod_(?:[a-zA-Z0-9]){14}$/)
+  generateRegExValidationFn(/^prod_(?:[a-zA-Z0-9]){14}$/)
 );
 
 export const subscriptionIdScalar = generateCustomScalar(
   'SubscriptionID',
-  generateValidationFn(/^sub_(?:[a-zA-Z0-9]){24}$/)
+  generateRegExValidationFn(/^sub_(?:[a-zA-Z0-9]){24}$/)
+);
+
+export const emailScalar = generateCustomScalar(
+  'Email',
+  generateRegExValidationFn(
+    /^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/
+  )
+);
+
+export const usernameScalar = generateCustomScalar(
+  'Username',
+  generateRegExValidationFn(/^(?:[a-z]){1}(?:[a-zA-Z0-9\._-])$/)
+  // TODO: come up with a valid set of rules for username
 );

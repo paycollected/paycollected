@@ -1,7 +1,7 @@
 import stripeSDK from 'stripe';
 import { ApolloError } from 'apollo-server-core';
 import authResolverWrapper from './authResolverWrapper';
-import { planIdScalar, subscriptionIdScalar } from './customScalarTypes';
+import { planIdScalar, subscriptionIdScalar, emailScalar, usernameScalar } from './customScalarTypes';
 import createAccount from './users/createAccount';
 import loginResolver from './users/login';
 import startSubscription from './subscriptions/startSubscription';
@@ -28,6 +28,10 @@ const recurringInterval = {
 
 
 export default {
+  Username: usernameScalar,
+
+  Email: emailScalar,
+
   PlanID: planIdScalar,
 
   SubscriptionID: subscriptionIdScalar,
