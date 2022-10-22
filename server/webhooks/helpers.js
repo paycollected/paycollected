@@ -260,10 +260,8 @@ export async function handlePlanDelete(price) {
       models.deletePlanGetAllSubs(productId),
       // cancel subscriptions for ALL members on plan
       // delete product in db
-      stripe.prices.update(priceId, { active: false }),
       stripe.products.update(productId, { active: false })
-      // archive price & product
-
+      // archive product
     ]);
 
     if (rows.length > 0) {
