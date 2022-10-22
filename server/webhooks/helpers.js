@@ -253,10 +253,10 @@ async function cancelSubsAndNotify(row) {
 export async function handlePlanDelete(price) {
   // archive product
 
-  const { id: priceId, product: productId } = price;
+  const { product: productId } = price;
 
   try {
-    const [{ rows }, _, __] = await Promise.all([
+    const [{ rows }, _] = await Promise.all([
       models.deletePlanGetAllSubs(productId),
       // cancel subscriptions for ALL members on plan
       // delete product in db
