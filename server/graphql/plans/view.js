@@ -6,7 +6,6 @@ import {
   membersOnOnePlan
 } from '../../db/models.js';
 
-const stripe = stripeSDK(process.env.STRIPE_SECRET_KEY);
 
 export async function viewOnePlan(planId, username) {
   let errMsg;

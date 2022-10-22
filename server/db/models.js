@@ -160,15 +160,28 @@ export function joinPlan(username, planId) {
     SELECT
       p.cycle_frequency AS "cycleFrequency",
       p.per_cycle_cost AS "perCycleCost",
-      p.start_date AS "startDate",
       p.price_id AS "priceId",
       COALESCE(
         ( SELECT quantity
           FROM user_plan
-          WHERE plan_id = $2 AND username = $1
+          WHERE username = $1 AND plan_id = $2
         ),
         0
-      ) AS quantity
+      ) AS quantity,
+      CASE
+        WHEN CURRENT_TIMESTAMP < p.start_date
+          THEN ROUND (EXTRACT (EPOCH FROM p.start_date))
+        WHEN CURRENT_TIMESTAMP >= p.start_date
+          THEN CASE
+            WHEN p.cycle_frequency = 'weekly'
+              THEN ROUND (EXTRACT (EPOCH FROM (p.start_date + interval '1 week')))
+            WHEN p.cycle_frequency = 'monthly'
+              THEN ROUND (EXTRACT (EPOCH FROM (p.start_date + interval '1 month')))
+            WHEN p.cycle_frequency = 'yearly'
+              THEN ROUND (EXTRACT (EPOCH FROM (p.start_date + interval '1 year')))
+          END
+      END
+      AS "startDate"
     FROM plans p
     JOIN user_plan up
     ON p.plan_id = up.plan_id
