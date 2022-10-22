@@ -54,6 +54,13 @@ export default gql`
     YEARLY
   }
 
+  enum TimeZone {
+    EASTERN
+    CENTRAL
+    MOUNTAIN
+    PACIFIC
+  }
+
   type Plan {
     planId: PlanID!
     name: String!
@@ -87,7 +94,8 @@ export default gql`
       planName: String!
       cycleFrequency: CycleFrequency!
       perCycleCost: Float!
-      startDate: String! # in UTC format
+      startDate: String! # datestring
+      timeZone: TimeZone!
     ): PlanIdResponse!
     # returning stripe product ID here, which will be used as code
 

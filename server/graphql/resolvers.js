@@ -62,13 +62,14 @@ export default {
     login: (_, { username, password }) => (loginResolver(username, password)),
 
     createPlan: authResolverWrapper((_, {
-      planName, cycleFrequency, perCycleCost, startDate
+      planName, cycleFrequency, perCycleCost, startDate, timeZone
     }, { user: { username } }) => (
       createPlanResolver(
         planName,
         cycleFrequency,
         perCycleCost,
         startDate,
+        timeZone,
         username,
         recurringInterval
       )

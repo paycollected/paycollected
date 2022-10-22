@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS plans (
   plan_name VARCHAR(50) NOT NULL,
   cycle_frequency CYCLE_FREQ NOT NULL,
   per_cycle_cost INTEGER NOT NULL,
-  start_date BIGINT NOT NULL -- in UTC format
+  start_date TIMESTAMP WITH TIME ZONE NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS pending_subs (
