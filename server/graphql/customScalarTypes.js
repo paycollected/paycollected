@@ -1,22 +1,12 @@
 import { GraphQLScalarType, Kind } from 'graphql';
 import { UserInputError } from 'apollo-server-core';
 
-
-const validatePlanId = (planId) => {
-  const planIdRegex = /^prod_(?:[a-zA-Z0-9]){14}$/;
-  if (typeof planId === 'string' && planIdRegex.test(planId)) {
-    return planId;
+const generateValidationFn = (regEx) => ((input) => {
+  if (typeof input === 'string' && regEx.test(input)) {
+    return input;
   }
   throw new UserInputError();
-};
-
-const validateSubsId = (subsId) => {
-  const subsIdRegex = /^sub_(?:[a-zA-Z0-9]){24}$/;
-  if (typeof subsId === 'string' && subsIdRegex.test(subsId)) {
-    return subsId;
-  }
-  throw new UserInputError();
-};
+});
 
 const generateCustomScalar = (scalarName, validationFn) => (
   new GraphQLScalarType({
@@ -32,5 +22,12 @@ const generateCustomScalar = (scalarName, validationFn) => (
   })
 );
 
-export const planIdScalar = generateCustomScalar('PlanID', validatePlanId);
-export const subscriptionIdScalar = generateCustomScalar('SubscriptionID', validateSubsId);
+export const planIdScalar = generateCustomScalar(
+  'PlanID',
+  generateValidationFn(/^prod_(?:[a-zA-Z0-9]){14}$/)
+);
+
+export const subscriptionIdScalar = generateCustomScalar(
+  'SubscriptionID',
+  generateValidationFn(/^sub_(?:[a-zA-Z0-9]){24}$/)
+);
