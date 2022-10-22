@@ -39,8 +39,7 @@ export default async function createPlanResolver(
     throw new UserInputError('Invalid input');
   }
 
-  planName = planName.trim();
-  cycleFrequency = cycleFrequency.toLowerCase();
+  const plan = planName.trim();
 
   try {
     // create both a Stripe product ID & price ID in 1 API call
@@ -48,11 +47,11 @@ export default async function createPlanResolver(
       currency: 'usd',
       unit_amount: cost,
       recurring: {
-        interval: recurringInterval[cycleFrequency],
+        interval: recurringInterval[cycleFrequency.toLowerCase()],
         // could consider allowing customers to do interval count in the future?
         // meaning every 2 weeks, every 3 months etc.
       },
-      product_data: { name: planName },
+      product_data: { name: plan },
       metadata: { deletePlan: false },
     });
 
@@ -78,7 +77,7 @@ export default async function createPlanResolver(
 
     await addPlan(
       username,
-      planName,
+      plan,
       cycleFrequency,
       cost,
       planId,
