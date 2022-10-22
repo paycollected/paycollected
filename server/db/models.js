@@ -213,8 +213,7 @@ export function startSubscriptionWithNoPriceUpdate(
         quantity = $1, subscription_id = $2, subscription_item_id = $3
       WHERE user_plan.username = $5 AND user_plan.plan_id = $4
     )
-    UPDATE pending_subs
-    SET paid = True
+    DELETE FROM pending_subs
     WHERE subscription_id = $2
   `;
   const args = [quantity, subscriptionId, subscriptionItemId, planId, username];
@@ -250,8 +249,7 @@ export function startSubscription(
       WHERE plan_id = $4
     ),
     update_pending_subs AS (
-      UPDATE pending_subs
-      SET paid = True
+      DELETE FROM pending_subs
       WHERE subscription_id = $2
     )
     SELECT
@@ -434,12 +432,8 @@ export function queuePendingSubs(subscriptionId, username) {
 
 export function getExpiredPendingSubs() {
   const query = `
-    WITH del_valid_subs AS (
-      DELETE FROM pending_subs
-      WHERE created_at < (CURRENT_TIMESTAMP - interval '1 day') AND paid = True
-    )
     DELETE FROM pending_subs
-    WHERE created_at < (CURRENT_TIMESTAMP - interval '1 day') AND paid = False
+    WHERE created_at < (CURRENT_TIMESTAMP - interval '1 day')
     RETURNING subscription_id AS "subscriptionId"
   `;
   return pool.query(query);

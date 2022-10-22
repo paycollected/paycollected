@@ -19,10 +19,8 @@ export default async function editQuantityResolver(
   // (3) and update this subscription
 
   // Validating quantity input
-  if (newQuantity > 6) {
+  if (newQuantity > 6 || newQuantity <= 0) {
     // upper limit for our system
-    throw new UserInputError('New quantity must be less than 7');
-  } else if (newQuantity <= 0) {
     throw new UserInputError('Invalid quantity');
   }
 
