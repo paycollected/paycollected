@@ -19,14 +19,17 @@ export default function JoinPlan({
   });
 
   // will need to handle this payLoading state on client side so user knows what to expect
-  const [makePayment, { data: payData, loading: payLoading, error: payError}] = useMutation(JOIN_PLAN, {
-    onCompleted: ({ joinPlan: { clientSecret, subscriptionId } }) => {
-      setStripeClientSecret(clientSecret);
-      setSubscriptionInTransaction(subscriptionId);
-      navigate('/checkout');
-    },
-    onError: ({ message }) => { console.log(message); },
-  });
+  const [makePayment, { data: payData, loading: payLoading, error: payError}] = useMutation(
+    JOIN_PLAN,
+    {
+      onCompleted: ({ joinPlan: { clientSecret, subscriptionId } }) => {
+        setStripeClientSecret(clientSecret);
+        setSubscriptionInTransaction(subscriptionId);
+        navigate('/checkout');
+      },
+      onError: ({ message }) => { console.log(message); },
+    }
+  );
 
   useEffect(() => {
     if (planId) {
