@@ -30,8 +30,8 @@ export default function CreatePlan({ setPlanToJoin, setShowMagicLink }) {
   const [startDate, setStartDate] = useState(fullDate);
 
   const [createNewPlan, { data, loading, error }] = useMutation(CREATE_PLAN, {
-    onCompleted: ({ createPlan }) => {
-      setPlanToJoin(createPlan.productId);
+    onCompleted: ({ createPlan: { planId } }) => {
+      setPlanToJoin(planId);
       setShowMagicLink(true);
     },
     onError: ({ message }) => {

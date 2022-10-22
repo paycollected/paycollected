@@ -3,6 +3,8 @@ import { gql } from 'apollo-server-core';
 export default gql`
   scalar PlanID
 
+  scalar SubscriptionID
+
   type Query {
     viewOnePlan (planId: PlanID!): Plan!
     viewAllPlans: [Plan]!
@@ -23,11 +25,11 @@ export default gql`
 
   type PaymentIntent {
     clientSecret: String!
-    subscriptionId: String!
+    subscriptionId: SubscriptionID!
   }
-
-  type ProductId {
-    productId: String!
+ ##
+  type PlanIdResponse {
+    planId: PlanID!
   }
 
   type PortalSession {
@@ -35,16 +37,12 @@ export default gql`
   }
 
   type EditQuantResponse {
-    planId: ID!
+    planId: PlanID!
     quantity: Int!
   }
 
-  type SubsModificationResponse {
-    planId: ID!
-  }
-
   type CancelTransactionResponse {
-    subscriptionId: String!
+    subscriptionId: SubscriptionID!
   }
 
   enum CycleFrequency {
@@ -85,37 +83,37 @@ export default gql`
       cycleFrequency: CycleFrequency!
       perCycleCost: Float!
       startDate: String! # in UTC format
-    ): ProductId!
+    ): PlanIdResponse!
     # returning stripe product ID here, which will be used as code
 
     joinPlan(
-      planId: ID!
+      planId: PlanID!
       quantity: Int!
     ): PaymentIntent! # returning client secret
 
     editPayment: PortalSession!
 
     unsubscribe(
-      subscriptionId: String!
-    ): SubsModificationResponse!
+      subscriptionId: SubscriptionID!
+    ): PlanIdResponse!
 
     unsubscribeAsOwner(
-      subscriptionId: String!
-      planId: String!
+      subscriptionId: SubscriptionID!
+      planId: PlanID!
       newOwner: String!
-    ): SubsModificationResponse!
+    ): PlanIdResponse!
 
     editQuantity(
-      subscriptionId: String!
+      subscriptionId: SubscriptionID!
       newQuantity: Int!
     ): EditQuantResponse!
 
     deletePlan(
-      planId: ID!
-    ): SubsModificationResponse!
+      planId: PlanID!
+    ): PlanIdResponse!
 
     cancelTransaction(
-      subscriptionId: String!
+      subscriptionId: SubscriptionID!
     ): CancelTransactionResponse!
   }
 `;
