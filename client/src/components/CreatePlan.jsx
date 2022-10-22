@@ -21,10 +21,6 @@ const fullDate = processDateStr(today);
 const nextMonthFullDate = processDateStr(nextMonth);
 
 export default function CreatePlan({ setPlanToJoin, setShowMagicLink }) {
-  /* after submitting create plan form
-  --> will get back a planID as response to mutation
-  --> set this planID in state to generate magic link
-  */
   const navigate = useNavigate();
   const { register, handleSubmit, formState: { errors } } = useForm();
   const [startDate, setStartDate] = useState(fullDate);

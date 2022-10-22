@@ -24,7 +24,7 @@ mutation CreatePlanMutation (
 }
 
 
-mutation JoinPlan ($planId: ID!, $quantity: Int!) {
+mutation JoinPlan ($planId: PlanID!, $quantity: Int!) {
   joinPlan(planId: $planId, quantity: $quantity) {
     clientSecret
     subscriptionId
@@ -39,21 +39,21 @@ mutation EditPayment {
 }
 
 
-mutation Unsubscribe ($subscriptionId: String!) {
+mutation Unsubscribe ($subscriptionId: SubscriptionID!) {
   unsubscribe(subscriptionId: $subscriptionId) {
     planId
   }
 }
 
 
-mutation UnsubscribeAsPlanOwner($subscriptionId: String!, $planId: String!, $newOwner: String!) {
+mutation UnsubscribeAsPlanOwner($subscriptionId: SubscriptionID!, $planId: PlanID!, $newOwner: String!) {
   unsubscribeAsOwner(subscriptionId: $subscriptionId, planId: $planId, newOwner: $newOwner) {
     planId
   }
 }
 
 
-mutation EditQuantity($subscriptionId: String!, $newQuantity: Int!) {
+mutation EditQuantity($subscriptionId: SubscriptionID!, $newQuantity: Int!) {
   editQuantity(subscriptionId: $subscriptionId, newQuantity: $newQuantity) {
     planId
     quantity
@@ -61,14 +61,14 @@ mutation EditQuantity($subscriptionId: String!, $newQuantity: Int!) {
 }
 
 
-mutation DeletePlan($planId: ID!) {
+mutation DeletePlan($planId: PlanID!) {
   deletePlan(planId: $planId) {
     planId
   }
 }
 
 
-mutation CancelTransaction($subscriptionId: String!) {
+mutation CancelTransaction($subscriptionId: SubscriptionID!) {
   cancelTransaction(subscriptionId: $subscriptionId) {
     subscriptionId
   }

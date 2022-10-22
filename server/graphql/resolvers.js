@@ -1,7 +1,7 @@
 import stripeSDK from 'stripe';
 import { ApolloError } from 'apollo-server-core';
 import authResolverWrapper from './authResolverWrapper';
-import { planIdScalar } from './customScalarTypes';
+import { planIdScalar, subscriptionIdScalar } from './customScalarTypes';
 import createAccount from './users/createAccount';
 import loginResolver from './users/login';
 import startSubscription from './subscriptions/startSubscription';
@@ -29,6 +29,8 @@ const recurringInterval = {
 
 export default {
   PlanID: planIdScalar,
+
+  SubscriptionID: subscriptionIdScalar,
 
   Query: {
     viewOnePlan: authResolverWrapper((_, { planId }, { user: { username } }) => (
