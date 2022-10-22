@@ -1,8 +1,10 @@
 import { gql } from 'apollo-server-core';
 
 export default gql`
+  scalar PlanID
+
   type Query {
-    viewOnePlan (planId: ID!): Plan!
+    viewOnePlan (planId: PlanID!): Plan!
     viewAllPlans: [Plan]!
   }
 
@@ -52,7 +54,7 @@ export default gql`
   }
 
   type Plan {
-    planId: ID!
+    planId: PlanID!
     name: String!
     owner: PlanMember!
     cycleFrequency: CycleFrequency!
