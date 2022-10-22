@@ -13,7 +13,8 @@ export default async function createPlanResolver(
   username,
   recurringInterval
 ) {
-  if (perCycleCost <= 10 || !Number.isInteger(perCycleCost *= 100)) {
+  const cost = perCycleCost * 100; // need in cents
+  if (cost <= 10 || !Number.isInteger(cost)) {
     // make min $10
     throw new UserInputError('Invalid input');
   }
@@ -23,10 +24,14 @@ export default async function createPlanResolver(
   let startArr = startDate.split('-');
   startArr = startArr.map((ele) => Number(ele)); // convert str to number
   startArr[1] -= 1; // month is zeroth-indexed
-  const start = new Date(...startArr.split('-')); // will be at 00:00:00 local time
+  const start = new Date(...startArr); // will be at 00:00:00 local time
 
-  const tomorrow = (new Date()).setDate(today.getDate() + 1).setHours(0, 0, 0);
-  const oneMonthFromTmr = (new Date(tomorrow)).setMonth(tomorrow.getMonth() + 1).setHours(0, 0, 0);
+  const tomorrow = new Date();
+  tomorrow.setDate(today.getDate() + 1);
+  tomorrow.setHours(0, 0, 0, 0);
+  const oneMonthFromTmr = new Date(tomorrow);
+  oneMonthFromTmr.setMonth(tomorrow.getMonth() + 1);
+  oneMonthFromTmr.setHours(0, 0, 0, 0);
   // set tmr + 1 month from then to also be at 00:00:00 local time
   // so we can just compare the DATE!
   if (start < tomorrow || start > oneMonthFromTmr) {
@@ -36,14 +41,12 @@ export default async function createPlanResolver(
 
   planName = planName.trim();
   cycleFrequency = cycleFrequency.toLowerCase();
-  perCycleCost *= 100; // store in cents
-
 
   try {
     // create both a Stripe product ID & price ID in 1 API call
-    const { id: priceId, product: productId } = await stripe.prices.create({
+    const { id: priceId, product: planId } = await stripe.prices.create({
       currency: 'usd',
-      unit_amount: perCycleCost,
+      unit_amount: cost,
       recurring: {
         interval: recurringInterval[cycleFrequency],
         // could consider allowing customers to do interval count in the future?
@@ -77,13 +80,13 @@ export default async function createPlanResolver(
       username,
       planName,
       cycleFrequency,
-      perCycleCost,
-      productId,
+      cost,
+      planId,
       timeStr,
       priceId
     );
 
-    return { productId };
+    return { planId };
   } catch (asyncError) {
     console.log(asyncError);
     throw new ApolloError('Unable to create new plan');

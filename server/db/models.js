@@ -39,13 +39,14 @@ export function addPlan(
         INSERT INTO plans
           (plan_name, cycle_frequency, per_cycle_cost, plan_id, start_date, price_id)
         VALUES
-          ($2, $3, $4, $5, (TIMESTAMP WITH TIME ZONE $6), $7)
+          ($2, $3, $4, $5, $6::TIMESTAMPTZ, $7)
       )
     INSERT INTO user_plan
       (username, plan_id, plan_owner)
     VALUES
       ($1, $5, TRUE)
   `;
+  console.log(startDate);
   const args = [username, planName, cycleFrequency, perCycleCost, productId, startDate, priceId];
   return pool.query(query, args);
 }

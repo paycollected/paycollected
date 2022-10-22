@@ -6,10 +6,10 @@ import { Button, Input, Select } from '@chakra-ui/react';
 import { CreatePlanMutation as CREATE_PLAN } from '../graphql/mutations.gql';
 
 const today = new Date();
-const tomorrow = (new Date()).setDate(today.getDate() + 1);
-const oneMonthFromTmr = (new Date(tomorrow)).setMonth(tomorrow.getMonth() + 1);
-// const nextMonth = new Date();
-// nextMonth.setMonth(today.getMonth() + 1);
+const tomorrow = new Date();
+tomorrow.setDate(today.getDate() + 1);
+const oneMonthFromTmr = new Date(tomorrow);
+oneMonthFromTmr.setMonth(tomorrow.getMonth() + 1);
 // we'll limit users to a start date that is between tomorrow and 1 month from then
 
 const processDateStr = (date) => {
@@ -19,7 +19,7 @@ const processDateStr = (date) => {
   return `${year}-${month}-${dateStr}`;
 };
 
-const fullDate = processDateStr(today);
+const fullDate = processDateStr(tomorrow);
 const nextMonthFullDate = processDateStr(oneMonthFromTmr);
 
 export default function CreatePlan({ setPlanToJoin, setShowMagicLink }) {
@@ -98,7 +98,7 @@ export default function CreatePlan({ setPlanToJoin, setShowMagicLink }) {
           error={!!errors?.timeZone}
           helperText={errors?.timeZone ? errors.timeZone.message : ' '}
         >
-          {['Eastern', 'Central', 'Mountain', 'Pacific'].map((freq) => (
+          {['Eastern', 'Central', 'Mountain', 'Pacific'].map((zone) => (
             <option key={zone} value={zone}>
               {zone}
             </option>
