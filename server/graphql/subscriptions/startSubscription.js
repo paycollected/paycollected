@@ -75,7 +75,6 @@ export default async function startSubscription(planId, newQuantity, user, recur
         perCycleCost,
         quantChanged: false,
         cancelSubs: false,
-        deletePlan: false,
       }
     });
 

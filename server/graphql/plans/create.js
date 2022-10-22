@@ -26,9 +26,8 @@ export default async function createPlanResolver(
         // could consider allowing customers to do interval count in the future?
         // meaning every 2 weeks, every 3 months etc.
       },
-      product_data: {
-        name: planName,
-      }
+      product_data: { name: planName },
+      metadata: { deletePlan: false },
     });
 
     await addPlan(

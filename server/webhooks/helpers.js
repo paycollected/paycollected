@@ -85,6 +85,7 @@ export async function handleSubscriptionStart(setupIntent) {
           product: planId,
           unit_amount: Math.ceil(perCycleCost / productTotalQuantity),
           recurring: { interval: cycleFrequency },
+          metadata: { deletePlan: false }
         }),
         // create new price ID;
         stripe.prices.update(prevPriceId, { active: false }),
@@ -159,9 +160,8 @@ export async function handleSubscriptionCancel(subscription) {
           currency: 'usd',
           product: productId,
           unit_amount: Math.ceil(perCycleCost / newProductTotalQuantity),
-          recurring: {
-            interval: cycleFrequency,
-          },
+          recurring: { interval: cycleFrequency },
+          metadata: { deletePlan: false },
         }),
         stripe.prices.update(prevPriceId, { active: false }),
         stripe.subscriptions.del(subscriptionId)
@@ -250,24 +250,26 @@ async function cancelSubsAndNotify(row) {
   }
 }
 
-export async function handlePlanDelete(subscription) {
+export async function handlePlanDelete(price) {
   // archive product
-  // cancel subscriptions for ALL members on plan
-  // delete product in db
-  const { id: subscriptionId, items } = subscription;
-  const { product: productId } = items.data[0].price;
+
+  const { id: priceId, product: productId } = price;
 
   try {
     const [{ rows }, _, __] = await Promise.all([
       models.deletePlanGetAllSubs(productId),
+      // cancel subscriptions for ALL members on plan
+      // delete product in db
       stripe.prices.update(priceId, { active: false }),
       stripe.products.update(productId, { active: false })
+      // archive price & product
+
     ]);
 
     if (rows.length > 0) {
       await Promise.all(rows.map((row) => cancelSubsAndNotify(row)));
     }
-  } catch(e) {
+  } catch (e) {
     console.log(e);
   }
 }

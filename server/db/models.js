@@ -391,32 +391,15 @@ export function updatePriceQuantGetMembers(planId, subscriptionId, newQuantity, 
 }
 
 
-export function checkPlanOwnerUsingPlanIdGetOneSub(planId, username) {
+export function getPriceFromPlan(planId, username) {
   const query = `
-  WITH owner AS (
-    SELECT quantity, subscription_id
-    FROM user_plan
-    WHERE plan_id = $1 AND username = $2 AND plan_owner = True
-  )
-  SELECT *
-  FROM (
-    VALUES (
-      (SELECT quantity FROM owner),
-      (SELECT subscription_id FROM owner),
-      (SELECT s_price_id FROM plans WHERE plan_id = $1),
-      (SELECT subscription_id
-        FROM user_plan
-        WHERE plan_id = $1 AND plan_owner = False
-        LIMIT 1
-      )
-    )
-  )
-  AS temp (
-    "ownerQuant",
-    "ownerSubsId",
-    "priceId",
-    "memberSubsId"
-  )
+    SELECT p.price_id AS "priceId"
+    FROM plans p
+    JOIN user_plan up
+    ON p.plan_id = up.plan_id
+    WHERE up.plan_id = $1
+      AND up.username = $2
+      AND up.plan_owner = True
   `;
   return pool.query(query, [planId, username]);
 }
@@ -437,11 +420,6 @@ export function deletePlanGetAllSubs(planId) {
   return pool.query(query, [planId]);
 }
 
-
-export function deletePlan(planId) {
-  const query = 'DELETE FROM plans WHERE plan_id = $1';
-  return pool.query(query, [planId]);
-}
 
 export function queuePendingSubs(subscriptionId, username) {
   const query = `

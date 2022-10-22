@@ -12,6 +12,8 @@ export default async function editQuantityResolver(
   username,
   recurringInterval
 ) {
+  // plan owner with quant = 0 will not be able to call this mutation b/c they don't have
+  // a preexisting subscriptionId
   // (1) check that requesting user does own subscription, also query for necessary data to:
   // (2) create new stripe price ID
   // (3) and update this subscription
@@ -23,7 +25,6 @@ export default async function editQuantityResolver(
   } else if (newQuantity <= 0) {
     throw new UserInputError('Invalid quantity');
   }
-
 
   let rows;
   try {
@@ -55,6 +56,7 @@ export default async function editQuantityResolver(
       recurring: {
         interval: recurringInterval[cycleFrequency],
       },
+      metadata: { deletePlan: false },
     });
 
     await stripe.subscriptions.update(
