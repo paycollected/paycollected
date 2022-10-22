@@ -1,4 +1,4 @@
-query ViewOnePlan ($planId: ID!) {
+query ViewOnePlan ($planId: PlanID!) {
   viewOnePlan(planId: $planId) {
     planId
     name

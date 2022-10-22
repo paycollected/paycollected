@@ -25,32 +25,6 @@ export default async function startSubscription(planId, newQuantity, user, recur
       throw new Error();
     }
 
-    let nextStartDate = new Date(startDate * 1000);
-    const today = new Date();
-    // adjust startDate to be in the future based on subscription frequency
-    if (nextStartDate < today) {
-      if (cycleFrequency === 'weekly') {
-        const targetDay = nextStartDate.getDay();
-        const todayDay = today.getDay();
-        // find the next occurrence of the target day
-        nextStartDate.setDate(today.getDate() + (((7 - todayDay) + targetDay) % 7));
-      } else if (cycleFrequency === 'monthly') {
-        const targetDate = nextStartDate.getDate();
-        // if current date is past the target, then set target to next month
-        if (today.getDate() >= targetDate) {
-          nextStartDate.setMonth(today.getMonth() + 1);
-          nextStartDate.setDate(targetDate);
-          // otherwise set the date with the current month
-        } else {
-          nextStartDate.setDate(targetDate);
-        }
-      } else { // cycleFrequency === yearly
-        // set to next year if current date is past the start date
-        nextStartDate.setYear(today.getFullYear() + 1);
-      }
-    }
-    nextStartDate = Math.ceil(nextStartDate.valueOf() / 1000);
-
     // create a Stripe subscription
     const {
       id: subscriptionId, items, pending_setup_intent: pendingSetupIntent
@@ -67,7 +41,7 @@ export default async function startSubscription(planId, newQuantity, user, recur
         payment_method_types: ['link', 'card'],
       },
       proration_behavior: 'none',
-      trial_end: nextStartDate,
+      trial_end: startDate,
       expand: ['pending_setup_intent'],
       metadata: {
         productTotalQuantity: newQuantity, // will need to get latest number from webhook

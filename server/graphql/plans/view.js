@@ -1,4 +1,3 @@
-import stripeSDK from 'stripe';
 import { ApolloError } from 'apollo-server-core';
 import {
   viewOnePlan as viewOnePlanModel,

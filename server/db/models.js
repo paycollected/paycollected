@@ -46,7 +46,7 @@ export function addPlan(
     VALUES
       ($1, $5, TRUE)
   `;
-  console.log(startDate);
+
   const args = [username, planName, cycleFrequency, perCycleCost, productId, startDate, priceId];
   return pool.query(query, args);
 }
