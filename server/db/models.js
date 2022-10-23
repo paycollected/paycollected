@@ -174,11 +174,35 @@ export function joinPlan(username, planId) {
         WHEN CURRENT_TIMESTAMP >= p.start_date
           THEN CASE
             WHEN p.cycle_frequency = 'weekly'
-              THEN ROUND (EXTRACT (EPOCH FROM (p.start_date + interval '1 week')))
+              THEN ROUND (
+                EXTRACT (
+                  EPOCH FROM (
+                    p.start_date
+                    + MAKE_INTERVAL(weeks => (FLOOR (EXTRACT (DAY FROM (CURRENT_TIMESTAMP - p.start_date)) / 7))::INTEGER)
+                    + interval '1 week'
+                  )
+                )
+              )
             WHEN p.cycle_frequency = 'monthly'
-              THEN ROUND (EXTRACT (EPOCH FROM (p.start_date + interval '1 month')))
+              THEN ROUND (
+                EXTRACT (
+                  EPOCH FROM (
+                    p.start_date
+                    + DATE_TRUNC('month', AGE(CURRENT_TIMESTAMP, p.start_date))
+                    + interval '1 month'
+                  )
+                )
+              )
             WHEN p.cycle_frequency = 'yearly'
-              THEN ROUND (EXTRACT (EPOCH FROM (p.start_date + interval '1 year')))
+              THEN ROUND (
+                EXTRACT (
+                  EPOCH FROM (
+                    p.start_date
+                    + DATE_TRUNC('year', AGE(CURRENT_TIMESTAMP, p.start_date))
+                    + interval '1 year'
+                  )
+                )
+              )
           END
       END
       AS "startDate"
