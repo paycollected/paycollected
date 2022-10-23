@@ -4,6 +4,13 @@ import { addPlan } from '../../db/models.js';
 
 const stripe = stripeSDK(process.env.STRIPE_SECRET_KEY);
 
+const formatTimeZone = {
+  EASTERN: 'America/New_York',
+  CENTRAL: 'America/Chicago',
+  MOUNTAIN: 'America/Phoenix',
+  PACIFIC: 'America/Los_Angeles'
+};
+
 export default async function createPlanResolver(
   planName,
   cycleFrequency,
@@ -20,14 +27,13 @@ export default async function createPlanResolver(
   }
 
   // just doing a simple input date validation using server's local time
-  const today = new Date();
   let startArr = startDate.split('-');
   startArr = startArr.map((ele) => Number(ele)); // convert str to number
   startArr[1] -= 1; // month is zeroth-indexed
   const start = new Date(...startArr); // will be at 00:00:00 local time
 
   const tomorrow = new Date();
-  tomorrow.setDate(today.getDate() + 1);
+  tomorrow.setDate(tomorrow.getDate() + 1);
   tomorrow.setHours(0, 0, 0, 0);
   const oneMonthFromTmr = new Date(tomorrow);
   oneMonthFromTmr.setMonth(tomorrow.getMonth() + 1);
@@ -55,30 +61,12 @@ export default async function createPlanResolver(
       metadata: { deletePlan: false },
     });
 
-    let timeZoneStr;
-    switch (timeZone) {
-      case 'EASTERN':
-        timeZoneStr = 'America/New_York';
-        break;
-      case 'CENTRAL':
-        timeZoneStr = 'America/Chicago';
-        break;
-      case 'MOUNTAIN':
-        timeZoneStr = 'America/Phoenix';
-        break;
-      case 'PACIFIC':
-        timeZoneStr = 'America/Los_Angeles';
-        break;
-      default:
-        break;
-    }
-
-    const timeStr = `${startDate} 23:59:59 ${timeZoneStr}`;
+    const timeStr = `${startDate} 23:59:59 ${formatTimeZone[timeZone]}`;
 
     await addPlan(
       username,
       plan,
-      cycleFrequency,
+      cycleFrequency.toLowerCase(),
       cost,
       planId,
       timeStr,

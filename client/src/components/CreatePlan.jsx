@@ -5,9 +5,8 @@ import { useForm } from 'react-hook-form';
 import { Button, Input, Select } from '@chakra-ui/react';
 import { CreatePlanMutation as CREATE_PLAN } from '../graphql/mutations.gql';
 
-const today = new Date();
 const tomorrow = new Date();
-tomorrow.setDate(today.getDate() + 1);
+tomorrow.setDate(tomorrow.getDate() + 1);
 const oneMonthFromTmr = new Date(tomorrow);
 oneMonthFromTmr.setMonth(tomorrow.getMonth() + 1);
 // we'll limit users to a start date that is between tomorrow and 1 month from then
