@@ -1,8 +1,13 @@
 import { gql } from 'apollo-server-core';
 
 export default gql`
+  scalar PlanID
+  scalar SubscriptionID
+  scalar Username
+  scalar Email
+
   type Query {
-    viewOnePlan (planId: ID!): Plan!
+    viewOnePlan (planId: PlanID!): Plan!
     viewAllPlans: [Plan]!
   }
 
@@ -10,22 +15,24 @@ export default gql`
     firstName: String!
     lastName: String!
     username: ID!
+    # username: Username
     quantity: Int # 0 means not paying # nullable because quantity for owner field is null
   }
 
   type LoginInfo {
     username: String!
-    email: String!
+    # username: Username!
+    email: Email!
     token: String!
   }
 
   type PaymentIntent {
     clientSecret: String!
-    email: String!
+    subscriptionId: SubscriptionID!
   }
-
-  type ProductId {
-    productId: String!
+ ##
+  type PlanIdResponse {
+    planId: PlanID!
   }
 
   type PortalSession {
@@ -33,12 +40,12 @@ export default gql`
   }
 
   type EditQuantResponse {
-    planId: ID!
+    planId: PlanID!
     quantity: Int!
   }
 
-  type SubsModificationResponse {
-    planId: ID!
+  type CancelTransactionResponse {
+    subscriptionId: SubscriptionID!
   }
 
   enum CycleFrequency {
@@ -47,8 +54,15 @@ export default gql`
     YEARLY
   }
 
+  enum TimeZone {
+    EASTERN
+    CENTRAL
+    MOUNTAIN
+    PACIFIC
+  }
+
   type Plan {
-    planId: ID!
+    planId: PlanID!
     name: String!
     owner: PlanMember!
     cycleFrequency: CycleFrequency!
@@ -56,7 +70,7 @@ export default gql`
     activeMembers: [PlanMember]!
     # can include owner, will only include members whose quantity > 0
     # does not include user requesting this info
-    subscriptionId: String
+    subscriptionId: SubscriptionID
     quantity: Int! # unit quant of this plan for current user
   }
 
@@ -65,12 +79,14 @@ export default gql`
       firstName: String!
       lastName: String!
       username: String!
+      # username: Username!
       password: String!
-      email: String!
+      email: Email!
     ): LoginInfo!
 
     login(
       username: String!
+      # username: Username!
       password: String!
     ): LoginInfo
 
@@ -78,34 +94,40 @@ export default gql`
       planName: String!
       cycleFrequency: CycleFrequency!
       perCycleCost: Float!
-      startDate: String! # in UTC format
-    ): ProductId!
+      startDate: String! # datestring
+      timeZone: TimeZone!
+    ): PlanIdResponse!
     # returning stripe product ID here, which will be used as code
 
     joinPlan(
-      planId: ID!
+      planId: PlanID!
       quantity: Int!
     ): PaymentIntent! # returning client secret
 
     editPayment: PortalSession!
 
     unsubscribe(
-      subscriptionId: String!
-    ): SubsModificationResponse!
+      subscriptionId: SubscriptionID!
+    ): PlanIdResponse!
 
     unsubscribeAsOwner(
-      subscriptionId: String!
-      planId: String!
+      subscriptionId: SubscriptionID!
+      planId: PlanID!
       newOwner: String!
-    ): SubsModificationResponse!
+      # newOwner: Username!
+    ): PlanIdResponse!
 
     editQuantity(
-      subscriptionId: String!
+      subscriptionId: SubscriptionID!
       newQuantity: Int!
     ): EditQuantResponse!
 
     deletePlan(
-      planId: ID!
-    ): SubsModificationResponse!
+      planId: PlanID!
+    ): PlanIdResponse!
+
+    cancelTransaction(
+      subscriptionId: SubscriptionID!
+    ): CancelTransactionResponse!
   }
 `;

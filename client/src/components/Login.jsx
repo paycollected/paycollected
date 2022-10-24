@@ -10,7 +10,7 @@ import {
 import { ViewIcon, ViewOffIcon } from '@chakra-ui/icons';
 import { LogIn as LOG_IN } from '../graphql/mutations.gql';
 
-export default function Login({ setUser, planToJoin }) {
+export default function Login({ setUser, planToJoin, setEmail }) {
   const navigate = useNavigate();
   const { register, handleSubmit, formState: { errors } } = useForm();
   // if login info is valid
@@ -23,10 +23,9 @@ export default function Login({ setUser, planToJoin }) {
       if (login) {
         const { username, email, token } = login;
         localStorage.setItem('token', token);
-        localStorage.setItem('username', username); // need access to username
-        localStorage.setItem('email', email);
         setErrorMessage('');
         setUser(username); // need access to username
+        setEmail(email);
         if (!planToJoin) {
           navigate('/dashboard');
         } else {

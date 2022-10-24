@@ -5,18 +5,17 @@ import { useForm } from 'react-hook-form';
 import { Button, Input, FormControl, FormLabel, FormErrorMessage } from '@chakra-ui/react';
 import { CreateUser as SIGN_UP } from '../graphql/mutations.gql';
 
-export default function Signup({ setUser, planToJoin }) {
+export default function Signup({ setUser, planToJoin, setEmail }) {
   const navigate = useNavigate();
   const { register, handleSubmit, formState: { errors } } = useForm();
   const [errorMessage, setErrorMessage] = useState('');
 
   const [signup, { data, loading, error }] = useMutation(SIGN_UP, {
     onCompleted: ({ createUser }) => {
-      const { username, email, token } = createUser;
+      const { username, token, email } = createUser;
       localStorage.setItem('token', token);
-      localStorage.setItem('username', username);
-      localStorage.setItem('email', email);
       setUser(username);
+      setEmail(email);
       setErrorMessage('');
       if (!planToJoin) {
         navigate('/dashboard');

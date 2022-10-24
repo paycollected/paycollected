@@ -5,33 +5,30 @@ import { useForm } from 'react-hook-form';
 import { Button, Input, Select } from '@chakra-ui/react';
 import { CreatePlanMutation as CREATE_PLAN } from '../graphql/mutations.gql';
 
-const today = new Date();
-const nextMonth = new Date();
-nextMonth.setMonth(nextMonth.getMonth() + 1);
+const tomorrow = new Date();
+tomorrow.setDate(tomorrow.getDate() + 1);
+const oneMonthFromTmr = new Date(tomorrow);
+oneMonthFromTmr.setMonth(tomorrow.getMonth() + 1);
 // we'll limit users to a start date that is between tomorrow and 1 month from then
 
 const processDateStr = (date) => {
   const year = date.getFullYear().toString();
   const month = (date.getMonth() + 1).toString().padStart(2, '0'); // month is zero-th indexed
-  const dateStr = (date.getDate() + 1).toString().padStart(2, '0'); // starting tomorrow
+  const dateStr = (date.getDate()).toString().padStart(2, '0'); // starting tomorrow
   return `${year}-${month}-${dateStr}`;
 };
 
-const fullDate = processDateStr(today);
-const nextMonthFullDate = processDateStr(nextMonth);
+const fullDate = processDateStr(tomorrow);
+const nextMonthFullDate = processDateStr(oneMonthFromTmr);
 
 export default function CreatePlan({ setPlanToJoin, setShowMagicLink }) {
-  /* after submitting create plan form
-  --> will get back a planID as response to mutation
-  --> set this planID in state to generate magic link
-  */
   const navigate = useNavigate();
   const { register, handleSubmit, formState: { errors } } = useForm();
   const [startDate, setStartDate] = useState(fullDate);
 
   const [createNewPlan, { data, loading, error }] = useMutation(CREATE_PLAN, {
-    onCompleted: ({ createPlan }) => {
-      setPlanToJoin(createPlan.productId);
+    onCompleted: ({ createPlan: { planId } }) => {
+      setPlanToJoin(planId);
       setShowMagicLink(true);
     },
     onError: ({ message }) => {
@@ -40,19 +37,15 @@ export default function CreatePlan({ setPlanToJoin, setShowMagicLink }) {
   });
 
   const onSubmit = ({
-    planName, cycleFrequency, perCycleCost,
+    planName, cycleFrequency, perCycleCost, timeZone
   }) => {
-    const formattedStartDate = new Date(...startDate.split('-'));
-    formattedStartDate.setMonth(formattedStartDate.getMonth() - 1); // month is zero-th indexed
-    formattedStartDate.setHours(23, 59, 59); // set time to 23:59:59 almost at midnight
     createNewPlan({
       variables: {
         planName,
         cycleFrequency: cycleFrequency.toUpperCase(),
         perCycleCost: Number(perCycleCost),
-        startDate: (formattedStartDate.valueOf() / 1000).toString(),
-        // need seconds and not milliseconds
-        // only using dates so exact time will default to 00:00:00 of that day
+        startDate,
+        timeZone: timeZone.toUpperCase(),
       },
     });
   };
@@ -90,6 +83,23 @@ export default function CreatePlan({ setPlanToJoin, setShowMagicLink }) {
           {['Weekly', 'Monthly', 'Yearly'].map((freq) => (
             <option key={freq} value={freq}>
               {freq}
+            </option>
+          ))}
+        </Select>
+        <Select
+          sx={{ width: '25ch' }}
+          name="timeZone"
+          label="Time Zone"
+          placeholder="Time Zone"
+          required
+          defaultValue=""
+          {...register('timeZone', { required: 'Select time zone' })}
+          error={!!errors?.timeZone}
+          helperText={errors?.timeZone ? errors.timeZone.message : ' '}
+        >
+          {['Eastern', 'Central', 'Mountain', 'Pacific'].map((zone) => (
+            <option key={zone} value={zone}>
+              {zone}
             </option>
           ))}
         </Select>

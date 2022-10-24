@@ -22,10 +22,21 @@ webhook.post('/webhook', express.raw({type: 'application/json'}), (req, res) => 
   let invoice;
   let subscription;
   let setupIntent;
+  let price;
+  let deletePlan;
+  let quantChanged;
+  let cancelSubs;
   switch (event.type) {
     case 'invoice.payment_failed':
       invoice = event.data.object;
       // Then define and call a function to handle the event invoice.payment_failed
+      break;
+    case 'price.updated': // plan deleted
+      price = event.data.object;
+      ({ deletePlan } = price.metadata);
+      if (JSON.parse(deletePlan)) {
+        helpers.handlePlanDelete(price);
+      }
       break;
     case 'setup_intent.succeeded': // someone new joining plan
       setupIntent = event.data.object;
@@ -33,9 +44,8 @@ webhook.post('/webhook', express.raw({type: 'application/json'}), (req, res) => 
       break;
     case 'customer.subscription.updated':
       subscription = event.data.object;
-      const { metadata } = subscription;
-      const { quantChanged, cancelSubs, deletePlan } = metadata;
-      switch(true) {
+      ({ quantChanged, cancelSubs } = subscription.metadata);
+      switch (true) {
         case (JSON.parse(quantChanged)):
           helpers.handleSubscriptionQuantChange(subscription);
           break;
@@ -45,9 +55,6 @@ webhook.post('/webhook', express.raw({type: 'application/json'}), (req, res) => 
           // if plan owner and no active members --> disable option to transfer ownership
           // can only delete entire plan at this point
           helpers.handleSubscriptionCancel(subscription);
-          break;
-        case (JSON.parse(deletePlan)):
-          helpers.handlePlanDelete(subscription);
           break;
         default:
           break;

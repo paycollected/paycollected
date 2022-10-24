@@ -1,6 +1,7 @@
 import stripeSDK from 'stripe';
 import { ApolloError } from 'apollo-server-core';
 import authResolverWrapper from './authResolverWrapper';
+import { planIdScalar, subscriptionIdScalar, emailScalar, usernameScalar } from './customScalarTypes';
 import createAccount from './users/createAccount';
 import loginResolver from './users/login';
 import startSubscription from './subscriptions/startSubscription';
@@ -15,6 +16,7 @@ import {
 } from './plans/view.js';
 import createPlanResolver from './plans/create.js';
 import deletePlanResolver from './plans/delete.js';
+import cancelTransactionResolver from './payment/cancelTransaction';
 
 const stripe = stripeSDK(process.env.STRIPE_SECRET_KEY);
 
@@ -24,7 +26,16 @@ const recurringInterval = {
   yearly: 'year'
 };
 
+
 export default {
+  Username: usernameScalar,
+
+  Email: emailScalar,
+
+  PlanID: planIdScalar,
+
+  SubscriptionID: subscriptionIdScalar,
+
   Query: {
     viewOnePlan: authResolverWrapper((_, { planId }, { user: { username } }) => (
       viewOnePlanResolver(planId, username)
@@ -51,9 +62,17 @@ export default {
     login: (_, { username, password }) => (loginResolver(username, password)),
 
     createPlan: authResolverWrapper((_, {
-      planName, cycleFrequency, perCycleCost, startDate
+      planName, cycleFrequency, perCycleCost, startDate, timeZone
     }, { user: { username } }) => (
-      createPlanResolver(planName, cycleFrequency, perCycleCost, startDate, username)
+      createPlanResolver(
+        planName,
+        cycleFrequency,
+        perCycleCost,
+        startDate,
+        timeZone,
+        username,
+        recurringInterval
+      )
     )),
 
     joinPlan: authResolverWrapper((_, { planId, quantity }, { user }) => (
@@ -100,6 +119,12 @@ export default {
     deletePlan: authResolverWrapper(
       (_, { planId }, { user: { username } }) => (
         deletePlanResolver(planId, username)
+      )
+    ),
+
+    cancelTransaction: authResolverWrapper(
+      (_, { subscriptionId, }, { user: { username }}) => (
+        cancelTransactionResolver(subscriptionId, username)
       )
     ),
   }

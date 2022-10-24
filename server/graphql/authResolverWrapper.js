@@ -1,10 +1,10 @@
 import { AuthenticationError, ForbiddenError } from 'apollo-server-core';
 
-export default function (someResolver) {
+export default function authResolverWrapper(someResolver) {
   return function(parent, args, context, info) {
     const { user, err } = context;
     switch (true) {
-      case (err === 'Incorrect token' || err === 'Token has expired'):
+      case (err === 'Incorrect token'):
         throw new AuthenticationError(err);
       case (err === 'Unauthorized request'):
         throw new ForbiddenError(err);
@@ -13,5 +13,5 @@ export default function (someResolver) {
       default:
         break;
     }
-  }
+  };
 }

@@ -1,14 +1,10 @@
-import stripeSDK from 'stripe';
-import {
-  ApolloError, UserInputError, ForbiddenError
-} from 'apollo-server-core';
+import { ApolloError } from 'apollo-server-core';
 import {
   viewOnePlan as viewOnePlanModel,
   viewAllPlans as viewAllPlansModel,
   membersOnOnePlan
 } from '../../db/models.js';
 
-const stripe = stripeSDK(process.env.STRIPE_SECRET_KEY);
 
 export async function viewOnePlan(planId, username) {
   let errMsg;

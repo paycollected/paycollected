@@ -1,9 +1,7 @@
 import stripeSDK from 'stripe';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import {
-  ApolloError, UserInputError, ForbiddenError
-} from 'apollo-server-core';
+import { ApolloError, UserInputError } from 'apollo-server-core';
 import { checkUser, createUser } from '../../db/models.js';
 
 const stripe = stripeSDK(process.env.STRIPE_SECRET_KEY);
@@ -30,8 +28,8 @@ export default async function createAccount(firstName, lastName, username, passw
 
       await createUser(firstName, lastName, username, hashedPass, email, stripeCusId);
       const token = jwt.sign({
-        // expires after 2 weeks
-        exp: Math.floor(Date.now() / 1000) + (60 * 60 * 24 * 14),
+        // expires after 30 mins
+        exp: Math.floor(Date.now() / 1000) + (60 * 30),
         // storing user's info in token so we can easily obtain it from context in any resolver
         user: {
           username,
@@ -40,7 +38,12 @@ export default async function createAccount(firstName, lastName, username, passw
         }
       }, process.env.SECRET_KEY);
       return { username, email, token };
-    // username or email exist --> return error
+      // username or email exist --> return error
+
+    // note: Security docs recommend that we should only display a generic msg
+    // saying that username OR email exists - instead of specifying which
+    // because the former can increase the likelihood that a brute force attacker
+    // can correctly guess the username
     } else if (rows[0].username === username) {
       errMsg = 'This username already exists';
       throw new Error();
@@ -49,14 +52,6 @@ export default async function createAccount(firstName, lastName, username, passw
       throw new Error();
     }
   } catch (asyncError) {
-    /*
-    Because this entire process depends on many async operations
-    (2 database queries + 1 bcrypt here),
-    this catch block will catch ALL errors from any of these async operations
-    and throw a generic error message.
-    According to Apollo docs, this should generate an error with code 'INTERNAL_SERVER_ERROR'.
-    */
-
     // if this is an anticipated bad input error
     if (errMsg) {
       throw new UserInputError(errMsg);

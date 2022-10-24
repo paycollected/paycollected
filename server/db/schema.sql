@@ -5,7 +5,6 @@ CREATE DATABASE paycollected;
 
 -- non-relational tables
 CREATE TABLE IF NOT EXISTS users (
-  -- id SERIAL PRIMARY KEY,
   username VARCHAR(100) PRIMARY KEY,
   first_name VARCHAR(100) NOT NULL,
   last_name VARCHAR (100) NOT NULL,
@@ -17,19 +16,26 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE TYPE cycle_freq AS ENUM ('weekly', 'monthly', 'yearly');
 
 CREATE TABLE IF NOT EXISTS plans (
+  plan_id VARCHAR(255) PRIMARY KEY,
+  price_id VARCHAR(255) NOT NULL UNIQUE,
   plan_name VARCHAR(50) NOT NULL,
   cycle_frequency CYCLE_FREQ NOT NULL,
   per_cycle_cost INTEGER NOT NULL,
-  s_prod_id VARCHAR(255) PRIMARY KEY,
-  s_price_id VARCHAR(255) UNIQUE, -- corresponds to per_user_per_cycle_cost
-  start_date BIGINT NOT NULL -- in UTC format
+  start_date TIMESTAMP WITH TIME ZONE NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS pending_subs (
+  subscription_id VARCHAR(255) PRIMARY KEY,
+  username VARCHAR(100) NOT NULL REFERENCES users(username) ON DELETE CASCADE,
+  created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
 
 -- relational tables
 CREATE TABLE IF NOT EXISTS user_plan (
   id SERIAL PRIMARY KEY,
   username VARCHAR(100) NOT NULL REFERENCES users(username) ON DELETE CASCADE,
-  plan_id VARCHAR(255) NOT NULL REFERENCES plans(s_prod_id) ON DELETE CASCADE,
+  plan_id VARCHAR(255) NOT NULL REFERENCES plans(plan_id) ON DELETE CASCADE,
   plan_owner BOOLEAN NOT NULL DEFAULT FALSE,
   quantity INTEGER NOT NULL DEFAULT 0,
   subscription_id VARCHAR(255) UNIQUE, -- stripe subscription id

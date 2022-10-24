@@ -82,14 +82,17 @@ export default function ViewPlans({ user }) {
                 plan={plan}
                 setPlanToModify={setPlanToModify}
               />
-              <button
-                type="button"
-                onClick={() => { handleSubsModification(plan, 'confirmCancel'); }}
-                disabled={plan.activeMembers.length === 0}
-                style={{ width: '150px', justifySelf: 'center' }}
-              >
-                Cancel subscription
-              </button>
+              {(plan.owner.username !== user
+                || (plan.owner.username === user && plan.activeMembers.length > 0))
+                && (
+                  <button
+                    type="button"
+                    onClick={() => { handleSubsModification(plan, 'confirmCancel'); }}
+                    style={{ width: '150px', justifySelf: 'center' }}
+                  >
+                    Cancel subscription
+                  </button>
+                )}
               {plan.owner.username === user && (
                 <button
                   type="button"

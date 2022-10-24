@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
+import jwtDecode from 'jwt-decode';
 import Home from './Home.jsx';
 import Login from './Login.jsx';
 import Signup from './Signup.jsx';
@@ -11,43 +12,66 @@ import Checkout from './Checkout.jsx';
 import ViewPlans from './ViewPlans.jsx';
 import MagicLink from './MagicLink.jsx';
 import FourOhFour from './404.jsx';
-import PaymentSuccess from './PaymentSuccess.jsx';
+
+// check that token is still valid before displaying logged-in state
+let token = localStorage.getItem('token');
+let emailFromToken;
+let username;
+if (token) {
+  const { exp, user } = jwtDecode(token);
+  ({ email: emailFromToken, username } = user);
+  const today = new Date();
+  if (today.valueOf() > (exp * 1000)) {
+    localStorage.clear();
+    token = null;
+  }
+}
 
 function App() {
-  const [user, setUser] = useState(localStorage.getItem('username'));
+  const [user, setUser] = useState(token ? username : null);
+  const [email, setEmail] = useState(token ? emailFromToken : null);
   const [planToJoin, setPlanToJoin] = useState(null);
   const [showMagicLink, setShowMagicLink] = useState(false);
-  const [stripeClientSecret, setStripeClientSecret] = useState(localStorage.getItem('clientSecret'));
-  /*
-  Note from Stripe API: The client secret can be used to complete a payment from your frontend.
-  It should not be stored, logged, or exposed to anyone other than the customer.
-  Make sure that you have TLS enabled on any page that includes the client secret.
-
-  --> If customer does not go through with payment in one sitting, perhaps we should let this client
-  secret expire and when they come back, we'll make them go through the checkout process over again
-  which will create a new subscription with new subscription id and give them a new client secret.
-  Is it safe to store this client secret in local storage??
-  */
-
-  /*
-  More TO-DO: Check expiration date for token and automatically sign user out once token has expired
-  */
+  const [stripeClientSecret, setStripeClientSecret] = useState(null);
+  const [subscriptionInTransaction, setSubscriptionInTransaction] = useState(null);
 
   return (
     <Routes>
       <Route path="/" element={!user ? <Home /> : <Navigate to="/dashboard" />} />
-      <Route path="/login" element={!user ? <Login setUser={setUser} planToJoin={planToJoin} /> : <Navigate to="/dashboard" />} />
-      <Route path="/signup" element={!user ? <Signup setUser={setUser} planToJoin={planToJoin} /> : <Navigate to="/dashboard" />} />
+      <Route
+        path="/login"
+        element={!user
+          ? <Login setUser={setUser} planToJoin={planToJoin} setEmail={setEmail} />
+          : <Navigate to="/dashboard" />}
+      />
+      <Route
+        path="/signup"
+        element={!user
+          ? <Signup setUser={setUser} planToJoin={planToJoin} setEmail={setEmail} />
+          : <Navigate to="/dashboard" />}
+      />
       <Route
         path="/dashboard"
-        element={user ? <Dashboard username={user} setUser={setUser} setPlanToJoin={setPlanToJoin} /> : <Navigate to="/" />}
+        element={user
+          ? (
+            <Dashboard
+              username={user}
+              setUser={setUser}
+              setPlanToJoin={setPlanToJoin}
+              setEmail={setEmail}
+            />
+          )
+          : <Navigate to="/" />}
       />
       <Route
         path="/plan/create"
-        element={
-          !showMagicLink
+        element={user
+          ?
+          (!showMagicLink
             ? <CreatePlan setPlanToJoin={setPlanToJoin} setShowMagicLink={setShowMagicLink} />
             : <MagicLink planToJoin={planToJoin} setShowMagicLink={setShowMagicLink} />
+          )
+          : <Navigate to="/" />
           }
       />
       <Route
@@ -59,14 +83,25 @@ function App() {
               <JoinPlan
                 setPlanToJoin={setPlanToJoin}
                 setStripeClientSecret={setStripeClientSecret}
+                setSubscriptionInTransaction={setSubscriptionInTransaction}
               />
             )
           }
       />
       <Route path="/cards" element={user ? <Cards /> : <Navigate to="/" />} />
-      <Route path="/checkout" element={user ? <Checkout stripeClientSecret={stripeClientSecret} /> : <Navigate to="/" />} />
+      <Route
+        path="/checkout"
+        element={user && stripeClientSecret
+          ? (
+            <Checkout
+              stripeClientSecret={stripeClientSecret}
+              subscriptionInTransaction={subscriptionInTransaction}
+              email={email}
+            />
+          )
+          : <Navigate to="/" />}
+      />
       <Route path="/plan/all" element={user ? <ViewPlans user={user} /> : <Navigate to="/" />} />
-      <Route path="/payment-success" element={user ? <PaymentSuccess /> : <Navigate to="/" />} />
       <Route path="/404" element={<FourOhFour />} />
       <Route path="*" element={<FourOhFour />} />
     </Routes>
