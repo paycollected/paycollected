@@ -33,19 +33,26 @@ export default async function createPlanResolver(
   const start = new Date(...startArr); // will be at 00:00:00 local time
 
   const tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  tomorrow.setHours(0, 0, 0, 0);
+  if (tomorrow.getHours() !== 0 || tomorrow.getMinutes() > 1) {
+    // only set "tomorrow" to 00:00:00 of tomorrow if less than a minute past midnight
+    // so that validation won't fail just because request was received a few (milli)seconds
+    // past midnight
+    // otherwise "tomorrow" for user who submitted this request (super close to midnight)
+    // is actually today server's local time
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setHours(0, 0, 0, 0);
+  }
   const oneMonthFromTmr = new Date(tomorrow);
   oneMonthFromTmr.setMonth(tomorrow.getMonth() + 1);
   oneMonthFromTmr.setHours(0, 0, 0, 0);
   // set tmr + 1 month from then to also be at 00:00:00 local time
   // so we can just compare the DATE!
   if (start < tomorrow || start > oneMonthFromTmr) {
-    // start could = tomorrow if plan created very close to midnight server time
     throw new UserInputError('Invalid input');
   }
 
   const plan = planName.trim();
+  const freq = cycleFrequency.toLowerCase();
 
   try {
     // create both a Stripe product ID & price ID in 1 API call
@@ -53,7 +60,7 @@ export default async function createPlanResolver(
       currency: 'usd',
       unit_amount: cost,
       recurring: {
-        interval: recurringInterval[cycleFrequency.toLowerCase()],
+        interval: recurringInterval[freq],
         // could consider allowing customers to do interval count in the future?
         // meaning every 2 weeks, every 3 months etc.
       },
@@ -66,7 +73,7 @@ export default async function createPlanResolver(
     await addPlan(
       username,
       plan,
-      cycleFrequency.toLowerCase(),
+      freq,
       cost,
       planId,
       timeStr,
