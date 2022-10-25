@@ -174,7 +174,7 @@ export function joinPlan(username, planId) {
 }
 
 
-export function startSubscription(planId) {
+export function subscriptionSetup(planId) {
   const query = `
     SELECT
       p.cycle_frequency AS "cycleFrequency",
@@ -218,19 +218,19 @@ export function startSubscription(planId) {
 }
 
 
-export function checkCountGetPriceIdOfPlan(planId) {
-  const query = `
-    SELECT
-      p.price_id AS "prevPriceId",
-      SUM (up.quantity)::INTEGER AS count
-    FROM plans p
-    JOIN user_plan up
-    ON p.plan_id = up.plan_id
-    WHERE p.plan_id = $1
-    GROUP BY p.price_id
-  `;
-  return pool.query(query, [planId]);
-}
+// export function checkCountGetPriceIdOfPlan(planId) {
+//   const query = `
+//     SELECT
+//       p.price_id AS "prevPriceId",
+//       SUM (up.quantity)::INTEGER AS count
+//     FROM plans p
+//     JOIN user_plan up
+//     ON p.plan_id = up.plan_id
+//     WHERE p.plan_id = $1
+//     GROUP BY p.price_id
+//   `;
+//   return pool.query(query, [planId]);
+// }
 
 
 export function startSubscriptionWithNoPriceUpdate(

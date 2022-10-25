@@ -80,7 +80,7 @@ export async function handleSubscriptionStart(setupIntent) {
   const quantity = Number(setupIntent.metadata.quantity);
 
   try {
-    const { rows } = await models.checkCountGetPriceIdOfPlan(planId);
+    const { rows } = await models.subscriptionSetup(planId);
     const { count, prevPriceId } = rows[0];
     const productTotalQuantity = quantity + count;
 
