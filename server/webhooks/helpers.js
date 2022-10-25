@@ -106,7 +106,7 @@ export async function handleSubscriptionStart(setupIntent) {
         // archive old price ID
       ]);
 
-      const [{ id: subscriptionId, items }, _] = await Promise.all([stripe.subscriptions.create({
+      const [{ id: subscriptionId, items }, __] = await Promise.all([stripe.subscriptions.create({
         customer,
         items: [{
           price: newPriceId, // just use whatever latest priceId is in db
