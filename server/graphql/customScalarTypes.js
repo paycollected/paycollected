@@ -44,3 +44,13 @@ export const usernameScalar = generateCustomScalar(
   generateRegExValidationFn(/^(?:[a-z]){1}(?:[a-zA-Z0-9\._-])$/)
   // TODO: come up with a valid set of rules for username
 );
+
+export const paymentMethodIdScalar = generateCustomScalar(
+  'PaymentMethodID',
+  generateRegExValidationFn(/^pm_(?:[a-zA-Z0-9]){24}$/)
+);
+
+export const setupIntentIdScalar = generateCustomScalar(
+  'SetupIntentID',
+  generateRegExValidationFn(/^seti_(?:[a-zA-Z0-9]{24})$/)
+);

@@ -7,7 +7,7 @@ const stripe = stripeSDK(process.env.STRIPE_SECRET_KEY);
 export default async function cancelTransactionResolver(subscriptionId, username) {
   let rows;
   try {
-    ({ rows } = await delPendingSubs(subscriptionId, username));
+    // ({ rows } = await delPendingSubs(subscriptionId, username));
   } catch (e) {
     console.log(e);
     throw new ApolloError('Cannot cancel transaction');

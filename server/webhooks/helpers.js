@@ -67,6 +67,13 @@ async function processQuantChangeOnSubsStart(
 }
 
 export async function handleSubscriptionStart(setupIntent) {
+  // info needed from db: cycleFreq, total count, perCycleCost, startDate for this person,
+  // everyone else already on plan
+  // also potential create a new price ID
+  // API calls: start subscription for this person
+  // change subscriptions for existing plan members
+
+
   const {
     subscriptionId, subscriptionItemId, planId, username, cycleFrequency
   } = setupIntent.metadata;

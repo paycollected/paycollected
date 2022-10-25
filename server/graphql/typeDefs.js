@@ -5,6 +5,8 @@ export default gql`
   scalar SubscriptionID
   scalar Username
   scalar Email
+  scalar SetupIntentID
+  scalar PaymentMethodID
 
   type Query {
     viewOnePlan (planId: PlanID!): Plan!
@@ -28,16 +30,17 @@ export default gql`
 
   type PaymentIntentAndPaymentMethods {
     clientSecret: String!
-    subscriptionId: SubscriptionID!
+    setupIntentId: SetupIntentID!
     paymentMethods: [PaymentMethod]!
   }
 
   type PaymentMethod {
-    id: ID!
+    id: PaymentMethodID!
     brand: String!
     last4: String!
     expiryMonth: Int!
     expiryYear: Int!
+    default: Boolean!
   }
 
   type PlanIdResponse {
@@ -108,11 +111,6 @@ export default gql`
     ): PlanIdResponse!
     # returning stripe product ID here, which will be used as code
 
-    joinPlan(
-      planId: PlanID!
-      quantity: Int!
-    ): PaymentIntentAndPaymentMethods! # returning client secret
-
     editPayment: PortalSession!
 
     unsubscribe(
@@ -140,8 +138,13 @@ export default gql`
     ): CancelTransactionResponse!
 
     subscribeWithSavedCard(
-      paymentMethodId: String!
-      subscriptionId: SubscriptionID!
+      paymentMethodId: PaymentMethodID!
+      setupIntentId: SetupIntentID!
     ): Boolean!
+
+    joinPlan(
+      planId: PlanID!
+      quantity: Int!
+    ): PaymentIntentAndPaymentMethods! # returning client secret
   }
 `;

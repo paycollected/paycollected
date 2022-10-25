@@ -157,49 +157,68 @@ export function getUserInfo(username) {
 
 export function joinPlan(username, planId) {
   const query = `
-    SELECT
-      p.cycle_frequency AS "cycleFrequency",
-      p.per_cycle_cost AS "perCycleCost",
-      p.price_id AS "priceId",
-      COALESCE(
-        ( SELECT quantity
-          FROM user_plan
-          WHERE username = $1 AND plan_id = $2
-        ),
-        0
-      ) AS quantity,
-      CASE
-        WHEN CURRENT_TIMESTAMP < p.start_date
-          THEN ROUND (EXTRACT (EPOCH FROM p.start_date))
-        WHEN CURRENT_TIMESTAMP >= p.start_date
-          THEN CASE
-            WHEN p.cycle_frequency = 'weekly'
-              THEN ROUND (EXTRACT (EPOCH FROM (
-                p.start_date
-                + MAKE_INTERVAL(weeks => (FLOOR (EXTRACT (DAY FROM (CURRENT_TIMESTAMP - p.start_date)) / 7))::INTEGER)
-                + interval '1 week'
-              )))
-            WHEN p.cycle_frequency = 'monthly'
-              THEN ROUND (EXTRACT (EPOCH FROM (
-                p.start_date
-                + DATE_TRUNC('month', AGE(CURRENT_TIMESTAMP, p.start_date))
-                + interval '1 month'
-              )))
-            WHEN p.cycle_frequency = 'yearly'
-              THEN ROUND (EXTRACT (EPOCH FROM (
-                p.start_date
-                + DATE_TRUNC('year', AGE(CURRENT_TIMESTAMP, p.start_date))
-                + interval '1 year'
-              )))
-          END
-      END
-      AS "startDate"
-    FROM plans p
-    WHERE p.plan_id = $2
+  SELECT
+    u.s_cus_id AS "stripeCusId",
+    u.default_pmnt_id AS "defaultPaymentId",
+    COALESCE(
+      ( SELECT quantity
+        FROM user_plan
+        WHERE username = $1 AND plan_id = $2
+      ),
+      0
+    ) AS quantity
+    FROM users u
+    WHERE username = $1
   `;
-
   return pool.query(query, [username, planId]);
 }
+
+
+// export function joinPlan(username, planId) {
+//   const query = `
+//     SELECT
+//       p.cycle_frequency AS "cycleFrequency",
+//       p.per_cycle_cost AS "perCycleCost",
+//       p.price_id AS "priceId",
+//       COALESCE(
+//         ( SELECT quantity
+//           FROM user_plan
+//           WHERE username = $1 AND plan_id = $2
+//         ),
+//         0
+//       ) AS quantity,
+//       CASE
+//         WHEN CURRENT_TIMESTAMP < p.start_date
+//           THEN ROUND (EXTRACT (EPOCH FROM p.start_date))
+//         WHEN CURRENT_TIMESTAMP >= p.start_date
+//           THEN CASE
+//             WHEN p.cycle_frequency = 'weekly'
+//               THEN ROUND (EXTRACT (EPOCH FROM (
+//                 p.start_date
+//                 + MAKE_INTERVAL(weeks => (FLOOR (EXTRACT (DAY FROM (CURRENT_TIMESTAMP - p.start_date)) / 7))::INTEGER)
+//                 + interval '1 week'
+//               )))
+//             WHEN p.cycle_frequency = 'monthly'
+//               THEN ROUND (EXTRACT (EPOCH FROM (
+//                 p.start_date
+//                 + DATE_TRUNC('month', AGE(CURRENT_TIMESTAMP, p.start_date))
+//                 + interval '1 month'
+//               )))
+//             WHEN p.cycle_frequency = 'yearly'
+//               THEN ROUND (EXTRACT (EPOCH FROM (
+//                 p.start_date
+//                 + DATE_TRUNC('year', AGE(CURRENT_TIMESTAMP, p.start_date))
+//                 + interval '1 year'
+//               )))
+//           END
+//       END
+//       AS "startDate"
+//     FROM plans p
+//     WHERE p.plan_id = $2
+//   `;
+
+//   return pool.query(query, [username, planId]);
+// }
 
 
 export function checkCountGetPriceIdOfPlan(planId) {
@@ -225,20 +244,15 @@ export function startSubscriptionWithNoPriceUpdate(
   username,
 ) {
   const query = `
-    WITH update_sub_id AS
-    (
-      INSERT INTO user_plan
-        (quantity, subscription_id, subscription_item_id, plan_id, username)
-      VALUES
-        ($1, $2, $3, $4, $5)
-      ON CONFLICT
-        (username, plan_id)
-      DO UPDATE SET
-        quantity = $1, subscription_id = $2, subscription_item_id = $3
-      WHERE user_plan.username = $5 AND user_plan.plan_id = $4
-    )
-    DELETE FROM pending_subs
-    WHERE subscription_id = $2
+    INSERT INTO user_plan
+      (quantity, subscription_id, subscription_item_id, plan_id, username)
+    VALUES
+      ($1, $2, $3, $4, $5)
+    ON CONFLICT
+      (username, plan_id)
+    DO UPDATE SET
+      quantity = $1, subscription_id = $2, subscription_item_id = $3
+    WHERE user_plan.username = $5 AND user_plan.plan_id = $4
   `;
   const args = [quantity, subscriptionId, subscriptionItemId, planId, username];
   return pool.query(query, args);
@@ -272,10 +286,6 @@ export function startSubscription(
       SET price_id = $6
       WHERE plan_id = $4
     ),
-    update_pending_subs AS (
-      DELETE FROM pending_subs
-      WHERE subscription_id = $2
-    )
     SELECT
       username,
       email,
@@ -442,33 +452,3 @@ export function deletePlanGetAllSubs(planId) {
   return pool.query(query, [planId]);
 }
 
-
-export function queuePendingSubs(subscriptionId, username) {
-  const query = `
-    INSERT INTO pending_subs
-      (subscription_id, username)
-    VALUES
-      ($1, $2)
-  `;
-  return pool.query(query, [subscriptionId, username]);
-}
-
-
-export function getExpiredPendingSubs() {
-  const query = `
-    DELETE FROM pending_subs
-    WHERE created_at < (CURRENT_TIMESTAMP - interval '1 day')
-    RETURNING subscription_id AS "subscriptionId"
-  `;
-  return pool.query(query);
-}
-
-
-export function delPendingSubs(subscriptionId, username) {
-  const query = `
-    DELETE FROM pending_subs
-    WHERE subscription_id = $1 AND username = $2
-    RETURNING subscription_id
-  `;
-  return pool.query(query, [subscriptionId, username]);
-}

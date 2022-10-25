@@ -27,13 +27,14 @@ mutation CreatePlanMutation (
 mutation JoinPlan ($planId: PlanID!, $quantity: Int!) {
   joinPlan(planId: $planId, quantity: $quantity) {
     clientSecret
-    subscriptionId
+    setupIntentId
     paymentMethods {
       id
       brand
       last4
       expiryMonth
       expiryYear
+      default
     }
   }
 }

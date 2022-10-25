@@ -6,7 +6,6 @@ import path from 'path';
 import typeDefs from './graphql/typeDefs';
 import resolvers from './graphql/resolvers';
 import webhook from './webhooks/webhook';
-import expireSubs from './maintenance/expiredClientSecret';
 
 dotenv.config();
 
@@ -62,7 +61,6 @@ async function startApolloServer() {
   app.listen(SERVER_PORT, () => {
     console.log(`🛌 REST server is served at localhost:${SERVER_PORT}`);
     console.log(`🚀 GraphQL Server ready at http://localhost:${SERVER_PORT}${server.graphqlPath}`);
-    setInterval(expireSubs, 24 * 60 * 60 * 1000); // schedule task to execute every 24 hours
   });
 }
 

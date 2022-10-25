@@ -1,10 +1,13 @@
 import stripeSDK from 'stripe';
 import { ApolloError } from 'apollo-server-core';
 import authResolverWrapper from './authResolverWrapper';
-import { planIdScalar, subscriptionIdScalar, emailScalar, usernameScalar } from './customScalarTypes';
+import {
+  planIdScalar, subscriptionIdScalar, emailScalar, usernameScalar, paymentMethodIdScalar,
+  setupIntentIdScalar
+} from './customScalarTypes';
 import createAccount from './users/createAccount';
 import loginResolver from './users/login';
-import startSubscription from './subscriptions/startSubscription';
+import joinPlanResolver from './plans/join';
 import {
   unsubscribe as unsubscribeResolver, unsubscribeAsOwner as unsubscribeAsOwnerResolver
 } from './subscriptions/unsubscribe.js';
@@ -36,6 +39,10 @@ export default {
   PlanID: planIdScalar,
 
   SubscriptionID: subscriptionIdScalar,
+
+  SetupIntentID: setupIntentIdScalar,
+
+  PaymentMethodID: paymentMethodIdScalar,
 
   Query: {
     viewOnePlan: authResolverWrapper((_, { planId }, { user: { username } }) => (
@@ -76,8 +83,8 @@ export default {
       )
     )),
 
-    joinPlan: authResolverWrapper((_, { planId, quantity }, { user }) => (
-      startSubscription(planId, quantity, user, recurringInterval)
+    joinPlan: authResolverWrapper((_, { planId, quantity }, { user: { username } }) => (
+      joinPlanResolver(planId, quantity, username)
     )),
 
     editPayment: authResolverWrapper(async (_, __, { user }) => {
