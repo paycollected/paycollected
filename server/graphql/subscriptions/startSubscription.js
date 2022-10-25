@@ -26,31 +26,35 @@ export default async function startSubscription(planId, newQuantity, user, recur
     }
 
     // create a Stripe subscription
-    const {
+    const [{
       id: subscriptionId, items, pending_setup_intent: pendingSetupIntent
-    } = await stripe.subscriptions.create({
-      customer: stripeCusId,
-      items: [{
-        price: priceId, // just use whatever latest priceId is in db
-        // will have to recalculate at webhook anyway
-        quantity: newQuantity,
-      }],
-      payment_behavior: 'default_incomplete',
-      payment_settings: {
-        save_default_payment_method: 'on_subscription',
-        payment_method_types: ['link', 'card'],
-      },
-      proration_behavior: 'none',
-      trial_end: startDate,
-      expand: ['pending_setup_intent'],
-      metadata: {
-        productTotalQuantity: newQuantity, // will need to get latest number from webhook
-        cycleFrequency: recurringInterval[cycleFrequency],
-        perCycleCost,
-        quantChanged: false,
-        cancelSubs: false,
-      }
-    });
+    }, { data: paymentMethodsData }] = await Promise.all([
+      stripe.subscriptions.create({
+        customer: stripeCusId,
+        items: [{
+          price: priceId, // just use whatever latest priceId is in db
+          // will have to recalculate at webhook anyway
+          quantity: newQuantity,
+        }],
+        payment_behavior: 'default_incomplete',
+        payment_settings: {
+          save_default_payment_method: 'on_subscription',
+          payment_method_types: ['link', 'card'],
+        },
+        proration_behavior: 'none',
+        trial_end: startDate,
+        expand: ['pending_setup_intent'],
+        metadata: {
+          productTotalQuantity: newQuantity, // will need to get latest number from webhook
+          cycleFrequency: recurringInterval[cycleFrequency],
+          perCycleCost,
+          quantChanged: false,
+          cancelSubs: false,
+        }
+      }),
+      stripe.customers.listPaymentMethods(stripeCusId, { type: 'card' })
+    ]);
+
 
     const { id: setupIntentId, client_secret: clientSecret } = pendingSetupIntent;
     const { id: subscriptionItemId } = items.data[0];
@@ -76,7 +80,15 @@ export default async function startSubscription(planId, newQuantity, user, recur
         }
       )
     ]);
-    return { clientSecret, subscriptionId };
+
+    const paymentMethods = paymentMethodsData.map((method) => ({
+      id: method.id,
+      brand: method.card.brand,
+      expiryMonth: method.card.exp_month,
+      expiryYear: method.card.exp_year,
+    }));
+
+    return { clientSecret, subscriptionId, paymentMethods };
   } catch (asyncError) {
     if (errMsg === 'User is already subscribed to this plan') {
       throw new ForbiddenError(errMsg);

@@ -28,6 +28,12 @@ mutation JoinPlan ($planId: PlanID!, $quantity: Int!) {
   joinPlan(planId: $planId, quantity: $quantity) {
     clientSecret
     subscriptionId
+    paymentMethods {
+      id
+      brand
+      expiryMonth
+      expiryYear
+    }
   }
 }
 

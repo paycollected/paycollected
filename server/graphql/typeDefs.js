@@ -26,11 +26,19 @@ export default gql`
     token: String!
   }
 
-  type PaymentIntent {
+  type PaymentIntentAndPaymentMethods {
     clientSecret: String!
     subscriptionId: SubscriptionID!
+    paymentMethods: [PaymentMethod]!
   }
- ##
+
+  type PaymentMethod {
+    id: ID!
+    brand: String!
+    expiryMonth: Int!
+    expiryYear: Int!
+  }
+
   type PlanIdResponse {
     planId: PlanID!
   }
@@ -102,7 +110,7 @@ export default gql`
     joinPlan(
       planId: PlanID!
       quantity: Int!
-    ): PaymentIntent! # returning client secret
+    ): PaymentIntentAndPaymentMethods! # returning client secret
 
     editPayment: PortalSession!
 

@@ -10,12 +10,17 @@ import { CancelTransaction as CANCEL_TRANSC } from '../graphql/mutations.gql';
 
 const stripePromise = loadStripe(process.env.STRIPE_PUBLISHABLE_KEY);
 
-function CheckoutForm({ email, subscriptionInTransaction: subscriptionId }) {
+function CheckoutForm({
+  email, setSubscriptionInTransaction, setStripeClientSecret,
+  subscriptionInTransaction: subscriptionId,
+}) {
   const navigate = useNavigate();
   const stripe = useStripe();
   const elements = useElements();
   const [cancel, { loading }] = useMutation(CANCEL_TRANSC, {
     onCompleted: () => {
+      setSubscriptionInTransaction(null);
+      setStripeClientSecret(null);
       navigate('/dashboard');
     },
     onError: ({ message }) => {
@@ -87,7 +92,9 @@ on another note, subscription will expire if not followed up with payment
 how does this affect what we store in db?
 */
 
-export default function Checkout({ stripeClientSecret, email, subscriptionInTransaction }) {
+export default function Checkout({
+  stripeClientSecret, email, subscriptionInTransaction, setSubscriptionInTransaction, setStripeClientSecret
+}) {
   const options = {
     clientSecret: stripeClientSecret
   };
@@ -96,7 +103,12 @@ export default function Checkout({ stripeClientSecret, email, subscriptionInTran
     return (
       <Elements stripe={stripePromise} options={options}>
         <h1>This is the Checkout page with a Client Secret</h1>
-        <CheckoutForm email={email} subscriptionInTransaction={subscriptionInTransaction} />
+        <CheckoutForm
+          email={email}
+          subscriptionInTransaction={subscriptionInTransaction}
+          setStripeClientSecret={setStripeClientSecret}
+          setSubscriptionInTransaction={setSubscriptionInTransaction}
+        />
       </Elements>
     );
   }

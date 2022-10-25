@@ -38,6 +38,7 @@ function App() {
   return (
     <Routes>
       <Route path="/" element={!user ? <Home /> : <Navigate to="/dashboard" />} />
+      {console.log('-------------> clientSecret', stripeClientSecret)}
       <Route
         path="/login"
         element={!user
@@ -97,6 +98,8 @@ function App() {
               stripeClientSecret={stripeClientSecret}
               subscriptionInTransaction={subscriptionInTransaction}
               email={email}
+              setStripeClientSecret={setStripeClientSecret}
+              setSubscriptionInTransaction={setSubscriptionInTransaction}
             />
           )
           : <Navigate to="/" />}
