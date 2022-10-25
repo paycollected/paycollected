@@ -9,6 +9,7 @@ import {
   unsubscribe as unsubscribeResolver, unsubscribeAsOwner as unsubscribeAsOwnerResolver
 } from './subscriptions/unsubscribe.js';
 import editQuantityResolver from './subscriptions/editQuantity';
+import subscribeWithSavedCardResolver from './subscriptions/subscribeWithSavedCard';
 import {
   viewOnePlan as viewOnePlanResolver,
   viewAllPlans as viewAllPlansResolver,
@@ -123,8 +124,14 @@ export default {
     ),
 
     cancelTransaction: authResolverWrapper(
-      (_, { subscriptionId, }, { user: { username }}) => (
+      (_, { subscriptionId, }, { user: { username } }) => (
         cancelTransactionResolver(subscriptionId, username)
+      )
+    ),
+
+    subscribeWithSavedCard: authResolverWrapper(
+      (_, { paymentMethodId, subscriptionId }, { user }) => (
+        subscribeWithSavedCardResolver(paymentMethodId, subscriptionId, user)
       )
     ),
   }

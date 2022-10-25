@@ -31,6 +31,7 @@ mutation JoinPlan ($planId: PlanID!, $quantity: Int!) {
     paymentMethods {
       id
       brand
+      last4
       expiryMonth
       expiryYear
     }

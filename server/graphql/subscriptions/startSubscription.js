@@ -84,6 +84,7 @@ export default async function startSubscription(planId, newQuantity, user, recur
     const paymentMethods = paymentMethodsData.map((method) => ({
       id: method.id,
       brand: method.card.brand,
+      last4: method.card.last4,
       expiryMonth: method.card.exp_month,
       expiryYear: method.card.exp_year,
     }));

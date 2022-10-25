@@ -6,7 +6,7 @@ import { JoinPlan as JOIN_PLAN } from '../graphql/mutations.gql';
 import { ViewOnePlan as GET_PLAN } from '../graphql/queries.gql';
 
 export default function JoinPlan({
-  setPlanToJoin, setStripeClientSecret, setSubscriptionInTransaction
+  setPlanToJoin, setStripeClientSecret, setSubscriptionInTransaction, setPaymentMethods
 }) {
   const navigate = useNavigate();
   const { planId } = useParams();
@@ -22,9 +22,10 @@ export default function JoinPlan({
   const [makePayment, { data: payData, loading: payLoading, error: payError}] = useMutation(
     JOIN_PLAN,
     {
-      onCompleted: ({ joinPlan: { clientSecret, subscriptionId } }) => {
+      onCompleted: ({ joinPlan: { clientSecret, subscriptionId, paymentMethods } }) => {
         setStripeClientSecret(clientSecret);
         setSubscriptionInTransaction(subscriptionId);
+        setPaymentMethods(paymentMethods);
         navigate('/checkout');
       },
       onError: ({ message }) => { console.log(message); },

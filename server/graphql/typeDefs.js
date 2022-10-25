@@ -35,6 +35,7 @@ export default gql`
   type PaymentMethod {
     id: ID!
     brand: String!
+    last4: String!
     expiryMonth: Int!
     expiryYear: Int!
   }
@@ -137,5 +138,10 @@ export default gql`
     cancelTransaction(
       subscriptionId: SubscriptionID!
     ): CancelTransactionResponse!
+
+    subscribeWithSavedCard(
+      paymentMethodId: String!
+      subscriptionId: String!
+    )
   }
 `;

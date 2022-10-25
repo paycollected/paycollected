@@ -34,6 +34,7 @@ function App() {
   const [showMagicLink, setShowMagicLink] = useState(false);
   const [stripeClientSecret, setStripeClientSecret] = useState(null);
   const [subscriptionInTransaction, setSubscriptionInTransaction] = useState(null);
+  const [paymentMethods, setPaymentMethods] = useState([]);
 
   return (
     <Routes>
@@ -85,6 +86,7 @@ function App() {
                 setPlanToJoin={setPlanToJoin}
                 setStripeClientSecret={setStripeClientSecret}
                 setSubscriptionInTransaction={setSubscriptionInTransaction}
+                setPaymentMethods={setPaymentMethods}
               />
             )
           }
@@ -100,6 +102,7 @@ function App() {
               email={email}
               setStripeClientSecret={setStripeClientSecret}
               setSubscriptionInTransaction={setSubscriptionInTransaction}
+              paymentMethods={paymentMethods}
             />
           )
           : <Navigate to="/" />}

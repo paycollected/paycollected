@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import { Flex, Box, FormControl, FormLabel, FormErrorMessage, Button, Input } from '@chakra-ui/react';
 import { loadStripe } from '@stripe/stripe-js';
 import { CancelTransaction as CANCEL_TRANSC } from '../graphql/mutations.gql';
+import SavedCards from './SavedCards.jsx';
 
 const stripePromise = loadStripe(process.env.STRIPE_PUBLISHABLE_KEY);
 
@@ -93,7 +94,8 @@ how does this affect what we store in db?
 */
 
 export default function Checkout({
-  stripeClientSecret, email, subscriptionInTransaction, setSubscriptionInTransaction, setStripeClientSecret
+  stripeClientSecret, email, subscriptionInTransaction, setSubscriptionInTransaction,
+  setStripeClientSecret, paymentMethods,
 }) {
   const options = {
     clientSecret: stripeClientSecret
@@ -101,15 +103,24 @@ export default function Checkout({
 
   if (stripeClientSecret && stripeClientSecret.length > 0) {
     return (
-      <Elements stripe={stripePromise} options={options}>
+      <div>
         <h1>This is the Checkout page with a Client Secret</h1>
-        <CheckoutForm
-          email={email}
+        {paymentMethods.length > 0 && (
+        <SavedCards
+          paymentMethods={paymentMethods}
           subscriptionInTransaction={subscriptionInTransaction}
-          setStripeClientSecret={setStripeClientSecret}
-          setSubscriptionInTransaction={setSubscriptionInTransaction}
         />
-      </Elements>
+        )}
+        <Elements stripe={stripePromise} options={options}>
+          <h2>Use a new card!</h2>
+          <CheckoutForm
+            email={email}
+            subscriptionInTransaction={subscriptionInTransaction}
+            setStripeClientSecret={setStripeClientSecret}
+            setSubscriptionInTransaction={setSubscriptionInTransaction}
+          />
+        </Elements>
+      </div>
     );
   }
   return (
