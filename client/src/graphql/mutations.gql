@@ -80,3 +80,7 @@ mutation CancelTransaction($subscriptionId: SubscriptionID!) {
     subscriptionId
   }
 }
+
+mutation SubscribeWithSavedCard($paymentMethodId: String!, $subscriptionId: SubscriptionID!) {
+  subscribeWithSavedCard(paymentMethodId: $paymentMethodId, subscriptionId: $subscriptionId)
+}

@@ -141,7 +141,7 @@ export default gql`
 
     subscribeWithSavedCard(
       paymentMethodId: String!
-      subscriptionId: String!
-    )
+      subscriptionId: SubscriptionID!
+    ): Boolean!
   }
 `;

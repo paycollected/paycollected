@@ -39,7 +39,6 @@ function App() {
   return (
     <Routes>
       <Route path="/" element={!user ? <Home /> : <Navigate to="/dashboard" />} />
-      {console.log('-------------> clientSecret', stripeClientSecret)}
       <Route
         path="/login"
         element={!user
