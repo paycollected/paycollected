@@ -174,51 +174,48 @@ export function joinPlan(username, planId) {
 }
 
 
-// export function joinPlan(username, planId) {
-//   const query = `
-//     SELECT
-//       p.cycle_frequency AS "cycleFrequency",
-//       p.per_cycle_cost AS "perCycleCost",
-//       p.price_id AS "priceId",
-//       COALESCE(
-//         ( SELECT quantity
-//           FROM user_plan
-//           WHERE username = $1 AND plan_id = $2
-//         ),
-//         0
-//       ) AS quantity,
-//       CASE
-//         WHEN CURRENT_TIMESTAMP < p.start_date
-//           THEN ROUND (EXTRACT (EPOCH FROM p.start_date))
-//         WHEN CURRENT_TIMESTAMP >= p.start_date
-//           THEN CASE
-//             WHEN p.cycle_frequency = 'weekly'
-//               THEN ROUND (EXTRACT (EPOCH FROM (
-//                 p.start_date
-//                 + MAKE_INTERVAL(weeks => (FLOOR (EXTRACT (DAY FROM (CURRENT_TIMESTAMP - p.start_date)) / 7))::INTEGER)
-//                 + interval '1 week'
-//               )))
-//             WHEN p.cycle_frequency = 'monthly'
-//               THEN ROUND (EXTRACT (EPOCH FROM (
-//                 p.start_date
-//                 + DATE_TRUNC('month', AGE(CURRENT_TIMESTAMP, p.start_date))
-//                 + interval '1 month'
-//               )))
-//             WHEN p.cycle_frequency = 'yearly'
-//               THEN ROUND (EXTRACT (EPOCH FROM (
-//                 p.start_date
-//                 + DATE_TRUNC('year', AGE(CURRENT_TIMESTAMP, p.start_date))
-//                 + interval '1 year'
-//               )))
-//           END
-//       END
-//       AS "startDate"
-//     FROM plans p
-//     WHERE p.plan_id = $2
-//   `;
+export function startSubscription(planId) {
+  const query = `
+    SELECT
+      p.cycle_frequency AS "cycleFrequency",
+      p.per_cycle_cost AS "perCycleCost",
+      p.price_id AS "prevPriceId",
+      SUM (up.quantity)::INTEGER AS count
+      CASE
+        WHEN CURRENT_TIMESTAMP < p.start_date
+          THEN ROUND (EXTRACT (EPOCH FROM p.start_date))
+        WHEN CURRENT_TIMESTAMP >= p.start_date
+          THEN CASE
+            WHEN p.cycle_frequency = 'weekly'
+              THEN ROUND (EXTRACT (EPOCH FROM (
+                p.start_date
+                + MAKE_INTERVAL(weeks => (FLOOR (EXTRACT (DAY FROM (CURRENT_TIMESTAMP - p.start_date)) / 7))::INTEGER)
+                + interval '1 week'
+              )))
+            WHEN p.cycle_frequency = 'monthly'
+              THEN ROUND (EXTRACT (EPOCH FROM (
+                p.start_date
+                + DATE_TRUNC('month', AGE(CURRENT_TIMESTAMP, p.start_date))
+                + interval '1 month'
+              )))
+            WHEN p.cycle_frequency = 'yearly'
+              THEN ROUND (EXTRACT (EPOCH FROM (
+                p.start_date
+                + DATE_TRUNC('year', AGE(CURRENT_TIMESTAMP, p.start_date))
+                + interval '1 year'
+              )))
+          END
+      END
+      AS "startDate"
+    FROM plans p
+    JOIN user_plan up
+    ON p.plan_id = up.plan_id
+    WHERE p.plan_id = $1
+    GROUP BY p.price_id
+  `;
 
-//   return pool.query(query, [username, planId]);
-// }
+  return pool.query(query, [planId]);
+}
 
 
 export function checkCountGetPriceIdOfPlan(planId) {
@@ -451,4 +448,3 @@ export function deletePlanGetAllSubs(planId) {
   `;
   return pool.query(query, [planId]);
 }
-

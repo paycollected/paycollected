@@ -131,14 +131,14 @@ export default {
     ),
 
     cancelTransaction: authResolverWrapper(
-      (_, { subscriptionId, }, { user: { username } }) => (
-        cancelTransactionResolver(subscriptionId, username)
+      (_, { setupIntentId, }, { user: { username } }) => (
+        cancelTransactionResolver(setupIntentId, username)
       )
     ),
 
     subscribeWithSavedCard: authResolverWrapper(
-      (_, { paymentMethodId, subscriptionId }, { user }) => (
-        subscribeWithSavedCardResolver(paymentMethodId, subscriptionId, user)
+      (_, { paymentMethodId, setupIntentId }, { user: { username } }) => (
+        subscribeWithSavedCardResolver(paymentMethodId, setupIntentId, username)
       )
     ),
   }

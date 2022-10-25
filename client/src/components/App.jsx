@@ -33,7 +33,7 @@ function App() {
   const [planToJoin, setPlanToJoin] = useState(null);
   const [showMagicLink, setShowMagicLink] = useState(false);
   const [stripeClientSecret, setStripeClientSecret] = useState(null);
-  const [subscriptionInTransaction, setSubscriptionInTransaction] = useState(null);
+  const [setupIntentId, setSetupIntentId] = useState(null);
   const [paymentMethods, setPaymentMethods] = useState([]);
 
   return (
@@ -84,7 +84,7 @@ function App() {
               <JoinPlan
                 setPlanToJoin={setPlanToJoin}
                 setStripeClientSecret={setStripeClientSecret}
-                setSubscriptionInTransaction={setSubscriptionInTransaction}
+                setSetupIntentId={setSetupIntentId}
                 setPaymentMethods={setPaymentMethods}
               />
             )
@@ -97,10 +97,10 @@ function App() {
           ? (
             <Checkout
               stripeClientSecret={stripeClientSecret}
-              subscriptionInTransaction={subscriptionInTransaction}
+              setupIntentId={setupIntentId}
               email={email}
               setStripeClientSecret={setStripeClientSecret}
-              setSubscriptionInTransaction={setSubscriptionInTransaction}
+              setSetupIntentId={setSetupIntentId}
               paymentMethods={paymentMethods}
             />
           )

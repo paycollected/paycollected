@@ -76,12 +76,10 @@ mutation DeletePlan($planId: PlanID!) {
 }
 
 
-mutation CancelTransaction($subscriptionId: SubscriptionID!) {
-  cancelTransaction(subscriptionId: $subscriptionId) {
-    subscriptionId
-  }
+mutation CancelTransaction($setupIntentId: SetupIntentID!) {
+  cancelTransaction(setupIntentId: $setupIntentId)
 }
 
-mutation SubscribeWithSavedCard($paymentMethodId: String!, $subscriptionId: SubscriptionID!) {
-  subscribeWithSavedCard(paymentMethodId: $paymentMethodId, subscriptionId: $subscriptionId)
+mutation SubscribeWithSavedCard($paymentMethodId: PaymentMethodID!, $setupIntentId: SetupIntentID!) {
+  subscribeWithSavedCard(paymentMethodId: $paymentMethodId, setupIntentId: $setupIntentId)
 }

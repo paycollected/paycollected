@@ -56,10 +56,6 @@ export default gql`
     quantity: Int!
   }
 
-  type CancelTransactionResponse {
-    subscriptionId: SubscriptionID!
-  }
-
   enum CycleFrequency {
     WEEKLY
     MONTHLY
@@ -134,8 +130,8 @@ export default gql`
     ): PlanIdResponse!
 
     cancelTransaction(
-      subscriptionId: SubscriptionID!
-    ): CancelTransactionResponse!
+      setupIntentId: SetupIntentID!
+    ): Boolean!
 
     subscribeWithSavedCard(
       paymentMethodId: PaymentMethodID!

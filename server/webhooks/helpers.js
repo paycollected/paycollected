@@ -73,12 +73,11 @@ export async function handleSubscriptionStart(setupIntent) {
   // API calls: start subscription for this person
   // change subscriptions for existing plan members
 
-
   const {
-    subscriptionId, subscriptionItemId, planId, username, cycleFrequency
+    planId,
+    username,
   } = setupIntent.metadata;
   const quantity = Number(setupIntent.metadata.quantity);
-  const perCycleCost = Number(setupIntent.metadata.perCycleCost);
 
   try {
     const { rows } = await models.checkCountGetPriceIdOfPlan(planId);
@@ -136,6 +135,7 @@ export async function handleSubscriptionStart(setupIntent) {
     // --> no need to create a new price ID
     // also no need to archive current price ID
     // no other plan members to update
+    // --> also create subscription for this person
     // --> only need to update db
       await models.startSubscriptionWithNoPriceUpdate(
         planId,
