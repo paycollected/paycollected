@@ -12,6 +12,7 @@ export default function SavedCards({ setSelectedCard, selectedCard, paymentMetho
             onChange={(e) => { setSelectedCard(e.target.value); }}
           />
           {`${method.brand} ending in ${method.last4} (exp: ${method.expiryMonth}/${method.expiryYear})`}
+          {method.default && '(default)'}
         </div>
       ))}
     </>
