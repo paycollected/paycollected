@@ -133,6 +133,7 @@ export default function Signup({ setUser, planToJoin, setEmail }) {
               isRequired
               isInvalid={errors.password || errorMessage === 'Passwords must match'}
             >
+              <FormLabel>Password</FormLabel>
               <Input
                 name="password"
                 placeholder="Enter Password"
@@ -151,9 +152,10 @@ export default function Signup({ setUser, planToJoin, setEmail }) {
               isRequired
               isInvalid={errors.password2 || errorMessage === 'Passwords must match'}
             >
+              <FormLabel>Confirm Password</FormLabel>
               <Input
                 name="password2"
-                placeholder="Confirm Password"
+                placeholder="Enter Password Again"
                 type="password"
                 {...register('password2', { required: 'Please enter password again' })}
               />
@@ -169,6 +171,7 @@ export default function Signup({ setUser, planToJoin, setEmail }) {
               isRequired
               isInvalid={errors.email || errorMessage === 'Email already exists'}
             >
+              <FormLabel>Email</FormLabel>
               <Input
                 name="email"
                 placeholder="Enter Email"
