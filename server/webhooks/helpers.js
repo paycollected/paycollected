@@ -116,30 +116,31 @@ export async function handleSubscriptionStart(setupIntent) {
         // archive old price ID
       ]);
 
-      const [{ id: subscriptionId, items }, __] = await Promise.all([stripe.subscriptions.create({
-        customer,
-        items: [{
-          price: newPriceId,
-          quantity,
-        }],
-        payment_behavior: 'default_incomplete',
-        payment_settings: {
-          save_default_payment_method: 'on_subscription',
-          payment_method_types: ['card'],
-        },
-        proration_behavior: 'none',
-        trial_end: startDate,
-        expand: ['pending_setup_intent'],
-        metadata: {
-          productTotalQuantity,
-          cycleFrequency,
-          perCycleCost,
-          quantChanged: false,
-          cancelSubs: false,
-        }
-      }),
-      updateDefaultPaymentMethod(defaultPmntMethod, paymentMethodId, username, customer)
-    ]);
+      const [{ id: subscriptionId, items }, __] = await Promise.all([
+        stripe.subscriptions.create({
+          customer,
+          items: [{
+            price: newPriceId,
+            quantity,
+          }],
+          payment_behavior: 'default_incomplete',
+          payment_settings: {
+            save_default_payment_method: 'on_subscription',
+            payment_method_types: ['card'],
+          },
+          proration_behavior: 'none',
+          trial_end: startDate,
+          expand: ['pending_setup_intent'],
+          metadata: {
+            productTotalQuantity,
+            cycleFrequency,
+            perCycleCost,
+            quantChanged: false,
+            cancelSubs: false,
+          }
+        }),
+        updateDefaultPaymentMethod(defaultPmntMethod, paymentMethodId, username, customer)
+      ]);
 
       const { id: subscriptionItemId } = items.data[0];
 
