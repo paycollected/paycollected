@@ -21,7 +21,8 @@ export default async function createAccount(firstName, lastName, username, passw
       ] = await Promise.all([
         stripe.customers.create({
           name: `${firstName} ${lastName}`,
-          email
+          email,
+          metadata: { username }
         }),
         bcrypt.hash(password, saltRounds)
       ]);
