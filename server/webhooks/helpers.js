@@ -66,6 +66,16 @@ async function processQuantChangeOnSubsStart(
   }
 }
 
+
+async function updateDefaultPaymentMethod(defaultPmnt, newMethodId, username, stripeCusId) {
+  if (!defaultPmnt) {
+    return await Promise.all([
+      models.updateDefaultPmntMethod(username, newMethodId),
+      stripe.customers.update(stripeCusId, { invoice_settings: { default_payment_method: defaultPmnt } })
+    ]);
+  }
+}
+
 export async function handleSubscriptionStart(setupIntent) {
   // info needed from db: cycleFreq, total count, perCycleCost, startDate for this person,
   // everyone else already on plan
@@ -129,10 +139,7 @@ export async function handleSubscriptionStart(setupIntent) {
           cancelSubs: false,
         }
       }),
-      () => { if (!defaultPmntMethod) {
-        return models.updateDefaultPmntMethod(username, paymentMethodId);
-        }
-      }
+      updateDefaultPaymentMethod(defaultPmntMethod, paymentMethodId, username, customer)
     ]);
 
       const { id: subscriptionItemId } = items.data[0];
@@ -181,10 +188,7 @@ export async function handleSubscriptionStart(setupIntent) {
             cancelSubs: false,
           }
         }),
-        () => { if (!defaultPmntMethod) {
-          return models.updateDefaultPmntMethod(username, paymentMethodId);
-          }
-        }
+        updateDefaultPaymentMethod(defaultPmntMethod, paymentMethodId, username, customer)
       ]);
 
       const { id: subscriptionItemId } = items.data[0];
@@ -327,5 +331,16 @@ export async function handlePlanDelete(price) {
     }
   } catch (e) {
     console.log(e);
+  }
+}
+
+
+export async function handleDefaultPmntMethodChange(customer) {
+  const {
+    invoice_settings: { default_payment_method: newMethodId },
+    metadata: { username }
+  } = customer;
+  if (newMethodId) {
+    await models.updateDefaultPmntMethod(username, newMethodId);
   }
 }
