@@ -13,7 +13,6 @@ import ConfirmDeletePlan from './ConfirmDeletePlan.jsx';
 
 export default function ViewPlans({ user }) {
   const navigate = useNavigate();
-  const [modal, setModal] = useState(null);
   const [planToModify, setPlanToModify] = useState(null);
   const [planToCopy, setPlanToCopy] = useState(null);
   const [newQuant, setNewQuant] = useState(null);
@@ -42,9 +41,6 @@ export default function ViewPlans({ user }) {
 
   return (
     <div>
-      {modal === 'confirmCancel' && (<ConfirmCancel plan={planToModify} setModal={setModal} user={user} />)}
-      {modal === 'confirmQuantChange' && (<ConfirmModifyQuant plan={planToModify} setModal={setModal} newQuantity={newQuant} />)}
-      {modal === 'confirmDeletePlan' && (<ConfirmDeletePlan plan={planToModify} setModal={setModal} />)}
       <Button onClick={() => { navigate('/dashboard'); }}>Dashboard</Button>
       <Button onClick={() => { submitEditPayment(); }}>Manage Payment Methods</Button>
       <Flex justifyContent="center">
@@ -88,9 +84,9 @@ export default function ViewPlans({ user }) {
                     )}
                   </GridItem>
                   <GridItem colSpan={1} textAlign="center">
+      <ConfirmModifyQuant plan={planToModify} newQuantity={newQuant} />
                     <ModifyQuantity
                       quantity={plan.quantity}
-                      setModal={setModal}
                       setNewQuant={setNewQuant}
                       plan={plan}
                       setPlanToModify={setPlanToModify}
@@ -99,19 +95,10 @@ export default function ViewPlans({ user }) {
                     {(plan.owner.username !== user
                       || (plan.owner.username === user && plan.activeMembers.length > 0))
                       && (
-                        <Button
-                          type="button"
-                          onClick={() => { handleSubsModification(plan, 'confirmCancel'); }}
-                        >
-                          Cancel subscription
-                        </Button>
+                        <ConfirmCancel plan={planToModify} user={user} />
                       )}
                     {plan.owner.username === user && (
-                      <Button
-                        onClick={() => { handleSubsModification(plan, 'confirmDeletePlan'); }}
-                      >
-                        Delete plan
-                      </Button>
+                      <ConfirmDeletePlan plan={planToModify} />
                     )}
                   </GridItem>
                 </Grid>

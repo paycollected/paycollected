@@ -1,11 +1,16 @@
 import React, { useState } from 'react';
 import { useMutation } from '@apollo/client';
 import {
+  useDisclosure, Button, Heading,
+  Modal, ModalOverlay, ModalContent, ModalCloseButton, ModalHeader, ModalBody, ModalFooter
+} from '@chakra-ui/react';
+import {
   Unsubscribe as UNSUBSCRIBE,
   UnsubscribeAsPlanOwner as UNSUBSCRIBE_AS_OWNER
 } from '../graphql/mutations.gql';
 
-export default function ConfirmCancel({ plan, setModal, user }) {
+export default function ConfirmCancel({ plan, user }) {
+  const { isOpen, onOpen, onClose } = useDisclosure();
   const {
     subscriptionId, planId, activeMembers, owner
   } = plan;
@@ -18,7 +23,7 @@ export default function ConfirmCancel({ plan, setModal, user }) {
     : members[0];
 
   const [confirmUnsubscribe, { data, loading, error }] = useMutation(UNSUBSCRIBE, {
-    onCompleted: () => { setModal(null); },
+    onCompleted: () => { onClose(); },
     update: (cache, { data: { unsubscribe } }) => {
       const { planId: resultPlanId } = unsubscribe;
       cache.modify({
@@ -35,7 +40,7 @@ export default function ConfirmCancel({ plan, setModal, user }) {
     confirmUnsubscribeAsOwner,
     { data: ownerData, loading: ownerLoading, error: ownerError}
   ] = useMutation(UNSUBSCRIBE_AS_OWNER, {
-    onCompleted: () => { setModal(null); },
+    onCompleted: () => { onClose(); },
     update: (cache, { data: { unsubscribeAsOwner } }) => {
       const { planId: resultPlanId } = unsubscribeAsOwner;
       cache.modify({
@@ -61,36 +66,42 @@ export default function ConfirmCancel({ plan, setModal, user }) {
   };
 
   return (
-    <div
-      style={{
-        zIndex: 500,
-        position: 'fixed',
-        background: 'white',
-        border: '1px solid black',
-        padding: '1rem',
-      }}
-    >
+    <div>
+      <Button onClick={onOpen}>Cancel Subscription</Button>
+      <Modal isOpen={isOpen} onClose={onClose}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>
+            Cancel Plan:&nbsp;
+            {plan.name}
+          </ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            {members.length > 0 && (<p>{`with ${membersStr}`}</p>)}
+            <p>{`x${plan.quantity}`}</p>
+            <p>Are you sure you want to drop out of this plan?</p>
+            {owner.username === user && (
+              <div>
+                <p>Please transfer plan ownership to another member to proceed:</p>
+                {activeMembers.map((member) => (
+                  <div key={member.username}>
+                    <input
+                      type="radio"
+                      value={member.username}
+                      checked={member.username === newOwner}
+                      onChange={(e) => { setNewOwner(e.target.value); }}
+                    />
+                    {member.firstName}
+                  </div>
+                ))}
+              </div>
+            )}
+          </ModalBody>
+
+        </ModalContent>
+      </Modal>
       <button type="button" onClick={() => { setModal(null); }}>Back</button>
       <h2>{plan.name}</h2>
-      {members.length > 0 && (<p>{`with ${membersStr}`}</p>)}
-      <p>{`x${plan.quantity}`}</p>
-      <p>Are you sure you want to drop out of this plan?</p>
-      {owner.username === user && (
-        <div>
-          <p>Please transfer plan ownership to another member to proceed:</p>
-          {activeMembers.map((member) => (
-            <div key={member.username}>
-              <input
-                type="radio"
-                value={member.username}
-                checked={member.username === newOwner}
-                onChange={(e) => { setNewOwner(e.target.value); }}
-              />
-              {member.firstName}
-            </div>
-          ))}
-        </div>
-      )}
       <button type="button" onClick={handleConfirmUnsubscribe}>Confirm cancellation</button>
     </div>
   );
