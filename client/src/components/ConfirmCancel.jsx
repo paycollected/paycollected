@@ -6,7 +6,9 @@ import {
 } from '../graphql/mutations.gql';
 
 export default function ConfirmCancel({ plan, setModal, user }) {
-  const { subscriptionId, planId, activeMembers, owner } = plan;
+  const {
+    subscriptionId, planId, activeMembers, owner
+  } = plan;
   const [newOwner, setNewOwner] = useState(
     activeMembers.length > 0 ? activeMembers[0].username : null
   );
