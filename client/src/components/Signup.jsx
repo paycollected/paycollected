@@ -178,7 +178,7 @@ export default function Signup({ setUser, planToJoin }) {
                 {...register('email', { required: 'Email required' })}
               />
               {errorMessage.length > 0 ? (
-                <FormErrorMessage>{errorMessage}</FormErrorMessage>
+                <div>{errorMessage}</div>
               ) : (
                 <div>&nbsp;</div>
               )}
