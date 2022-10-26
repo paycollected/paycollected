@@ -65,18 +65,6 @@ async function processQuantChangeOnSubsStart(
 }
 
 
-async function updateDefaultPaymentMethod(defaultPmnt, newMethodId, username, stripeCusId) {
-  if (defaultPmnt === null) {
-    await Promise.all([
-      models.updateDefaultPmntMethod(username, newMethodId),
-      stripe.customers.update(
-        stripeCusId,
-        { invoice_settings: { default_payment_method: newMethodId } }
-      )
-    ]);
-  }
-}
-
 export async function handleSubscriptionStart(setupIntent) {
   // info needed from db: cycleFreq, total count, perCycleCost, startDate for this person,
   // everyone else already on plan
@@ -84,10 +72,7 @@ export async function handleSubscriptionStart(setupIntent) {
   // API calls: start subscription for this person
   // change subscriptions for existing plan members
   const { customer, payment_method: paymentMethodId } = setupIntent;
-  const {
-    planId,
-    username,
-  } = setupIntent.metadata;
+  const { planId, username } = setupIntent.metadata;
   const quantity = Number(setupIntent.metadata.quantity);
 
   try {
@@ -98,6 +83,7 @@ export async function handleSubscriptionStart(setupIntent) {
       models.subscriptionSetup(planId),
       stripe.customers.retrieve(customer)
     ]);
+
     const {
       cycleFrequency, perCycleCost, count, prevPriceId, startDate
     } = rows[0];
@@ -126,7 +112,7 @@ export async function handleSubscriptionStart(setupIntent) {
     };
 
     if (count > 0 || quantity > 1) {
-      const [{ id: newPriceId }, _] = await Promise.all([
+      const promises = [
         stripe.prices.create({
           currency: 'usd',
           product: planId,
@@ -137,13 +123,22 @@ export async function handleSubscriptionStart(setupIntent) {
         // create new price ID;
         stripe.prices.update(prevPriceId, { active: false }),
         // archive old price ID
-      ]);
+      ];
+
+      if (defaultPmntMethod === null) {
+        promises.push(
+          stripe.customers.update(
+            customer,
+            { invoice_settings: { default_payment_method: paymentMethodId } }
+          )
+          // update the default payment method for this customer
+        );
+      }
+
+      const [{ id: newPriceId }] = await Promise.all(promises);
       subscription.items[0].price = newPriceId;
 
-      const [{ id: subscriptionId, items }, __] = await Promise.all([
-        stripe.subscriptions.create(subscription),
-        updateDefaultPaymentMethod(defaultPmntMethod, paymentMethodId, username, customer)
-      ]);
+      const { id: subscriptionId, items } = await stripe.subscriptions.create(subscription);
 
       const { id: subscriptionItemId } = items.data[0];
 
@@ -167,10 +162,19 @@ export async function handleSubscriptionStart(setupIntent) {
     // no other plan members to update
     // --> also create subscription for this person
     // --> only need to update db
-      const [{ id: subscriptionId, items }, _] = await Promise.all([
-        stripe.subscriptions.create(subscription),
-        updateDefaultPaymentMethod(defaultPmntMethod, paymentMethodId, username, customer)
-      ]);
+      let subscriptionId;
+      let items;
+      if (defaultPmntMethod === null) {
+        [{ id: subscriptionId, items }, _] = await Promise.all([
+          stripe.subscriptions.create(subscription),
+          stripe.customers.update(
+            customer,
+            { invoice_settings: { default_payment_method: paymentMethodId } }
+          )
+        ]);
+      } else {
+        ({ id: subscriptionId, items } = await stripe.subscriptions.create(subscription));
+      }
 
       const { id: subscriptionItemId } = items.data[0];
       await models.startSubscriptionWithNoPriceUpdate(
