@@ -138,7 +138,6 @@ export async function handleSubscriptionStart(setupIntent) {
         stripe.prices.update(prevPriceId, { active: false }),
         // archive old price ID
       ]);
-
       subscription.items[0].price = newPriceId;
 
       const [{ id: subscriptionId, items }, __] = await Promise.all([
