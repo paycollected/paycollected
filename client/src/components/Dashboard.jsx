@@ -4,16 +4,13 @@ import { Button, Input } from '@chakra-ui/react';
 
 // actual redirect URL string 'http://localhost:5647/dashboard/?setup_intent=seti_1Lq9rqAJ5Ik974ueIdg7WHn9&setup_intent_client_secret=seti_1Lq9rqAJ5Ik974ueIdg7WHn9_secret_MZISJyXsMF6na4pA6ryaqOfvt8JbeGa&redirect_status=succeeded'
 
-export default function Dashboard({
-  username, setUser, setPlanToJoin, setEmail,
-}) {
+export default function Dashboard({ username, setUser, setPlanToJoin }) {
   const navigate = useNavigate();
   const [showCodeInput, setShowCodeInput] = useState(false);
   const [code, setCode] = useState('');
 
   useEffect(() => {
     const queryStr = window.location.search;
-    console.log('-----------> queryStr:', queryStr);
     if (queryStr.length > 0) {
       const urlParams = new URLSearchParams(queryStr);
       if (urlParams.get('redirect_status') === 'succeeded') {
@@ -33,7 +30,6 @@ export default function Dashboard({
   const logUserOut = () => {
     localStorage.clear();
     setUser(null);
-    setEmail(null);
     setPlanToJoin(null);
     navigate('/');
   };

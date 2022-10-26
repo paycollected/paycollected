@@ -15,11 +15,10 @@ import FourOhFour from './404.jsx';
 
 // check that token is still valid before displaying logged-in state
 let token = localStorage.getItem('token');
-let emailFromToken;
 let username;
 if (token) {
   const { exp, user } = jwtDecode(token);
-  ({ email: emailFromToken, username } = user);
+  ({ username } = user);
   const today = new Date();
   if (today.valueOf() > (exp * 1000)) {
     localStorage.clear();
@@ -29,7 +28,6 @@ if (token) {
 
 function App() {
   const [user, setUser] = useState(token ? username : null);
-  const [email, setEmail] = useState(token ? emailFromToken : null);
   const [planToJoin, setPlanToJoin] = useState(null);
   const [showMagicLink, setShowMagicLink] = useState(false);
   const [stripeClientSecret, setStripeClientSecret] = useState(null);
@@ -42,13 +40,13 @@ function App() {
       <Route
         path="/login"
         element={!user
-          ? <Login setUser={setUser} planToJoin={planToJoin} setEmail={setEmail} />
+          ? <Login setUser={setUser} planToJoin={planToJoin} />
           : <Navigate to="/dashboard" />}
       />
       <Route
         path="/signup"
         element={!user
-          ? <Signup setUser={setUser} planToJoin={planToJoin} setEmail={setEmail} />
+          ? <Signup setUser={setUser} planToJoin={planToJoin} />
           : <Navigate to="/dashboard" />}
       />
       <Route
@@ -59,7 +57,6 @@ function App() {
               username={user}
               setUser={setUser}
               setPlanToJoin={setPlanToJoin}
-              setEmail={setEmail}
             />
           )
           : <Navigate to="/" />}
@@ -98,7 +95,6 @@ function App() {
             <Checkout
               stripeClientSecret={stripeClientSecret}
               setupIntentId={setupIntentId}
-              email={email}
               setStripeClientSecret={setStripeClientSecret}
               setSetupIntentId={setSetupIntentId}
               paymentMethods={paymentMethods}
