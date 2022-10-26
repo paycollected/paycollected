@@ -1,10 +1,14 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Button, Input } from '@chakra-ui/react';
+import { AddIcon, MinusIcon } from '@chakra-ui/icons';
 
 const regex = /[1-6]/;
 
 export default function ModifyQuantity({
   quantity: originalQuant, setModal, setNewQuant, plan, setPlanToModify
 }) {
+  const navigate = useNavigate();
   const [quantity, setQuantity] = useState(originalQuant.toString());
   const [inputErr, setInputErr] = useState(null);
 
@@ -25,69 +29,60 @@ export default function ModifyQuantity({
       setModal('confirmQuantChange');
     }
   };
-
   return (
-    <div style={{
-      width: '150px',
-      display: 'grid',
-      gridTemplateRows: 'repeat(3, max-content)',
-      gap: '10px',
-    }}
-    >
+    <div>
       {inputErr && (<p>{inputErr}</p>)}
-      <div style={{
-        display: 'grid',
-        gridRow: '2 / 3',
-        gridTemplateColumns: 'repeat(3, 1fr)',
-        gap: '10px',
-        justifyItems: 'center',
-      }}
-      >
-        <button
-          type="button"
-          disabled={Number(quantity) === 1}
-          onClick={
-            () => {
-              if (!Number.isNaN(Number(quantity))) {
-                setQuantity((Number(quantity) - 1).toString());
+      {quantity === '0'
+        ? (
+          <Button onClick={() => { navigate(`/join/${plan.planId}`); }}>Join</Button>
+        ) : (
+          <div>
+            <Button
+              size="xs"
+              disabled={Number(quantity) === 1}
+              onClick={
+                () => {
+                  if (!Number.isNaN(Number(quantity))) {
+                    setQuantity((Number(quantity) - 1).toString());
+                  }
+                }
               }
-            }
-          }
-        >
-          −
-        </button>
-        <input
-          type="text"
-          maxLength="1"
-          value={quantity}
-          onChange={(e) => {
-            setQuantity(e.target.value);
-            // setInputErr(null);
-          }}
-          style={{ width: '20px' }}
-        />
-        <button
-          type="button"
-          disabled={Number(quantity) === 6}
-          onClick={
-            () => {
-              if (!isNaN(Number(quantity))) {
-                setQuantity((Number(quantity) + 1).toString());
+            >
+              <MinusIcon />
+            </Button>
+            <Input
+              type="text"
+              maxLength="1"
+              min="1"
+              max="6"
+              value={quantity}
+              onChange={(e) => {
+                setQuantity(e.target.value);
+                // setInputErr(null);
+              }}
+              style={{ width: '20px' }}
+            />
+            <Button
+              size="xs"
+              disabled={Number(quantity) >= 6}
+              onClick={
+                () => {
+                  if (!isNaN(Number(quantity))) {
+                    setQuantity((Number(quantity) + 1).toString());
+                  }
+                }
               }
-            }
-          }
-        >
-          +
-        </button>
-      </div>
-      <button
-        type="button"
-        onClick={handleSubmit}
-        style={{ gridRow: '3 / 4' }}
-        disabled={!!inputErr}
-      >
-        Change quantity
-      </button>
+            >
+              <AddIcon />
+            </Button>
+            <Button
+              onClick={handleSubmit}
+              disabled={!!inputErr}
+            >
+              Change quantity
+            </Button>
+          </div>
+        )}
     </div>
   );
 }
