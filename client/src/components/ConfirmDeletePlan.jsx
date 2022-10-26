@@ -1,5 +1,6 @@
 import React from 'react';
 import { useMutation } from '@apollo/client';
+import { Button } from '@chakra-ui/react';
 import { DeletePlan as DELETE_PLAN } from '../graphql/mutations.gql';
 import { ViewAllPlans as GET_ALL_PLANS } from '../graphql/queries.gql';
 
@@ -38,13 +39,13 @@ export default function ConfirmDeletePlan({ plan, setModal }) {
         padding: '1rem',
       }}
     >
-      <button type="button" onClick={() => { setModal(null); }}>Back</button>
+      <Button type="button" onClick={() => { setModal(null); }}>Back</Button>
       <h2>{plan.name}</h2>
       {members.length > 0 && (<p>{`with ${membersStr}`}</p>)}
       <p>{`x${plan.quantity}`}</p>
       <p>Are you sure you want to delete this plan?</p>
       <p>This action cannot be reversed and will make the plan unavailable to all current, active members on the plan.</p>
-      <button type="button" onClick={handleConfirmDelete}>Confirm delete</button>
+      <Button type="button" onClick={handleConfirmDelete}>Confirm delete</Button>
     </div>
   );
 }

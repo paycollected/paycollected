@@ -1,5 +1,6 @@
 import React from 'react';
 import { useMutation } from '@apollo/client';
+import { Button } from '@chakra-ui/react';
 import { EditQuantity as EDIT_QUANTITY } from '../graphql/mutations.gql';
 
 export default function ConfirmModifyQuant({ plan, setModal, newQuantity }) {
@@ -36,12 +37,12 @@ export default function ConfirmModifyQuant({ plan, setModal, newQuantity }) {
         padding: '1rem',
       }}
     >
-      <button type="button" onClick={() => { setModal(null); }}>Back</button>
+      <Button onClick={() => { setModal(null); }}>Back</Button>
       <h2>{plan.name}</h2>
       {members.length > 0 && (<p>{`with ${membersStr}`}</p>)}
       <p>{`Current quantity: ${quantity}`}</p>
       <p>{`New quantity: ${newQuantity}`}</p>
-      <button type="button" onClick={handleConfirmQuantChange}>Update quantity!</button>
+      <Button onClick={handleConfirmQuantChange}>Update quantity!</Button>
     </div>
   );
 }

@@ -41,7 +41,7 @@ export default function Login({ setUser, planToJoin, setEmail }) {
       setUser(null);
       switch (message) {
         case 'This username does not exist':
-          setErrorMessage('Please verify username');
+          setErrorMessage('Incorrect username and password');
           break;
         case 'Unable to log in':
           setErrorMessage('Please try logging in later');
@@ -76,7 +76,7 @@ export default function Login({ setUser, planToJoin, setEmail }) {
           >
             <FormControl
               isRequired
-              isInvalid={errors.username || errorMessage === 'Please verify username' || errorMessage === 'Incorrect username and password'}
+              isInvalid={errors.username || errorMessage === 'Incorrect username and password'}
             >
               <FormLabel>Username</FormLabel>
               <Input
@@ -86,11 +86,9 @@ export default function Login({ setUser, planToJoin, setEmail }) {
                 {...register('username', { required: 'Username required' })}
               />
               {errors.username ? (
-                <div>
-                  <FormErrorMessage>
-                    {errors.username.message}
-                  </FormErrorMessage>
-                </div>
+                <FormErrorMessage>
+                  {errors.username.message}
+                </FormErrorMessage>
               ) : (
                 <div>&nbsp;</div>
               )}
@@ -117,21 +115,21 @@ export default function Login({ setUser, planToJoin, setEmail }) {
                 </InputRightElement>
               </InputGroup>
               {errors.password ? (
-                <div>
-                  <FormErrorMessage>
-                    {errors.password.message}
-                  </FormErrorMessage>
-                </div>
+                <FormErrorMessage>
+                  {errors.password.message}
+                </FormErrorMessage>
               ) : (
                 <div>&nbsp;</div>
               )}
             </FormControl>
-            {errorMessage.length > 0 ? (
-              <div>{errorMessage}</div>
-            ) : (
-              <div>&nbsp;</div>
-            )}
-            <Button type="submit" isLoading={loading}>Sign in</Button>
+            <FormControl isInvalid={errorMessage.length > 0}>
+              {errorMessage.length > 0 ? (
+                <FormErrorMessage>{errorMessage}</FormErrorMessage>
+              ) : (
+                <div>&nbsp;</div>
+              )}
+            </FormControl>
+            <Button type="submit" isLoading={loading} disabled={loading}>Sign in</Button>
           </form>
           <p>Don&apos;t have an account? Sign up!</p>
           <Button onClick={() => { navigate('/signup'); }}>Sign up</Button>
