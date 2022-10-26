@@ -8,13 +8,11 @@ import { ViewAllPlans as GET_ALL_PLANS } from '../graphql/queries.gql';
 import { EditPayment as EDIT_PAYMENT } from '../graphql/mutations.gql';
 import ConfirmCancel from './ConfirmCancel.jsx';
 import ModifyQuantity from './ModifyQuantity.jsx';
-import ConfirmModifyQuant from './ConfirmModifyQuant.jsx';
 import ConfirmDeletePlan from './ConfirmDeletePlan.jsx';
 
 export default function ViewPlans({ user }) {
   const navigate = useNavigate();
   const [planToCopy, setPlanToCopy] = useState(null);
-  const [newQuant, setNewQuant] = useState(null);
   const { hasCopied, onCopy } = useClipboard(`${process.env.CLIENT_HOST}:${process.env.SERVER_PORT}/join/${planToCopy}`);
 
   const { loading, data, error } = useQuery(GET_ALL_PLANS, {
@@ -80,7 +78,6 @@ export default function ViewPlans({ user }) {
                   <GridItem colSpan={1} textAlign="center">
                     <ModifyQuantity
                       quantity={plan.quantity}
-                      setNewQuant={setNewQuant}
                       plan={plan}
                     />
                     <br></br>

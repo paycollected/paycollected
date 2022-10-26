@@ -4,9 +4,7 @@ import { Button, Badge } from '@chakra-ui/react';
 import { AddIcon, MinusIcon } from '@chakra-ui/icons';
 import ConfirmModifyQuant from './ConfirmModifyQuant.jsx';
 
-export default function ModifyQuantity({
-  quantity: originalQuant, plan
-}) {
+export default function ModifyQuantity({ quantity: originalQuant, plan }) {
   const navigate = useNavigate();
   const [quantity, setQuantity] = useState(originalQuant.toString());
 

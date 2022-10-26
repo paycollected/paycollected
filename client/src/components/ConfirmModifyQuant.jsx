@@ -6,7 +6,7 @@ import {
 } from '@chakra-ui/react';
 import { EditQuantity as EDIT_QUANTITY } from '../graphql/mutations.gql';
 
-const regex = /[1-6]/;
+const regex = /^[1-6]$/;
 
 export default function ConfirmModifyQuant({
   plan, originalQuant, newQuantity
@@ -39,7 +39,7 @@ export default function ConfirmModifyQuant({
   const handleSubmit = () => {
     if (newQuantity === originalQuant.toString()) {
       setInputErr('Please submit a quantity different from your original.');
-    } else if (!regex.test(newQuantity) || newQuantity.length > 1) {
+    } else if (!regex.test(newQuantity)) {
       setInputErr('Invalid input! Only 1 through 6 please.');
     } else {
       onOpen();
@@ -47,7 +47,7 @@ export default function ConfirmModifyQuant({
   };
 
   const handleConfirmQuantChange = () => {
-    confirmQuantChange({ variables: { subscriptionId, newQuantity } });
+    confirmQuantChange({ variables: { subscriptionId, newQuantity: Number(newQuantity) } });
   };
 
   return (
