@@ -66,12 +66,12 @@ async function processQuantChangeOnSubsStart(
 
 
 async function updateDefaultPaymentMethod(defaultPmnt, newMethodId, username, stripeCusId) {
-  if (!defaultPmnt) {
+  if (defaultPmnt === null) {
     await Promise.all([
       models.updateDefaultPmntMethod(username, newMethodId),
       stripe.customers.update(
         stripeCusId,
-        { invoice_settings: { default_payment_method: defaultPmnt } }
+        { invoice_settings: { default_payment_method: newMethodId } }
       )
     ]);
   }
@@ -321,7 +321,7 @@ export async function handleDefaultPmntMethodChange(customer) {
     invoice_settings: { default_payment_method: newMethodId },
     metadata: { username }
   } = customer;
-  if (newMethodId) {
+  if (newMethodId !== null) {
     await models.updateDefaultPmntMethod(username, newMethodId);
   }
 }

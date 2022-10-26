@@ -19,15 +19,9 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
   //   console.log('------------->', method.card);
   // });
   const { invoice_settings } = await stripe.customers.retrieve(
-    'cus_Mf5ov8HIvXS5Mc'
+    'cus_MgQYPSdkrqi1z8'
   );
-  console.log(invoice_settings);
-  /*
-  {
-    custom_fields: null,
-    default_payment_method: null,
-    footer: null,
-    rendering_options: null
-  }
-  */
+
+  const { default_payment_method } = invoice_settings;
+  console.log(typeof 'default_payment_method');
 }());
