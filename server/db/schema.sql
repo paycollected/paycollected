@@ -10,7 +10,8 @@ CREATE TABLE IF NOT EXISTS users (
   last_name VARCHAR (100) NOT NULL,
   password VARCHAR(200) NOT NULL, -- hashed
   email VARCHAR(100) NOT NULL UNIQUE,
-  s_cus_id VARCHAR(200) NOT NULL UNIQUE
+  s_cus_id VARCHAR(200) NOT NULL UNIQUE,
+  default_pmnt_id VARCHAR(100) UNIQUE
 );
 
 CREATE TYPE cycle_freq AS ENUM ('weekly', 'monthly', 'yearly');
@@ -24,11 +25,6 @@ CREATE TABLE IF NOT EXISTS plans (
   start_date TIMESTAMP WITH TIME ZONE NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS pending_subs (
-  subscription_id VARCHAR(255) PRIMARY KEY,
-  username VARCHAR(100) NOT NULL REFERENCES users(username) ON DELETE CASCADE,
-  created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
 
 
 -- relational tables

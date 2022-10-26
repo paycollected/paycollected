@@ -157,17 +157,37 @@ export function getUserInfo(username) {
 
 export function joinPlan(username, planId) {
   const query = `
+  SELECT
+    u.s_cus_id AS "stripeCusId",
+    u.default_pmnt_id AS "defaultPaymentId",
+    COALESCE(
+      ( SELECT quantity
+        FROM user_plan
+        WHERE username = $1 AND plan_id = $2
+      ),
+      0
+    ) AS quantity
+    FROM users u
+    WHERE username = $1
+  `;
+  return pool.query(query, [username, planId]);
+}
+
+
+export function subscriptionSetup(planId) {
+  const query = `
     SELECT
-      p.cycle_frequency AS "cycleFrequency",
+      CASE
+        WHEN p.cycle_frequency = 'weekly'
+          THEN 'week'
+        WHEN p.cycle_frequency = 'monthly'
+          THEN 'month'
+        WHEN p.cycle_frequency = 'yearly'
+          THEN 'year'
+      END AS "cycleFrequency",
       p.per_cycle_cost AS "perCycleCost",
-      p.price_id AS "priceId",
-      COALESCE(
-        ( SELECT quantity
-          FROM user_plan
-          WHERE username = $1 AND plan_id = $2
-        ),
-        0
-      ) AS quantity,
+      p.price_id AS "prevPriceId",
+      SUM (up.quantity)::INTEGER AS count,
       CASE
         WHEN CURRENT_TIMESTAMP < p.start_date
           THEN ROUND (EXTRACT (EPOCH FROM p.start_date))
@@ -195,24 +215,12 @@ export function joinPlan(username, planId) {
       END
       AS "startDate"
     FROM plans p
-    WHERE p.plan_id = $2
-  `;
-
-  return pool.query(query, [username, planId]);
-}
-
-
-export function checkCountGetPriceIdOfPlan(planId) {
-  const query = `
-    SELECT
-      p.price_id AS "prevPriceId",
-      SUM (up.quantity)::INTEGER AS count
-    FROM plans p
     JOIN user_plan up
     ON p.plan_id = up.plan_id
     WHERE p.plan_id = $1
-    GROUP BY p.price_id
+    GROUP BY p.price_id, p.cycle_frequency, p.per_cycle_cost, p.price_id, p.start_date
   `;
+
   return pool.query(query, [planId]);
 }
 
@@ -225,20 +233,15 @@ export function startSubscriptionWithNoPriceUpdate(
   username,
 ) {
   const query = `
-    WITH update_sub_id AS
-    (
-      INSERT INTO user_plan
-        (quantity, subscription_id, subscription_item_id, plan_id, username)
-      VALUES
-        ($1, $2, $3, $4, $5)
-      ON CONFLICT
-        (username, plan_id)
-      DO UPDATE SET
-        quantity = $1, subscription_id = $2, subscription_item_id = $3
-      WHERE user_plan.username = $5 AND user_plan.plan_id = $4
-    )
-    DELETE FROM pending_subs
-    WHERE subscription_id = $2
+    INSERT INTO user_plan
+      (quantity, subscription_id, subscription_item_id, plan_id, username)
+    VALUES
+      ($1, $2, $3, $4, $5)
+    ON CONFLICT
+      (username, plan_id)
+    DO UPDATE SET
+      quantity = $1, subscription_id = $2, subscription_item_id = $3
+    WHERE user_plan.username = $5 AND user_plan.plan_id = $4
   `;
   const args = [quantity, subscriptionId, subscriptionItemId, planId, username];
   return pool.query(query, args);
@@ -271,10 +274,6 @@ export function startSubscription(
       UPDATE plans
       SET price_id = $6
       WHERE plan_id = $4
-    ),
-    update_pending_subs AS (
-      DELETE FROM pending_subs
-      WHERE subscription_id = $2
     )
     SELECT
       username,
@@ -442,33 +441,10 @@ export function deletePlanGetAllSubs(planId) {
   return pool.query(query, [planId]);
 }
 
-
-export function queuePendingSubs(subscriptionId, username) {
+export function updateDefaultPmntMethod(username, pmntMethodId) {
   const query = `
-    INSERT INTO pending_subs
-      (subscription_id, username)
-    VALUES
-      ($1, $2)
+    UPDATE users SET default_pmnt_id = $1 WHERE username = $2
   `;
-  return pool.query(query, [subscriptionId, username]);
-}
 
-
-export function getExpiredPendingSubs() {
-  const query = `
-    DELETE FROM pending_subs
-    WHERE created_at < (CURRENT_TIMESTAMP - interval '1 day')
-    RETURNING subscription_id AS "subscriptionId"
-  `;
-  return pool.query(query);
-}
-
-
-export function delPendingSubs(subscriptionId, username) {
-  const query = `
-    DELETE FROM pending_subs
-    WHERE subscription_id = $1 AND username = $2
-    RETURNING subscription_id
-  `;
-  return pool.query(query, [subscriptionId, username]);
+  return pool.query(query, [pmntMethodId, username]);
 }

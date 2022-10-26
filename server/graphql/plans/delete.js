@@ -4,7 +4,7 @@ import { getPriceFromPlan } from '../../db/models.js';
 
 const stripe = stripeSDK(process.env.STRIPE_SECRET_KEY);
 
-export default async function deletePlanResolve(planId, username) {
+export default async function deletePlanResolver(planId, username) {
   let rows;
   try {
     ({ rows } = await getPriceFromPlan(planId, username));

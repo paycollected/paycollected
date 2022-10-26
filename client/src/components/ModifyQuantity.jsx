@@ -1,93 +1,63 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Button, Badge } from '@chakra-ui/react';
+import { AddIcon, MinusIcon } from '@chakra-ui/icons';
+import ConfirmModifyQuant from './ConfirmModifyQuant.jsx';
 
-const regex = /[1-6]/;
-
-export default function ModifyQuantity({
-  quantity: originalQuant, setModal, setNewQuant, plan, setPlanToModify
-}) {
+export default function ModifyQuantity({ quantity: originalQuant, plan }) {
+  const navigate = useNavigate();
   const [quantity, setQuantity] = useState(originalQuant.toString());
-  const [inputErr, setInputErr] = useState(null);
-
-  useEffect(() => {
-    setInputErr(null);
-  }, [quantity]);
 
   // maybe allow only up to 6 units per plan
 
-  const handleSubmit = () => {
-    if (quantity === originalQuant.toString()) {
-      setInputErr('Please submit a quantity different from your original.');
-    } else if (!regex.test(quantity) || quantity.length > 1) {
-      setInputErr('Invalid input! Only 1 through 6 please.');
-    } else {
-      setPlanToModify(plan);
-      setNewQuant(Number(quantity));
-      setModal('confirmQuantChange');
-    }
-  };
-
   return (
-    <div style={{
-      width: '150px',
-      display: 'grid',
-      gridTemplateRows: 'repeat(3, max-content)',
-      gap: '10px',
-    }}
-    >
-      {inputErr && (<p>{inputErr}</p>)}
-      <div style={{
-        display: 'grid',
-        gridRow: '2 / 3',
-        gridTemplateColumns: 'repeat(3, 1fr)',
-        gap: '10px',
-        justifyItems: 'center',
-      }}
-      >
-        <button
-          type="button"
-          disabled={Number(quantity) === 1}
-          onClick={
-            () => {
-              if (!Number.isNaN(Number(quantity))) {
-                setQuantity((Number(quantity) - 1).toString());
+    <div>
+      {quantity === '0'
+        ? (
+          <Button onClick={() => { navigate(`/join/${plan.planId}`); }}>Join</Button>
+        ) : (
+          <div>
+            <Button
+              size="xs"
+              disabled={Number(quantity) === 1}
+              onClick={
+                () => {
+                  if (!Number.isNaN(Number(quantity))) {
+                    setQuantity((Number(quantity) - 1).toString());
+                  }
+                }
               }
-            }
-          }
-        >
-          −
-        </button>
-        <input
-          type="text"
-          maxLength="1"
-          value={quantity}
-          onChange={(e) => {
-            setQuantity(e.target.value);
-            // setInputErr(null);
-          }}
-          style={{ width: '20px' }}
-        />
-        <button
-          type="button"
-          disabled={Number(quantity) === 6}
-          onClick={
-            () => {
-              if (!isNaN(Number(quantity))) {
-                setQuantity((Number(quantity) + 1).toString());
+            >
+              <MinusIcon />
+            </Button>
+            <Badge
+              mx="1"
+              width="3ch"
+              fontSize="1.2em"
+              colorScheme={quantity === originalQuant.toString() ? 'default' : 'red'}
+            >
+              {quantity}
+            </Badge>
+            <Button
+              size="xs"
+              disabled={Number(quantity) >= 6}
+              onClick={
+                () => {
+                  if (!Number.isNaN(Number(quantity))) {
+                    setQuantity((Number(quantity) + 1).toString());
+                  }
+                }
               }
-            }
-          }
-        >
-          +
-        </button>
-      </div>
-      <button
-        type="button"
-        onClick={handleSubmit}
-        style={{ gridRow: '3 / 4' }}
-        disabled={!!inputErr}
-      >
-        Change quantity
-      </button>
+            >
+              <AddIcon />
+            </Button>
+            <ConfirmModifyQuant
+              plan={plan}
+              originalQuant={originalQuant}
+              newQuantity={quantity}
+            />
+          </div>
+        )}
     </div>
   );
 }

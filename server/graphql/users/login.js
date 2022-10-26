@@ -26,12 +26,11 @@ export default async function loginResolver(username, password) {
       exp: Math.floor(Date.now() / 1000) + (60 * 30),
       user: {
         username,
-        email,
         stripeCusId,
       }
     }, process.env.SECRET_KEY);
 
-    return { username, email, token };
+    return { username, token };
   } catch (asyncError) {
     if (errMsg) {
       // if anticipated bad input error

@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation } from '@apollo/client';
-import { Flex, Box, FormControl, FormLabel, FormErrorMessage, Button, Input } from '@chakra-ui/react';
+import { Flex, Box, FormControl, FormLabel, Heading, Button, Input } from '@chakra-ui/react';
 import { JoinPlan as JOIN_PLAN } from '../graphql/mutations.gql';
 import { ViewOnePlan as GET_PLAN } from '../graphql/queries.gql';
 
 export default function JoinPlan({
-  setPlanToJoin, setStripeClientSecret, setSubscriptionInTransaction
+  setPlanToJoin, setStripeClientSecret, setSetupIntentId, setPaymentMethods
 }) {
   const navigate = useNavigate();
   const { planId } = useParams();
@@ -22,9 +22,10 @@ export default function JoinPlan({
   const [makePayment, { data: payData, loading: payLoading, error: payError}] = useMutation(
     JOIN_PLAN,
     {
-      onCompleted: ({ joinPlan: { clientSecret, subscriptionId } }) => {
+      onCompleted: ({ joinPlan: { clientSecret, setupIntentId, paymentMethods } }) => {
         setStripeClientSecret(clientSecret);
-        setSubscriptionInTransaction(subscriptionId);
+        setSetupIntentId(setupIntentId);
+        setPaymentMethods(paymentMethods);
         navigate('/checkout');
       },
       onError: ({ message }) => { console.log(message); },
@@ -60,44 +61,59 @@ export default function JoinPlan({
     } = getPlanData.viewOnePlan;
 
     return (
-      <>
-        <h1>This is the Join Subscription page</h1>
-        <h2>{name}</h2>
-        <div>
-          Owned by:&nbsp;
-          {owner.firstName.concat(' ', owner.lastName)}
-        </div>
-        <div>{`Total Plan Cost: $${perCycleCost} ${cycleFrequency.toLowerCase()}`}</div>
-        {activeMembers.length > 0 && (
-          <>
-            <div>Others on this plan:</div>
-            <ul>
-              {activeMembers.map((member) => (
-                <li key={member.username}>{`${member.firstName} ${member.lastName} x ${member.quantity}`}</li>
-              ))}
-            </ul>
-          </>
-        )}
-        {activeMembers.length === 0
-          && (<div>There are currently no members on this plan.</div>)}
-        {quantity > 0 && (
-          <div>
-            <p>{`Your quantity on this plan: ${quantity}`}</p>
-            <p>You cannot join this plan again. Please use the dashboard to adjust your membership on this plan.</p>
-          </div>
-        )}
-        <form onSubmit={onSubmit}>
-          <input
-            type="number"
-            placeholder="Quantity"
-            required
-            min="1"
-            onChange={(e) => { setQuantity(Number(e.target.value)); }}
-          />
-          <Button type="submit" disabled={!!quantity}>Join</Button>
-        </form>
-        <Button onClick={() => { navigate('/dashboard'); }}>Cancel</Button>
-      </>
+      <Flex width="full" align="center" justifyContent="center">
+        <Box p={2} my={8} width="40%" bg="white" borderRadius="15">
+          <Box textAlign="center">
+            <Heading>Join this Plan!</Heading>
+            <Heading size="xl">{name}</Heading>
+          </Box>
+          <Box my={4} textAlign="left">
+            <div>
+              Owned by:&nbsp;
+              {owner.firstName.concat(' ', owner.lastName)}
+            </div>
+            <div>{`Total Plan Cost: $${perCycleCost} ${cycleFrequency.toLowerCase()}`}</div>
+            {activeMembers.length > 0 && (
+              <>
+                <div>Others on this plan:</div>
+                <ul>
+                  {activeMembers.map((member) => (
+                    <li key={member.username}>{`${member.firstName} ${member.lastName} x ${member.quantity}`}</li>
+                  ))}
+                </ul>
+              </>
+            )}
+            {activeMembers.length === 0
+              && (<div>There are currently no members on this plan.</div>)}
+            {quantity > 0 ? (
+              <div>
+                <p>{`Your quantity on this plan: ${quantity}`}</p>
+                <p>
+                  You cannot join this plan again.
+                  Please use the dashboard to adjust your membership on this plan.
+                </p>
+              </div>
+            ) : (
+              <form onSubmit={onSubmit}>
+                <FormControl
+                  isRequired
+                >
+                  <FormLabel>Quantity</FormLabel>
+                  <Input
+                    type="number"
+                    name="quantity"
+                    placeholder="Quantity"
+                    min="1"
+                    onChange={(e) => { setQuantity(Number(e.target.value)); }}
+                  />
+                </FormControl>
+                <Button type="submit" disabled={!!quantity} isLoading={payLoading}>Join</Button>
+              </form>
+            )}
+            <Button onClick={() => { navigate('/dashboard'); }}>Cancel</Button>
+          </Box>
+        </Box>
+      </Flex>
     );
   }
   return null;

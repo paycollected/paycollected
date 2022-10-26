@@ -1,10 +1,5 @@
 import { defineStyle, defineStyleConfig } from '@chakra-ui/react';
 
-// const outlined = defineStyle({
-//   background: 'white',
-//   fontWeight: 'semibold'
-// });
-
 export const buttonTheme = defineStyleConfig({
   baseStyle: {
     fontWeight: 'bold',
@@ -24,23 +19,25 @@ export const buttonTheme = defineStyleConfig({
   },
   variants: {
     outline: {
-      border: '2px solid',
-      borderRadius: 5,
-      background: 'white',
+      bg: 'white',
       color: '#001C55',
+      border: '2px solid',
+      borderColor: '#001C55',
       _hover: {
         bg: '#001C55',
-        color: '#A6E1FA'
+        color: '#A6E1FA',
+        border: '2px solid',
+        borderColor: 'white'
       }
     },
     solid: {
-      background: '#001C55',
+      bg: '#001C55',
       color: 'white',
       border: '2px solid transparent',
       _hover: {
         bg: '#A6E1FA',
         color: '#001C55',
-        border: '2px solid #001C55'
+        border: '2px solid'
       }
     }
   },
