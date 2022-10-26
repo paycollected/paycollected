@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useMutation } from '@apollo/client';
 import {
-  useDisclosure, Button, Heading,
+  useDisclosure, Button, RadioGroup, Stack, Radio,
   Modal, ModalOverlay, ModalContent, ModalCloseButton, ModalHeader, ModalBody, ModalFooter
 } from '@chakra-ui/react';
 import {
@@ -78,31 +78,39 @@ export default function ConfirmCancel({ plan, user }) {
           <ModalCloseButton />
           <ModalBody>
             {members.length > 0 && (<p>{`with ${membersStr}`}</p>)}
-            <p>{`x${plan.quantity}`}</p>
+            <p>{`Total Quantity: ${plan.quantity}`}</p>
             <p>Are you sure you want to drop out of this plan?</p>
             {owner.username === user && (
               <div>
                 <p>Please transfer plan ownership to another member to proceed:</p>
-                {activeMembers.map((member) => (
-                  <div key={member.username}>
-                    <input
-                      type="radio"
-                      value={member.username}
-                      checked={member.username === newOwner}
-                      onChange={(e) => { setNewOwner(e.target.value); }}
-                    />
-                    {member.firstName}
-                  </div>
-                ))}
+                <RadioGroup onChange={setNewOwner} value={newOwner}>
+                  <Stack>
+                    {activeMembers.map((member) => (
+                      <Radio
+                        key={member.username}
+                        value={member.username}
+                      >
+                        {member.firstName}
+                      </Radio>
+                    ))}
+                  </Stack>
+                </RadioGroup>
               </div>
             )}
           </ModalBody>
-
+          <ModalFooter>
+            <Button variant="outline" onClick={onClose}>
+              Back
+            </Button>
+            <Button onClick={handleConfirmUnsubscribe}>
+              Confirm Cancellation
+            </Button>
+          </ModalFooter>
         </ModalContent>
       </Modal>
-      <button type="button" onClick={() => { setModal(null); }}>Back</button>
-      <h2>{plan.name}</h2>
-      <button type="button" onClick={handleConfirmUnsubscribe}>Confirm cancellation</button>
     </div>
   );
 }
+/*
+<ConfirmModifyQuant plan={planToModify} newQuantity={newQuant} />
+*/
