@@ -106,8 +106,8 @@ function CheckoutForm({ setupIntentId, paymentMethods }) {
             <PaymentElement />
           </div>
         </div>
-        <button type="submit" disabled={!stripe}>Make payment</button>
-        <button type="button" onClick={handleCancel}>Cancel</button>
+        <Button type="submit" disabled={!stripe}>Make payment</Button>
+        <Button onClick={handleCancel}>Cancel</Button>
       </form>
     </>
   );
