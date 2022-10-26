@@ -72,7 +72,7 @@ export async function handleSubscriptionStart(setupIntent) {
   // also potential create a new price ID
   // API calls: start subscription for this person
   // change subscriptions for existing plan members
-
+  const { customer, payment_method: paymentMethodId } = setupIntent;
   const {
     planId,
     username,
@@ -80,8 +80,16 @@ export async function handleSubscriptionStart(setupIntent) {
   const quantity = Number(setupIntent.metadata.quantity);
 
   try {
-    const { rows } = await models.subscriptionSetup(planId);
-    const { count, prevPriceId } = rows[0];
+    const [
+      { rows },
+      { invoice_settings: { default_payment_method: defaultPmntMethod } }
+    ] = await Promise.all([
+      models.subscriptionSetup(planId),
+      stripe.customers.retrieve(customer)
+    ]);
+    const {
+      cycleFrequency, perCycleCost, count, prevPriceId, startDate
+    } = rows[0];
     const productTotalQuantity = quantity + count;
 
     if (count > 0 || quantity > 1) {
@@ -98,36 +106,48 @@ export async function handleSubscriptionStart(setupIntent) {
         // archive old price ID
       ]);
 
-      await Promise.all([
-        processQuantChangeOnSubsStart(
-          planId,
+      const [{ id: subscriptionId, items }, __] = await Promise.all([stripe.subscriptions.create({
+        customer,
+        items: [{
+          price: newPriceId, // just use whatever latest priceId is in db
+          // will have to recalculate at webhook anyway
           quantity,
-          subscriptionId,
-          subscriptionItemId,
-          username,
-          newPriceId,
+        }],
+        payment_behavior: 'default_incomplete',
+        payment_settings: {
+          save_default_payment_method: 'on_subscription',
+          payment_method_types: ['card'],
+        },
+        proration_behavior: 'none',
+        trial_end: startDate,
+        expand: ['pending_setup_intent'],
+        metadata: {
           productTotalQuantity,
-        ),
-        // write new changes to db
-        // and update all existing plan members
-        stripe.subscriptions.update(
-          subscriptionId,
-          {
-            items: [
-              {
-                id: subscriptionItemId,
-                price: newPriceId,
-                quantity
-              }
-            ],
-            metadata: {
-              productTotalQuantity,
-            },
-            proration_behavior: 'none',
-          }
-        ),
-        // update this incoming new subscription
-      ]);
+          cycleFrequency,
+          perCycleCost,
+          quantChanged: false,
+          cancelSubs: false,
+        }
+      }),
+      () => { if (!defaultPmntMethod) {
+        return models.updateDefaultPmntMethod(username, paymentMethodId);
+        }
+      }
+    ]);
+
+      const { id: subscriptionItemId } = items.data[0];
+
+      await processQuantChangeOnSubsStart(
+        planId,
+        quantity,
+        subscriptionId,
+        subscriptionItemId,
+        username,
+        newPriceId,
+        productTotalQuantity,
+      );
+      // write new changes to db
+      // and update all existing plan members
     } else {
     // if count = 0, and quantity = 1
     // meaning this is the first subscription on this plan
@@ -137,6 +157,37 @@ export async function handleSubscriptionStart(setupIntent) {
     // no other plan members to update
     // --> also create subscription for this person
     // --> only need to update db
+      const [{ id: subscriptionId, items,}, _] = await Promise.all([
+        stripe.subscriptions.create({
+          customer,
+          items: [{
+            price: prevPriceId, // just use whatever latest priceId is in db
+            // will have to recalculate at webhook anyway
+            quantity,
+          }],
+          payment_behavior: 'default_incomplete',
+          payment_settings: {
+            save_default_payment_method: 'on_subscription',
+            payment_method_types: ['card'],
+          },
+          proration_behavior: 'none',
+          trial_end: startDate,
+          expand: ['pending_setup_intent'],
+          metadata: {
+            productTotalQuantity, // will need to get latest number from webhook
+            cycleFrequency,
+            perCycleCost,
+            quantChanged: false,
+            cancelSubs: false,
+          }
+        }),
+        () => { if (!defaultPmntMethod) {
+          return models.updateDefaultPmntMethod(username, paymentMethodId);
+          }
+        }
+      ]);
+
+      const { id: subscriptionItemId } = items.data[0];
       await models.startSubscriptionWithNoPriceUpdate(
         planId,
         quantity,

@@ -177,10 +177,17 @@ export function joinPlan(username, planId) {
 export function subscriptionSetup(planId) {
   const query = `
     SELECT
-      p.cycle_frequency AS "cycleFrequency",
+      CASE
+        WHEN p.cycle_frequency = 'weekly'
+          THEN 'week'
+        WHEN p.cycle_frequency = 'monthly'
+          THEN 'month'
+        WHEN p.cycle_frequency = 'yearly'
+          THEN 'year'
+      END AS "cycleFrequency",
       p.per_cycle_cost AS "perCycleCost",
       p.price_id AS "prevPriceId",
-      SUM (up.quantity)::INTEGER AS count
+      SUM (up.quantity)::INTEGER AS count,
       CASE
         WHEN CURRENT_TIMESTAMP < p.start_date
           THEN ROUND (EXTRACT (EPOCH FROM p.start_date))
@@ -211,7 +218,7 @@ export function subscriptionSetup(planId) {
     JOIN user_plan up
     ON p.plan_id = up.plan_id
     WHERE p.plan_id = $1
-    GROUP BY p.price_id
+    GROUP BY p.price_id, p.cycle_frequency, p.per_cycle_cost, p.price_id, p.start_date
   `;
 
   return pool.query(query, [planId]);
@@ -282,7 +289,7 @@ export function startSubscription(
       UPDATE plans
       SET price_id = $6
       WHERE plan_id = $4
-    ),
+    )
     SELECT
       username,
       email,
@@ -447,4 +454,12 @@ export function deletePlanGetAllSubs(planId) {
     WHERE plan_id = $1
   `;
   return pool.query(query, [planId]);
+}
+
+export function updateDefaultPmntMethod(username, pmntMethodId) {
+  const query = `
+    UPDATE users SET default_pmnt_id = $1 WHERE username = $2
+  `;
+
+  return pool.query(query, [pmntMethodId, username]);
 }
