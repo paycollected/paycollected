@@ -13,7 +13,6 @@ import ConfirmDeletePlan from './ConfirmDeletePlan.jsx';
 
 export default function ViewPlans({ user }) {
   const navigate = useNavigate();
-  const [planToModify, setPlanToModify] = useState(null);
   const [planToCopy, setPlanToCopy] = useState(null);
   const [newQuant, setNewQuant] = useState(null);
   const { hasCopied, onCopy } = useClipboard(`${process.env.CLIENT_HOST}:${process.env.SERVER_PORT}/join/${planToCopy}`);
@@ -33,11 +32,6 @@ export default function ViewPlans({ user }) {
     },
     onError: ({ message }) => { console.log(message); }
   });
-
-  const handleSubsModification = (plan, modalName) => {
-    setModal(modalName);
-    setPlanToModify(plan);
-  };
 
   return (
     <div>
@@ -84,21 +78,19 @@ export default function ViewPlans({ user }) {
                     )}
                   </GridItem>
                   <GridItem colSpan={1} textAlign="center">
-      <ConfirmModifyQuant plan={planToModify} newQuantity={newQuant} />
                     <ModifyQuantity
                       quantity={plan.quantity}
                       setNewQuant={setNewQuant}
                       plan={plan}
-                      setPlanToModify={setPlanToModify}
                     />
                     <br></br>
                     {(plan.owner.username !== user
                       || (plan.owner.username === user && plan.activeMembers.length > 0))
                       && (
-                        <ConfirmCancel plan={planToModify} user={user} />
+                        <ConfirmCancel plan={plan} user={user} />
                       )}
                     {plan.owner.username === user && (
-                      <ConfirmDeletePlan plan={planToModify} />
+                      <ConfirmDeletePlan plan={plan} />
                     )}
                   </GridItem>
                 </Grid>
