@@ -186,6 +186,7 @@ export default function Signup({ setUser, planToJoin, setEmail }) {
 
             </FormControl>
             <Button type="submit" isLoading={loading}>Join</Button>
+            <Button onClick={() => { navigate('/'); }}>Cancel</Button>
           </form>
         </Box>
       </Box>
