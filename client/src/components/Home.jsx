@@ -15,8 +15,8 @@ export default function Home({ setPlanToJoin }) {
   return (
     <div>
       <h1>This is the Home page</h1>
-      <Button variant="outline" onClick={() => { navigate('/login'); }}>Login</Button>
-      <Button variant="outline" onClick={() => { navigate('/signup'); }}>Sign up</Button>
+      <Button onClick={() => { navigate('/login'); }}>Login</Button>
+      <Button onClick={() => { navigate('/signup'); }}>Sign up</Button>
     </div>
   );
 }

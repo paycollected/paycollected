@@ -2,7 +2,11 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMutation } from '@apollo/client';
 import { useForm } from 'react-hook-form';
-import { Button, Input, Select } from '@chakra-ui/react';
+import {
+  Button, Input, Select, InputGroup, InputLeftElement,
+  FormControl, FormLabel, FormErrorMessage,
+  Box, Heading, Flex
+} from '@chakra-ui/react';
 import { CreatePlanMutation as CREATE_PLAN } from '../graphql/mutations.gql';
 
 const tomorrow = new Date();
@@ -51,79 +55,124 @@ export default function CreatePlan({ setPlanToJoin, setShowMagicLink }) {
   };
 
   return (
-    <div>
-      <h1>This is the Create Subscription page</h1>
-      <form
-        autoComplete="off"
-        onSubmit={handleSubmit(onSubmit)}
-      >
-        <Input
-          name="planName"
-          label="Plan Name"
-          placeholder="Plan Name"
-          required
-          type="text"
-          variant="outlined"
-          defaultValue=""
-          {...register('planName', { required: 'Plan name required' })}
-          error={!!errors?.planName}
-          helperText={errors?.planName ? errors.planName.message : ' '}
-        />
-        <Select
-          sx={{ width: '25ch' }}
-          name="cycleFrequency"
-          label="Cycle Frequency"
-          placeholder="Cycle Frequency"
-          required
-          defaultValue=""
-          {...register('cycleFrequency', { required: 'Select cycle frequency' })}
-          error={!!errors?.cycleFrequency}
-          helperText={errors?.cycleFrequency ? errors.cycleFrequency.message : ' '}
-        >
-          {['Weekly', 'Monthly', 'Yearly'].map((freq) => (
-            <option key={freq} value={freq}>
-              {freq}
-            </option>
-          ))}
-        </Select>
-        <Select
-          sx={{ width: '25ch' }}
-          name="timeZone"
-          label="Time Zone"
-          placeholder="Time Zone"
-          required
-          defaultValue=""
-          {...register('timeZone', { required: 'Select time zone' })}
-          error={!!errors?.timeZone}
-          helperText={errors?.timeZone ? errors.timeZone.message : ' '}
-        >
-          {['Eastern', 'Central', 'Mountain', 'Pacific'].map((zone) => (
-            <option key={zone} value={zone}>
-              {zone}
-            </option>
-          ))}
-        </Select>
-        <Input
-          name="perCycleCost"
-          label="Per-Cycle Cost"
-          placeholder="Per-Cycle Cost"
-          required
-          type="number"
-          variant="outlined"
-          {...register('perCycleCost', { required: 'Enter total cost per pay cycle' })}
-          error={!!errors?.perCycleCost}
-          helperText={errors?.perCycleCost ? errors.perCycleCost.message : ' '}
-        />
-        <input
-          type="date"
-          value={startDate}
-          min={fullDate}
-          max={nextMonthFullDate}
-          onChange={(e) => { setStartDate(e.target.value); }}
-        />
-        <Button type="submit" variant="contained" disabled={loading}>Submit</Button>
-      </form>
-      <Button variant="contained" onClick={() => { navigate('/dashboard'); }}>Cancel</Button>
-    </div>
+    <Flex width="fill" align="center" justifyContent="center">
+      <Box p={2} my={8} width="40%" bg="white" borderRadius="15">
+        <Heading>Create a New Plan</Heading>
+        <Box my={4} textAlign="left">
+          <form
+            autoComplete="off"
+            onSubmit={handleSubmit(onSubmit)}
+          >
+            <FormControl
+              isRequired
+              isInvalid={errors.planName}
+            >
+              <FormLabel>Plan Name</FormLabel>
+              <Input
+                name="planName"
+                placeholder="Plan Name"
+                type="text"
+                {...register('planName', { required: 'Plan name required' })}
+              />
+              {errors.planName ? (
+                <FormErrorMessage>
+                  {errors.planName.message}
+                </FormErrorMessage>
+              ) : (
+                <div>&nbsp;</div>
+              )}
+            </FormControl>
+            <FormControl
+              isRequired
+              isInvalid={errors.cycleFrequency}
+            >
+              <FormLabel>Cycle Frequency</FormLabel>
+              <Select
+                variant="outline"
+                name="cycleFrequency"
+                placeholder="Select a Cycle Frequency"
+                {...register('cycleFrequency', { required: 'Select cycle frequency' })}
+              >
+                {['Weekly', 'Monthly', 'Yearly'].map((freq) => (
+                  <option key={freq} value={freq}>
+                    {freq}
+                  </option>
+                ))}
+              </Select>
+              {errors.cycleFrequency ? (
+                <FormErrorMessage>
+                  {errors.cycleFrequency.message}
+                </FormErrorMessage>
+              ) : (
+                <div>&nbsp;</div>
+              )}
+            </FormControl>
+            <FormControl
+              isRequired
+              isInvalid={errors.timeZone}
+            >
+              <FormLabel>Time Zone</FormLabel>
+              <Select
+                name="timeZone"
+                placeholder="Select a Time Zone"
+                {...register('timeZone', { required: 'Select time zone' })}
+              >
+                {['Eastern', 'Central', 'Mountain', 'Pacific'].map((zone) => (
+                  <option key={zone} value={zone}>
+                    {zone}
+                  </option>
+                ))}
+              </Select>
+              {errors.timeZone ? (
+                <FormErrorMessage>
+                  {errors.timeZone.message}
+                </FormErrorMessage>
+              ) : (
+                <div>&nbsp;</div>
+              )}
+            </FormControl>
+            <FormControl
+              isRequired
+              isInvalid={errors.perCycleCost}
+            >
+              <FormLabel>Per-Cycle Cost</FormLabel>
+              <InputGroup>
+                <InputLeftElement
+                  children='$'
+                />
+                <Input
+                  name="perCycleCost"
+                  placeholder="Per-Cycle Cost"
+                  type="number"
+                  {...register('perCycleCost', { required: 'Enter total cost per pay cycle' })}
+                />
+              </InputGroup>
+              {errors.perCycleCost ? (
+                <FormErrorMessage>
+                  {errors.perCycleCost.message}
+                </FormErrorMessage>
+              ) : (
+                <div>&nbsp;</div>
+              )}
+            </FormControl>
+            <FormControl
+              isRequired
+            >
+              <FormLabel>Start Date</FormLabel>
+              <Input
+                type="date"
+                value={startDate}
+                min={fullDate}
+                max={nextMonthFullDate}
+                onChange={(e) => { setStartDate(e.target.value); }}
+              />
+            </FormControl>
+            <div>&nbsp;</div>
+            <Button type="submit" isLoading={loading} disabled={loading}>Submit</Button>
+            <Button onClick={() => { navigate('/dashboard'); }}>Cancel</Button>
+          </form>
+        </Box>
+      </Box>
+    </Flex>
   );
 }
