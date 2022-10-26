@@ -12,6 +12,7 @@ export default function ModifyQuantity({ quantity: originalQuant, plan }) {
 
   return (
     <div>
+      {console.log(quantity, typeof quantity)}
       {quantity === '0'
         ? (
           <Button onClick={() => { navigate(`/join/${plan.planId}`); }}>Join</Button>

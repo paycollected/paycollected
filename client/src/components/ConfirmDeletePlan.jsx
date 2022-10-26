@@ -35,7 +35,7 @@ export default function ConfirmDeletePlan({ plan }) {
 
   return (
     <div>
-      <Button onClick={onOpen}>Delete Subscription</Button>
+      <Button onClick={onOpen}>Delete Plan</Button>
       <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
         <ModalContent>
