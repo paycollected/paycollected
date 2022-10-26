@@ -1,7 +1,6 @@
 mutation CreateUser ($firstName: String!, $lastName: String!, $username: String!, $password: String!, $email: Email!) {
   createUser(firstName: $firstName, lastName: $lastName, username: $username, password: $password, email: $email) {
     username
-    email
     token
   }
 }
@@ -10,7 +9,6 @@ mutation CreateUser ($firstName: String!, $lastName: String!, $username: String!
 mutation LogIn ($username: String!, $password: String!) {
   login(username: $username, password: $password) {
     username
-    email
     token
   }
 }

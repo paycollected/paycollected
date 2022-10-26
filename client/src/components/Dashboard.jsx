@@ -6,9 +6,7 @@ import {
 
 // actual redirect URL string 'http://localhost:5647/dashboard/?setup_intent=seti_1Lq9rqAJ5Ik974ueIdg7WHn9&setup_intent_client_secret=seti_1Lq9rqAJ5Ik974ueIdg7WHn9_secret_MZISJyXsMF6na4pA6ryaqOfvt8JbeGa&redirect_status=succeeded'
 
-export default function Dashboard({
-  username, setUser, setPlanToJoin, setEmail,
-}) {
+export default function Dashboard({ username, setUser, setPlanToJoin }) {
   const navigate = useNavigate();
   const [showCodeInput, setShowCodeInput] = useState(false);
   const [code, setCode] = useState('');
@@ -34,7 +32,6 @@ export default function Dashboard({
   const logUserOut = () => {
     localStorage.clear();
     setUser(null);
-    setEmail(null);
     setPlanToJoin(null);
     navigate('/');
   };

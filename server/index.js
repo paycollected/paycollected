@@ -32,10 +32,10 @@ async function startApolloServer() {
       if (token.length > 0) {
         try {
           const { user } = jwt.verify(token, process.env.SECRET_KEY);
-          const { username, email, stripeCusId } = user;
+          const { username, stripeCusId } = user;
           return {
             user: {
-              username, email, stripeCusId,
+              username, stripeCusId,
             },
             err: null
           };

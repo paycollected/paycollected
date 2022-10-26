@@ -24,7 +24,6 @@ export default gql`
   type LoginInfo {
     username: String!
     # username: Username!
-    email: Email!
     token: String!
   }
 

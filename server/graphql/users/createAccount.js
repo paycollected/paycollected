@@ -34,11 +34,10 @@ export default async function createAccount(firstName, lastName, username, passw
         // storing user's info in token so we can easily obtain it from context in any resolver
         user: {
           username,
-          email,
           stripeCusId,
         }
       }, process.env.SECRET_KEY);
-      return { username, email, token };
+      return { username, token };
       // username or email exist --> return error
 
     // note: Security docs recommend that we should only display a generic msg

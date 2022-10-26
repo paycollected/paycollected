@@ -84,7 +84,6 @@ function CheckoutForm({ setupIntentId, paymentMethods }) {
   return (
     <>
       <h3>This is the Checkout Form component</h3>
-      {console.log('-----------> selectedCard', selectedCard)}
       <form onSubmit={handlePaymentSubmit}>
         {paymentMethods.length > 0 && (
           <SavedCards

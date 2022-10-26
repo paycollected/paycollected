@@ -28,9 +28,7 @@ async function updateStripePrice(row, price, productTotalQuantity) {
             quantity
           }
         ],
-        metadata: {
-          productTotalQuantity,
-        },
+        metadata: { productTotalQuantity },
         proration_behavior: 'none',
       }
     );
@@ -67,15 +65,6 @@ async function processQuantChangeOnSubsStart(
 }
 
 
-async function updateDefaultPaymentMethod(defaultPmnt, newMethodId, username, stripeCusId) {
-  if (!defaultPmnt) {
-    return await Promise.all([
-      models.updateDefaultPmntMethod(username, newMethodId),
-      stripe.customers.update(stripeCusId, { invoice_settings: { default_payment_method: defaultPmnt } })
-    ]);
-  }
-}
-
 export async function handleSubscriptionStart(setupIntent) {
   // info needed from db: cycleFreq, total count, perCycleCost, startDate for this person,
   // everyone else already on plan
@@ -83,10 +72,7 @@ export async function handleSubscriptionStart(setupIntent) {
   // API calls: start subscription for this person
   // change subscriptions for existing plan members
   const { customer, payment_method: paymentMethodId } = setupIntent;
-  const {
-    planId,
-    username,
-  } = setupIntent.metadata;
+  const { planId, username } = setupIntent.metadata;
   const quantity = Number(setupIntent.metadata.quantity);
 
   try {
@@ -97,13 +83,36 @@ export async function handleSubscriptionStart(setupIntent) {
       models.subscriptionSetup(planId),
       stripe.customers.retrieve(customer)
     ]);
+
     const {
       cycleFrequency, perCycleCost, count, prevPriceId, startDate
     } = rows[0];
     const productTotalQuantity = quantity + count;
+    const subscription = {
+      customer,
+      items: [{
+        price: prevPriceId,
+        quantity,
+      }],
+      payment_behavior: 'default_incomplete',
+      payment_settings: {
+        save_default_payment_method: 'on_subscription',
+        payment_method_types: ['card'],
+      },
+      proration_behavior: 'none',
+      trial_end: startDate,
+      expand: ['pending_setup_intent'],
+      metadata: {
+        productTotalQuantity,
+        cycleFrequency,
+        perCycleCost,
+        quantChanged: false,
+        cancelSubs: false,
+      }
+    };
 
     if (count > 0 || quantity > 1) {
-      const [{ id: newPriceId }, _] = await Promise.all([
+      const promises = [
         stripe.prices.create({
           currency: 'usd',
           product: planId,
@@ -114,33 +123,22 @@ export async function handleSubscriptionStart(setupIntent) {
         // create new price ID;
         stripe.prices.update(prevPriceId, { active: false }),
         // archive old price ID
-      ]);
+      ];
 
-      const [{ id: subscriptionId, items }, __] = await Promise.all([
-        stripe.subscriptions.create({
-          customer,
-          items: [{
-            price: newPriceId,
-            quantity,
-          }],
-          payment_behavior: 'default_incomplete',
-          payment_settings: {
-            save_default_payment_method: 'on_subscription',
-            payment_method_types: ['card'],
-          },
-          proration_behavior: 'none',
-          trial_end: startDate,
-          expand: ['pending_setup_intent'],
-          metadata: {
-            productTotalQuantity,
-            cycleFrequency,
-            perCycleCost,
-            quantChanged: false,
-            cancelSubs: false,
-          }
-        }),
-        updateDefaultPaymentMethod(defaultPmntMethod, paymentMethodId, username, customer)
-      ]);
+      if (defaultPmntMethod === null) {
+        promises.push(
+          stripe.customers.update(
+            customer,
+            { invoice_settings: { default_payment_method: paymentMethodId } }
+          )
+          // update the default payment method for this customer
+        );
+      }
+
+      const [{ id: newPriceId }] = await Promise.all(promises);
+      subscription.items[0].price = newPriceId;
+
+      const { id: subscriptionId, items } = await stripe.subscriptions.create(subscription);
 
       const { id: subscriptionItemId } = items.data[0];
 
@@ -164,32 +162,19 @@ export async function handleSubscriptionStart(setupIntent) {
     // no other plan members to update
     // --> also create subscription for this person
     // --> only need to update db
-      const [{ id: subscriptionId, items,}, _] = await Promise.all([
-        stripe.subscriptions.create({
-          customer,
-          items: [{
-            price: prevPriceId, // just use whatever latest priceId is in db
-            // will have to recalculate at webhook anyway
-            quantity,
-          }],
-          payment_behavior: 'default_incomplete',
-          payment_settings: {
-            save_default_payment_method: 'on_subscription',
-            payment_method_types: ['card'],
-          },
-          proration_behavior: 'none',
-          trial_end: startDate,
-          expand: ['pending_setup_intent'],
-          metadata: {
-            productTotalQuantity, // will need to get latest number from webhook
-            cycleFrequency,
-            perCycleCost,
-            quantChanged: false,
-            cancelSubs: false,
-          }
-        }),
-        updateDefaultPaymentMethod(defaultPmntMethod, paymentMethodId, username, customer)
-      ]);
+      let subscriptionId;
+      let items;
+      if (defaultPmntMethod === null) {
+        [{ id: subscriptionId, items }, _] = await Promise.all([
+          stripe.subscriptions.create(subscription),
+          stripe.customers.update(
+            customer,
+            { invoice_settings: { default_payment_method: paymentMethodId } }
+          )
+        ]);
+      } else {
+        ({ id: subscriptionId, items } = await stripe.subscriptions.create(subscription));
+      }
 
       const { id: subscriptionItemId } = items.data[0];
       await models.startSubscriptionWithNoPriceUpdate(
@@ -340,7 +325,7 @@ export async function handleDefaultPmntMethodChange(customer) {
     invoice_settings: { default_payment_method: newMethodId },
     metadata: { username }
   } = customer;
-  if (newMethodId) {
+  if (newMethodId !== null) {
     await models.updateDefaultPmntMethod(username, newMethodId);
   }
 }
