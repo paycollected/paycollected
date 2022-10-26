@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button, Input } from '@chakra-ui/react';
+import {
+  Button, FormControl, FormLabel, Input, Heading
+} from '@chakra-ui/react';
 
 // actual redirect URL string 'http://localhost:5647/dashboard/?setup_intent=seti_1Lq9rqAJ5Ik974ueIdg7WHn9&setup_intent_client_secret=seti_1Lq9rqAJ5Ik974ueIdg7WHn9_secret_MZISJyXsMF6na4pA6ryaqOfvt8JbeGa&redirect_status=succeeded'
 
@@ -13,7 +15,6 @@ export default function Dashboard({
 
   useEffect(() => {
     const queryStr = window.location.search;
-    console.log('-----------> queryStr:', queryStr);
     if (queryStr.length > 0) {
       const urlParams = new URLSearchParams(queryStr);
       if (urlParams.get('redirect_status') === 'succeeded') {
@@ -41,27 +42,35 @@ export default function Dashboard({
   return (
     <div>
       <Button onClick={logUserOut}>Log Out</Button>
-      <h1>
+      <Heading>
         {username}
         &apos;s Dashboard
-      </h1>
+      </Heading>
       <Button onClick={() => { navigate('/plan/create'); }}>Create a New Plan</Button>
       <Button onClick={() => { navigate('/plan/all'); }}>Your Current Plans</Button>
       <Button onClick={() => { setShowCodeInput(true); }}>Have a Code? Join a Plan!</Button>
       <div>
         {showCodeInput && (
-        <form onSubmit={codeInputSubmit}>
-          <Input
-            type="text"
-            label="Plan Code"
-            placeholder="Plan Code"
-            value={code}
-            required
-            variant="outlined"
-            onChange={(e) => { setCode(e.target.value); }}
-          />
-          <Button type="submit">Join!</Button>
-        </form>
+        <div>
+          <form onSubmit={codeInputSubmit}>
+            <FormControl
+              isRequired
+              my={2}
+            >
+              <FormLabel>Plan Code</FormLabel>
+              <Input
+                type="text"
+                width="50%"
+                bg="white"
+                placeholder="Enter Code"
+                value={code}
+                onChange={(e) => { setCode(e.target.value); }}
+              />
+            </FormControl>
+            <Button type="submit">Join!</Button>
+            <Button onClick={() => { setShowCodeInput(false); }}>Cancel</Button>
+          </form>
+        </div>
         )}
       </div>
     </div>
