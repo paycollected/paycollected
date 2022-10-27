@@ -134,7 +134,7 @@ how does this affect what we store in db?
 */
 
 export default function Checkout({
-  stripeClientSecret, setupIntentId, paymentMethods, plan, quantity
+  stripeClientSecret, setupIntentId, paymentMethods,
 }) {
   const options = {
     clientSecret: stripeClientSecret
@@ -149,8 +149,6 @@ export default function Checkout({
           <CheckoutForm
             setupIntentId={setupIntentId}
             paymentMethods={paymentMethods}
-            plan={plan}
-            quantity={quantity}
           />
         </Elements>
       </div>
