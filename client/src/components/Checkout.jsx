@@ -33,19 +33,20 @@ function CheckoutForm({ setupIntentId, paymentMethods, plan, quantity }) {
     },
     update: (cache) => {
       cache.modify({
-        id: `Plan:{"planId":"${plan}"}`,
-        fields: {
-          quantity() {
-            console.log('oooooo');
-            console.log(quantity, '<------ quantity');
-            console.log(plan, '<-------- plan');
-            return quantity;
-          },
-        }
-      });
-      cache.modify({
         fields: {
           viewAllPlans(allPlanRefs, { readField }) {
+            cache.modify({
+              id: `Plan:{"planId":"${plan}"}`,
+              fields: {
+                quantity() {
+                  console.log('oooooo');
+                  console.log(quantity, '<------ quantity');
+                  console.log(plan, '<-------- plan');
+                  return quantity;
+                },
+              }
+            });
+
             if (allPlanRefs.some((planRef) => (plan === readField('planId', planRef)))) {
               console.log('aaaaaa');
               return allPlanRefs;
