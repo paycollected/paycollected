@@ -14,7 +14,7 @@ export default function JoinPlan({
 
   const { loading: getPlanLoading, data: getPlanData, error: getPlanError } = useQuery(GET_PLAN, {
     variables: { planId: planId.toString().trim() },
-    fetchPolicy: 'network-only',
+    fetchPolicy: 'cache-and-network',
     nextFetchPolicy: 'cache-only',
   });
 
