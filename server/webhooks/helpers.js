@@ -71,6 +71,7 @@ export async function handleSubscriptionStart(setupIntent) {
   // also potential create a new price ID
   // API calls: start subscription for this person
   // change subscriptions for existing plan members
+  const a = Date.now();
   const { customer, payment_method: paymentMethodId } = setupIntent;
   const { planId, username } = setupIntent.metadata;
   const quantity = Number(setupIntent.metadata.quantity);
@@ -184,6 +185,8 @@ export async function handleSubscriptionStart(setupIntent) {
   } catch (e) {
     console.log(e);
   }
+  const b = Date.now();
+  console.log('--------------> end - start', (b - a) / 1000);
 }
 
 export async function handleSubscriptionCancel(subscription) {

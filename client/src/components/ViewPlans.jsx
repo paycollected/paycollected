@@ -16,7 +16,7 @@ export default function ViewPlans({ user }) {
   const { hasCopied, onCopy } = useClipboard(`${process.env.CLIENT_HOST}:${process.env.SERVER_PORT}/join/${planToCopy}`);
 
   const { loading, data, error } = useQuery(GET_ALL_PLANS, {
-    fetchPolicy: 'cache-first',
+    fetchPolicy: 'cache-and-network',
     nextFetchPolicy: 'cache-only',
   });
 
