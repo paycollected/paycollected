@@ -40,6 +40,7 @@ export default function ViewPlans({ user }) {
           <Box textAlign="center">
             <Heading>Your Subscriptions</Heading>
           </Box>
+          {console.log('------> data:', data)}
           {data
             && (data.viewAllPlans.map((plan) => (
               <div key={plan.name}>

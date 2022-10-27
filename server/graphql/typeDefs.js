@@ -135,7 +135,7 @@ export default gql`
     subscribeWithSavedCard(
       paymentMethodId: PaymentMethodID!
       setupIntentId: SetupIntentID!
-    ): Boolean!
+    ): Plan!
 
     joinPlan(
       planId: PlanID!

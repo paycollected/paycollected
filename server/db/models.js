@@ -445,6 +445,31 @@ export function updateDefaultPmntMethod(username, pmntMethodId) {
   const query = `
     UPDATE users SET default_pmnt_id = $1 WHERE username = $2
   `;
-
   return pool.query(query, [pmntMethodId, username]);
+}
+
+export function planReturnAfterSubs(planId, quantity) {
+  const query = `
+    WITH select_owner AS (
+      SELECT
+        JSON_BUILD_OBJECT(
+          'firstName', u.first_name,
+          'lastName', u.last_name,
+          'username', u.username
+        ) AS owner
+      FROM users u
+      JOIN user_plan up
+      ON u.username = up.username
+      WHERE up.plan_owner = True AND up.plan_id = $1
+    )
+    SELECT p.plan_id AS "planId",
+    p.plan_name AS name,
+    UPPER(p.cycle_frequency::VARCHAR) AS "cycleFrequency",
+    p.per_cycle_cost AS "perCycleCost",
+    $2 AS quantity,
+    (SELECT owner FROM select_owner)
+    FROM plans p
+    WHERE p.plan_id = $1`;
+
+  return pool.query(query, [planId, quantity]);
 }

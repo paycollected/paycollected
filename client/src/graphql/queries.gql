@@ -6,7 +6,7 @@ query ViewOnePlan ($planId: PlanID!) {
       firstName
       lastName
       username
-    },
+    }
     cycleFrequency
     perCycleCost
     activeMembers {

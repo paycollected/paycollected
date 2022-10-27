@@ -1,6 +1,6 @@
 import stripeSDK from 'stripe';
-import { ApolloError, ForbiddenError, UserInputError } from 'apollo-server-core';
-import { getUserInfo } from '../../db/models.js';
+import { ApolloError, ForbiddenError } from 'apollo-server-core';
+import { getUserInfo, planReturnAfterSubs } from '../../db/models.js';
 
 const stripe = stripeSDK(process.env.STRIPE_SECRET_KEY);
 
@@ -12,10 +12,12 @@ export default async function subscribeWithSavedCardResolver(
   let paymentMethodCustomer;
   let setupIntentCustomer;
   let rows;
+  let planId;
+  let quantity;
   try {
     [
       { customer: paymentMethodCustomer },
-      { customer: setupIntentCustomer },
+      { customer: setupIntentCustomer, metadata: { quantity, planId } },
       { rows }
     ] = await Promise.all([
       stripe.paymentMethods.retrieve(paymentMethodId),
@@ -33,8 +35,12 @@ export default async function subscribeWithSavedCardResolver(
   }
 
   try {
-    await stripe.setupIntents.confirm(setupIntentId, { payment_method: paymentMethodId });
-    return true;
+    const [{ rows: resultRows }, _] = await Promise.all([
+      planReturnAfterSubs(planId, quantity),
+      stripe.setupIntents.confirm(setupIntentId, { payment_method: paymentMethodId })
+    ]);
+
+    return resultRows[0];
   } catch (e) {
     console.log(e);
     throw new ApolloError('Unable to cancel transaction');

@@ -8,16 +8,19 @@ import {
   Flex, Box, FormControl, FormLabel, FormErrorMessage, Button, Input
 } from '@chakra-ui/react';
 import { loadStripe } from '@stripe/stripe-js';
+import { ViewAllPlans as viewAllPlansQuery } from '../graphql/queries.gql';
 import { CancelTransaction as CANCEL_TRANSC, SubscribeWithSavedCard as SUBSCRIBE } from '../graphql/mutations.gql';
 import SavedCards from './SavedCards.jsx';
 
 const stripePromise = loadStripe(process.env.STRIPE_PUBLISHABLE_KEY);
 
-function CheckoutForm({ setupIntentId, paymentMethods, plan, quantity }) {
+function CheckoutForm({ setupIntentId, paymentMethods }) {
   const navigate = useNavigate();
+  // CACHE IS UPDATING CORRECTLY
+  // BUT UI IN viewPlans is not rendering from cache??
   const [cancel, { loading }] = useMutation(CANCEL_TRANSC, {
     onCompleted: () => {
-      navigate('/dashboard');
+      navigate('/plan/all');
     },
     onError: ({ message }) => {
       console.log(message);
@@ -26,36 +29,18 @@ function CheckoutForm({ setupIntentId, paymentMethods, plan, quantity }) {
 
   const [submitPayment, { data, loading: subscribeLoading, error }] = useMutation(SUBSCRIBE, {
     onCompleted: () => {
-      navigate('/dashboard');
+      // navigate('/dashboard');
+      navigate('/plan/all');
     },
     onError: ({ message }) => {
       console.log('error subscribing using a saved card: ', message);
     },
-    update: (cache) => {
-      cache.modify({
-        id: `Plan:{"planId":"${plan}"}`,
-        fields: {
-          quantity() {
-            console.log('oooooo');
-            console.log(quantity, '<------ quantity');
-            console.log(plan, '<-------- plan');
-            return quantity;
-          },
-        }
-      });
-
-      cache.modify({
-        fields: {
-          viewAllPlans(allPlanRefs, { readField }) {
-            if (allPlanRefs.some((planRef) => (plan === readField('planId', planRef)))) {
-              console.log('aaaaaa');
-              return allPlanRefs;
-            }
-            console.log('bbbbb');
-            return [...allPlanRefs, { __ref: `Plan:{"planId":"${plan}"}` }];
-          }
-        }
-      });
+    update: (cache, { data: { subscribeWithSavedCard } }) => {
+      console.log('------> cache & subscribeWithSavedCard', cache, subscribeWithSavedCard);
+      const { planId, quantity } = subscribeWithSavedCard;
+      cache.updateQuery({
+        query: viewAllPlansQuery,
+      }, ({ viewAllPlans }) => ({ viewAllPlans: [...viewAllPlans, subscribeWithSavedCard] }));
     }
   });
 
