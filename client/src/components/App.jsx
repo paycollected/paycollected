@@ -37,6 +37,7 @@ function App() {
 
   return (
     <Routes>
+      {console.log(quantityOfPlanToJoin, '<--------- quant of plan to join')}
       <Route path="/" element={!user ? <Home /> : <Navigate to="/dashboard" />} />
       <Route
         path="/login"

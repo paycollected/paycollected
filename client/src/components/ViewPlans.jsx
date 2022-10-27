@@ -17,7 +17,7 @@ export default function ViewPlans({ user }) {
 
   const { loading, data, error } = useQuery(GET_ALL_PLANS, {
     fetchPolicy: 'cache-and-network',
-    nextFetchPolicy: 'cache-only',
+    // nextFetchPolicy: 'cache-only',
   });
 
   const [

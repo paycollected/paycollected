@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import {
   useStripe, useElements, Elements, PaymentElement,
 } from '@stripe/react-stripe-js';
-import { useMutation } from '@apollo/client';
+import { useMutation, gql } from '@apollo/client';
 import { useNavigate } from 'react-router-dom';
 import {
   Flex, Box, FormControl, FormLabel, FormErrorMessage, Button, Input
@@ -33,20 +33,20 @@ function CheckoutForm({ setupIntentId, paymentMethods, plan, quantity }) {
     },
     update: (cache) => {
       cache.modify({
+        id: `Plan:{"planId":"${plan}"}`,
+        fields: {
+          quantity() {
+            console.log('oooooo');
+            console.log(quantity, '<------ quantity');
+            console.log(plan, '<-------- plan');
+            return quantity;
+          },
+        }
+      });
+
+      cache.modify({
         fields: {
           viewAllPlans(allPlanRefs, { readField }) {
-            cache.modify({
-              id: `Plan:{"planId":"${plan}"}`,
-              fields: {
-                quantity() {
-                  console.log('oooooo');
-                  console.log(quantity, '<------ quantity');
-                  console.log(plan, '<-------- plan');
-                  return quantity;
-                },
-              }
-            });
-
             if (allPlanRefs.some((planRef) => (plan === readField('planId', planRef)))) {
               console.log('aaaaaa');
               return allPlanRefs;
