@@ -26,8 +26,6 @@ export default async function subscribeWithSavedCardResolver(
     console.log(e);
     throw new ApolloError('Unable to cancel transaction');
   }
-  console.log(username);
-  console.log(rows);
 
   if (rows[0].stripeCusId !== paymentMethodCustomer
     || rows[0].stripeCusId !== setupIntentCustomer) {

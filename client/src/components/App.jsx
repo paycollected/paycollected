@@ -29,6 +29,7 @@ if (token) {
 function App() {
   const [user, setUser] = useState(token ? username : null);
   const [planToJoin, setPlanToJoin] = useState(null);
+  const [quantityOfPlanToJoin, setQuantityOfPlanToJoin] = useState(0);
   const [showMagicLink, setShowMagicLink] = useState(false);
   const [stripeClientSecret, setStripeClientSecret] = useState(null);
   const [setupIntentId, setSetupIntentId] = useState(null);
@@ -80,6 +81,8 @@ function App() {
             : (
               <JoinPlan
                 setPlanToJoin={setPlanToJoin}
+                quantityOfPlanToJoin={quantityOfPlanToJoin}
+                setQuantityOfPlanToJoin={setQuantityOfPlanToJoin}
                 setStripeClientSecret={setStripeClientSecret}
                 setSetupIntentId={setSetupIntentId}
                 setPaymentMethods={setPaymentMethods}
@@ -93,6 +96,8 @@ function App() {
         element={user && stripeClientSecret
           ? (
             <Checkout
+              plan={planToJoin}
+              quantity={quantityOfPlanToJoin}
               stripeClientSecret={stripeClientSecret}
               setupIntentId={setupIntentId}
               setStripeClientSecret={setStripeClientSecret}

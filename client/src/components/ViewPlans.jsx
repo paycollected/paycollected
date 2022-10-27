@@ -16,7 +16,7 @@ export default function ViewPlans({ user }) {
   const { hasCopied, onCopy } = useClipboard(`${process.env.CLIENT_HOST}:${process.env.SERVER_PORT}/join/${planToCopy}`);
 
   const { loading, data, error } = useQuery(GET_ALL_PLANS, {
-    fetchPolicy: 'network-only',
+    fetchPolicy: 'cache-first',
     nextFetchPolicy: 'cache-only',
   });
 
@@ -76,10 +76,15 @@ export default function ViewPlans({ user }) {
                     )}
                   </GridItem>
                   <GridItem colSpan={1} textAlign="center">
-                    <ModifyQuantity
-                      quantity={plan.quantity}
-                      plan={plan}
-                    />
+                    {plan.owner.username === user && plan.quantity === 0
+                      ? (<Button onClick={() => { navigate(`/join/${plan.planId}`); }}>Join</Button>)
+                      : (
+                        <ModifyQuantity
+                          quantity={plan.quantity}
+                          plan={plan}
+                        />
+                      )
+                    }
                     <br></br>
                     {(plan.owner.username !== user
                       || (plan.owner.username === user && plan.activeMembers.length > 0))

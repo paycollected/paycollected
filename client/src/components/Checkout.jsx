@@ -13,7 +13,7 @@ import SavedCards from './SavedCards.jsx';
 
 const stripePromise = loadStripe(process.env.STRIPE_PUBLISHABLE_KEY);
 
-function CheckoutForm({ setupIntentId, paymentMethods }) {
+function CheckoutForm({ setupIntentId, paymentMethods, plan, quantity }) {
   const navigate = useNavigate();
   const [cancel, { loading }] = useMutation(CANCEL_TRANSC, {
     onCompleted: () => {
@@ -31,7 +31,33 @@ function CheckoutForm({ setupIntentId, paymentMethods }) {
     onError: ({ message }) => {
       console.log('error subscribing using a saved card: ', message);
     },
+    // update: (cache) => {
+    //   cache.modify({
+    //     id: `Plan:{"planId":"${plan}"}`,
+    //     fields: {
+    //       quantity() {
+    //         console.log('oooooo');
+    //         console.log(quantity, '<------ quantity');
+    //         console.log(plan, '<-------- plan');
+    //         return quantity;
+    //       },
+    //     }
+    //   });
+    //   cache.modify({
+    //     fields: {
+    //       viewAllPlans(allPlanRefs, { readField }) {
+    //         if (allPlanRefs.some((planRef) => (plan === readField('planId', planRef)))) {
+    //           console.log('aaaaaa');
+    //           return allPlanRefs;
+    //         }
+    //         console.log('bbbbb');
+    //         return [...allPlanRefs, { __ref: `Plan:{"planId":"${plan}"}` }];
+    //       }
+    //     }
+    //   });
+    // }
   });
+
   const stripe = useStripe();
   const elements = useElements();
   const [selectedCard, setSelectedCard] = useState(
@@ -122,7 +148,7 @@ how does this affect what we store in db?
 */
 
 export default function Checkout({
-  stripeClientSecret, setupIntentId, paymentMethods,
+  stripeClientSecret, setupIntentId, paymentMethods, plan, quantity
 }) {
   const options = {
     clientSecret: stripeClientSecret
@@ -137,6 +163,8 @@ export default function Checkout({
           <CheckoutForm
             setupIntentId={setupIntentId}
             paymentMethods={paymentMethods}
+            plan={plan}
+            quantity={quantity}
           />
         </Elements>
       </div>
