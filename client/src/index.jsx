@@ -29,6 +29,30 @@ const cache = new InMemoryCache({
     Plan: {
       keyFields: ['planId'],
     },
+    Query: {
+      fields: {
+        viewAllPlans: {
+          merge: (existing = [], incoming) => {
+            if (incoming.every((plan) => (existing.includes(plan)))
+            && existing.length > incoming.length) {
+            // if server's response is not yet updated because webhook is still processing request
+            // cache will be more updated and accurate
+            // in this case prefer to use cached data
+              return existing;
+            }
+            if (!existing.every((plan) => (incoming.includes(plan)))) {
+              // if viewAllPlans haven't been called yet,
+              // for ex: user navigates straight to joinPlan without checking out viewAllPlans first
+              // cache will be empty at first
+              // after writing to cache after joining a plan,
+              // want to merge with network response, which may still be outdated
+              return [...existing, ...incoming];
+            }
+            return incoming;
+          }
+        }
+      }
+    }
   },
 });
 

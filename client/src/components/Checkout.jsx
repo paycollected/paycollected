@@ -31,31 +31,31 @@ function CheckoutForm({ setupIntentId, paymentMethods, plan, quantity }) {
     onError: ({ message }) => {
       console.log('error subscribing using a saved card: ', message);
     },
-    // update: (cache) => {
-    //   cache.modify({
-    //     id: `Plan:{"planId":"${plan}"}`,
-    //     fields: {
-    //       quantity() {
-    //         console.log('oooooo');
-    //         console.log(quantity, '<------ quantity');
-    //         console.log(plan, '<-------- plan');
-    //         return quantity;
-    //       },
-    //     }
-    //   });
-    //   cache.modify({
-    //     fields: {
-    //       viewAllPlans(allPlanRefs, { readField }) {
-    //         if (allPlanRefs.some((planRef) => (plan === readField('planId', planRef)))) {
-    //           console.log('aaaaaa');
-    //           return allPlanRefs;
-    //         }
-    //         console.log('bbbbb');
-    //         return [...allPlanRefs, { __ref: `Plan:{"planId":"${plan}"}` }];
-    //       }
-    //     }
-    //   });
-    // }
+    update: (cache) => {
+      cache.modify({
+        id: `Plan:{"planId":"${plan}"}`,
+        fields: {
+          quantity() {
+            console.log('oooooo');
+            console.log(quantity, '<------ quantity');
+            console.log(plan, '<-------- plan');
+            return quantity;
+          },
+        }
+      });
+      cache.modify({
+        fields: {
+          viewAllPlans(allPlanRefs, { readField }) {
+            if (allPlanRefs.some((planRef) => (plan === readField('planId', planRef)))) {
+              console.log('aaaaaa');
+              return allPlanRefs;
+            }
+            console.log('bbbbb');
+            return [...allPlanRefs, { __ref: `Plan:{"planId":"${plan}"}` }];
+          }
+        }
+      });
+    }
   });
 
   const stripe = useStripe();
