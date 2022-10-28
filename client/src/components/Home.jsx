@@ -1,9 +1,8 @@
 import React, { useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { Button, Box } from '@chakra-ui/react';
+import { useParams } from 'react-router-dom';
+import { Heading, Divider } from '@chakra-ui/react';
 
-export default function Home({ setPlanToJoin }) {
-  const navigate = useNavigate();
+export default function Home({ setPlanToJoin, }) {
   const { planId } = useParams();
 
   useEffect(() => {
@@ -15,8 +14,17 @@ export default function Home({ setPlanToJoin }) {
   return (
     <div>
       <h1>This is the Home page</h1>
-      <Button onClick={() => { navigate('/login'); }}>Login</Button>
-      <Button onClick={() => { navigate('/signup'); }}>Sign up</Button>
+      <Heading my={5}>
+        Info About App
+      </Heading>
+      <Divider />
+      <Heading my={5}>
+        Sign Up
+      </Heading>
+      <Divider />
+      <Heading my={5}>
+        Contact Us
+      </Heading>
     </div>
   );
 }
