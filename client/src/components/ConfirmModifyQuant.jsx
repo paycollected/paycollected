@@ -37,9 +37,9 @@ export default function ConfirmModifyQuant({
   });
 
   const handleSubmit = () => {
-    if (newQuantity === originalQuant.toString()) {
+    if (newQuantity === originalQuant) {
       setInputErr('Please submit a quantity different from your original.');
-    } else if (!regex.test(newQuantity) || newQuantity.length > 1) {
+    } else if (!regex.test(newQuantity)) {
       setInputErr('Invalid input! Only 1 through 6 please.');
     } else {
       onOpen();
