@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation } from '@apollo/client';
 import {
-  Flex, Box, Grid, GridItem, Heading, Button, useClipboard
+  Flex, Box, Grid, GridItem, Heading, Button, useClipboard, UnorderedList, ListItem
 } from '@chakra-ui/react';
 import { ViewAllPlans as GET_ALL_PLANS } from '../graphql/queries.gql';
 import { EditPayment as EDIT_PAYMENT } from '../graphql/mutations.gql';
@@ -57,11 +57,11 @@ export default function ViewPlans({ user }) {
                     {plan.activeMembers.length > 0 && (
                       <>
                         <div>Others on this plan:</div>
-                        <ul>
+                        <UnorderedList>
                           {plan.activeMembers.map((member) => (
-                            <li key={member.username}>{`${member.firstName} ${member.lastName} x ${member.quantity}`}</li>
+                            <ListItem key={member.username}>{`${member.firstName} ${member.lastName} x ${member.quantity}`}</ListItem>
                           ))}
-                        </ul>
+                        </UnorderedList>
                       </>
                     )}
                     {plan.activeMembers.length === 0
