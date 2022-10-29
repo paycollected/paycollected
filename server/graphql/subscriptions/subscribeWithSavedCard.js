@@ -1,7 +1,8 @@
 import stripeSDK from 'stripe';
 import bcrypt from 'bcrypt';
 import { ApolloError, ForbiddenError } from 'apollo-server-core';
-import { subscriptionSetupSavedCard, startSubsNoPriceUpdateReturningPlan } from '../../db/models.js';
+import { subscriptionSetupSavedCard, startSubsNoPriceUpdateReturningPlan, startSubsPriceUpdateReturningPlan } from '../../db/models.js';
+import { updateStripePrice } from '../../utils/helperFn.js';
 
 const stripe = stripeSDK(process.env.STRIPE_SECRET_KEY);
 
@@ -12,16 +13,14 @@ export default async function subscribeWithSavedCardResolver(
   planId,
   username
 ) {
-  // info needed from db: cycleFreq, total count, perCycleCost, startDate for this person,
-  // everyone else already on plan
-  // also potential create a new price ID
-  // API calls: start subscription for this person
-  // change subscriptions for existing plan members
   let err;
   try {
     const [
       { customer: paymentMethodCustomer },
-      { customer: setupIntentCustomer, metadata: { quantity: savedQuant, planId: planIdToSubscribe } },
+      {
+        customer: setupIntentCustomer,
+        metadata: { quantity: savedQuant, planId: planIdToSubscribe }
+      },
       { rows }
     ] = await Promise.all([
       stripe.paymentMethods.retrieve(paymentMethodId),
@@ -43,16 +42,14 @@ export default async function subscribeWithSavedCardResolver(
       err = 'User not authorized to perform this action';
       throw new Error();
     }
-    console.log('aaaaaa');
     const result = await bcrypt.compare(password, user.password);
     if (!result) {
       err = 'User not authorized to perform this action';
       throw new Error();
     }
-    console.log('bbbbb');
 
     // create new priceId if needbe
-    // also archieve old price id if needbe
+    // also archive old price id if needbe
     // update all existing plan members
     // create subscription for this person
     // cancel setupIntent
@@ -90,13 +87,11 @@ export default async function subscribeWithSavedCardResolver(
       // --> create subscription for this person
       // cancel setupIntent
       // --> only need to update db
-      console.log('I got to here');
       const [{ id: subscriptionId, items }, _] = await Promise.all([
         stripe.subscriptions.create(subscription),
         stripe.setupIntents.cancel(setupIntentId),
       ]);
       const { id: subscriptionItemId } = items.data[0];
-      console.log(planId, quantity, subscriptionId, subscriptionItemId, username, startDate);
       const { rows: resultRows } = await startSubsNoPriceUpdateReturningPlan(
         planId,
         quantity,
@@ -105,9 +100,53 @@ export default async function subscribeWithSavedCardResolver(
         username,
         startDate
       );
-      console.log(resultRows[0]);
+
       return resultRows[0];
     }
+
+    const [{ id: newPriceId }] = await Promise.all([
+      stripe.prices.create({
+        currency: 'usd',
+        product: planId,
+        unit_amount: Math.ceil(perCycleCost / productTotalQuantity),
+        recurring: { interval: cycleFrequency },
+        metadata: { deletePlan: false }
+      }),
+      stripe.prices.update(prevPriceId, { active: false }),
+      stripe.setupIntents.cancel(setupIntentId),
+    ]);
+    // replace old price Id with new Id
+    subscription.items[0].price = newPriceId;
+
+
+    const createNewSubsAndUpdateDb = async () => {
+      const { id: subscriptionId, items } = await stripe.subscriptions.create(subscription);
+      const { id: subscriptionItemId } = items.data[0];
+      const { rows: newRows } = await startSubsPriceUpdateReturningPlan(
+        planId,
+        quantity,
+        subscriptionId,
+        subscriptionItemId,
+        username,
+        newPriceId,
+        startDate
+      );
+      return newRows[0];
+    };
+
+    let plan;
+
+    if (count === 0) {
+      // no existing members yet
+      plan = await createNewSubsAndUpdateDb();
+    } else {
+      // there are other members --> also have to update their subscription
+      [plan] = await Promise.all([
+        createNewSubsAndUpdateDb(subscription),
+        ...members.map((member) => updateStripePrice(member, newPriceId, productTotalQuantity)),
+      ]);
+    }
+    return plan;
   } catch (e) {
     if (err) {
       throw new ForbiddenError(err);

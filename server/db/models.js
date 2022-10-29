@@ -382,6 +382,64 @@ export function startSubsNoPriceUpdateReturningPlan(
 }
 
 
+export function startSubsPriceUpdateReturningPlan(
+  planId,
+  quantity,
+  subscriptionId,
+  subscriptionItemId,
+  username,
+  newPriceId,
+  startDate
+) {
+  const query = `
+  WITH upd AS (
+    INSERT INTO user_plan
+        (quantity, subscription_id, subscription_item_id, plan_id, username, start_date)
+      VALUES
+        ($1, $2, $3, $4, $5, TO_TIMESTAMP($6))
+      ON CONFLICT
+        (username, plan_id)
+      DO UPDATE SET
+        quantity = $1, subscription_id = $2, subscription_item_id = $3
+      WHERE user_plan.username = $5 AND user_plan.plan_id = $4
+      RETURNING plan_id, quantity, subscription_id
+  ),
+  update_price_id AS (
+      UPDATE plans
+      SET price_id = $7
+      WHERE plan_id = $4
+  ),
+  select_owner AS (
+    SELECT
+        JSON_BUILD_OBJECT(
+          'firstName', u.first_name,
+          'lastName', u.last_name,
+          'username', u.username
+        ) AS owner
+      FROM users u
+      JOIN user_plan up
+      ON u.username = up.username
+      WHERE up.plan_owner = True AND up.plan_id = $4
+  )
+  SELECT
+      p.plan_id AS "planId",
+      p.plan_name AS name,
+      UPPER(p.cycle_frequency::VARCHAR) AS "cycleFrequency",
+      (p.per_cycle_cost / 100) AS "perCycleCost",
+      (SELECT owner FROM select_owner),
+      quantity,
+      subscription_id AS "subscriptionId"
+    FROM plans p
+    JOIN upd
+    ON p.plan_id = upd.plan_id
+    WHERE p.plan_id = $4
+  `;
+  const args = [quantity, subscriptionId, subscriptionItemId, planId, username, startDate,
+    newPriceId];
+  return pool.query(query, args);
+}
+
+
 export function startSubscription(
   planId,
   quantity,
