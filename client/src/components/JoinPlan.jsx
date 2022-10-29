@@ -1,7 +1,9 @@
 import React, { useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation } from '@apollo/client';
-import { Flex, Box, FormControl, FormLabel, Heading, Button, Input } from '@chakra-ui/react';
+import {
+  Flex, Box, FormControl, FormLabel, Heading, Button, Input, UnorderedList, ListItem
+} from '@chakra-ui/react';
 import { JoinPlan as JOIN_PLAN } from '../graphql/mutations.gql';
 import { ViewOnePlan as GET_PLAN } from '../graphql/queries.gql';
 
@@ -76,11 +78,11 @@ export default function JoinPlan({
             {activeMembers.length > 0 && (
               <>
                 <div>Others on this plan:</div>
-                <ul>
+                <UnorderedList>
                   {activeMembers.map((member) => (
-                    <li key={member.username}>{`${member.firstName} ${member.lastName} x ${member.quantity}`}</li>
+                    <ListItem key={member.username}>{`${member.firstName} ${member.lastName} x ${member.quantity}`}</ListItem>
                   ))}
-                </ul>
+                </UnorderedList>
               </>
             )}
             {activeMembers.length === 0

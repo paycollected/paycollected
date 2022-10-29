@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation } from '@apollo/client';
 import {
-  Flex, Box, Grid, GridItem, Heading, Button, useClipboard
+  Flex, Box, Grid, GridItem, Heading, Button, useClipboard, UnorderedList, ListItem, Tooltip
 } from '@chakra-ui/react';
+import { CopyIcon } from '@chakra-ui/icons';
 import { ViewAllPlans as GET_ALL_PLANS } from '../graphql/queries.gql';
 import { EditPayment as EDIT_PAYMENT } from '../graphql/mutations.gql';
 import ConfirmCancel from './ConfirmCancel.jsx';
@@ -11,7 +11,6 @@ import ModifyQuantity from './ModifyQuantity.jsx';
 import ConfirmDeletePlan from './ConfirmDeletePlan.jsx';
 
 export default function ViewPlans({ user }) {
-  const navigate = useNavigate();
   const [planToCopy, setPlanToCopy] = useState(null);
   const { hasCopied, onCopy } = useClipboard(`${process.env.CLIENT_HOST}:${process.env.SERVER_PORT}/join/${planToCopy}`);
 
@@ -33,7 +32,6 @@ export default function ViewPlans({ user }) {
 
   return (
     <div>
-      <Button onClick={() => { navigate('/dashboard'); }}>Dashboard</Button>
       <Button onClick={() => { submitEditPayment(); }}>Manage Payment Methods</Button>
       <Flex justifyContent="center">
         <Box p={2} my={8} width="60%" bg="white" borderRadius="15">
@@ -43,7 +41,10 @@ export default function ViewPlans({ user }) {
           {console.log('------> data:', data)}
           {data
             && (data.viewAllPlans.map((plan) => (
-              <div key={plan.name}>
+              <div
+                key={plan.name}
+                onMouseEnter={() => { setPlanToCopy(plan.planId); }}
+              >
                 <Grid templateColumns="repeat(3, 1fr)" gap={3} mb={3}>
                   <GridItem colSpan={2} textAlign="left">
                     <Heading size="xl">{plan.name}</Heading>
@@ -56,36 +57,25 @@ export default function ViewPlans({ user }) {
                     {plan.activeMembers.length > 0 && (
                       <>
                         <div>Others on this plan:</div>
-                        <ul>
+                        <UnorderedList>
                           {plan.activeMembers.map((member) => (
-                            <li key={member.username}>{`${member.firstName} ${member.lastName} x ${member.quantity}`}</li>
+                            <ListItem key={member.username}>{`${member.firstName} ${member.lastName} x ${member.quantity}`}</ListItem>
                           ))}
-                        </ul>
+                        </UnorderedList>
                       </>
                     )}
                     {plan.activeMembers.length === 0
                       && (<div>There are currently no other members on this plan.</div>)}
-                    {planToCopy === plan.planId ? (
-                      <Box>
-                        {`Link to join: ${process.env.CLIENT_HOST}:${process.env.SERVER_PORT}/join/${plan.planId}`}
-                        <Button variant="outline" size="sm" onClick={onCopy}>
-                          {hasCopied ? 'Copied' : 'Copy'}
-                        </Button>
-                      </Box>
-                    ) : (
-                      <Button variant="outline" size="sm" onClick={() => setPlanToCopy(plan.planId)}>Show Link</Button>
-                    )}
+                    Copy link to join:&nbsp;
+                    <Tooltip label={hasCopied ? 'Copied to clipboard' : 'Click to copy'}>
+                      <CopyIcon onClick={onCopy} />
+                    </Tooltip>
                   </GridItem>
                   <GridItem colSpan={1} textAlign="center">
-                    {plan.owner.username === user && plan.quantity === 0
-                      ? (<Button onClick={() => { navigate(`/join/${plan.planId}`); }}>Join</Button>)
-                      : (
-                        <ModifyQuantity
-                          quantity={plan.quantity}
-                          plan={plan}
-                        />
-                      )
-                    }
+                    <ModifyQuantity
+                      originalQuant={plan.quantity}
+                      plan={plan}
+                    />
                     <br></br>
                     {(plan.owner.username !== user
                       || (plan.owner.username === user && plan.activeMembers.length > 0))

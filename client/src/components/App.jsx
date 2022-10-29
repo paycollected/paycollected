@@ -12,6 +12,7 @@ import Checkout from './Checkout.jsx';
 import ViewPlans from './ViewPlans.jsx';
 import MagicLink from './MagicLink.jsx';
 import FourOhFour from './404.jsx';
+import NavBar from './NavBar.jsx';
 
 // check that token is still valid before displaying logged-in state
 let token = localStorage.getItem('token');
@@ -29,87 +30,86 @@ if (token) {
 function App() {
   const [user, setUser] = useState(token ? username : null);
   const [planToJoin, setPlanToJoin] = useState(null);
-  const [quantityOfPlanToJoin, setQuantityOfPlanToJoin] = useState(0);
   const [showMagicLink, setShowMagicLink] = useState(false);
   const [stripeClientSecret, setStripeClientSecret] = useState(null);
   const [setupIntentId, setSetupIntentId] = useState(null);
   const [paymentMethods, setPaymentMethods] = useState([]);
 
   return (
-    <Routes>
-      {console.log(quantityOfPlanToJoin, '<--------- quant of plan to join')}
-      <Route path="/" element={!user ? <Home /> : <Navigate to="/dashboard" />} />
-      <Route
-        path="/login"
-        element={!user
-          ? <Login setUser={setUser} planToJoin={planToJoin} />
-          : <Navigate to="/dashboard" />}
-      />
-      <Route
-        path="/signup"
-        element={!user
-          ? <Signup setUser={setUser} planToJoin={planToJoin} />
-          : <Navigate to="/dashboard" />}
-      />
-      <Route
-        path="/dashboard"
-        element={user
-          ? (
-            <Dashboard
-              username={user}
-              setUser={setUser}
-              setPlanToJoin={setPlanToJoin}
-            />
-          )
-          : <Navigate to="/" />}
-      />
-      <Route
-        path="/plan/create"
-        element={user
-          ?
-          (!showMagicLink
-            ? <CreatePlan setPlanToJoin={setPlanToJoin} setShowMagicLink={setShowMagicLink} />
-            : <MagicLink planToJoin={planToJoin} setShowMagicLink={setShowMagicLink} />
-          )
-          : <Navigate to="/" />
-          }
-      />
-      <Route
-        path="/join/:planId"
-        element={
-          !user
-            ? <Home setPlanToJoin={setPlanToJoin} />
-            : (
-              <JoinPlan
+    <div>
+      <NavBar user={user} setUser={setUser} setPlanToJoin={setPlanToJoin} />
+      <Routes>
+        <Route path="/" element={!user ? <Home setPlanToJoin={setPlanToJoin} /> : <Navigate to="/dashboard" />} />
+        <Route
+          path="/login"
+          element={!user
+            ? <Login setUser={setUser} planToJoin={planToJoin} />
+            : <Navigate to="/dashboard" />}
+        />
+        <Route
+          path="/signup"
+          element={!user
+            ? <Signup setUser={setUser} planToJoin={planToJoin} />
+            : <Navigate to="/dashboard" />}
+        />
+        <Route
+          path="/dashboard"
+          element={user
+            ? (
+              <Dashboard
+                username={user}
+                setUser={setUser}
                 setPlanToJoin={setPlanToJoin}
-                quantityOfPlanToJoin={quantityOfPlanToJoin}
-                setQuantityOfPlanToJoin={setQuantityOfPlanToJoin}
-                setStripeClientSecret={setStripeClientSecret}
-                setSetupIntentId={setSetupIntentId}
-                setPaymentMethods={setPaymentMethods}
               />
             )
-          }
-      />
-      <Route path="/cards" element={user ? <Cards /> : <Navigate to="/" />} />
-      <Route
-        path="/checkout"
-        element={user && stripeClientSecret
-          ? (
-            <Checkout
-              stripeClientSecret={stripeClientSecret}
-              setupIntentId={setupIntentId}
-              setStripeClientSecret={setStripeClientSecret}
-              setSetupIntentId={setSetupIntentId}
-              paymentMethods={paymentMethods}
-            />
-          )
-          : <Navigate to="/" />}
-      />
-      <Route path="/plan/all" element={user ? <ViewPlans user={user} /> : <Navigate to="/" />} />
-      <Route path="/404" element={<FourOhFour />} />
-      <Route path="*" element={<FourOhFour />} />
-    </Routes>
+            : <Navigate to="/" />}
+        />
+        <Route
+          path="/plan/create"
+          element={user
+            ?
+            (!showMagicLink
+              ? <CreatePlan setPlanToJoin={setPlanToJoin} setShowMagicLink={setShowMagicLink} />
+              : <MagicLink planToJoin={planToJoin} setShowMagicLink={setShowMagicLink} />
+            )
+            : <Navigate to="/" />
+            }
+        />
+        <Route
+          path="/join/:planId"
+          element={
+            !user
+              ? <Home setPlanToJoin={setPlanToJoin} />
+              : (
+                <JoinPlan
+                  setPlanToJoin={setPlanToJoin}
+                  setStripeClientSecret={setStripeClientSecret}
+                  setSetupIntentId={setSetupIntentId}
+                  setPaymentMethods={setPaymentMethods}
+                />
+              )
+            }
+        />
+        <Route path="/cards" element={user ? <Cards /> : <Navigate to="/" />} />
+        <Route
+          path="/checkout"
+          element={user && stripeClientSecret
+            ? (
+              <Checkout
+                stripeClientSecret={stripeClientSecret}
+                setupIntentId={setupIntentId}
+                setStripeClientSecret={setStripeClientSecret}
+                setSetupIntentId={setSetupIntentId}
+                paymentMethods={paymentMethods}
+              />
+            )
+            : <Navigate to="/" />}
+        />
+        <Route path="/plan/all" element={user ? <ViewPlans user={user} /> : <Navigate to="/" />} />
+        <Route path="/404" element={<FourOhFour />} />
+        <Route path="*" element={<FourOhFour />} />
+      </Routes>
+    </div>
   );
 }
 
