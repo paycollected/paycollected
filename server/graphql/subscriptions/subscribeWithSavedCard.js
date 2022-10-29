@@ -92,6 +92,7 @@ export default async function subscribeWithSavedCardResolver(
         stripe.setupIntents.cancel(setupIntentId),
       ]);
       const { id: subscriptionItemId } = items.data[0];
+      console.log(startDate);
       const { rows: resultRows } = await startSubsNoPriceUpdateReturningPlan(
         planId,
         quantity,

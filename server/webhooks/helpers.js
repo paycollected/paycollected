@@ -44,6 +44,7 @@ async function processQuantChangeOnSubsStart(
   username,
   newPriceId,
   productTotalQuantity,
+  startDate
 ) {
   const { rows } = await models.startSubscription(
     productId,
@@ -51,6 +52,7 @@ async function processQuantChangeOnSubsStart(
     subscriptionId,
     subscriptionItemId,
     username,
+    startDate,
     newPriceId
   );
   // save new subscription details (our db),
@@ -153,6 +155,7 @@ export async function handleSubscriptionStart(setupIntent) {
           username,
           newPriceId,
           productTotalQuantity,
+          startDate
         );
         // write new changes to db
         // and update all existing plan members

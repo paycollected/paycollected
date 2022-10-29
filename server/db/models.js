@@ -348,7 +348,7 @@ export function startSubsNoPriceUpdateReturningPlan(
       ON CONFLICT
         (username, plan_id)
       DO UPDATE SET
-        quantity = $1, subscription_id = $2, subscription_item_id = $3
+        quantity = $1, subscription_id = $2, subscription_item_id = $3, start_date = TO_TIMESTAMP($6)
       WHERE user_plan.username = $5 AND user_plan.plan_id = $4
       RETURNING plan_id, quantity, subscription_id
   ),
@@ -377,6 +377,7 @@ export function startSubsNoPriceUpdateReturningPlan(
     ON p.plan_id = upd.plan_id
     WHERE p.plan_id = $4
   `;
+  console.log(startDate);
   const args = [quantity, subscriptionId, subscriptionItemId, planId, username, startDate];
   return pool.query(query, args);
 }
@@ -400,7 +401,7 @@ export function startSubsPriceUpdateReturningPlan(
       ON CONFLICT
         (username, plan_id)
       DO UPDATE SET
-        quantity = $1, subscription_id = $2, subscription_item_id = $3
+        quantity = $1, subscription_id = $2, subscription_item_id = $3, start_date = TO_TIMESTAMP($6)
       WHERE user_plan.username = $5 AND user_plan.plan_id = $4
       RETURNING plan_id, quantity, subscription_id
   ),
@@ -446,25 +447,26 @@ export function startSubscription(
   subscriptionId,
   subscriptionItemId,
   username,
+  startDate,
   newPriceId
 ) {
   const query = `
     WITH update_sub_id AS
     (
       INSERT INTO user_plan
-        (quantity, subscription_id, subscription_item_id, plan_id, username)
+        (quantity, subscription_id, subscription_item_id, plan_id, username, start_date)
       VALUES
-        ($1, $2, $3, $4, $5)
+        ($1, $2, $3, $4, $5, $6)
       ON CONFLICT
         (username, plan_id)
       DO UPDATE SET
-        quantity = $1, subscription_id = $2, subscription_item_id = $3
+        quantity = $1, subscription_id = $2, subscription_item_id = $3, start_date = TO_TIMESTAMP($6)
       WHERE user_plan.username = $5 AND user_plan.plan_id = $4
     ),
     update_price_id AS
     (
       UPDATE plans
-      SET price_id = $6
+      SET price_id = $7
       WHERE plan_id = $4
     )
     SELECT
@@ -476,7 +478,8 @@ export function startSubscription(
     FROM user_on_plan
     WHERE plan_id = $4 AND subscription_id != $2
   `;
-  const args = [quantity, subscriptionId, subscriptionItemId, planId, username, newPriceId];
+  const args = [quantity, subscriptionId, subscriptionItemId, planId, username, startDate,
+    newPriceId];
   return pool.query(query, args);
 }
 

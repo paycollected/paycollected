@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS user_plan (
   plan_id VARCHAR(255) NOT NULL REFERENCES plans(plan_id) ON DELETE CASCADE,
   plan_owner BOOLEAN NOT NULL DEFAULT FALSE,
   quantity INTEGER NOT NULL DEFAULT 0,
-  start_date TIMESTAMP WITH TIME ZONE NOT NULL,
+  start_date TIMESTAMP WITH TIME ZONE,
   subscription_id VARCHAR(255) UNIQUE, -- stripe subscription id
   subscription_item_id VARCHAR(255) UNIQUE,
   UNIQUE (username, plan_id)
