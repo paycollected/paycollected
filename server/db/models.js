@@ -377,7 +377,6 @@ export function startSubsNoPriceUpdateReturningPlan(
     ON p.plan_id = upd.plan_id
     WHERE p.plan_id = $4
   `;
-  console.log(startDate);
   const args = [quantity, subscriptionId, subscriptionItemId, planId, username, startDate];
   return pool.query(query, args);
 }
