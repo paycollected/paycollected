@@ -1,7 +1,7 @@
 import stripeSDK from 'stripe';
 import bcrypt from 'bcrypt';
 import { ApolloError, ForbiddenError } from 'apollo-server-core';
-import { subscriptionSetupSavedCard, startSubscriptionWithNoPriceUpdate } from '../../db/models.js';
+import { subscriptionSetupSavedCard, startSubsNoPriceUpdateReturningPlan } from '../../db/models.js';
 
 const stripe = stripeSDK(process.env.STRIPE_SECRET_KEY);
 
@@ -94,7 +94,7 @@ export default async function subscribeWithSavedCardResolver(
         stripe.setupIntents.cancel(setupIntentId),
       ]);
       const { id: subscriptionItemId } = items.data[0];
-      const { rows: resultRows } = await startSubscriptionWithNoPriceUpdate(
+      const { rows: resultRows } = await startSubsNoPriceUpdateReturningPlan(
         planId,
         quantity,
         subscriptionId,

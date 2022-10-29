@@ -180,12 +180,13 @@ export async function handleSubscriptionStart(setupIntent) {
           ({ id: subscriptionId, items } = await stripe.subscriptions.create(subscription));
         }
         const { id: subscriptionItemId } = items.data[0];
-        await models.startSubscriptionWithNoPriceUpdate(
+        await models.startSubsNoPriceUpdate(
           planId,
           quantity,
           subscriptionId,
           subscriptionItemId,
           username,
+          startDate
         );
       }
     } catch (e) {
