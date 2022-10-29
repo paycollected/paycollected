@@ -21,7 +21,7 @@ export default async function subscribeWithSavedCardResolver(
   try {
     const [
       { customer: paymentMethodCustomer },
-      { customer: setupIntentCustomer, metadata: { quantity, planId: planIdToSubscribe } },
+      { customer: setupIntentCustomer, metadata: { quantity: savedQuant, planId: planIdToSubscribe } },
       { rows }
     ] = await Promise.all([
       stripe.paymentMethods.retrieve(paymentMethodId),
@@ -29,7 +29,10 @@ export default async function subscribeWithSavedCardResolver(
       subscriptionSetupSavedCard(planId, username)
     ]);
 
-    const user = JSON.parse(rows[0].user);
+    const quantity = Number(savedQuant);
+    const {
+      cycleFrequency, perCycleCost, count, prevPriceId, startDate, user, members
+    } = rows[0];
 
     // input validation
     if (user.stripeCusId !== paymentMethodCustomer
@@ -40,23 +43,21 @@ export default async function subscribeWithSavedCardResolver(
       err = 'User not authorized to perform this action';
       throw new Error();
     }
-
+    console.log('aaaaaa');
     const result = await bcrypt.compare(password, user.password);
     if (!result) {
       err = 'User not authorized to perform this action';
       throw new Error();
     }
+    console.log('bbbbb');
 
-    const members = JSON.parse(rows[0].members);
     // create new priceId if needbe
     // also archieve old price id if needbe
     // update all existing plan members
     // create subscription for this person
     // cancel setupIntent
     // save to db
-    const {
-      cycleFrequency, perCycleCost, count, prevPriceId, startDate,
-    } = rows[0];
+
     const productTotalQuantity = quantity + count;
     const subscription = {
       customer: user.stripeCusId,
@@ -89,11 +90,13 @@ export default async function subscribeWithSavedCardResolver(
       // --> create subscription for this person
       // cancel setupIntent
       // --> only need to update db
+      console.log('I got to here');
       const [{ id: subscriptionId, items }, _] = await Promise.all([
         stripe.subscriptions.create(subscription),
         stripe.setupIntents.cancel(setupIntentId),
       ]);
       const { id: subscriptionItemId } = items.data[0];
+      console.log(planId, quantity, subscriptionId, subscriptionItemId, username, startDate);
       const { rows: resultRows } = await startSubsNoPriceUpdateReturningPlan(
         planId,
         quantity,
@@ -102,12 +105,14 @@ export default async function subscribeWithSavedCardResolver(
         username,
         startDate
       );
+      console.log(resultRows[0]);
       return resultRows[0];
     }
   } catch (e) {
     if (err) {
       throw new ForbiddenError(err);
     }
+    console.log(e);
     throw new ApolloError('Unable to start subscription');
   }
 }

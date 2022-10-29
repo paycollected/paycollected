@@ -14,7 +14,8 @@ import SavedCards from './SavedCards.jsx';
 
 const stripePromise = loadStripe(process.env.STRIPE_PUBLISHABLE_KEY);
 
-function CheckoutForm({ setupIntentId, paymentMethods }) {
+function CheckoutForm({ setupIntentId, paymentMethods, planId }) {
+  const [password, setPassword] = useState('');
   const navigate = useNavigate();
   // CACHE IS UPDATING CORRECTLY
   // BUT UI IN viewPlans is not rendering from cache??
@@ -35,13 +36,13 @@ function CheckoutForm({ setupIntentId, paymentMethods }) {
     onError: ({ message }) => {
       console.log('error subscribing using a saved card: ', message);
     },
-    update: (cache, { data: { subscribeWithSavedCard } }) => {
-      console.log('------> cache & subscribeWithSavedCard', cache, subscribeWithSavedCard);
-      const { planId, quantity } = subscribeWithSavedCard;
-      cache.updateQuery({
-        query: viewAllPlansQuery,
-      }, ({ viewAllPlans }) => ({ viewAllPlans: [...viewAllPlans, subscribeWithSavedCard] }));
-    }
+    // update: (cache, { data: { subscribeWithSavedCard } }) => {
+    //   console.log('------> cache & subscribeWithSavedCard', cache, subscribeWithSavedCard);
+    //   const { planId, quantity } = subscribeWithSavedCard;
+    //   cache.updateQuery({
+    //     query: viewAllPlansQuery,
+    //   }, ({ viewAllPlans }) => ({ viewAllPlans: [...viewAllPlans, subscribeWithSavedCard] }));
+    // }
   });
 
   const stripe = useStripe();
@@ -83,7 +84,9 @@ function CheckoutForm({ setupIntentId, paymentMethods }) {
       submitPayment({
         variables: {
           paymentMethodId: selectedCard,
-          setupIntentId
+          setupIntentId,
+          planId,
+          password
         }
       });
     }
@@ -116,6 +119,14 @@ function CheckoutForm({ setupIntentId, paymentMethods }) {
           <div hidden={selectedCard !== 'newCard'}>
             <PaymentElement />
           </div>
+          <div hidden={selectedCard === 'newCard'}>
+            To use a saved card, please retype your password to confirm identity:
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => { setPassword(e.target.value) }}
+            />
+          </div>
         </div>
         <Button type="submit" disabled={!stripe}>Make payment</Button>
         <Button onClick={handleCancel}>Cancel</Button>
@@ -134,7 +145,7 @@ how does this affect what we store in db?
 */
 
 export default function Checkout({
-  stripeClientSecret, setupIntentId, paymentMethods,
+  stripeClientSecret, setupIntentId, paymentMethods, planId
 }) {
   const options = {
     clientSecret: stripeClientSecret
@@ -149,6 +160,7 @@ export default function Checkout({
           <CheckoutForm
             setupIntentId={setupIntentId}
             paymentMethods={paymentMethods}
+            planId={planId}
           />
         </Elements>
       </div>

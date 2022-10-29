@@ -137,8 +137,10 @@ export default {
     ),
 
     subscribeWithSavedCard: authResolverWrapper(
-      (_, { paymentMethodId, setupIntentId }, { user: { username } }) => (
-        subscribeWithSavedCardResolver(paymentMethodId, setupIntentId, username)
+      (_, {
+        paymentMethodId, setupIntentId, password, planId
+      }, { user: { username } }) => (
+        subscribeWithSavedCardResolver(paymentMethodId, setupIntentId, password, planId, username)
       )
     ),
   }

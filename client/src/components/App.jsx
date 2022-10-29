@@ -96,6 +96,7 @@ function App() {
           element={user && stripeClientSecret
             ? (
               <Checkout
+                planId={planToJoin}
                 stripeClientSecret={stripeClientSecret}
                 setupIntentId={setupIntentId}
                 setStripeClientSecret={setStripeClientSecret}
