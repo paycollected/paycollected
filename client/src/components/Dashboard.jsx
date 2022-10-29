@@ -29,16 +29,8 @@ export default function Dashboard({ username, setUser, setPlanToJoin }) {
     navigate(`/join/${formattedCode}`);
   };
 
-  const logUserOut = () => {
-    localStorage.clear();
-    setUser(null);
-    setPlanToJoin(null);
-    navigate('/');
-  };
-
   return (
     <div>
-      <Button onClick={logUserOut}>Log Out</Button>
       <Heading>
         {username}
         &apos;s Dashboard
