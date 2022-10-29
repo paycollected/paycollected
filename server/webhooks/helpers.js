@@ -46,6 +46,7 @@ async function processQuantChangeOnSubsStart(
   productTotalQuantity,
   startDate
 ) {
+  console.log(startDate);
   const { rows } = await models.startSubscription(
     productId,
     quantity,
@@ -117,6 +118,8 @@ export async function handleSubscriptionStart(setupIntent) {
           cancelSubs: false,
         }
       };
+
+      console.log(startDate);
 
       if (count > 0 || quantity > 1) {
         const promises = [

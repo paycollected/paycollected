@@ -323,7 +323,7 @@ export function startSubsNoPriceUpdate(
     ON CONFLICT
       (username, plan_id)
     DO UPDATE SET
-      quantity = $1, subscription_id = $2, subscription_item_id = $3
+      quantity = $1, subscription_id = $2, subscription_item_id = $3, start_date = TO_TIMESTAMP($6)
     WHERE user_plan.username = $5 AND user_plan.plan_id = $4
   `;
   const args = [quantity, subscriptionId, subscriptionItemId, planId, username, startDate];
@@ -456,7 +456,7 @@ export function startSubscription(
       INSERT INTO user_plan
         (quantity, subscription_id, subscription_item_id, plan_id, username, start_date)
       VALUES
-        ($1, $2, $3, $4, $5, $6)
+        ($1, $2, $3, $4, $5, TO_TIMESTAMP($6))
       ON CONFLICT
         (username, plan_id)
       DO UPDATE SET
@@ -478,6 +478,7 @@ export function startSubscription(
     FROM user_on_plan
     WHERE plan_id = $4 AND subscription_id != $2
   `;
+  console.log(startDate);
   const args = [quantity, subscriptionId, subscriptionItemId, planId, username, startDate,
     newPriceId];
   return pool.query(query, args);
