@@ -313,21 +313,75 @@ export function startSubscriptionWithNoPriceUpdate(
   subscriptionId,
   subscriptionItemId,
   username,
+  startDate
 ) {
   const query = `
+  WITH update AS (
     INSERT INTO user_plan
-      (quantity, subscription_id, subscription_item_id, plan_id, username)
-    VALUES
-      ($1, $2, $3, $4, $5)
-    ON CONFLICT
-      (username, plan_id)
-    DO UPDATE SET
-      quantity = $1, subscription_id = $2, subscription_item_id = $3
-    WHERE user_plan.username = $5 AND user_plan.plan_id = $4
+        (quantity, subscription_id, subscription_item_id, plan_id, username, start_date)
+      VALUES
+        ($1, $2, $3, $4, $5, TO_TIMESTAMP($6))
+      ON CONFLICT
+        (username, plan_id)
+      DO UPDATE SET
+        quantity = $1, subscription_id = $2, subscription_item_id = $3
+      WHERE user_plan.username = $5 AND user_plan.plan_id = $4
+      RETURNING plan_id, quantity, subscription_id
+  ),
+  select_owner AS (
+    SELECT
+        JSON_BUILD_OBJECT(
+          'firstName', u.first_name,
+          'lastName', u.last_name,
+          'username', u.username
+        ) AS owner
+      FROM users u
+      JOIN user_plan up
+      ON u.username = up.username
+      WHERE up.plan_owner = True AND up.plan_id = $4
+  )
+  SELECT
+      p.plan_id AS "planId",
+      p.plan_name AS name,
+      UPPER(p.cycle_frequency::VARCHAR) AS "cycleFrequency",
+      (p.per_cycle_cost / 100) AS "perCycleCost",
+      (SELECT owner FROM select_owner)
+      update.quantity,
+      update.subscription_id AS "subscriptionId"
+    FROM plans p
+    JOIN update
+    ON p.plan_id = update.plan_id
+    WHERE p.plan_id = $4
   `;
-  const args = [quantity, subscriptionId, subscriptionItemId, planId, username];
+  const args = [quantity, subscriptionId, subscriptionItemId, planId, username, startDate];
   return pool.query(query, args);
 }
+
+// export function planReturnAfterSubs(planId, quantity) {
+//   const query = `
+//     WITH select_owner AS (
+//       SELECT
+//         JSON_BUILD_OBJECT(
+//           'firstName', u.first_name,
+//           'lastName', u.last_name,
+//           'username', u.username
+//         ) AS owner
+//       FROM users u
+//       JOIN user_plan up
+//       ON u.username = up.username
+//       WHERE up.plan_owner = True AND up.plan_id = $1
+//     )
+//     SELECT p.plan_id AS "planId",
+//     p.plan_name AS name,
+//     UPPER(p.cycle_frequency::VARCHAR) AS "cycleFrequency",
+//     p.per_cycle_cost AS "perCycleCost",
+//     $2 AS quantity,
+//     (SELECT owner FROM select_owner)
+//     FROM plans p
+//     WHERE p.plan_id = $1`;
+
+//   return pool.query(query, [planId, quantity]);
+// }
 
 
 export function startSubscription(
