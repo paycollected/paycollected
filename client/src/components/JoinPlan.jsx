@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation } from '@apollo/client';
 import {
@@ -9,10 +9,10 @@ import { ViewOnePlan as GET_PLAN } from '../graphql/queries.gql';
 
 export default function JoinPlan({
   setPlanToJoin, setStripeClientSecret, setSetupIntentId, setPaymentMethods,
-  setQuantityOfPlanToJoin: setQuantity, quantityOfPlanToJoin: quantity
 }) {
   const navigate = useNavigate();
   const { planId } = useParams();
+  const [quantity, setQuantity] = useState(0);
 
   const { loading: getPlanLoading, data: getPlanData, error: getPlanError } = useQuery(GET_PLAN, {
     variables: { planId: planId.toString().trim() },

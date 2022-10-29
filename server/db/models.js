@@ -225,6 +225,88 @@ export function subscriptionSetup(planId) {
 }
 
 
+export function subscriptionSetupSavedCard(planId, username) {
+  const query = `
+    SELECT
+      CASE
+        WHEN p.cycle_frequency = 'weekly'
+          THEN 'week'
+        WHEN p.cycle_frequency = 'monthly'
+          THEN 'month'
+        WHEN p.cycle_frequency = 'yearly'
+          THEN 'year'
+      END AS "cycleFrequency",
+      COALESCE(
+        ( SELECT quantity
+          FROM user_plan
+          WHERE username = $1 AND plan_id = $2
+        ),
+        0
+      ) AS "existingQuant",
+      ( SELECT
+          COALESCE(
+            json_agg(
+              json_build_object(
+                'username', username,
+                'email', email,
+                'subscriptionId', subscription_id,
+                'subscriptionItemId', subscription_item_id,
+                'quantity', quantity
+              )
+            ),
+            '[]'::JSON
+          )
+        FROM user_on_plan
+        WHERE plan_id = $2 AND subscription_id IS NOT NULL
+      ) AS members,
+      ( SELECT
+          json_build_object(
+            'stripeCusId', s_cus_id,
+            'password', password
+          )
+        FROM users
+        WHERE username = $1
+      ) AS user,
+      p.per_cycle_cost AS "perCycleCost",
+      p.price_id AS "prevPriceId",
+      SUM (up.quantity)::INTEGER AS count,
+      CASE
+        WHEN CURRENT_TIMESTAMP < p.start_date
+          THEN ROUND (EXTRACT (EPOCH FROM p.start_date))
+        WHEN CURRENT_TIMESTAMP >= p.start_date
+          THEN CASE
+            WHEN p.cycle_frequency = 'weekly'
+              THEN ROUND (EXTRACT (EPOCH FROM (
+                p.start_date
+                + MAKE_INTERVAL(weeks => (FLOOR (EXTRACT (DAY FROM (CURRENT_TIMESTAMP - p.start_date)) / 7))::INTEGER)
+                + interval '1 week'
+              )))
+            WHEN p.cycle_frequency = 'monthly'
+              THEN ROUND (EXTRACT (EPOCH FROM (
+                p.start_date
+                + DATE_TRUNC('month', AGE(CURRENT_TIMESTAMP, p.start_date))
+                + interval '1 month'
+              )))
+            WHEN p.cycle_frequency = 'yearly'
+              THEN ROUND (EXTRACT (EPOCH FROM (
+                p.start_date
+                + DATE_TRUNC('year', AGE(CURRENT_TIMESTAMP, p.start_date))
+                + interval '1 year'
+              )))
+          END
+      END
+      AS "startDate"
+    FROM plans p
+    JOIN user_plan up
+    ON p.plan_id = up.plan_id
+    WHERE p.plan_id = $2
+    GROUP BY p.price_id, p.cycle_frequency, p.per_cycle_cost, p.price_id, p.start_date
+  `;
+
+  return pool.query(query, [username, planId]);
+}
+
+
 export function startSubscriptionWithNoPriceUpdate(
   planId,
   quantity,

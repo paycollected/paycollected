@@ -21,10 +21,9 @@ CREATE TABLE IF NOT EXISTS plans (
   price_id VARCHAR(255) NOT NULL UNIQUE,
   plan_name VARCHAR(50) NOT NULL,
   cycle_frequency CYCLE_FREQ NOT NULL,
-  per_cycle_cost INTEGER NOT NULL,
+  per_cycle_cost INTEGER NOT NULL CHECK (per_cycle_cost >= 1000),
   start_date TIMESTAMP WITH TIME ZONE NOT NULL
 );
-
 
 
 -- relational tables
@@ -34,9 +33,21 @@ CREATE TABLE IF NOT EXISTS user_plan (
   plan_id VARCHAR(255) NOT NULL REFERENCES plans(plan_id) ON DELETE CASCADE,
   plan_owner BOOLEAN NOT NULL DEFAULT FALSE,
   quantity INTEGER NOT NULL DEFAULT 0,
+  start_date TIMESTAMP WITH TIME ZONE NOT NULL,
   subscription_id VARCHAR(255) UNIQUE, -- stripe subscription id
   subscription_item_id VARCHAR(255) UNIQUE,
   UNIQUE (username, plan_id)
+);
+
+
+CREATE TABLE IF NOT EXISTS invoices (
+  id BIGSERIAL PRIMARY KEY,
+  username VARCHAR(100) NOT NULL REFERENCES users(username) ON DELETE CASCADE,
+  plan_id VARCHAR(255) NOT NULL REFERENCES plans(plan_id) ON DELETE CASCADE,
+  quantity INTEGER NOT NULL DEFAULT 1,
+  period_start TIMESTAMP WITH TIME ZONE NOT NULL,
+  period_end TIMESTAMP WITH TIME ZONE NOT NULL,
+  amount INTEGER NOT NULL CHECK (amount > 0) -- in cents
 );
 
 

@@ -14,7 +14,7 @@ export default async function loginResolver(username, password) {
       throw new Error();
     }
     // if username exists but password doesn't match, return null
-    const { password: savedPass, stripeCusId, email } = rows[0];
+    const { password: savedPass, stripeCusId } = rows[0];
     const result = await bcrypt.compare(password, savedPass);
     if (!result) {
       return null;

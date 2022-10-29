@@ -22,7 +22,7 @@ export default async function createPlanResolver(
 ) {
   // INPUT VALIDATION
   const cost = perCycleCost * 100; // need in cents
-  if (cost <= 10 || !Number.isInteger(cost)) {
+  if (cost < 1000 || !Number.isInteger(cost)) {
     // make min $10
     throw new UserInputError('Invalid input');
   }
