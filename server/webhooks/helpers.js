@@ -143,9 +143,6 @@ export async function handleSubscriptionStart(setupIntent) {
           const [{ id: newPriceId }] = await Promise.all(promises);
           subscription.items[0].price = newPriceId;
 
-          // const { id: subscriptionId, items } = await stripe.subscriptions.create(subscription);
-          // const { id: subscriptionItemId } = items.data[0];
-
           const createNewSubsAndUpdateDb = async () => {
             const { id: subscriptionId, items } = await stripe.subscriptions.create(subscription);
             const { id: subscriptionItemId } = items.data[0];
@@ -172,6 +169,8 @@ export async function handleSubscriptionStart(setupIntent) {
             ]);
           }
         } else {
+          // case when quantity = 1 and count = 0
+          // no active plan members yet, no need to update price
           let subscriptionId;
           let items;
 

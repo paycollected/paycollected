@@ -34,17 +34,17 @@ export function addPlan(
   priceId
 ) {
   const query = `
-    WITH first_insert AS
-      (
+    WITH plan_insert AS (
         INSERT INTO plans
           (plan_name, cycle_frequency, per_cycle_cost, plan_id, start_date, price_id)
         VALUES
           ($2, $3, $4, $5, $6::TIMESTAMPTZ, $7)
-      )
-    INSERT INTO user_plan
-      (username, plan_id, plan_owner)
-    VALUES
-      ($1, $5, TRUE)
+    ), plan_history_insert AS (
+      INSERT INTO plans_history (plan_id, start_date, plan_cost)
+        VALUES ($5, $6::TIMESTAMPTZ, $4)
+    )
+    INSERT INTO user_plan (username, plan_id, plan_owner)
+      VALUES ($1, $5, TRUE)
   `;
 
   const args = [username, planName, cycleFrequency, perCycleCost, productId, startDate, priceId];
