@@ -19,7 +19,6 @@ webhook.post('/webhook', express.raw({type: 'application/json'}), (req, res) => 
   }
 
   // Handle the event
-  let customer;
   let invoice;
   let subscription;
   let setupIntent;
@@ -28,10 +27,6 @@ webhook.post('/webhook', express.raw({type: 'application/json'}), (req, res) => 
   let quantChanged;
   let cancelSubs;
   switch (event.type) {
-    case 'customer.updated':
-      customer = event.data.object;
-      helpers.handleDefaultPmntMethodChange(customer);
-      break;
     case 'invoice.payment_failed':
       invoice = event.data.object;
       // Then define and call a function to handle the event invoice.payment_failed

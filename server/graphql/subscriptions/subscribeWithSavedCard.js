@@ -30,21 +30,26 @@ export default async function subscribeWithSavedCardResolver(
 
     const quantity = Number(savedQuant);
     const {
-      cycleFrequency, perCycleCost, count, prevPriceId, startDate, user, members
+      cycleFrequency, perCycleCost, count, prevPriceId, startDate, user, members, active,
+      existingQuant,
     } = rows[0];
 
     // input validation
     if (user.stripeCusId !== paymentMethodCustomer
       || user.stripeCusId !== setupIntentCustomer
-      || rows[0].existingQuant > 0
       || planIdToSubscribe !== planId
     ) {
       err = 'User not authorized to perform this action';
       throw new Error();
+    } else if (!active) {
+      err = 'This plan has already been archived';
+    } else if (existingQuant > 0) {
+      err = 'User already subscribed';
+      throw new Error();
     }
     const result = await bcrypt.compare(password, user.password);
     if (!result) {
-      err = 'User not authorized to perform this action';
+      err = 'Incorrect password';
       throw new Error();
     }
 
@@ -81,30 +86,24 @@ export default async function subscribeWithSavedCardResolver(
 
     if (count === 0 && quantity === 1) {
       // this is the first subscription on this plan
-      // --> no need to create a new price ID
-      // also no need to archive current price ID
-      // no other plan members to update
-      // --> create subscription for this person
-      // cancel setupIntent
-      // --> only need to update db
+      // and subscribed quant doesn't require price adjustment
       const [{ id: subscriptionId, items }, _] = await Promise.all([
         stripe.subscriptions.create(subscription),
         stripe.setupIntents.cancel(setupIntentId),
       ]);
       const { id: subscriptionItemId } = items.data[0];
-      console.log(startDate);
       const { rows: resultRows } = await startSubsNoPriceUpdateReturningPlan(
         planId,
         quantity,
         subscriptionId,
         subscriptionItemId,
         username,
-        startDate
       );
 
       return resultRows[0];
     }
 
+    // not first subscription, or quant > 1 --> require price adjustment
     const [{ id: newPriceId }] = await Promise.all([
       stripe.prices.create({
         currency: 'usd',
@@ -130,7 +129,6 @@ export default async function subscribeWithSavedCardResolver(
         subscriptionItemId,
         username,
         newPriceId,
-        startDate
       );
       return newRows[0];
     };

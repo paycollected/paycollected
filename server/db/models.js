@@ -159,14 +159,14 @@ export function joinPlan(username, planId) {
   const query = `
   SELECT
     u.s_cus_id AS "stripeCusId",
-    u.default_pmnt_id AS "defaultPaymentId",
     COALESCE(
       ( SELECT quantity
         FROM user_plan
         WHERE username = $1 AND plan_id = $2
       ),
       0
-    ) AS quantity
+    ) AS quantity,
+    (SELECT active FROM plans p WHERE p.plan_id = $2) AS active
     FROM users u
     WHERE username = $1
   `;
@@ -174,7 +174,7 @@ export function joinPlan(username, planId) {
 }
 
 
-export function subscriptionSetup(planId) {
+export function subscriptionSetup(planId, username) {
   const query = `
     SELECT
       CASE
@@ -185,8 +185,27 @@ export function subscriptionSetup(planId) {
         WHEN p.cycle_frequency = 'yearly'
           THEN 'year'
       END AS "cycleFrequency",
+      COALESCE(
+        ( SELECT quantity
+          FROM user_plan
+          WHERE username = $2 AND plan_id = $1
+        ),
+        0
+      ) AS "existingQuant",
+      ( SELECT json_agg(
+          json_build_object(
+            'username', username,
+            'email', email,
+            'subscriptionId', subscription_id,
+            'subscriptionItemId', subscription_item_id,
+            'quantity', quantity
+          ))
+        FROM user_on_plan
+        WHERE plan_id = $1 AND subscription_id IS NOT NULL
+      ) AS members,
       p.per_cycle_cost AS "perCycleCost",
       p.price_id AS "prevPriceId",
+      p.active,
       SUM (up.quantity)::INTEGER AS count,
       CASE
         WHEN CURRENT_TIMESTAMP < p.start_date
@@ -221,7 +240,7 @@ export function subscriptionSetup(planId) {
     GROUP BY p.price_id, p.cycle_frequency, p.per_cycle_cost, p.price_id, p.start_date
   `;
 
-  return pool.query(query, [planId]);
+  return pool.query(query, [planId, username]);
 }
 
 
@@ -243,19 +262,14 @@ export function subscriptionSetupSavedCard(planId, username) {
         ),
         0
       ) AS "existingQuant",
-      ( SELECT
-          COALESCE(
-            json_agg(
-              json_build_object(
-                'username', username,
-                'email', email,
-                'subscriptionId', subscription_id,
-                'subscriptionItemId', subscription_item_id,
-                'quantity', quantity
-              )
-            ),
-            '[]'::JSON
-          )
+      ( SELECT json_agg(
+          json_build_object(
+            'username', username,
+            'email', email,
+            'subscriptionId', subscription_id,
+            'subscriptionItemId', subscription_item_id,
+            'quantity', quantity
+          ))
         FROM user_on_plan
         WHERE plan_id = $2 AND subscription_id IS NOT NULL
       ) AS members,
@@ -268,6 +282,7 @@ export function subscriptionSetupSavedCard(planId, username) {
         WHERE username = $1
       ) AS user,
       p.per_cycle_cost AS "perCycleCost",
+      p.active,
       p.price_id AS "prevPriceId",
       SUM (up.quantity)::INTEGER AS count,
       CASE
@@ -313,20 +328,19 @@ export function startSubsNoPriceUpdate(
   subscriptionId,
   subscriptionItemId,
   username,
-  startDate
 ) {
   const query = `
   INSERT INTO user_plan
-      (quantity, subscription_id, subscription_item_id, plan_id, username, start_date)
+      (quantity, subscription_id, subscription_item_id, plan_id, username)
     VALUES
-      ($1, $2, $3, $4, $5, TO_TIMESTAMP($6))
+      ($1, $2, $3, $4, $5)
     ON CONFLICT
       (username, plan_id)
     DO UPDATE SET
-      quantity = $1, subscription_id = $2, subscription_item_id = $3, start_date = TO_TIMESTAMP($6)
+      quantity = $1, subscription_id = $2, subscription_item_id = $3
     WHERE user_plan.username = $5 AND user_plan.plan_id = $4
   `;
-  const args = [quantity, subscriptionId, subscriptionItemId, planId, username, startDate];
+  const args = [quantity, subscriptionId, subscriptionItemId, planId, username];
   return pool.query(query, args);
 }
 
@@ -337,18 +351,17 @@ export function startSubsNoPriceUpdateReturningPlan(
   subscriptionId,
   subscriptionItemId,
   username,
-  startDate
 ) {
   const query = `
   WITH upd AS (
     INSERT INTO user_plan
-        (quantity, subscription_id, subscription_item_id, plan_id, username, start_date)
+        (quantity, subscription_id, subscription_item_id, plan_id, username)
       VALUES
-        ($1, $2, $3, $4, $5, TO_TIMESTAMP($6))
+        ($1, $2, $3, $4, $5)
       ON CONFLICT
         (username, plan_id)
       DO UPDATE SET
-        quantity = $1, subscription_id = $2, subscription_item_id = $3, start_date = TO_TIMESTAMP($6)
+        quantity = $1, subscription_id = $2, subscription_item_id = $3
       WHERE user_plan.username = $5 AND user_plan.plan_id = $4
       RETURNING plan_id, quantity, subscription_id
   ),
@@ -370,14 +383,14 @@ export function startSubsNoPriceUpdateReturningPlan(
       UPPER(p.cycle_frequency::VARCHAR) AS "cycleFrequency",
       (p.per_cycle_cost / 100) AS "perCycleCost",
       (SELECT owner FROM select_owner),
-      quantity,
-      subscription_id AS "subscriptionId"
+      $1 AS quantity,
+      $2 AS "subscriptionId"
     FROM plans p
     JOIN upd
     ON p.plan_id = upd.plan_id
     WHERE p.plan_id = $4
   `;
-  const args = [quantity, subscriptionId, subscriptionItemId, planId, username, startDate];
+  const args = [quantity, subscriptionId, subscriptionItemId, planId, username];
   return pool.query(query, args);
 }
 
@@ -389,18 +402,17 @@ export function startSubsPriceUpdateReturningPlan(
   subscriptionItemId,
   username,
   newPriceId,
-  startDate
 ) {
   const query = `
   WITH upd AS (
     INSERT INTO user_plan
-        (quantity, subscription_id, subscription_item_id, plan_id, username, start_date)
+        (quantity, subscription_id, subscription_item_id, plan_id, username)
       VALUES
-        ($1, $2, $3, $4, $5, TO_TIMESTAMP($6))
+        ($1, $2, $3, $4, $5)
       ON CONFLICT
         (username, plan_id)
       DO UPDATE SET
-        quantity = $1, subscription_id = $2, subscription_item_id = $3, start_date = TO_TIMESTAMP($6)
+        quantity = $1, subscription_id = $2, subscription_item_id = $3
       WHERE user_plan.username = $5 AND user_plan.plan_id = $4
       RETURNING plan_id, quantity, subscription_id
   ),
@@ -427,14 +439,14 @@ export function startSubsPriceUpdateReturningPlan(
       UPPER(p.cycle_frequency::VARCHAR) AS "cycleFrequency",
       (p.per_cycle_cost / 100) AS "perCycleCost",
       (SELECT owner FROM select_owner),
-      quantity,
-      subscription_id AS "subscriptionId"
+      $1 AS quantity,
+      $2 AS "subscriptionId"
     FROM plans p
     JOIN upd
     ON p.plan_id = upd.plan_id
     WHERE p.plan_id = $4
   `;
-  const args = [quantity, subscriptionId, subscriptionItemId, planId, username, startDate,
+  const args = [quantity, subscriptionId, subscriptionItemId, planId, username,
     newPriceId];
   return pool.query(query, args);
 }
@@ -446,40 +458,26 @@ export function startSubscription(
   subscriptionId,
   subscriptionItemId,
   username,
-  startDate,
   newPriceId
 ) {
   const query = `
     WITH update_sub_id AS
     (
       INSERT INTO user_plan
-        (quantity, subscription_id, subscription_item_id, plan_id, username, start_date)
+        (quantity, subscription_id, subscription_item_id, plan_id, username)
       VALUES
-        ($1, $2, $3, $4, $5, TO_TIMESTAMP($6))
+        ($1, $2, $3, $4, $5)
       ON CONFLICT
         (username, plan_id)
       DO UPDATE SET
-        quantity = $1, subscription_id = $2, subscription_item_id = $3, start_date = TO_TIMESTAMP($6)
+        quantity = $1, subscription_id = $2, subscription_item_id = $3
       WHERE user_plan.username = $5 AND user_plan.plan_id = $4
     ),
-    update_price_id AS
-    (
-      UPDATE plans
-      SET price_id = $7
-      WHERE plan_id = $4
-    )
-    SELECT
-      username,
-      email,
-      subscription_id AS "subscriptionId",
-      subscription_item_id AS "subscriptionItemId",
-      quantity
-    FROM user_on_plan
-    WHERE plan_id = $4 AND subscription_id != $2
+    UPDATE plans
+    SET price_id = $6
+    WHERE plan_id = $4
   `;
-  console.log(startDate);
-  const args = [quantity, subscriptionId, subscriptionItemId, planId, username, startDate,
-    newPriceId];
+  const args = [quantity, subscriptionId, subscriptionItemId, planId, username, newPriceId];
   return pool.query(query, args);
 }
 
@@ -636,12 +634,6 @@ export function deletePlanGetAllSubs(planId) {
   return pool.query(query, [planId]);
 }
 
-export function updateDefaultPmntMethod(username, pmntMethodId) {
-  const query = `
-    UPDATE users SET default_pmnt_id = $1 WHERE username = $2
-  `;
-  return pool.query(query, [pmntMethodId, username]);
-}
 
 export function planReturnAfterSubs(planId, quantity) {
   const query = `

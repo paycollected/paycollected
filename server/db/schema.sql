@@ -11,7 +11,6 @@ CREATE TABLE IF NOT EXISTS users (
   password VARCHAR(200) NOT NULL, -- hashed
   email VARCHAR(100) NOT NULL UNIQUE,
   s_cus_id VARCHAR(200) NOT NULL UNIQUE,
-  default_pmnt_id VARCHAR(100) UNIQUE
 );
 
 CREATE TYPE cycle_freq AS ENUM ('weekly', 'monthly', 'yearly');
@@ -23,33 +22,32 @@ CREATE TABLE IF NOT EXISTS plans (
   cycle_frequency CYCLE_FREQ NOT NULL,
   per_cycle_cost INTEGER NOT NULL CHECK (per_cycle_cost >= 1000),
   start_date TIMESTAMP WITH TIME ZONE NOT NULL,
-  end_date TIMESTAMP WITH TIME ZONE
+  active BOOLEAN NOT NULL DEFAULT TRUE -- will only be false once archived
 );
 
 
 -- relational tables
 CREATE TABLE IF NOT EXISTS user_plan (
   -- reflective of the NEXT billing cycle
-  id SERIAL PRIMARY KEY,
+  id SERIAL GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   username VARCHAR(100) NOT NULL REFERENCES users(username) ON DELETE CASCADE,
   plan_id VARCHAR(255) NOT NULL REFERENCES plans(plan_id) ON DELETE CASCADE,
   plan_owner BOOLEAN NOT NULL DEFAULT FALSE,
   quantity INTEGER NOT NULL DEFAULT 0,
-  -- start_date TIMESTAMP WITH TIME ZONE,
-  -- end_date TIMESTAMP WITH TIME ZONE,
-  subscription_id VARCHAR(255) UNIQUE, -- stripe subscription id
+  active BOOLEAN NOT NULL DEFAULT TRUE, -- will also be True for owner with quant = 0; only false once archived
+  subscription_id VARCHAR(255) UNIQUE,
   subscription_item_id VARCHAR(255) UNIQUE,
   UNIQUE (username, plan_id)
 );
 
 
 CREATE TABLE IF NOT EXISTS invoices (
-  id BIGSERIAL PRIMARY KEY,
+  id VARCHAR(100) PRIMARY KEY,
   username VARCHAR(100) NOT NULL REFERENCES users(username) ON DELETE CASCADE,
   plan_id VARCHAR(255) NOT NULL REFERENCES plans(plan_id) ON DELETE CASCADE,
   quantity INTEGER NOT NULL DEFAULT 1,
   period_start TIMESTAMP WITH TIME ZONE NOT NULL, -- charge date
-  -- period_end TIMESTAMP WITH TIME ZONE NOT NULL,
+  period_end TIMESTAMP WITH TIME ZONE NOT NULL,
   amount INTEGER NOT NULL CHECK (amount > 0) -- base amount in cents
 );
 

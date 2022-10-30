@@ -1,6 +1,7 @@
 import dotenv from 'dotenv';
 import stripeSDK from 'stripe';
 import * as models from '../db/models.js';
+import { updateStripePrice as updateStripePriceUtil } from '../utils/helperFn.js';
 
 dotenv.config();
 const stripe = stripeSDK(process.env.STRIPE_SECRET_KEY);
@@ -44,7 +45,6 @@ async function processQuantChangeOnSubsStart(
   username,
   newPriceId,
   productTotalQuantity,
-  startDate
 ) {
   const { rows } = await models.startSubscription(
     productId,
@@ -52,7 +52,6 @@ async function processQuantChangeOnSubsStart(
     subscriptionId,
     subscriptionItemId,
     username,
-    startDate,
     newPriceId
   );
   // save new subscription details (our db),
@@ -68,18 +67,14 @@ async function processQuantChangeOnSubsStart(
 
 
 export async function handleSubscriptionStart(setupIntent) {
-  // info needed from db: cycleFreq, total count, perCycleCost, startDate for this person,
-  // everyone else already on plan
-  // also potential create a new price ID
-  // API calls: start subscription for this person
-  // change subscriptions for existing plan members
   const a = Date.now();
   // NOTE: as long as user is on at least one plan,
   // we're confident that they have a default payment method
   console.log('----------> setup Intent metadata', setupIntent.metadata);
   if (Object.keys(setupIntent.metadata).length > 0) {
   // only run this if a new subscription is created through our site
-  // A new setupIntent is also created and succeeds when a user updates their payment method
+  // A new setupIntent is also created and succeeds when a user updates their payment method,
+  // or when an invoice is created
     const { customer, payment_method: paymentMethodId } = setupIntent;
     const { planId, username } = setupIntent.metadata;
     const quantity = Number(setupIntent.metadata.quantity);
@@ -88,110 +83,118 @@ export async function handleSubscriptionStart(setupIntent) {
         { rows },
         { invoice_settings: { default_payment_method: defaultPmntMethod } }
       ] = await Promise.all([
-        models.subscriptionSetup(planId),
+        models.subscriptionSetup(planId, username),
         stripe.customers.retrieve(customer)
       ]);
       const {
-        cycleFrequency, perCycleCost, count, prevPriceId, startDate
+        cycleFrequency, perCycleCost, count, prevPriceId, startDate, members, existingQuant, active
       } = rows[0];
-      const productTotalQuantity = quantity + count;
-      const subscription = {
-        customer,
-        items: [{
-          price: prevPriceId,
-          quantity,
-        }],
-        payment_behavior: 'default_incomplete',
-        payment_settings: {
-          save_default_payment_method: 'on_subscription',
-          payment_method_types: ['card'],
-        },
-        proration_behavior: 'none',
-        trial_end: startDate,
-        default_payment_method: paymentMethodId,
-        metadata: {
-          productTotalQuantity,
-          cycleFrequency,
-          perCycleCost,
-          quantChanged: false,
-          cancelSubs: false,
-        }
-      };
+      if (active || existingQuant === 0) {
+        // ensure idempotency -- do not run this code if user already subscribed
+        // if plan no longer active, also don't run code
+        const productTotalQuantity = quantity + count;
+        const subscription = {
+          customer,
+          items: [{
+            price: prevPriceId,
+            quantity,
+          }],
+          payment_behavior: 'default_incomplete',
+          payment_settings: {
+            save_default_payment_method: 'on_subscription',
+            payment_method_types: ['card'],
+          },
+          proration_behavior: 'none',
+          trial_end: startDate,
+          default_payment_method: paymentMethodId,
+          metadata: {
+            productTotalQuantity,
+            cycleFrequency,
+            perCycleCost,
+            quantChanged: false,
+            cancelSubs: false,
+          }
+        };
 
 
-      if (count > 0 || quantity > 1) {
-        const promises = [
-          stripe.prices.create({
-            currency: 'usd',
-            product: planId,
-            unit_amount: Math.ceil(perCycleCost / productTotalQuantity),
-            recurring: { interval: cycleFrequency },
-            metadata: { deletePlan: false }
-          }),
-          // create new price ID;
-          stripe.prices.update(prevPriceId, { active: false }),
-          // archive old price ID
-        ];
+        if (count > 0 || quantity > 1) {
+          const promises = [
+            stripe.prices.create({
+              currency: 'usd',
+              product: planId,
+              unit_amount: Math.ceil(perCycleCost / productTotalQuantity),
+              recurring: { interval: cycleFrequency },
+              metadata: { deletePlan: false }
+            }),
+            // create new price ID;
+            stripe.prices.update(prevPriceId, { active: false }),
+            // archive old price ID
+          ];
 
-        if (defaultPmntMethod === null) {
-          promises.push(
-            stripe.customers.update(
-              customer,
-              { invoice_settings: { default_payment_method: paymentMethodId } }
-            )
-            // update the default payment method for this customer
+          if (defaultPmntMethod === null) {
+            promises.push(
+              stripe.customers.update(
+                customer,
+                { invoice_settings: { default_payment_method: paymentMethodId } }
+              )
+              // update the default payment method for this customer
+            );
+          }
+          const [{ id: newPriceId }] = await Promise.all(promises);
+          subscription.items[0].price = newPriceId;
+
+          // const { id: subscriptionId, items } = await stripe.subscriptions.create(subscription);
+          // const { id: subscriptionItemId } = items.data[0];
+
+          const createNewSubsAndUpdateDb = async () => {
+            const { id: subscriptionId, items } = await stripe.subscriptions.create(subscription);
+            const { id: subscriptionItemId } = items.data[0];
+            return models.startSubscription(
+              planId,
+              quantity,
+              subscriptionId,
+              subscriptionItemId,
+              username,
+              newPriceId
+            );
+          };
+
+          if (count === 0) {
+            await createNewSubsAndUpdateDb();
+          } else {
+            await Promise.all([
+              createNewSubsAndUpdateDb(),
+              ...members.map((member) => updateStripePriceUtil(
+                member,
+                newPriceId,
+                productTotalQuantity
+              ))
+            ]);
+          }
+        } else {
+          let subscriptionId;
+          let items;
+
+          if (defaultPmntMethod === null) {
+            [{ id: subscriptionId, items }] = await Promise.all([
+              stripe.subscriptions.create(subscription),
+              stripe.customers.update(
+                customer,
+                { invoice_settings: { default_payment_method: paymentMethodId } }
+              )
+            ]);
+          } else {
+            ({ id: subscriptionId, items } = await stripe.subscriptions.create(subscription));
+          }
+          const { id: subscriptionItemId } = items.data[0];
+          await models.startSubsNoPriceUpdate(
+            planId,
+            quantity,
+            subscriptionId,
+            subscriptionItemId,
+            username,
           );
         }
-        const [{ id: newPriceId }] = await Promise.all(promises);
-        subscription.items[0].price = newPriceId;
-
-        const { id: subscriptionId, items } = await stripe.subscriptions.create(subscription);
-        const { id: subscriptionItemId } = items.data[0];
-
-        await processQuantChangeOnSubsStart(
-          planId,
-          quantity,
-          subscriptionId,
-          subscriptionItemId,
-          username,
-          newPriceId,
-          productTotalQuantity,
-          startDate
-        );
-        // write new changes to db
-        // and update all existing plan members
-      } else {
-      // if count = 0, and quantity = 1
-      // meaning this is the first subscription on this plan
-      // until now (when payment succeeds)
-      // --> no need to create a new price ID
-      // also no need to archive current price ID
-      // no other plan members to update
-      // --> also create subscription for this person
-      // --> only need to update db
-        let subscriptionId;
-        let items;
-
-        if (defaultPmntMethod === null) {
-          [{ id: subscriptionId, items }] = await Promise.all([
-            stripe.subscriptions.create(subscription),
-            stripe.customers.update(
-              customer,
-              { invoice_settings: { default_payment_method: paymentMethodId } }
-            )
-          ]);
-        } else {
-          ({ id: subscriptionId, items } = await stripe.subscriptions.create(subscription));
-        }
-        const { id: subscriptionItemId } = items.data[0];
-        await models.startSubsNoPriceUpdate(
-          planId,
-          quantity,
-          subscriptionId,
-          subscriptionItemId,
-          username,
-          startDate
-        );
       }
     } catch (e) {
       console.log(e);
@@ -327,16 +330,5 @@ export async function handlePlanDelete(price) {
     }
   } catch (e) {
     console.log(e);
-  }
-}
-
-
-export async function handleDefaultPmntMethodChange(customer) {
-  const {
-    invoice_settings: { default_payment_method: newMethodId },
-    metadata: { username }
-  } = customer;
-  if (newMethodId !== null) {
-    await models.updateDefaultPmntMethod(username, newMethodId);
   }
 }
