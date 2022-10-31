@@ -42,7 +42,7 @@ export default async function subscribeWithSavedCardResolver(
       err = 'User not authorized to perform this action';
       throw new Error();
     } else if (!active) {
-      err = 'This plan has already been archived';
+      err = 'Plan has already been archived';
     } else if (existingQuant > 0) {
       err = 'User already subscribed';
       throw new Error();

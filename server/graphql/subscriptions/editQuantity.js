@@ -37,10 +37,14 @@ export default async function editQuantityResolver(
 
   const {
     product, subscriptionItemId, interval, perCycleCost, count, quantity, prevPriceId, members,
+    active
   } = rows[0];
 
   // input validation that there is indeed a change in quant
-  if (quantity === newQuantity) {
+  if (!active) {
+    throw new GraphQLError('Plan has already been archived', { extensions: { code: 'FORBIDDEN' } });
+  }
+  else if (quantity === newQuantity) {
     throw new GraphQLError('No change in quantity', { extensions: { code: 'BAD_USER_INPUT' } });
   }
 

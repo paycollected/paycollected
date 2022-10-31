@@ -8,7 +8,7 @@ dotenv.config();
 const webhook = express.Router();
 const endpointSecret = process.env.STRIPE_WEBHOOK_ENDPOINT_SECRET;
 
-webhook.post('/', express.raw({type: 'application/json'}), (req, res) => {
+webhook.post('/', express.raw({ type: 'application/json' }), (req, res) => {
   const signature = req.headers['stripe-signature'];
 
   let event;

@@ -34,35 +34,6 @@ async function updateStripePrice(row, price, productTotalQuantity) {
 }
 
 
-async function processQuantChangeOnSubsStart(
-  productId,
-  quantity,
-  subscriptionId,
-  subscriptionItemId,
-  username,
-  newPriceId,
-  productTotalQuantity,
-) {
-  const { rows } = await models.startSubscription(
-    productId,
-    quantity,
-    subscriptionId,
-    subscriptionItemId,
-    username,
-    newPriceId
-  );
-  // save new subscription details (our db),
-  // update product w/ new price ID (our db)
-  // query all other existing users on this same plan (db)
-
-  if (rows.length > 0) {
-    await Promise.all(
-      rows.map((row) => updateStripePrice(row, newPriceId, productTotalQuantity))
-    );
-  }
-}
-
-
 export async function handleSubscriptionCancel(subscription) {
   const { id: subscriptionId, items } = subscription;
   const { price, quantity } = items.data[0];
@@ -139,6 +110,7 @@ async function cancelSubsAndNotify(row) {
     await stripe.subscriptions.del(subscriptionId);
   }
 }
+
 
 export async function handlePlanDelete(price) {
   // archive product

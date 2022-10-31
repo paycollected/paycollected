@@ -196,7 +196,9 @@ export function subscriptionSetup(planId, username) {
           )
         )
         FROM user_on_plan
-        WHERE plan_id = $1 AND subscription_id IS NOT NULL
+        WHERE plan_id = $1
+          AND subscription_id IS NOT NULL
+          AND active = True
     ) AS members
     FROM subscription_setup
     WHERE plan_id = $1
@@ -228,7 +230,9 @@ export function subscriptionSetupSavedCard(planId, username) {
           )
         )
         FROM user_on_plan
-        WHERE plan_id = $2 AND subscription_id IS NOT NULL
+        WHERE plan_id = $2
+          AND subscription_id IS NOT NULL
+          AND active = True
     ) AS members,
     ( SELECT
         json_build_object(
@@ -502,6 +506,7 @@ export function getSubsItemIdAndProductInfo(subscriptionId, username) {
         WHEN p.cycle_frequency = 'yearly'
           THEN 'year'
       END AS interval,
+      p.active,
       p.per_cycle_cost AS "perCycleCost",
       p.price_id AS "prevPriceId",
       c.sum AS count,
@@ -520,6 +525,7 @@ export function getSubsItemIdAndProductInfo(subscriptionId, username) {
           plan_id = (SELECT plan_id FROM user_plan WHERE subscription_id = $1)
           AND subscription_id != $1
           AND subscription_id IS NOT NULL
+          AND active = True
     ) AS members
     FROM user_plan up
     JOIN plans p
