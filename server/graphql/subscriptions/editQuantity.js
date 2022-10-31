@@ -53,15 +53,17 @@ export default async function editQuantityResolver(
   const productTotalQuantity = count - quantity + newQuantity;
 
   try {
-    const { id: price } = await stripe.prices.create({
-      currency: 'usd',
-      product,
-      unit_amount: Math.ceil(perCycleCost / productTotalQuantity),
-      recurring: {
-        interval,
-      },
-      metadata: { deletePlan: false },
-    });
+    const [{ id: price }] = await Promise.all([
+      stripe.prices.create({
+        currency: 'usd',
+        product,
+        unit_amount: Math.ceil(perCycleCost / productTotalQuantity),
+        recurring: { interval },
+        metadata: { deletePlan: false },
+      }),
+      stripe.prices.update(prevPriceId, { active: false }),
+      // archive old price ID
+    ]);
 
     const promises = [
       stripe.subscriptions.update(
@@ -79,13 +81,11 @@ export default async function editQuantityResolver(
         }
       ),
       // update this subscription with new price ID
-      stripe.prices.update(prevPriceId, { active: false }),
-      // archive old price ID
       updatePriceQuant(product, subscriptionId, newQuantity, price),
       // save to db
     ];
 
-    if (!members) {
+    if (members !== null) {
       await Promise.all(promises);
     } else {
       await Promise.all([
@@ -95,7 +95,6 @@ export default async function editQuantityResolver(
     }
     return { planId: product, quantity: newQuantity };
   } catch (e) {
-    console.log(e);
     throw new GraphQLError('Cannot update quantity', { extensions: { code: 'INTERNAL_SERVER_ERROR' } });
   }
 }

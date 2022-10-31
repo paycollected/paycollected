@@ -73,7 +73,8 @@ CREATE VIEW user_on_plan AS
     up.plan_id,
     up.subscription_id,
     up.subscription_item_id,
-    up.quantity
+    up.quantity,
+    up.active
   FROM user_plan up
   JOIN users u
   ON up.username = u.username;
@@ -92,6 +93,7 @@ CREATE VIEW subs_on_plan AS
       up.quantity,
       up.username,
       up.active AS "subsActive",
+      up.plan_owner AS "planOwner",
       CASE
         WHEN p.cycle_frequency = 'weekly'
           THEN 'week'

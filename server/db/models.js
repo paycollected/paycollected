@@ -409,25 +409,31 @@ export function startSubscription(
 }
 
 
-export function updatePriceIdDelSubsGetMembers(newPriceId, productId, subscriptionId) {
+export function updatePriceIdDelSubs(newPriceId, productId, subscriptionId) {
   const query = `
     WITH update_price_id AS (
       UPDATE plans SET price_id = $1 WHERE plan_id = $2
-    ), del_sub AS (
-      DELETE FROM user_plan
-      WHERE subscription_id = $3
     )
-    SELECT
-      username,
-      email,
-      subscription_id AS "subscriptionId",
-      subscription_item_id AS "subscriptionItemId",
-      quantity
-    FROM user_on_plan
-    WHERE plan_id = $2 and subscription_id != $3
+    DELETE FROM user_plan WHERE subscription_id = $3
   `;
-  const args = [newPriceId, productId, subscriptionId];
-  return pool.query(query, args);
+  return pool.query(query, [newPriceId, productId, subscriptionId]);
+}
+
+
+export function updatePriceIdArchiveSubs(newPriceId, productId, subscriptionId) {
+  const query = `
+    WITH update_price_id AS (
+      UPDATE plans SET price_id = $1 WHERE plan_id = $2
+    )
+    UPDATE user_plan
+    SET
+      quantity = 0,
+      active = FALSE,
+      subscription_id = NULL,
+      subscription_item_id = NULL
+    WHERE subscription_id = $3
+  `;
+  return pool.query(query, [newPriceId, productId, subscriptionId]);
 }
 
 
@@ -460,11 +466,28 @@ export function deleteSubscription(subscriptionId) {
 }
 
 
+export function archiveSubs(subscriptionId) {
+  const query = `
+  UPDATE user_plan
+    SET
+      quantity = 0,
+      active = FALSE,
+      subscription_id = NULL,
+      subscription_item_id = NULL
+    WHERE subscription_id = $1
+  `;
+  return pool.query(query, [subscriptionId]);
+}
+
+
 export function checkPlanOwnerUsingSubsId(subscriptionId, username) {
   const query = `
-    SELECT plan_id AS "planId"
-    FROM user_plan
-    WHERE subscription_id = $1 AND username = $2 AND plan_owner = False`;
+    SELECT
+      *,
+
+      FROM subs_on_plan
+      WHERE subscription_id = $1 AND username = $2
+  `;
   return pool.query(query, [subscriptionId, username]);
 }
 
@@ -508,6 +531,38 @@ export function getSubsItemIdAndProductInfo(subscriptionId, username) {
             AND subscription_id IS NOT NULL
             AND active = True
       ) AS members
+      FROM subs_on_plan
+      WHERE subscription_id = $1 AND username = $2`;
+  return pool.query(query, [subscriptionId, username]);
+}
+
+
+export function getProductInfoAndInvoice(subscriptionId, username) {
+  const query = `
+    SELECT
+      *,
+      ( SELECT
+          json_agg(
+            json_build_object(
+              'username', username,
+              'email', email,
+              'subscriptionId', subscription_id,
+              'subscriptionItemId', subscription_item_id,
+              'quantity', quantity
+            )
+          )
+          FROM user_on_plan
+          WHERE
+            plan_id = (SELECT plan_id FROM user_plan WHERE subscription_id = $1)
+            AND subscription_id != $1
+            AND subscription_id IS NOT NULL
+            AND active = True
+      ) AS members,
+      ( SELECT invoice_id
+          FROM invoices
+          WHERE plan_id = (SELECT plan_id FROM user_plan WHERE subscription_id = $1)
+          LIMIT 1
+      ) AS "invoiceId"
       FROM subs_on_plan
       WHERE subscription_id = $1 AND username = $2`;
   return pool.query(query, [subscriptionId, username]);
