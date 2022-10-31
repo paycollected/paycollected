@@ -79,6 +79,38 @@ CREATE VIEW user_on_plan AS
   ON up.username = u.username;
 
 
+CREATE VIEW subs_on_plan AS
+  WITH c AS (
+    SELECT plan_id, SUM(quantity)
+      FROM user_plan
+      GROUP BY plan_id
+    )
+  SELECT
+      up.plan_id AS "product",
+      up.subscription_id,
+      up.subscription_item_id AS "subscriptionItemId",
+      up.quantity,
+      up.username,
+      up.active AS "subsActive",
+      CASE
+        WHEN p.cycle_frequency = 'weekly'
+          THEN 'week'
+        WHEN p.cycle_frequency = 'monthly'
+          THEN 'month'
+        WHEN p.cycle_frequency = 'yearly'
+          THEN 'year'
+      END AS interval,
+      p.active AS "planActive",
+      p.per_cycle_cost AS "perCycleCost",
+      p.price_id AS "prevPriceId",
+      c.sum AS count
+    FROM user_plan up
+    JOIN plans p
+    ON up.plan_id = p.plan_id
+    JOIN c
+    ON up.plan_id = c.plan_id;
+
+
 CREATE VIEW subscription_setup AS
   SELECT
     CASE

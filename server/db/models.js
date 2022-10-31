@@ -489,50 +489,27 @@ export function checkPlanOwnerForCancel(username, planId, subscriptionId, newOwn
 
 export function getSubsItemIdAndProductInfo(subscriptionId, username) {
   const query = `
-    WITH c AS (
-      SELECT plan_id, SUM(quantity)
-      FROM user_plan
-      GROUP BY plan_id
-    )
     SELECT
-      up.plan_id AS "product",
-      up.subscription_item_id AS "subscriptionItemId",
-      up.quantity,
-      CASE
-        WHEN p.cycle_frequency = 'weekly'
-          THEN 'week'
-        WHEN p.cycle_frequency = 'monthly'
-          THEN 'month'
-        WHEN p.cycle_frequency = 'yearly'
-          THEN 'year'
-      END AS interval,
-      p.active,
-      p.per_cycle_cost AS "perCycleCost",
-      p.price_id AS "prevPriceId",
-      c.sum AS count,
+      *,
       ( SELECT
-        json_agg(
-          json_build_object(
-            'username', username,
-            'email', email,
-            'subscriptionId', subscription_id,
-            'subscriptionItemId', subscription_item_id,
-            'quantity', quantity
+          json_agg(
+            json_build_object(
+              'username', username,
+              'email', email,
+              'subscriptionId', subscription_id,
+              'subscriptionItemId', subscription_item_id,
+              'quantity', quantity
+            )
           )
-        )
-        FROM user_on_plan
-        WHERE
-          plan_id = (SELECT plan_id FROM user_plan WHERE subscription_id = $1)
-          AND subscription_id != $1
-          AND subscription_id IS NOT NULL
-          AND active = True
-    ) AS members
-    FROM user_plan up
-    JOIN plans p
-    ON up.plan_id = p.plan_id
-    JOIN c
-    ON up.plan_id = c.plan_id
-    WHERE up.subscription_id = $1 AND up.username = $2`;
+          FROM user_on_plan
+          WHERE
+            plan_id = (SELECT plan_id FROM user_plan WHERE subscription_id = $1)
+            AND subscription_id != $1
+            AND subscription_id IS NOT NULL
+            AND active = True
+      ) AS members
+      FROM subs_on_plan
+      WHERE subscription_id = $1 AND username = $2`;
   return pool.query(query, [subscriptionId, username]);
 }
 

@@ -4,9 +4,14 @@ import { checkPlanOwnerUsingSubsId, checkPlanOwnerForCancel } from '../../db/mod
 
 const stripe = stripeSDK(process.env.STRIPE_SECRET_KEY);
 
+// remember to set subscription quantity = 0 and active = false
+
 export async function unsubscribe(subscriptionId, username) {
   // check that user calling this function is actually subscription owner
   // also check whether this user is planOwner
+
+  // need perCycleCost, current price Id, product Id, product count, quantity of this subscription
+  // current active members, cycleFrequency, past invoice or not
   let rows;
   try {
     ({ rows } = await checkPlanOwnerUsingSubsId(subscriptionId, username));

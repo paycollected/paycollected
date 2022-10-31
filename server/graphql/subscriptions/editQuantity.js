@@ -25,6 +25,7 @@ export default async function editQuantityResolver(
   let rows;
   try {
     ({ rows } = await getSubsItemIdAndProductInfo(subscriptionId, username));
+    console.log(rows[0]);
   } catch (e) {
     console.log(e);
     throw new GraphQLError('Cannot update quantity', { extensions: { code: 'INTERNAL_SERVER_ERROR' } });
@@ -37,14 +38,15 @@ export default async function editQuantityResolver(
 
   const {
     product, subscriptionItemId, interval, perCycleCost, count, quantity, prevPriceId, members,
-    active
+    planActive, subsActive,
   } = rows[0];
 
   // input validation that there is indeed a change in quant
-  if (!active) {
+  if (!planActive) {
     throw new GraphQLError('Plan has already been archived', { extensions: { code: 'FORBIDDEN' } });
-  }
-  else if (quantity === newQuantity) {
+  } else if (!subsActive) {
+    throw new GraphQLError('Subscription has already been archived', { extensions: { code: 'FORBIDDEN' } });
+  } else if (quantity === newQuantity) {
     throw new GraphQLError('No change in quantity', { extensions: { code: 'BAD_USER_INPUT' } });
   }
 
