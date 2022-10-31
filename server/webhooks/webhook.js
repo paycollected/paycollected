@@ -48,7 +48,7 @@ webhook.post('/', express.raw({type: 'application/json'}), (req, res) => {
       ({ quantChanged, cancelSubs } = subscription.metadata);
       switch (true) {
         case (JSON.parse(quantChanged)):
-          helpers.handleSubscriptionQuantChange(subscription);
+          // helpers.handleSubscriptionQuantChange(subscription);
           break;
         case (JSON.parse(cancelSubs)):
           // handle special case of plan owner deleting subscription!

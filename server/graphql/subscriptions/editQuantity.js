@@ -1,6 +1,7 @@
 import stripeSDK from 'stripe';
 import { GraphQLError } from 'graphql';
-import { getSubsItemIdAndProductInfo } from '../../db/models.js';
+import { getSubsItemIdAndProductInfo, updatePriceQuant } from '../../db/models.js';
+import { updateStripePrice } from '../../utils/helperFn.js';
 
 const stripe = stripeSDK(process.env.STRIPE_SECRET_KEY);
 
@@ -8,7 +9,6 @@ export default async function editQuantityResolver(
   subscriptionId,
   newQuantity,
   username,
-  recurringInterval
 ) {
   // plan owner with quant = 0 will not be able to call this mutation b/c they don't have
   // a preexisting subscriptionId
@@ -36,9 +36,10 @@ export default async function editQuantityResolver(
   }
 
   const {
-    product, subscriptionItemId, cycleFrequency, perCycleCost, count, quantity, prevPriceId
+    product, subscriptionItemId, interval, perCycleCost, count, quantity, prevPriceId, members,
   } = rows[0];
 
+  // input validation that there is indeed a change in quant
   if (quantity === newQuantity) {
     throw new GraphQLError('No change in quantity', { extensions: { code: 'BAD_USER_INPUT' } });
   }
@@ -51,32 +52,40 @@ export default async function editQuantityResolver(
       product,
       unit_amount: Math.ceil(perCycleCost / productTotalQuantity),
       recurring: {
-        interval: recurringInterval[cycleFrequency],
+        interval,
       },
       metadata: { deletePlan: false },
     });
 
-    await stripe.subscriptions.update(
-      subscriptionId,
-      {
-        items: [
-          {
-            id: subscriptionItemId,
-            price,
-            quantity: newQuantity,
-          }
-        ],
-        metadata: {
-          productTotalQuantity,
-          // update new total, also save webhook 1 trip to db
-          quantChanged: true,
-          // marker for event type
-          prevPriceId,
-          // store prevPriceId here to save webhook trip to db
-        },
-        proration_behavior: 'none',
-      }
-    );
+    const promises = [
+      stripe.subscriptions.update(
+        subscriptionId,
+        {
+          items: [
+            {
+              id: subscriptionItemId,
+              price,
+              quantity: newQuantity,
+            }
+          ],
+          metadata: { productTotalQuantity },
+          proration_behavior: 'none',
+        }
+      ),
+      // update this subscription with new price ID
+      stripe.prices.update(prevPriceId, { active: false }),
+      // archive old price ID
+      updatePriceQuant(product, subscriptionId, newQuantity, price)
+    ];
+
+    if (!members) {
+      await Promise.all(promises);
+    } else {
+      await Promise.all([
+        ...promises,
+        ...members.map((member) => updateStripePrice(member, price, productTotalQuantity)),
+      ]);
+    }
     return { planId: product, quantity: newQuantity };
   } catch (e) {
     console.log(e);

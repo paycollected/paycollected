@@ -494,35 +494,49 @@ export function getSubsItemIdAndProductInfo(subscriptionId, username) {
       up.plan_id AS "product",
       up.subscription_item_id AS "subscriptionItemId",
       up.quantity,
-      p.cycle_frequency::VARCHAR AS "cycleFrequency",
-      p.per_cycle_cost AS "perCycleCost",
+      CASE
+        WHEN p.cycle_frequency = 'weekly'
+          THEN 'week'
+        WHEN p.cycle_frequency = 'monthly'
+          THEN 'month'
+        WHEN p.cycle_frequency = 'yearly'
+          THEN 'year'
+      END AS "cycleFrequency",
+      p.per_cycle_cost AS interval,
       p.price_id AS "prevPriceId",
-      c.sum AS count
+      c.sum AS count,
+      ( SELECT
+        json_agg(
+          json_build_object(
+            'username', username,
+            'email', email,
+            'subscriptionId', subscription_id,
+            'subscriptionItemId', subscription_item_id,
+            'quantity', quantity
+          )
+        )
+        FROM user_on_plan
+        WHERE
+          plan_id = (SELECT plan_id FROM user_plan WHERE subscription_id = $1)
+          AND subscription_id != $1
+          AND subscription_id IS NOT NULL
+    ) AS members
     FROM user_plan up
     JOIN plans p
     ON up.plan_id = p.plan_id
     JOIN c
     ON up.plan_id = c.plan_id
-    WHERE up.subscription_id = $1 and up.username = $2`;
+    WHERE up.subscription_id = $1 AND up.username = $2`;
   return pool.query(query, [subscriptionId, username]);
 }
 
 
-export function updatePriceQuantGetMembers(planId, subscriptionId, newQuantity, newPriceId) {
+export function updatePriceQuant(planId, subscriptionId, newQuantity, newPriceId) {
   const query = `
   WITH update_price AS (
     UPDATE plans SET price_id = $4 WHERE plan_id = $1
-  ), update_quant AS (
-    UPDATE user_plan SET quantity = $3 WHERE subscription_id = $2
   )
-  SELECT
-    username,
-    email,
-    subscription_id AS "subscriptionId",
-    subscription_item_id AS "subscriptionItemId",
-    quantity
-  FROM user_on_plan
-  WHERE plan_id = $1 AND subscription_id != $2
+  UPDATE user_plan SET quantity = $3 WHERE subscription_id = $2
   `;
   return pool.query(query, [planId, subscriptionId, newQuantity, newPriceId]);
 }
@@ -555,31 +569,4 @@ export function deletePlanGetAllSubs(planId) {
     WHERE plan_id = $1
   `;
   return pool.query(query, [planId]);
-}
-
-
-export function planReturnAfterSubs(planId, quantity) {
-  const query = `
-    WITH select_owner AS (
-      SELECT
-        JSON_BUILD_OBJECT(
-          'firstName', u.first_name,
-          'lastName', u.last_name,
-          'username', u.username
-        ) AS owner
-      FROM users u
-      JOIN user_plan up
-      ON u.username = up.username
-      WHERE up.plan_owner = True AND up.plan_id = $1
-    )
-    SELECT p.plan_id AS "planId",
-    p.plan_name AS name,
-    UPPER(p.cycle_frequency::VARCHAR) AS "cycleFrequency",
-    p.per_cycle_cost AS "perCycleCost",
-    $2 AS quantity,
-    (SELECT owner FROM select_owner)
-    FROM plans p
-    WHERE p.plan_id = $1`;
-
-  return pool.query(query, [planId, quantity]);
 }

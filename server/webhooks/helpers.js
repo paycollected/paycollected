@@ -127,36 +127,6 @@ export async function handleSubscriptionCancel(subscription) {
   }
 }
 
-export async function handleSubscriptionQuantChange(subscription) {
-  const { id: subscriptionId, items, metadata } = subscription;
-  const productTotalQuantity = Number(metadata.productTotalQuantity);
-  const { prevPriceId } = metadata;
-  const { price, quantity } = items.data[0];
-  const { id: newPriceId, product: productId } = price;
-
-  try {
-    const [{ rows }, _, __] = await Promise.all([
-      models.updatePriceQuantGetMembers(productId, subscriptionId, quantity, newPriceId),
-      // edit quantity of this subscription in our db & update priceId, also get all members
-      stripe.prices.update(prevPriceId, { active: false }),
-      // archive old price ID
-      stripe.subscriptions.update(subscriptionId, { metadata: { quantChanged: false, prevPriceId: '' } })
-      // reset metadata for this subscription
-    ]);
-
-    if (rows.length > 0) {
-      // update price for all other members
-      await Promise.all(rows.map((row) => updateStripePrice(
-        row,
-        newPriceId,
-        productTotalQuantity
-      )));
-    }
-  } catch (err) {
-    console.log(err);
-  }
-}
-
 
 async function cancelSubsAndNotify(row) {
   const {

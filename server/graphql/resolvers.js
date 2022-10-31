@@ -116,7 +116,7 @@ export default {
 
     editQuantity: authResolverWrapper(
       (_, { subscriptionId, newQuantity }, { user: { username } }) => (
-        editQuantityResolver(subscriptionId, newQuantity, username, recurringInterval)
+        editQuantityResolver(subscriptionId, newQuantity, username)
       )
     ),
 
