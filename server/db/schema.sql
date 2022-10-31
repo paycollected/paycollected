@@ -78,3 +78,51 @@ CREATE VIEW user_on_plan AS
   JOIN users u
   ON up.username = u.username;
 
+
+CREATE VIEW subscription_setup AS
+  SELECT
+    CASE
+      WHEN p.cycle_frequency = 'weekly'
+        THEN 'week'
+      WHEN p.cycle_frequency = 'monthly'
+        THEN 'month'
+      WHEN p.cycle_frequency = 'yearly'
+        THEN 'year'
+    END AS "cycleFrequency",
+    p.plan_id,
+    p.per_cycle_cost AS "perCycleCost",
+    p.active,
+    p.price_id AS "prevPriceId",
+    SUM (up.quantity)::INTEGER AS count,
+    CASE
+      WHEN CURRENT_TIMESTAMP < p.start_date
+        THEN ROUND (EXTRACT (EPOCH FROM p.start_date))
+      WHEN CURRENT_TIMESTAMP >= p.start_date
+        THEN
+          CASE
+            WHEN p.cycle_frequency = 'weekly'
+              THEN ROUND (EXTRACT (EPOCH FROM (
+                p.start_date
+                + MAKE_INTERVAL(weeks => (FLOOR (EXTRACT (DAY FROM (CURRENT_TIMESTAMP - p.start_date)) / 7))::INTEGER)
+                + interval '1 week'
+              )))
+            WHEN p.cycle_frequency = 'monthly'
+              THEN ROUND (EXTRACT (EPOCH FROM (
+                p.start_date
+                + DATE_TRUNC('month', AGE(CURRENT_TIMESTAMP, p.start_date))
+                + interval '1 month'
+              )))
+            WHEN p.cycle_frequency = 'yearly'
+              THEN ROUND (EXTRACT (EPOCH FROM (
+                p.start_date
+                + DATE_TRUNC('year', AGE(CURRENT_TIMESTAMP, p.start_date))
+                + interval '1 year'
+              )))
+          END
+    END
+    AS "startDate"
+  FROM plans p
+  JOIN user_plan up
+  ON p.plan_id = up.plan_id
+  GROUP BY
+    p.price_id, p.cycle_frequency, p.per_cycle_cost, p.price_id, p.start_date, p.active, p.plan_id;
