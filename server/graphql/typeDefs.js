@@ -1,6 +1,5 @@
-import { gql } from 'apollo-server-core';
 
-export default gql`
+export default `#graphql
   scalar PlanID
   scalar SubscriptionID
   scalar Username

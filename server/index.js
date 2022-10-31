@@ -1,5 +1,10 @@
-import { ApolloServer } from 'apollo-server-express';
+import { ApolloServer } from '@apollo/server';
+import { expressMiddleware } from '@apollo/server/express4';
+import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer';
+import http from 'http';
 import express from 'express';
+import cors from 'cors';
+import { json } from 'body-parser';
 import dotenv from 'dotenv';
 import jwt from 'jsonwebtoken';
 import path from 'path';
@@ -13,16 +18,12 @@ const { SERVER_PORT } = process.env;
 
 async function startApolloServer() {
   const app = express();
-  app.use('/', webhook);
-
-  // Json middleware must be mounted AFTER webhook endpoint
-  // because req.body needs to be in json format
-  // so that webhook could convert it into raw buffer
-  app.use(express.json());
+  const httpServer = http.createServer(app);
 
   const server = new ApolloServer({
     typeDefs,
     resolvers,
+    plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
     csrfPrevention: true,
     cache: 'bounded',
     nodeEnv: 'test',
@@ -49,8 +50,14 @@ async function startApolloServer() {
   });
 
   await server.start();
+  app.use('/webhook', webhook);
 
-  server.applyMiddleware({ app, cors: { origin: true, credentials: true } });
+  // Json middleware must be mounted AFTER webhook endpoint
+  // because req.body needs to be in json format
+  // so that webhook could convert it into raw buffer
+  app.use(cors(), json());
+
+  app.use('/graphql', expressMiddleware(server));
 
   // serving web client
   // these needs to go AFTER Apollo server and webhook middlewares
@@ -58,10 +65,8 @@ async function startApolloServer() {
   app.use(express.static(path.join(__dirname, '..', 'client', 'dist')));
   app.get('*', (req, res) => res.sendFile(path.resolve(__dirname, '..', 'client', 'dist', 'index.html')));
 
-  app.listen(SERVER_PORT, () => {
-    console.log(`🛌 REST server is served at localhost:${SERVER_PORT}`);
-    console.log(`🚀 GraphQL Server ready at http://localhost:${SERVER_PORT}${server.graphqlPath}`);
-  });
+  await new Promise((resolve) => httpServer.listen({ port: SERVER_PORT }, resolve));
+  console.log(`🛌 REST server is served at localhost:${SERVER_PORT}`);
 }
 
 startApolloServer();

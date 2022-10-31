@@ -1,10 +1,6 @@
 import stripeSDK from 'stripe';
-import {
-  ApolloError, UserInputError, ForbiddenError
-} from 'apollo-server-core';
-import {
-  checkPlanOwnerUsingSubsId, checkPlanOwnerForCancel
-} from '../../db/models.js';
+import { GraphQLError } from 'graphql';
+import { checkPlanOwnerUsingSubsId, checkPlanOwnerForCancel } from '../../db/models.js';
 
 const stripe = stripeSDK(process.env.STRIPE_SECRET_KEY);
 
@@ -16,11 +12,13 @@ export async function unsubscribe(subscriptionId, username) {
     ({ rows } = await checkPlanOwnerUsingSubsId(subscriptionId, username));
   } catch (e) {
     console.log(e);
-    throw new ApolloError('Cannot unsubscribe');
+    throw new GraphQLError('Cannot unsubscribe', { extensions: { code: 'INTERNAL_SERVER_ERROR' } });
   }
 
   if (rows.length === 0) {
-    throw new ForbiddenError('User not authorized to perform this action');
+    // user not owner of this subscription ID,
+    // or he/she is plan owner - in which case cannot call this mutation
+    throw new GraphQLError('User not authorized to perform this action', { extensions: { code: 'FORBIDDEN' } });
   }
 
   try {
@@ -29,15 +27,15 @@ export async function unsubscribe(subscriptionId, username) {
     return { planId };
   } catch (e) {
     console.log(e);
-    throw new ApolloError('Cannot unsubscribe');
+    throw new GraphQLError('Cannot unsubscribe', { extensions: { code: 'INTERNAL_SERVER_ERROR' } });
   }
-};
+}
 
 
 export async function unsubscribeAsOwner(subscriptionId, planId, username, newOwner) {
   if (username === newOwner) {
     // check that this user is not trying to transfer plan ownership to him/herself
-    throw new UserInputError('User not authorized to perform this action');
+    throw new GraphQLError('Cannot transfer ownership to self', { extensions: { code: 'INTERNAL_SERVER_ERROR' } });
   }
 
   let rows;
@@ -46,10 +44,12 @@ export async function unsubscribeAsOwner(subscriptionId, planId, username, newOw
     // checking that all inputs are valid combinations
   } catch (e) {
     console.log('Failure to perform check', e);
-    throw new ApolloError('Cannot unsubscribe');
+    throw new GraphQLError('Cannot unsubscribe', { extensions: { code: 'INTERNAL_SERVER_ERROR' } });
   }
   if (rows.length !== 2) {
-    throw new ForbiddenError('User not authorized to perform this action');
+    // user is not a member on the plan, not owner of the plan, or does not own this subscription ID
+    // or new owner is not active member on plan
+    throw new GraphQLError('User not authorized to perform this action', { extensions: { code: 'FORBIDDEN' } });
   }
 
   try {
@@ -60,6 +60,6 @@ export async function unsubscribeAsOwner(subscriptionId, planId, username, newOw
     return { planId };
   } catch (e) {
     console.log(e);
-    throw new ApolloError('Cannot unsubscribe');
+    throw new GraphQLError('Cannot unsubscribe', { extensions: { code: 'INTERNAL_SERVER_ERROR' } });
   }
 }

@@ -1,6 +1,6 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { ApolloError, UserInputError } from 'apollo-server-core';
+import { GraphQLError } from 'graphql';
 import { getUserInfo } from '../../db/models.js';
 
 export default async function loginResolver(username, password) {
@@ -34,11 +34,11 @@ export default async function loginResolver(username, password) {
   } catch (asyncError) {
     if (errMsg) {
       // if anticipated bad input error
-      throw new UserInputError(errMsg);
+      throw new GraphQLError(errMsg, { extensions: { code: 'BAD_USER_INPUT' } });
     } else {
       // catch all from rest of async
       console.log(asyncError);
-      throw new ApolloError('Unable to log in');
+      throw new GraphQLError('Unable to log in', { extensions: { code: 'INTERNAL_SERVER_ERROR' } });
     }
   }
 }

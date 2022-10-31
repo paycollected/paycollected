@@ -1,5 +1,5 @@
 import stripeSDK from 'stripe';
-import { ApolloError, ForbiddenError } from 'apollo-server-core';
+import { GraphQLError } from 'graphql';
 import { getPriceFromPlan } from '../../db/models.js';
 
 const stripe = stripeSDK(process.env.STRIPE_SECRET_KEY);
@@ -10,11 +10,11 @@ export default async function deletePlanResolver(planId, username) {
     ({ rows } = await getPriceFromPlan(planId, username));
   } catch (e) {
     console.log(e);
-    throw new ApolloError('Cannot delete plan');
+    throw new GraphQLError('Unable to delete plan', { extensions: { code: 'INTERNAL_SERVER_ERROR' } });
   }
 
   if (rows.length === 0) {
-    throw new ForbiddenError('User not authorized to perform this action');
+    throw new GraphQLError('User not authorized to perform this action', { extensions: { code: 'FORBIDDEN' } });
   }
   const { priceId } = rows[0];
   try {
@@ -22,6 +22,6 @@ export default async function deletePlanResolver(planId, username) {
     return { planId };
   } catch (e) {
     console.log(e);
-    throw new ApolloError('Cannot delete plan');
+    throw new GraphQLError('Unable to delete plan', { extensions: { code: 'INTERNAL_SERVER_ERROR' } });
   }
 }

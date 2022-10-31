@@ -1,7 +1,5 @@
 import stripeSDK from 'stripe';
-import {
-  ApolloError, UserInputError, ForbiddenError
-} from 'apollo-server-core';
+import { GraphQLError } from 'graphql';
 import { getSubsItemIdAndProductInfo } from '../../db/models.js';
 
 const stripe = stripeSDK(process.env.STRIPE_SECRET_KEY);
@@ -21,7 +19,7 @@ export default async function editQuantityResolver(
   // Validating quantity input
   if (newQuantity > 6 || newQuantity <= 0) {
     // upper limit for our system
-    throw new UserInputError('Invalid quantity');
+    throw new GraphQLError('Invalid quantity', { extensions: { code: 'BAD_USER_INPUT' } });
   }
 
   let rows;
@@ -29,11 +27,12 @@ export default async function editQuantityResolver(
     ({ rows } = await getSubsItemIdAndProductInfo(subscriptionId, username));
   } catch (e) {
     console.log(e);
-    throw new ApolloError('Cannot update quantity');
+    throw new GraphQLError('Cannot update quantity', { extensions: { code: 'INTERNAL_SERVER_ERROR' } });
   }
 
+  // validating ownership
   if (rows.length === 0) {
-    throw new ForbiddenError("Subscription doesn't belong to user");
+    throw new GraphQLError("Subscription doesn't belong to user", { extensions: { code: 'FORBIDDEN' } });
   }
 
   const {
@@ -41,7 +40,7 @@ export default async function editQuantityResolver(
   } = rows[0];
 
   if (quantity === newQuantity) {
-    throw new UserInputError('No change in quantity');
+    throw new GraphQLError('No change in quantity', { extensions: { code: 'BAD_USER_INPUT' } });
   }
 
   const productTotalQuantity = count - quantity + newQuantity;
@@ -81,6 +80,6 @@ export default async function editQuantityResolver(
     return { planId: product, quantity: newQuantity };
   } catch (e) {
     console.log(e);
-    throw new ApolloError('Cannot update quantity');
+    throw new GraphQLError('Cannot update quantity', { extensions: { code: 'INTERNAL_SERVER_ERROR' } });
   }
 }

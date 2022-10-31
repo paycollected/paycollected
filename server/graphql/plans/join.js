@@ -1,5 +1,5 @@
 import stripeSDK from 'stripe';
-import { ApolloError, ForbiddenError, UserInputError } from 'apollo-server-core';
+import { GraphQLError } from 'graphql';
 import { joinPlan } from '../../db/models.js';
 
 const stripe = stripeSDK(process.env.STRIPE_SECRET_KEY);
@@ -8,7 +8,7 @@ export default async function joinPlanResolver(planId, newQuantity, username) {
   // create
   let errMsg;
   if (newQuantity <= 0) {
-    errMsg = 'Invalid input';
+    errMsg = 'Invalid quantity';
     throw new Error();
   }
 
@@ -54,12 +54,12 @@ export default async function joinPlanResolver(planId, newQuantity, username) {
 
     return { clientSecret, setupIntentId, paymentMethods };
   } catch (asyncError) {
-    if (errMsg === 'User is already subscribed to this plan') {
-      throw new ForbiddenError(errMsg);
-    } else if (errMsg === 'Invalid input') {
-      throw new UserInputError(errMsg);
+    if (errMsg === 'User already subscribed' || errMsg === 'This plan has already been archived') {
+      throw new GraphQLError(errMsg, { extensions: { code: 'FORBIDDEN' } });
+    } else if (errMsg === 'Invalid quantity') {
+      throw new GraphQLError(errMsg, { extensions: { code: 'BAD_USER_INPUT' } });
     }
     console.log(asyncError);
-    throw new ApolloError('Unable to create subscription');
+    throw new GraphQLError('Unable to create subscription', { extensions: { code: 'INTERNAL_SERVER_ERROR' } });
   }
 }

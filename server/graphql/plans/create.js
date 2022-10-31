@@ -1,5 +1,5 @@
 import stripeSDK from 'stripe';
-import { ApolloError, UserInputError } from 'apollo-server-core';
+import { GraphQLError } from 'graphql';
 import { addPlan } from '../../db/models.js';
 
 const stripe = stripeSDK(process.env.STRIPE_SECRET_KEY);
@@ -24,7 +24,7 @@ export default async function createPlanResolver(
   const cost = perCycleCost * 100; // need in cents
   if (cost < 1000 || !Number.isInteger(cost)) {
     // make min $10
-    throw new UserInputError('Invalid input');
+    throw new GraphQLError('Invalid cost', { extensions: { code: 'BAD_USER_INPUT' } });
   }
   // check that date input string is between 2022-01-01 until 2099-12-31
   // perhaps move regex check to custom scalar if needs to incorporate date string
@@ -33,7 +33,7 @@ export default async function createPlanResolver(
   // this regex works BUT it's very verbose, specifying almost every single case
   // --> TODO if have time: rewrite to improve "regex"-ness
   if (!dateStrRegEx.test(startDate)) {
-    throw new UserInputError('Invalid input');
+    throw new GraphQLError('Invalid start date', { extensions: { code: 'BAD_USER_INPUT' } });
   }
   // just doing a simple input date validation using server's local time
   let startArr = startDate.split('-');
@@ -57,7 +57,7 @@ export default async function createPlanResolver(
   // set tmr + 1 month from then to also be at 00:00:00 local time
   // so we can just compare the DATE!
   if (start < tomorrow || start > oneMonthFromTmr) {
-    throw new UserInputError('Invalid input');
+    throw new GraphQLError('Invalid start date', { extensions: { code: 'BAD_USER_INPUT' } });
   }
 
   const plan = planName.trim();
@@ -92,6 +92,6 @@ export default async function createPlanResolver(
     return { planId };
   } catch (asyncError) {
     console.log(asyncError);
-    throw new ApolloError('Unable to create new plan');
+    throw new GraphQLError('Unable to create new plan', { extensions: { code: 'INTERNAL_SERVER_ERROR' } });
   }
 }

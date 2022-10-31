@@ -1,6 +1,6 @@
 import stripeSDK from 'stripe';
 import bcrypt from 'bcrypt';
-import { ApolloError, ForbiddenError } from 'apollo-server-core';
+import { GraphQLError } from 'graphql';
 import { subscriptionSetupSavedCard, startSubsNoPriceUpdateReturningPlan, startSubsPriceUpdateReturningPlan } from '../../db/models.js';
 import { updateStripePrice } from '../../utils/helperFn.js';
 
@@ -148,9 +148,9 @@ export default async function subscribeWithSavedCardResolver(
     return plan;
   } catch (e) {
     if (err) {
-      throw new ForbiddenError(err);
+      throw new GraphQLError(err, { extensions: { code: 'FORBIDDEN' } });
     }
     console.log(e);
-    throw new ApolloError('Unable to start subscription');
+    throw new GraphQLError('Unable to start subscription', { extensions: { code: 'INTERNAL_SERVER_ERROR' } });
   }
 }

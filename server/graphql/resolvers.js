@@ -1,5 +1,5 @@
 import stripeSDK from 'stripe';
-import { ApolloError } from 'apollo-server-core';
+import { GraphQLError } from 'graphql';
 import authResolverWrapper from './authResolverWrapper';
 import {
   planIdScalar, subscriptionIdScalar, emailScalar, usernameScalar, paymentMethodIdScalar,
@@ -104,7 +104,10 @@ export default {
         return { portalSessionURL: url };
       } catch (asyncError) {
         console.log(asyncError);
-        throw new ApolloError('Unable to get customer portal link');
+        // throw new ApolloError('Unable to get customer portal link');
+        throw new GraphQLError('Unable to get customer portal link', {
+          extensions: { code: 'INTERNAL_SERVER_ERROR' }
+        });
       }
     }),
 

@@ -1,7 +1,7 @@
 import stripeSDK from 'stripe';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { ApolloError, UserInputError } from 'apollo-server-core';
+import { GraphQLError } from 'graphql';
 import { checkUser, createUser } from '../../db/models.js';
 
 const stripe = stripeSDK(process.env.STRIPE_SECRET_KEY);
@@ -55,10 +55,11 @@ export default async function createAccount(firstName, lastName, username, passw
     // if this is an anticipated bad input error
     if (errMsg) {
       throw new UserInputError(errMsg);
+      throw new GraphQLError(errMsg, { extensions: { code: 'INTERNAL_SERVER_ERROR' } });
     } else {
     // catch all from the rest of async operations
       console.log(asyncError);
-      throw new ApolloError('Unable to create user');
+      throw new GraphQLError('Unable to create user', { extensions: { code: 'BAD_USER_INPUT' } });
     }
   }
 }
