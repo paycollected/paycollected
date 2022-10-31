@@ -436,26 +436,39 @@ export function updatePriceIdArchiveSubs(newPriceId, productId, subscriptionId) 
   return pool.query(query, [newPriceId, productId, subscriptionId]);
 }
 
+export function updatePriceOwnerArchiveSubs(newPriceId, productId, subscriptionId, newOwner) {
+  const query = `
+    WITH update_price_id AS (
+      UPDATE plans
+        SET price_id = $1
+        WHERE plan_id = $2
+    ), update_new_owner AS (
+      UPDATE user_plan
+        SET plan_owner = TRUE
+        WHERE plan_id = $2 AND username = $4
+    )
+    UPDATE user_plan
+      SET
+        quantity = 0,
+        active = FALSE,
+        subscription_id = NULL,
+        subscription_item_id = NULL
+      WHERE subscription_id = $3
+  `;
+  return pool.query(query, [newPriceId, productId, subscriptionId, newOwner]);
+}
 
-export function updatePriceOwnerDelSubsGetMembers(newPriceId, planId, subscriptionId, newOwner) {
+
+export function updatePriceOwnerDelSubs(newPriceId, planId, subscriptionId, newOwner) {
   const query = `
     WITH update_price_id AS (
       UPDATE plans SET price_id = $1 WHERE plan_id = $2
     ), del_sub AS (
       DELETE FROM user_plan WHERE subscription_id = $3
-    ), update_owner AS (
-      UPDATE user_plan
-      SET plan_owner = True
-      WHERE username = $4 AND plan_id = $2
     )
-    SELECT
-      username,
-      email,
-      subscription_id AS "subscriptionId",
-      subscription_item_id AS "subscriptionItemId",
-      quantity
-    FROM user_on_plan
-    WHERE plan_id = $2 and subscription_id != $3
+    UPDATE user_plan
+    SET plan_owner = TRUE
+    WHERE plan_id = $2 AND username = $4
     `;
   return pool.query(query, [newPriceId, planId, subscriptionId, newOwner]);
 }
@@ -527,6 +540,11 @@ export function getSubsItemIdAndProductInfo(subscriptionId, username) {
 
 export function getProductInfoAndInvoice(subscriptionId, username) {
   const query = `
+    WITH t AS (
+      SELECT plan_id
+      FROM user_plan
+      WHERE subscription_id = $1
+    )
     SELECT
       *,
       ( SELECT
@@ -541,20 +559,62 @@ export function getProductInfoAndInvoice(subscriptionId, username) {
           )
           FROM user_on_plan
           WHERE
-            plan_id = (SELECT plan_id FROM user_plan WHERE subscription_id = $1)
+            plan_id = t.plan_id
             AND subscription_id != $1
             AND subscription_id IS NOT NULL
             AND active = True
       ) AS members,
       ( SELECT invoice_id
           FROM invoices
-          WHERE plan_id = (SELECT plan_id FROM user_plan WHERE subscription_id = $1)
+          WHERE plan_id = t.plan_id
           LIMIT 1
       ) AS "invoiceId"
       FROM subs_on_plan
       WHERE subscription_id = $1 AND username = $2`;
   return pool.query(query, [subscriptionId, username]);
 }
+
+
+export function getProductInfoAndInvoiceCheckNewOwner(subscriptionId, username, newOwner) {
+  const query = `
+    WITH t AS (
+      SELECT plan_id
+      FROM user_plan
+      WHERE subscription_id = $1
+    )
+    SELECT
+      *,
+      ( SELECT
+          json_agg(
+            json_build_object(
+              'username', username,
+              'email', email,
+              'subscriptionId', subscription_id,
+              'subscriptionItemId', subscription_item_id,
+              'quantity', quantity
+            )
+          )
+          FROM user_on_plan
+          WHERE
+            plan_id = t.plan_id
+            AND subscription_id != $1
+            AND subscription_id IS NOT NULL
+            AND active = True
+      ) AS members,
+      ( SELECT invoice_id
+          FROM invoices
+          WHERE plan_id = t.plan_id
+          LIMIT 1
+      ) AS "invoiceId",
+      ( SELECT plan_owner
+          FROM user_plan
+          WHERE username = $3
+            AND plan_id = t.plan_id
+            AND active = TRUE
+      ) AS "newOwnerCheck"
+      FROM subs_on_plan
+      WHERE subscription_id = $1 AND username = $2`;
+  return pool.query(query, [subscriptionId, username, newOwner]);
 
 
 export function updatePriceQuant(planId, subscriptionId, newQuantity, newPriceId) {

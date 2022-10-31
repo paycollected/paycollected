@@ -8,9 +8,8 @@ import {
 import createAccount from './users/createAccount';
 import loginResolver from './users/login';
 import joinPlanResolver from './plans/join';
-import {
-  unsubscribe as unsubscribeResolver, unsubscribeAsOwner as unsubscribeAsOwnerResolver
-} from './subscriptions/unsubscribe.js';
+import unsubscribeResolver from './subscriptions/unsubscribe.js';
+import unsubscribeAsOwnerResolver from './subscriptions/unsubscribeAsOwner';
 import editQuantityResolver from './subscriptions/editQuantity';
 import subscribeWithSavedCardResolver from './subscriptions/subscribeWithSavedCard';
 import {
@@ -109,8 +108,8 @@ export default {
     )),
 
     unsubscribeAsOwner: authResolverWrapper(
-      (_, { subscriptionId, planId, newOwner }, { user: { username } }) => (
-        unsubscribeAsOwnerResolver(subscriptionId, planId, username, newOwner)
+      (_, { subscriptionId, newOwner }, { user: { username } }) => (
+        unsubscribeAsOwnerResolver(subscriptionId, username, newOwner)
       )
     ),
 

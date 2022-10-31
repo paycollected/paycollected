@@ -113,7 +113,6 @@ export default `#graphql
 
     unsubscribeAsOwner(
       subscriptionId: SubscriptionID!
-      planId: PlanID!
       newOwner: String!
       # newOwner: Username!
     ): PlanIdResponse!

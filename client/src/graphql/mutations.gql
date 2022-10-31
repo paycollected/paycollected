@@ -52,8 +52,8 @@ mutation Unsubscribe ($subscriptionId: SubscriptionID!) {
 }
 
 
-mutation UnsubscribeAsPlanOwner($subscriptionId: SubscriptionID!, $planId: PlanID!, $newOwner: String!) {
-  unsubscribeAsOwner(subscriptionId: $subscriptionId, planId: $planId, newOwner: $newOwner) {
+mutation UnsubscribeAsPlanOwner($subscriptionId: SubscriptionID!, $newOwner: String!) {
+  unsubscribeAsOwner(subscriptionId: $subscriptionId, newOwner: $newOwner) {
     planId
   }
 }

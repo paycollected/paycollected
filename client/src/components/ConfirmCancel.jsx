@@ -12,7 +12,7 @@ import {
 export default function ConfirmCancel({ plan, user }) {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const {
-    subscriptionId, planId, activeMembers, owner
+    subscriptionId, activeMembers, owner
   } = plan;
   const [newOwner, setNewOwner] = useState(
     activeMembers.length > 0 ? activeMembers[0].username : null
@@ -59,7 +59,7 @@ export default function ConfirmCancel({ plan, user }) {
     } else {
       confirmUnsubscribeAsOwner({
         variables: {
-          subscriptionId, planId, newOwner
+          subscriptionId, newOwner
         }
       });
     }
