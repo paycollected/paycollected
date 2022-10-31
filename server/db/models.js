@@ -181,7 +181,7 @@ export function subscriptionSetup(planId, username) {
     COALESCE(
       ( SELECT quantity
         FROM user_plan
-        WHERE username = $1 AND plan_id = $2
+        WHERE username = $2 AND plan_id = $1
       ),
       0
     ) AS "existingQuant",
@@ -196,10 +196,10 @@ export function subscriptionSetup(planId, username) {
           )
         )
         FROM user_on_plan
-        WHERE plan_id = $2 AND subscription_id IS NOT NULL
+        WHERE plan_id = $1 AND subscription_id IS NOT NULL
     ) AS members
     FROM subscription_setup
-    WHERE plan_id = $2
+    WHERE plan_id = $1
   `;
 
   return pool.query(query, [planId, username]);

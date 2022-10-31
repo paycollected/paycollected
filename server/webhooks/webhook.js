@@ -2,6 +2,7 @@ import express from 'express';
 import dotenv from 'dotenv';
 import stripeSDK from 'stripe';
 import * as helpers from './helpers.js';
+import handleSubscriptionStart from './eventHandlers/subsStartNewCard';
 
 dotenv.config();
 const webhook = express.Router();
@@ -40,7 +41,7 @@ webhook.post('/', express.raw({type: 'application/json'}), (req, res) => {
       break;
     case 'setup_intent.succeeded': // someone new joining plan
       setupIntent = event.data.object;
-      helpers.handleSubscriptionStart(setupIntent);
+      handleSubscriptionStart(setupIntent);
       break;
     case 'customer.subscription.updated':
       subscription = event.data.object;
