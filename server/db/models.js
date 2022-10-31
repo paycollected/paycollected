@@ -237,7 +237,7 @@ export function subscriptionSetup(planId, username) {
     JOIN user_plan up
     ON p.plan_id = up.plan_id
     WHERE p.plan_id = $1
-    GROUP BY p.price_id, p.cycle_frequency, p.per_cycle_cost, p.price_id, p.start_date
+    GROUP BY p.price_id, p.cycle_frequency, p.per_cycle_cost, p.price_id, p.start_date, p.active
   `;
 
   return pool.query(query, [planId, username]);
@@ -315,7 +315,7 @@ export function subscriptionSetupSavedCard(planId, username) {
     JOIN user_plan up
     ON p.plan_id = up.plan_id
     WHERE p.plan_id = $2
-    GROUP BY p.price_id, p.cycle_frequency, p.per_cycle_cost, p.price_id, p.start_date
+    GROUP BY p.price_id, p.cycle_frequency, p.per_cycle_cost, p.price_id, p.start_date, p.active
   `;
 
   return pool.query(query, [username, planId]);
@@ -418,7 +418,7 @@ export function startSubsPriceUpdateReturningPlan(
   ),
   update_price_id AS (
       UPDATE plans
-      SET price_id = $7
+      SET price_id = $6
       WHERE plan_id = $4
   ),
   select_owner AS (
@@ -472,7 +472,7 @@ export function startSubscription(
       DO UPDATE SET
         quantity = $1, subscription_id = $2, subscription_item_id = $3
       WHERE user_plan.username = $5 AND user_plan.plan_id = $4
-    ),
+    )
     UPDATE plans
     SET price_id = $6
     WHERE plan_id = $4

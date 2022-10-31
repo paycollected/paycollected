@@ -67,9 +67,6 @@ async function processQuantChangeOnSubsStart(
 
 
 export async function handleSubscriptionStart(setupIntent) {
-  const a = Date.now();
-  // NOTE: as long as user is on at least one plan,
-  // we're confident that they have a default payment method
   console.log('----------> setup Intent metadata', setupIntent.metadata);
   if (Object.keys(setupIntent.metadata).length > 0) {
   // only run this if a new subscription is created through our site
@@ -198,8 +195,6 @@ export async function handleSubscriptionStart(setupIntent) {
     } catch (e) {
       console.log(e);
     }
-    const b = Date.now();
-    console.log('--------------> end - start', (b - a) / 1000);
   }
 }
 
