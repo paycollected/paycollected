@@ -65,9 +65,6 @@ export async function handleSubscriptionCancel(subscription) {
           productId,
           subscriptionId
         ));
-        // update product w/ new price ID
-        // delete this subscription
-        // get all other active members on plan
       } else {
         ({ rows } = await models.updatePriceOwnerDelSubsGetMembers(
           newPriceId,
@@ -75,7 +72,6 @@ export async function handleSubscriptionCancel(subscription) {
           subscriptionId,
           newOwner
         ));
-        // similar as above, w/ addition of updating new plan owner
       }
 
       if (rows.length > 0) {

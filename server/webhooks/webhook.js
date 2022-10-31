@@ -1,10 +1,8 @@
 import express from 'express';
-import dotenv from 'dotenv';
 import stripeSDK from 'stripe';
 import * as helpers from './helpers.js';
 import handleSubscriptionStart from './eventHandlers/subsStartNewCard';
 
-dotenv.config();
 const webhook = express.Router();
 const endpointSecret = process.env.STRIPE_WEBHOOK_ENDPOINT_SECRET;
 
@@ -51,11 +49,7 @@ webhook.post('/', express.raw({ type: 'application/json' }), (req, res) => {
           // helpers.handleSubscriptionQuantChange(subscription);
           break;
         case (JSON.parse(cancelSubs)):
-          // handle special case of plan owner deleting subscription!
-          // if plan owner and there are still active members --> transfer ownership
-          // if plan owner and no active members --> disable option to transfer ownership
-          // can only delete entire plan at this point
-          helpers.handleSubscriptionCancel(subscription);
+          // helpers.handleSubscriptionCancel(subscription);
           break;
         default:
           break;

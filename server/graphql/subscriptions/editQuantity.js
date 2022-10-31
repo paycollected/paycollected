@@ -85,7 +85,7 @@ export default async function editQuantityResolver(
       // save to db
     ];
 
-    if (members !== null) {
+    if (members === null) {
       await Promise.all(promises);
     } else {
       await Promise.all([
