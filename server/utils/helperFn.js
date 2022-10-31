@@ -12,13 +12,7 @@ export function updateStripePrice(member, price, productTotalQuantity) {
   return stripe.subscriptions.update(
     subscriptionId,
     {
-      items: [
-        {
-          id: subscriptionItemId,
-          price,
-          quantity
-        }
-      ],
+      items: [{ id: subscriptionItemId, price, quantity }],
       metadata: { productTotalQuantity },
       proration_behavior: 'none',
     }
