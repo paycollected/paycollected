@@ -501,8 +501,8 @@ export function getSubsItemIdAndProductInfo(subscriptionId, username) {
           THEN 'month'
         WHEN p.cycle_frequency = 'yearly'
           THEN 'year'
-      END AS "cycleFrequency",
-      p.per_cycle_cost AS interval,
+      END AS interval,
+      p.per_cycle_cost AS "perCycleCost",
       p.price_id AS "prevPriceId",
       c.sum AS count,
       ( SELECT

@@ -75,7 +75,8 @@ export default async function editQuantityResolver(
       // update this subscription with new price ID
       stripe.prices.update(prevPriceId, { active: false }),
       // archive old price ID
-      updatePriceQuant(product, subscriptionId, newQuantity, price)
+      updatePriceQuant(product, subscriptionId, newQuantity, price),
+      // save to db
     ];
 
     if (!members) {
