@@ -36,7 +36,7 @@ export async function unsubscribe(subscriptionId, username) {
   } = rows[0];
   if (planOwner) {
     throw new GraphQLError('Plan owner cannot call this mutation', { extensions: { code: 'FORBIDDEN' } });
-  } else if (planActive) {
+  } else if (!planActive) {
     throw new GraphQLError('Plan has already been archived', { extensions: { code: 'FORBIDDEN' } });
   } else if (!subsActive) {
     throw new GraphQLError('Subscription has already been archived', { extensions: { code: 'FORBIDDEN' } });

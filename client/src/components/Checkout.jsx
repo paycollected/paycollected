@@ -122,6 +122,7 @@ function CheckoutForm({ setupIntentId, paymentMethods, planId }) {
           <div hidden={selectedCard === 'newCard'}>
             To use a saved card, please retype your password to confirm identity:
             <input
+              required
               type="password"
               value={password}
               onChange={(e) => { setPassword(e.target.value) }}
@@ -135,14 +136,6 @@ function CheckoutForm({ setupIntentId, paymentMethods, planId }) {
   );
 }
 
-/*
-after clicking pay but not completing the checkout process,
-when coming back to the checkout page the client secret is lost if not saved somewhere
-
-on another note, subscription will expire if not followed up with payment
---> will prob need to set up webhooks
-how does this affect what we store in db?
-*/
 
 export default function Checkout({
   stripeClientSecret, setupIntentId, paymentMethods, planId

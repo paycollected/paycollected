@@ -480,18 +480,6 @@ export function archiveSubs(subscriptionId) {
 }
 
 
-export function checkPlanOwnerUsingSubsId(subscriptionId, username) {
-  const query = `
-    SELECT
-      *,
-
-      FROM subs_on_plan
-      WHERE subscription_id = $1 AND username = $2
-  `;
-  return pool.query(query, [subscriptionId, username]);
-}
-
-
 export function checkPlanOwnerForCancel(username, planId, subscriptionId, newOwner) {
   const query = `
     SELECT username
