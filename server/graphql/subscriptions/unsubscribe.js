@@ -44,9 +44,6 @@ export async function unsubscribe(subscriptionId, username) {
 
   const productTotalQuantity = count - quantity;
   try {
-    // await stripe.subscriptions.update(subscriptionId, { metadata: { cancelSubs: true } });
-    // const { planId } = rows[0];
-    // return { planId };
     if (productTotalQuantity > 0) {
       // there are still active members on the plan
       const [{ id: price }] = await Promise.all([
