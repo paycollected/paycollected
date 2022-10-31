@@ -27,6 +27,17 @@ async function startApolloServer() {
     csrfPrevention: true,
     cache: 'bounded',
     nodeEnv: 'test',
+  });
+
+  await server.start();
+  app.use('/webhook', webhook);
+
+  // Json middleware must be mounted AFTER webhook endpoint
+  // because req.body needs to be in json format
+  // so that webhook could convert it into raw buffer
+  app.use(cors(), json());
+
+  app.use('/graphql', expressMiddleware(server, {
     context: ({ req }) => {
       const token = req.headers.authorization || '';
       // no Authorization (may be signing up)
@@ -47,17 +58,7 @@ async function startApolloServer() {
       }
       return { user: null, err: 'Unauthorized request' };
     },
-  });
-
-  await server.start();
-  app.use('/webhook', webhook);
-
-  // Json middleware must be mounted AFTER webhook endpoint
-  // because req.body needs to be in json format
-  // so that webhook could convert it into raw buffer
-  app.use(cors(), json());
-
-  app.use('/graphql', expressMiddleware(server));
+  }));
 
   // serving web client
   // these needs to go AFTER Apollo server and webhook middlewares
