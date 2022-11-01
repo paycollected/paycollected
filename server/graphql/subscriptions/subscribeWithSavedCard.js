@@ -53,13 +53,6 @@ export default async function subscribeWithSavedCardResolver(
       throw new Error();
     }
 
-    // create new priceId if needbe
-    // also archive old price id if needbe
-    // update all existing plan members
-    // create subscription for this person
-    // cancel setupIntent
-    // save to db
-
     const productTotalQuantity = quantity + count;
     const subscription = {
       customer: user.stripeCusId,
