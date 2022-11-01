@@ -65,13 +65,7 @@ export default async function editQuantityResolver(
       stripe.subscriptions.update(
         subscriptionId,
         {
-          items: [
-            {
-              id: subscriptionItemId,
-              price,
-              quantity: newQuantity,
-            }
-          ],
+          items: [{ id: subscriptionItemId, price, quantity: newQuantity }],
           proration_behavior: 'none',
         }
       ),
