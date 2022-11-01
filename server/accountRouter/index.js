@@ -10,7 +10,7 @@ accountRouter.get('/verify/:token', async (req, res) => {
   const { params: { token } } = req;
   try {
     const { username, name, email } = jwt.verify(token, process.env.EMAIL_VERIFY_SECRET_KEY);
-    const { rows } = checkBeforeVerifyEmail(username);
+    const { rows } = await checkBeforeVerifyEmail(username);
     let stripeCusId;
     if (!rows[0].verified) {
       ({ id: stripeCusId } = await stripe.customers.create(
