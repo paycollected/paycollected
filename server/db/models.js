@@ -1,11 +1,10 @@
 import pool from './pool';
 
 export function checkUser(username, email) {
-  const query = `SELECT
-    username, email
+  const query = `
+  SELECT username, email
     FROM users
-    WHERE (username = $1)
-    OR (email = $2)
+    WHERE (username = $1) OR (email = $2)
     LIMIT 1`;
 
   return pool.query(query, [username, email]);
@@ -159,7 +158,8 @@ export function getUserInfo(username) {
       first_name AS "firstName",
       last_name AS "lastName",
       email,
-      password
+      password,
+      verified
     FROM users
     WHERE username = $1`;
   return pool.query(query, [username]);

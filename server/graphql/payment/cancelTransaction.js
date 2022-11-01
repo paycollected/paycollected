@@ -18,7 +18,7 @@ export default async function cancelTransactionResolver(setupIntentId, username)
   }
 
   if (rows[0].stripeCusId !== stripeCusId) {
-    throw new GraphQLError('User not authorized to perform this action', { extensions: { code: 'FORBIDDEN' } });
+    throw new GraphQLError('SetupIntent does not belong to user', { extensions: { code: 'FORBIDDEN' } });
   }
 
   try {

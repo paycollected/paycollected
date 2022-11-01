@@ -1,5 +1,5 @@
 import express from 'express';
-import jwt from 'jsonwebtoken';// import stripeSDK from 'stripe';
+import jwt from 'jsonwebtoken';
 import stripeSDK from 'stripe';
 import { verifyEmail } from '../db/models.js';
 

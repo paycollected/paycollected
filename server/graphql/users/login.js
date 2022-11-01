@@ -3,9 +3,9 @@ import jwt from 'jsonwebtoken';
 import { GraphQLError } from 'graphql';
 import { getUserInfo } from '../../db/models.js';
 
-export default async function loginResolver(username, password) {
+export default async function loginResolver(inputUsername, password) {
   let errMsg;
-  username = username.trim().toLowerCase();
+  const username = inputUsername.trim().toLowerCase();
   try {
     const { rows } = await getUserInfo(username);
     // if username does not exist, throw error
@@ -13,8 +13,14 @@ export default async function loginResolver(username, password) {
       errMsg = 'This username does not exist';
       throw new Error();
     }
+
+    const { password: savedPass, stripeCusId, verified } = rows[0];
+    // if unverified account, do not allow to log in
+    if (!verified) {
+      errMsg = 'Account exists but email still needs verification';
+      throw new Error();
+    }
     // if username exists but password doesn't match, return null
-    const { password: savedPass, stripeCusId } = rows[0];
     const result = await bcrypt.compare(password, savedPass);
     if (!result) {
       return null;

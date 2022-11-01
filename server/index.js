@@ -15,7 +15,7 @@ import accountRouter from './accountRouter';
 
 dotenv.config();
 
-const { SERVER_PORT } = process.env;
+const { PORT } = process.env;
 
 async function startApolloServer() {
   const app = express();
@@ -69,8 +69,8 @@ async function startApolloServer() {
   app.use(express.static(path.join(__dirname, '..', 'client', 'dist')));
   app.get('*', (req, res) => res.sendFile(path.resolve(__dirname, '..', 'client', 'dist', 'index.html')));
 
-  await new Promise((resolve) => httpServer.listen({ port: SERVER_PORT }, resolve));
-  console.log(`🛌 REST server is served at localhost:${SERVER_PORT}`);
+  await new Promise((resolve) => httpServer.listen({ port: PORT }, resolve));
+  console.log(`🛌 REST server is served at localhost:${PORT}`);
 }
 
 startApolloServer();
