@@ -5,6 +5,16 @@ import {
 } from '@chakra-ui/react';
 
 // actual redirect URL string 'http://localhost:5647/dashboard/?setup_intent=seti_1Lq9rqAJ5Ik974ueIdg7WHn9&setup_intent_client_secret=seti_1Lq9rqAJ5Ik974ueIdg7WHn9_secret_MZISJyXsMF6na4pA6ryaqOfvt8JbeGa&redirect_status=succeeded'
+const queryStr = window.location.search;
+let username;
+let token;
+let redirectStatus;
+if (queryStr.length > 0) {
+  const urlParams = new URLSearchParams(queryStr);
+  username = urlParams.get('username');
+  token = urlParams.get('token');
+  redirectStatus = urlParams.get('redirect_status');
+}
 
 export default function Dashboard({ user, setUser }) {
   const navigate = useNavigate();
@@ -12,22 +22,9 @@ export default function Dashboard({ user, setUser }) {
   const [code, setCode] = useState('');
 
   useEffect(() => {
-    const queryStr = window.location.search;
-    if (queryStr.length > 0) {
-      const urlParams = new URLSearchParams(queryStr);
-      const username = urlParams.get('username');
-      const token = urlParams.get('token');
-      const redirectStatus = urlParams.get('redirect_status');
-      if (username && token) {
-        setUser(username);
-        localStorage.setItem('token', token);
-      }
-      if (redirectStatus === 'succeeded') {
-        // console.log('I got to here');
-        // display some notification indicating successful payment
-      } else if (user === null) {
-        navigate('/');
-      }
+    if (user === null && !!username) {
+      setUser(username);
+      localStorage.setItem('token', token);
     } else if (user === null) {
       navigate('/');
     }
