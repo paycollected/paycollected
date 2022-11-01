@@ -25,6 +25,7 @@ export default async function unsubscribeAsOwnerResolver(
     console.log('Failure to perform check', e);
     throw new GraphQLError('Cannot unsubscribe', { extensions: { code: 'INTERNAL_SERVER_ERROR' } });
   }
+
   if (rows.length === 0) {
     throw new GraphQLError("Subscription doesn't belong to user", { extensions: { code: 'FORBIDDEN' } });
   }

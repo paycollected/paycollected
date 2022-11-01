@@ -2,13 +2,13 @@
   "name": "paycollected",
   "version": "1.0.0",
   "description": "A web application to automate shared payment for groups",
-  "main": "app.js",
+  "main": "server/index.js",
   "scripts": {
     "dev": "webpack --mode development --watch & nodemon --exec babel-node ./server/index",
     "build": "npx webpack",
     "db-schema": "psql postgres -f ./server/db/schema.sql",
     "stripe-webhook": "stripe listen --forward-to http://localhost:5647/webhook",
-    "stripe-custom-code": "node ./server/customCode.js"
+    "custom-code": "node ./server/customCode.js"
   },
   "repository": {
     "type": "git",

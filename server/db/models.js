@@ -540,11 +540,6 @@ export function getSubsItemIdAndProductInfo(subscriptionId, username) {
 
 export function getProductInfoAndInvoice(subscriptionId, username) {
   const query = `
-    WITH t AS (
-      SELECT plan_id
-      FROM user_plan
-      WHERE subscription_id = $1
-    )
     SELECT
       *,
       ( SELECT
@@ -559,14 +554,14 @@ export function getProductInfoAndInvoice(subscriptionId, username) {
           )
           FROM user_on_plan
           WHERE
-            plan_id = t.plan_id
+            plan_id = (SELECT plan_id FROM user_plan WHERE subscription_id = $1)
             AND subscription_id != $1
             AND subscription_id IS NOT NULL
             AND active = True
       ) AS members,
       ( SELECT invoice_id
           FROM invoices
-          WHERE plan_id = t.plan_id
+          WHERE plan_id = (SELECT plan_id FROM user_plan WHERE subscription_id = $1)
           LIMIT 1
       ) AS "invoiceId"
       FROM subs_on_plan
@@ -575,13 +570,8 @@ export function getProductInfoAndInvoice(subscriptionId, username) {
 }
 
 
-export function getProductInfoAndInvoiceCheckNewOwner(subscriptionId, username, newOwner) {
+export function getProductInfoAndInvoiceCheckNewOwner(username, subscriptionId, newOwner) {
   const query = `
-    WITH t AS (
-      SELECT plan_id
-      FROM user_plan
-      WHERE subscription_id = $1
-    )
     SELECT
       *,
       ( SELECT
@@ -596,25 +586,26 @@ export function getProductInfoAndInvoiceCheckNewOwner(subscriptionId, username, 
           )
           FROM user_on_plan
           WHERE
-            plan_id = t.plan_id
+            plan_id = (SELECT plan_id FROM user_plan WHERE subscription_id = $1)
             AND subscription_id != $1
             AND subscription_id IS NOT NULL
             AND active = True
       ) AS members,
       ( SELECT invoice_id
           FROM invoices
-          WHERE plan_id = t.plan_id
+          WHERE plan_id = (SELECT plan_id FROM user_plan WHERE subscription_id = $1)
           LIMIT 1
       ) AS "invoiceId",
       ( SELECT plan_owner
           FROM user_plan
           WHERE username = $3
-            AND plan_id = t.plan_id
+            AND plan_id = (SELECT plan_id FROM user_plan WHERE subscription_id = $1)
             AND active = TRUE
       ) AS "newOwnerCheck"
       FROM subs_on_plan
       WHERE subscription_id = $1 AND username = $2`;
   return pool.query(query, [subscriptionId, username, newOwner]);
+}
 
 
 export function updatePriceQuant(planId, subscriptionId, newQuantity, newPriceId) {
