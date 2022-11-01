@@ -1,4 +1,4 @@
-import { ApolloError } from 'apollo-server-core';
+import { GraphQLError } from 'graphql';
 import {
   viewOnePlan as viewOnePlanModel,
   viewAllPlans as viewAllPlansModel,
@@ -20,12 +20,10 @@ export async function viewOnePlan(planId, username) {
     return result;
   } catch (asyncError) {
     if (errMsg) {
-      throw new ApolloError(errMsg);
-      // will need to handle this error in front end
-      // where the join page will send this query request
+      throw new GraphQLError(errMsg, { extensions: { code: 'BAD_REQUEST' } });
     }
     console.log(asyncError);
-    throw new ApolloError('Unable to retrieve plan information');
+    throw new GraphQLError('Unable to retrieve plan information', { extensions: { code: 'INTERNAL_SERVER_ERROR' } });
   }
 }
 
@@ -38,7 +36,7 @@ export async function viewAllPlans(username) {
     return rows;
   } catch (asyncError) {
     console.log(asyncError);
-    throw new ApolloError('Unable to retrieve plans information');
+    throw new GraphQLError('Unable to retrieve plans information', { extensions: { code: 'INTERNAL_SERVER_ERROR' } });
   }
 }
 
@@ -48,6 +46,6 @@ export async function activeMembers(planId, username) {
     return rows;
   } catch (asyncError) {
     console.log(asyncError);
-    throw new ApolloError('Unable to retrieve plan information');
+    throw new GraphQLError('Unable to retrieve members information', { extensions: { code: 'INTERNAL_SERVER_ERROR' } });
   }
 }

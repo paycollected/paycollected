@@ -15,7 +15,7 @@ export default function ViewPlans({ user }) {
   const { hasCopied, onCopy } = useClipboard(`${process.env.CLIENT_HOST}:${process.env.SERVER_PORT}/join/${planToCopy}`);
 
   const { loading, data, error } = useQuery(GET_ALL_PLANS, {
-    fetchPolicy: 'network-only',
+    fetchPolicy: 'cache-and-network',
     nextFetchPolicy: 'cache-only',
   });
 
@@ -38,6 +38,7 @@ export default function ViewPlans({ user }) {
           <Box textAlign="center">
             <Heading>Your Subscriptions</Heading>
           </Box>
+          {console.log('------> data:', data)}
           {data
             && (data.viewAllPlans.map((plan) => (
               <div

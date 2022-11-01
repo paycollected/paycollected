@@ -49,21 +49,10 @@ function App() {
         <Route
           path="/signup"
           element={!user
-            ? <Signup setUser={setUser} planToJoin={planToJoin} />
+            ? <Signup setUser={setUser} />
             : <Navigate to="/dashboard" />}
         />
-        <Route
-          path="/dashboard"
-          element={user
-            ? (
-              <Dashboard
-                username={user}
-                setUser={setUser}
-                setPlanToJoin={setPlanToJoin}
-              />
-            )
-            : <Navigate to="/" />}
-        />
+        <Route path="/dashboard" element={<Dashboard user={user} setUser={setUser} />} />
         <Route
           path="/plan/create"
           element={user
@@ -96,6 +85,7 @@ function App() {
           element={user && stripeClientSecret
             ? (
               <Checkout
+                planId={planToJoin}
                 stripeClientSecret={stripeClientSecret}
                 setupIntentId={setupIntentId}
                 setStripeClientSecret={setStripeClientSecret}

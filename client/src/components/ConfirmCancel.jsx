@@ -12,7 +12,7 @@ import {
 export default function ConfirmCancel({ plan, user }) {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const {
-    subscriptionId, planId, activeMembers, owner
+    subscriptionId, activeMembers, owner
   } = plan;
   const [newOwner, setNewOwner] = useState(
     activeMembers.length > 0 ? activeMembers[0].username : null
@@ -24,16 +24,16 @@ export default function ConfirmCancel({ plan, user }) {
 
   const [confirmUnsubscribe, { data, loading, error }] = useMutation(UNSUBSCRIBE, {
     onCompleted: () => { onClose(); },
-    update: (cache, { data: { unsubscribe } }) => {
-      const { planId: resultPlanId } = unsubscribe;
-      cache.modify({
-        fields: {
-          viewAllPlans(allPlanRefs, { readField }) {
-            return allPlanRefs.filter((planRef) => resultPlanId !== readField('planId', planRef));
-          }
-        }
-      });
-    },
+    // update: (cache, { data: { unsubscribe } }) => {
+    //   const { planId: resultPlanId } = unsubscribe;
+    //   cache.modify({
+    //     fields: {
+    //       viewAllPlans(allPlanRefs, { readField }) {
+    //         return allPlanRefs.filter((planRef) => resultPlanId !== readField('planId', planRef));
+    //       }
+    //     }
+    //   });
+    // },
   });
 
   const [
@@ -41,16 +41,16 @@ export default function ConfirmCancel({ plan, user }) {
     { data: ownerData, loading: ownerLoading, error: ownerError}
   ] = useMutation(UNSUBSCRIBE_AS_OWNER, {
     onCompleted: () => { onClose(); },
-    update: (cache, { data: { unsubscribeAsOwner } }) => {
-      const { planId: resultPlanId } = unsubscribeAsOwner;
-      cache.modify({
-        fields: {
-          viewAllPlans(allPlanRefs, { readField }) {
-            return allPlanRefs.filter((planRef) => resultPlanId !== readField('planId', planRef));
-          }
-        }
-      });
-    },
+    // update: (cache, { data: { unsubscribeAsOwner } }) => {
+    //   const { planId: resultPlanId } = unsubscribeAsOwner;
+    //   cache.modify({
+    //     fields: {
+    //       viewAllPlans(allPlanRefs, { readField }) {
+    //         return allPlanRefs.filter((planRef) => resultPlanId !== readField('planId', planRef));
+    //       }
+    //     }
+    //   });
+    // },
   });
 
   const handleConfirmUnsubscribe = () => {
@@ -59,7 +59,7 @@ export default function ConfirmCancel({ plan, user }) {
     } else {
       confirmUnsubscribeAsOwner({
         variables: {
-          subscriptionId, planId, newOwner
+          subscriptionId, newOwner
         }
       });
     }

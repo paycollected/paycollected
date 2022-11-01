@@ -1,11 +1,10 @@
-import { GraphQLScalarType, Kind } from 'graphql';
-import { UserInputError } from 'apollo-server-core';
+import { GraphQLScalarType, Kind, GraphQLError } from 'graphql';
 
 const generateRegExValidationFn = (regEx) => ((input) => {
   if (typeof input === 'string' && regEx.test(input)) {
     return input;
   }
-  throw new UserInputError();
+  throw new GraphQLError("Fail schema's type validation", { extensions: { code: 'GRAPHQL_VALIDATION_FAILED' } });
 });
 
 const generateCustomScalar = (scalarName, validationFn) => (
@@ -17,7 +16,7 @@ const generateCustomScalar = (scalarName, validationFn) => (
       if (ast.kind === Kind.STRING) {
         return validationFn(ast.value);
       }
-      throw new UserInputError();
+      throw new GraphQLError("Fail schema's type validation", { extensions: { code: 'GRAPHQL_VALIDATION_FAILED' } });
     },
   })
 );

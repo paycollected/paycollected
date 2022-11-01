@@ -17,16 +17,16 @@ export default function ConfirmDeletePlan({ plan }) {
 
   const [confirmDelete, { data, loading, error }] = useMutation(DELETE_PLAN, {
     onCompleted: () => { onClose(); },
-    update: (cache, { data: { deletePlan } }) => {
-      const { planId: resultPlanId } = deletePlan;
-      cache.modify({
-        fields: {
-          viewAllPlans(allPlanRefs, { readField }) {
-            return allPlanRefs.filter((planRef) => resultPlanId !== readField('planId', planRef));
-          }
-        }
-      });
-    },
+    // update: (cache, { data: { deletePlan } }) => {
+    //   const { planId: resultPlanId } = deletePlan;
+    //   cache.modify({
+    //     fields: {
+    //       viewAllPlans(allPlanRefs, { readField }) {
+    //         return allPlanRefs.filter((planRef) => resultPlanId !== readField('planId', planRef));
+    //       }
+    //     }
+    //   });
+    // },
   });
 
   const handleConfirmDelete = () => {
@@ -35,7 +35,7 @@ export default function ConfirmDeletePlan({ plan }) {
 
   return (
     <div>
-      <Button onClick={onOpen}>Delete Subscription</Button>
+      <Button onClick={onOpen}>Delete Plan</Button>
       <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
         <ModalContent>

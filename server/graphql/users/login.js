@@ -1,11 +1,11 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { ApolloError, UserInputError } from 'apollo-server-core';
+import { GraphQLError } from 'graphql';
 import { getUserInfo } from '../../db/models.js';
 
-export default async function loginResolver(username, password) {
+export default async function loginResolver(inputUsername, password) {
   let errMsg;
-  username = username.trim().toLowerCase();
+  const username = inputUsername.trim().toLowerCase();
   try {
     const { rows } = await getUserInfo(username);
     // if username does not exist, throw error
@@ -13,8 +13,14 @@ export default async function loginResolver(username, password) {
       errMsg = 'This username does not exist';
       throw new Error();
     }
+
+    const { password: savedPass, stripeCusId, verified } = rows[0];
+    // if unverified account, do not allow to log in
+    if (!verified) {
+      errMsg = 'Account exists but email still needs verification';
+      throw new Error();
+    }
     // if username exists but password doesn't match, return null
-    const { password: savedPass, stripeCusId, email } = rows[0];
     const result = await bcrypt.compare(password, savedPass);
     if (!result) {
       return null;
@@ -28,17 +34,17 @@ export default async function loginResolver(username, password) {
         username,
         stripeCusId,
       }
-    }, process.env.SECRET_KEY);
+    }, process.env.SIGNIN_SECRET_KEY);
 
     return { username, token };
   } catch (asyncError) {
     if (errMsg) {
       // if anticipated bad input error
-      throw new UserInputError(errMsg);
+      throw new GraphQLError(errMsg, { extensions: { code: 'BAD_USER_INPUT' } });
     } else {
       // catch all from rest of async
       console.log(asyncError);
-      throw new ApolloError('Unable to log in');
+      throw new GraphQLError('Unable to log in', { extensions: { code: 'INTERNAL_SERVER_ERROR' } });
     }
   }
 }

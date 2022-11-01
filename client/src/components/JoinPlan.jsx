@@ -8,7 +8,7 @@ import { JoinPlan as JOIN_PLAN } from '../graphql/mutations.gql';
 import { ViewOnePlan as GET_PLAN } from '../graphql/queries.gql';
 
 export default function JoinPlan({
-  setPlanToJoin, setStripeClientSecret, setSetupIntentId, setPaymentMethods
+  setPlanToJoin, setStripeClientSecret, setSetupIntentId, setPaymentMethods,
 }) {
   const navigate = useNavigate();
   const { planId } = useParams();
@@ -16,7 +16,7 @@ export default function JoinPlan({
 
   const { loading: getPlanLoading, data: getPlanData, error: getPlanError } = useQuery(GET_PLAN, {
     variables: { planId: planId.toString().trim() },
-    fetchPolicy: 'network-only',
+    fetchPolicy: 'cache-and-network',
     nextFetchPolicy: 'cache-only',
   });
 

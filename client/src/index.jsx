@@ -28,7 +28,38 @@ const cache = new InMemoryCache({
   typePolicies: {
     Plan: {
       keyFields: ['planId'],
+      activeMembers: {
+        merge: (existing = [], incoming = []) => incoming,
+      }
     },
+    // Query: {
+    //   fields: {
+    //     viewAllPlans: {
+    //       merge: (existing = [], incoming) => {
+    //         console.log('---------> existing', existing, '------------> incoming', incoming);
+    //         if (incoming.every((iPlan) => existing.some((ePlan) => ePlan['__ref'] === iPlan['__ref']))
+    //         && existing.length >= incoming.length) {
+    //         // if server's response is not yet updated because webhook is still processing request
+    //         // cache will be more updated and accurate
+    //         // in this case prefer to use cached data
+    //           console.log('1');
+    //           return existing;
+    //         }
+    //         if (!existing.every((ePlan) => incoming.some((iPlan) => ePlan['__ref'] === iPlan['__ref']))) {
+    //           // if viewAllPlans haven't been called yet,
+    //           // for ex: user navigates straight to joinPlan without checking out viewAllPlans first
+    //           // cache will be empty at first
+    //           // after writing to cache after joining a plan,
+    //           // want to merge with network response, which may still be outdated
+    //           console.log('2');
+    //           return [...existing, ...incoming];
+    //         }
+    //         console.log('3');
+    //         return incoming;
+    //       }
+    //     }
+    //   }
+    // }
   },
 });
 

@@ -1,5 +1,5 @@
 import stripeSDK from 'stripe';
-import { ApolloError } from 'apollo-server-core';
+import { GraphQLError } from 'graphql';
 import authResolverWrapper from './authResolverWrapper';
 import {
   planIdScalar, subscriptionIdScalar, emailScalar, usernameScalar, paymentMethodIdScalar,
@@ -8,9 +8,8 @@ import {
 import createAccount from './users/createAccount';
 import loginResolver from './users/login';
 import joinPlanResolver from './plans/join';
-import {
-  unsubscribe as unsubscribeResolver, unsubscribeAsOwner as unsubscribeAsOwnerResolver
-} from './subscriptions/unsubscribe.js';
+import unsubscribeResolver from './subscriptions/unsubscribe.js';
+import unsubscribeAsOwnerResolver from './subscriptions/unsubscribeAsOwner';
 import editQuantityResolver from './subscriptions/editQuantity';
 import subscribeWithSavedCardResolver from './subscriptions/subscribeWithSavedCard';
 import {
@@ -90,13 +89,6 @@ export default {
     editPayment: authResolverWrapper(async (_, __, { user }) => {
       const { username, stripeCusId: customer } = user;
       try {
-        /* still debating whether we should store stripeCusId in JWT since it's public */
-        // const { rows } = await models.getUserInfo(username);
-        // const { stripeCusId: customer } = rows[0];
-        /*
-        Note that we're skipping programmatically configure the session here
-        and did that manually in Stripe dev portal.
-        */
         const { url } = await stripe.billingPortal.sessions.create({
           customer,
           return_url: 'http://localhost:5647/dashboard/',
@@ -104,7 +96,10 @@ export default {
         return { portalSessionURL: url };
       } catch (asyncError) {
         console.log(asyncError);
-        throw new ApolloError('Unable to get customer portal link');
+        // throw new ApolloError('Unable to get customer portal link');
+        throw new GraphQLError('Unable to get customer portal link', {
+          extensions: { code: 'INTERNAL_SERVER_ERROR' }
+        });
       }
     }),
 
@@ -113,14 +108,14 @@ export default {
     )),
 
     unsubscribeAsOwner: authResolverWrapper(
-      (_, { subscriptionId, planId, newOwner }, { user: { username } }) => (
-        unsubscribeAsOwnerResolver(subscriptionId, planId, username, newOwner)
+      (_, { subscriptionId, newOwner }, { user: { username } }) => (
+        unsubscribeAsOwnerResolver(subscriptionId, username, newOwner)
       )
     ),
 
     editQuantity: authResolverWrapper(
       (_, { subscriptionId, newQuantity }, { user: { username } }) => (
-        editQuantityResolver(subscriptionId, newQuantity, username, recurringInterval)
+        editQuantityResolver(subscriptionId, newQuantity, username)
       )
     ),
 
@@ -137,8 +132,10 @@ export default {
     ),
 
     subscribeWithSavedCard: authResolverWrapper(
-      (_, { paymentMethodId, setupIntentId }, { user: { username } }) => (
-        subscribeWithSavedCardResolver(paymentMethodId, setupIntentId, username)
+      (_, {
+        paymentMethodId, setupIntentId, password, planId
+      }, { user: { username } }) => (
+        subscribeWithSavedCardResolver(paymentMethodId, setupIntentId, password, planId, username)
       )
     ),
   }

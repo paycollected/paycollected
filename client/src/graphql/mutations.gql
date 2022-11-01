@@ -1,8 +1,5 @@
 mutation CreateUser ($firstName: String!, $lastName: String!, $username: String!, $password: String!, $email: Email!) {
-  createUser(firstName: $firstName, lastName: $lastName, username: $username, password: $password, email: $email) {
-    username
-    token
-  }
+  createUser(firstName: $firstName, lastName: $lastName, username: $username, password: $password, email: $email)
 }
 
 
@@ -52,8 +49,8 @@ mutation Unsubscribe ($subscriptionId: SubscriptionID!) {
 }
 
 
-mutation UnsubscribeAsPlanOwner($subscriptionId: SubscriptionID!, $planId: PlanID!, $newOwner: String!) {
-  unsubscribeAsOwner(subscriptionId: $subscriptionId, planId: $planId, newOwner: $newOwner) {
+mutation UnsubscribeAsPlanOwner($subscriptionId: SubscriptionID!, $newOwner: String!) {
+  unsubscribeAsOwner(subscriptionId: $subscriptionId, newOwner: $newOwner) {
     planId
   }
 }
@@ -78,6 +75,24 @@ mutation CancelTransaction($setupIntentId: SetupIntentID!) {
   cancelTransaction(setupIntentId: $setupIntentId)
 }
 
-mutation SubscribeWithSavedCard($paymentMethodId: PaymentMethodID!, $setupIntentId: SetupIntentID!) {
-  subscribeWithSavedCard(paymentMethodId: $paymentMethodId, setupIntentId: $setupIntentId)
+mutation SubscribeWithSavedCard($paymentMethodId: PaymentMethodID!, $setupIntentId: SetupIntentID!, $planId: PlanID!, $password: String!) {
+  subscribeWithSavedCard(paymentMethodId: $paymentMethodId, setupIntentId: $setupIntentId, planId: $planId, password: $password) {
+    planId
+    name
+    owner {
+      firstName
+      lastName
+      username
+    }
+    cycleFrequency
+    perCycleCost
+    activeMembers {
+      firstName
+      lastName
+      username
+      quantity
+    }
+    quantity
+    subscriptionId
+  }
 }

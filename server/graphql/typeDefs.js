@@ -1,6 +1,5 @@
-import { gql } from 'apollo-server-core';
 
-export default gql`
+export default `#graphql
   scalar PlanID
   scalar SubscriptionID
   scalar Username
@@ -89,7 +88,7 @@ export default gql`
       # username: Username!
       password: String!
       email: Email!
-    ): LoginInfo!
+    ): Boolean!
 
     login(
       username: String!
@@ -114,7 +113,6 @@ export default gql`
 
     unsubscribeAsOwner(
       subscriptionId: SubscriptionID!
-      planId: PlanID!
       newOwner: String!
       # newOwner: Username!
     ): PlanIdResponse!
@@ -135,7 +133,9 @@ export default gql`
     subscribeWithSavedCard(
       paymentMethodId: PaymentMethodID!
       setupIntentId: SetupIntentID!
-    ): Boolean!
+      password: String!
+      planId: PlanID!
+    ): Plan!
 
     joinPlan(
       planId: PlanID!
