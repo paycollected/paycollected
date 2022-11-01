@@ -56,7 +56,6 @@ export default async function editQuantityResolver(
         product,
         unit_amount: Math.ceil(perCycleCost / productTotalQuantity),
         recurring: { interval },
-        metadata: { deletePlan: false },
       }),
       stripe.prices.update(prevPriceId, { active: false }),
       // archive old price ID
@@ -73,7 +72,6 @@ export default async function editQuantityResolver(
               quantity: newQuantity,
             }
           ],
-          metadata: { productTotalQuantity },
           proration_behavior: 'none',
         }
       ),

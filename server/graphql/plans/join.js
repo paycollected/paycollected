@@ -34,11 +34,7 @@ export default async function joinPlanResolver(planId, newQuantity, username) {
       stripe.setupIntents.create({
         payment_method_types: ['card'],
         customer: stripeCusId,
-        metadata: {
-          planId,
-          quantity: newQuantity,
-          username,
-        }
+        metadata: { planId, quantity: newQuantity }
       }),
       stripe.customers.listPaymentMethods(stripeCusId, { type: 'card' }),
       stripe.customers.retrieve(stripeCusId)

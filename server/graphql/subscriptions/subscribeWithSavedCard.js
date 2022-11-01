@@ -75,13 +75,6 @@ export default async function subscribeWithSavedCardResolver(
       proration_behavior: 'none',
       trial_end: startDate,
       default_payment_method: paymentMethodId,
-      metadata: {
-        productTotalQuantity,
-        cycleFrequency,
-        perCycleCost,
-        quantChanged: false,
-        cancelSubs: false,
-      }
     };
 
     if (count === 0 && quantity === 1) {
@@ -110,7 +103,6 @@ export default async function subscribeWithSavedCardResolver(
         product: planId,
         unit_amount: Math.ceil(perCycleCost / productTotalQuantity),
         recurring: { interval: cycleFrequency },
-        metadata: { deletePlan: false }
       }),
       stripe.prices.update(prevPriceId, { active: false }),
       stripe.setupIntents.cancel(setupIntentId),

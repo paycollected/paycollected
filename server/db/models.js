@@ -174,14 +174,15 @@ export function joinPlan(username, planId) {
 }
 
 
-export function subscriptionSetup(planId, username) {
+export function subscriptionSetup(planId, stripeCusId) {
   const query = `
   SELECT
     *,
     COALESCE(
       ( SELECT quantity
         FROM user_plan
-        WHERE username = $2 AND plan_id = $1
+        WHERE plan_id = $1
+          AND username = (SELECT username FROM users WHERE s_cus_id = $1)
       ),
       0
     ) AS "existingQuant",
@@ -204,7 +205,7 @@ export function subscriptionSetup(planId, username) {
     WHERE plan_id = $1
   `;
 
-  return pool.query(query, [planId, username]);
+  return pool.query(query, [planId, stripeCusId]);
 }
 
 

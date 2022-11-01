@@ -74,7 +74,6 @@ export default async function createPlanResolver(
         // meaning every 2 weeks, every 3 months etc.
       },
       product_data: { name: plan },
-      metadata: { deletePlan: false },
     });
 
     const timeStr = `${startDate} 23:59:59 ${formatTimeZone[timeZone]}`;

@@ -2,7 +2,7 @@ import stripeSDK from 'stripe';
 
 const stripe = stripeSDK(process.env.STRIPE_SECRET_KEY);
 
-export function updateStripePrice(member, price, productTotalQuantity) {
+export function updateStripePrice(member, price) {
   const {
     subscriptionId,
     subscriptionItemId,
@@ -13,7 +13,6 @@ export function updateStripePrice(member, price, productTotalQuantity) {
     subscriptionId,
     {
       items: [{ id: subscriptionItemId, price, quantity }],
-      metadata: { productTotalQuantity },
       proration_behavior: 'none',
     }
   );

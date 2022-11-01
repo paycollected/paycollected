@@ -10,14 +10,14 @@ export default async function handleSubscriptionStart(setupIntent) {
   // A new setupIntent is also created and succeeds when a user updates their payment method,
   // or when an invoice is created
     const { customer, payment_method: paymentMethodId } = setupIntent;
-    const { planId, username } = setupIntent.metadata;
+    const { planId } = setupIntent.metadata;
     const quantity = Number(setupIntent.metadata.quantity);
     try {
       const [
         { rows },
         { invoice_settings: { default_payment_method: defaultPmntMethod } }
       ] = await Promise.all([
-        subscriptionSetup(planId, username),
+        subscriptionSetup(planId, customer),
         stripe.customers.retrieve(customer)
       ]);
 
@@ -43,13 +43,6 @@ export default async function handleSubscriptionStart(setupIntent) {
           proration_behavior: 'none',
           trial_end: startDate,
           default_payment_method: paymentMethodId,
-          metadata: {
-            productTotalQuantity,
-            cycleFrequency,
-            perCycleCost,
-            quantChanged: false,
-            cancelSubs: false,
-          }
         };
 
 
@@ -60,7 +53,6 @@ export default async function handleSubscriptionStart(setupIntent) {
               product: planId,
               unit_amount: Math.ceil(perCycleCost / productTotalQuantity),
               recurring: { interval: cycleFrequency },
-              metadata: { deletePlan: false }
             }),
             // create new price ID;
             stripe.prices.update(prevPriceId, { active: false }),

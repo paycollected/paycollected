@@ -55,7 +55,6 @@ export default async function unsubscribeAsOwnerResolver(
         product,
         unit_amount: Math.ceil(perCycleCost / productTotalQuantity),
         recurring: { interval },
-        metadata: { deletePlan: false },
       }),
       stripe.prices.update(prevPriceId, { active: false }),
       stripe.subscriptions.del(subscriptionId),
