@@ -17,13 +17,16 @@ export default function Dashboard({ user, setUser }) {
       const urlParams = new URLSearchParams(queryStr);
       const username = urlParams.get('username');
       const token = urlParams.get('token');
+      const redirectStatus = urlParams.get('redirect_status');
       if (username && token) {
         setUser(username);
         localStorage.setItem('token', token);
       }
-      if (urlParams.get('redirect_status') === 'succeeded') {
+      if (redirectStatus === 'succeeded') {
         // console.log('I got to here');
         // display some notification indicating successful payment
+      } else if (user === null) {
+        navigate('/');
       }
     } else if (user === null) {
       navigate('/');
