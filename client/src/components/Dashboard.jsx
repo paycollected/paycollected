@@ -22,7 +22,7 @@ export default function Dashboard({ user, setUser }) {
   const [code, setCode] = useState('');
 
   useEffect(() => {
-    if (user === null && !!username) {
+    if (user === null && !!username && !!token) {
       setUser(username);
       localStorage.setItem('token', token);
     } else if (user === null) {
