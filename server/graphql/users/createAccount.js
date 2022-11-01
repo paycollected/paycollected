@@ -7,10 +7,16 @@ import { checkUser, createUser } from '../../db/models.js';
 const stripe = stripeSDK(process.env.STRIPE_SECRET_KEY);
 const saltRounds = 10;
 
-export default async function createAccount(firstName, lastName, username, password, email) {
+export default async function createAccount(
+  firstName,
+  lastName,
+  inputUsername,
+  password,
+  inputEmail
+) {
   let errMsg;
-  username = username.trim().toLowerCase();
-  email = email.trim().toLowerCase();
+  const username = inputUsername.trim().toLowerCase();
+  const email = inputEmail.trim().toLowerCase();
   try {
     const { rows } = await checkUser(username, email);
     // username or email exist --> return error
