@@ -7,7 +7,7 @@ import {
 } from '@chakra-ui/react';
 import { CreateUser as SIGN_UP } from '../graphql/mutations.gql';
 
-export default function Signup({ setUser, planToJoin }) {
+export default function Signup({ setUser }) {
   const navigate = useNavigate();
   const { register, handleSubmit, formState: { errors } } = useForm();
   const [errorMessage, setErrorMessage] = useState('');

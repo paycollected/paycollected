@@ -6,7 +6,7 @@ import {
 
 // actual redirect URL string 'http://localhost:5647/dashboard/?setup_intent=seti_1Lq9rqAJ5Ik974ueIdg7WHn9&setup_intent_client_secret=seti_1Lq9rqAJ5Ik974ueIdg7WHn9_secret_MZISJyXsMF6na4pA6ryaqOfvt8JbeGa&redirect_status=succeeded'
 
-export default function Dashboard({ username, setUser, setPlanToJoin }) {
+export default function Dashboard({ user, setUser }) {
   const navigate = useNavigate();
   const [showCodeInput, setShowCodeInput] = useState(false);
   const [code, setCode] = useState('');
@@ -15,10 +15,18 @@ export default function Dashboard({ username, setUser, setPlanToJoin }) {
     const queryStr = window.location.search;
     if (queryStr.length > 0) {
       const urlParams = new URLSearchParams(queryStr);
+      const username = urlParams.get('username');
+      const token = urlParams.get('token');
+      if (username && token) {
+        setUser(username);
+        localStorage.setItem('token', token);
+      }
       if (urlParams.get('redirect_status') === 'succeeded') {
         // console.log('I got to here');
         // display some notification indicating successful payment
       }
+    } else if (user === null) {
+      navigate('/');
     }
   }, []);
 
@@ -32,7 +40,7 @@ export default function Dashboard({ username, setUser, setPlanToJoin }) {
   return (
     <div>
       <Heading>
-        {username}
+        {user}
         &apos;s Dashboard
       </Heading>
       <Button onClick={() => { navigate('/plan/create'); }}>Create a New Plan</Button>

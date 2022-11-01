@@ -8,7 +8,6 @@ const accountRouter = express.Router();
 
 accountRouter.get('/verify/:token', async (req, res) => {
   const { params: { token } } = req;
-  console.log('----------->', token);
   try {
     const { username, name, email } = jwt.verify(token, process.env.EMAIL_VERIFY_SECRET_KEY);
     const { id: stripeCusId } = await stripe.customers.create(
