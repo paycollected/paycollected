@@ -23,6 +23,11 @@ export function createUser(firstName, lastName, username, password, email) {
 }
 
 
+export function checkBeforeVerifyEmail(username) {
+  return pool.query('SELECT verified, s_cus_id AS "stripeCusId" FROM users WHERE username = $1', [username]);
+}
+
+
 export function verifyEmail(sCusId, username) {
   const query = `
     UPDATE users
