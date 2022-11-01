@@ -570,6 +570,40 @@ export function getProductInfoAndInvoice(subscriptionId, username) {
 }
 
 
+export function getProductInfoAndInvoiceUsingPlanId(planId, username) {
+  const query = `
+    SELECT
+      "prevPriceId",
+      "planActive",
+      "subsActive",
+      "planOwner",
+      subscription_id AS "subscriptionId",
+      ( SELECT
+          json_agg(
+            json_build_object(
+              'username', username,
+              'email', email,
+              'subscriptionId', subscription_id
+            )
+          )
+          FROM user_on_plan
+          WHERE
+            plan_id = $1
+            AND subscription_id != $1
+            AND subscription_id IS NOT NULL
+            AND active = True
+      ) AS members,
+      ( SELECT invoice_id
+          FROM invoices
+          WHERE plan_id = $1
+          LIMIT 1
+      ) AS "invoiceId"
+      FROM subs_on_plan
+      WHERE product = $1 AND username = $2`;
+  return pool.query(query, [planId, username]);
+}
+
+
 export function getProductInfoAndInvoiceCheckNewOwner(username, subscriptionId, newOwner) {
   const query = `
     SELECT
@@ -633,17 +667,26 @@ export function getPriceFromPlan(planId, username) {
 }
 
 
-export function deletePlanGetAllSubs(planId) {
+export function deletePlan(planId) {
+  return pool.query('DELETE FROM plans WHERE plan_id = $1', [planId]);
+}
+
+
+export function archivePlan(planId) {
   const query = `
-    WITH del_plan AS (
-      DELETE FROM plans WHERE plan_id = $1
+    WITH update_subs AS (
+      UPDATE user_plan
+        SET
+          quantity = 0,
+          active = FALSE,
+          subscription_id = NULL,
+          subscription_item_id = NULL
+        WHERE plan_id = $1
     )
-    SELECT
-      first_name AS "firstName",
-      email,
-      subscription_id AS "subscriptionId"
-    FROM user_on_plan
-    WHERE plan_id = $1
+    UPDATE plans
+      SET active = FALSE
+      WHERE plan_id = $1
+    )
   `;
   return pool.query(query, [planId]);
 }

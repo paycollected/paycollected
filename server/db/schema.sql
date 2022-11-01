@@ -87,7 +87,7 @@ CREATE VIEW subs_on_plan AS
       GROUP BY plan_id
     )
   SELECT
-      up.plan_id AS "product",
+      up.plan_id AS product,
       up.subscription_id,
       up.subscription_item_id AS "subscriptionItemId",
       up.quantity,

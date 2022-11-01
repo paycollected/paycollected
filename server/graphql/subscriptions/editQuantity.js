@@ -12,9 +12,6 @@ export default async function editQuantityResolver(
 ) {
   // plan owner with quant = 0 will not be able to call this mutation b/c they don't have
   // a preexisting subscriptionId
-  // (1) check that requesting user does own subscription, also query for necessary data to:
-  // (2) create new stripe price ID
-  // (3) and update this subscription
 
   // Validating quantity input
   if (newQuantity > 6 || newQuantity <= 0) {

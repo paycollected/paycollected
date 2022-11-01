@@ -19,6 +19,7 @@ export function updateStripePrice(member, price, productTotalQuantity) {
   );
 }
 
-export function emailNotify(member) {
-  return null;
+export function cancelSubs(member) {
+  const { subscriptionId } = member;
+  return stripe.subscriptions.del(subscriptionId);
 }
