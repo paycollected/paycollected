@@ -12,7 +12,7 @@ import ConfirmDeletePlan from './ConfirmDeletePlan.jsx';
 
 export default function ViewPlans({ user }) {
   const [planToCopy, setPlanToCopy] = useState(null);
-  const { hasCopied, onCopy } = useClipboard(`${process.env.CLIENT_HOST}:${process.env.SERVER_PORT}/join/${planToCopy}`);
+  const { hasCopied, onCopy } = useClipboard(`${process.env.HOST}:${process.env.PORT}/join/${planToCopy}`);
 
   const { loading, data, error } = useQuery(GET_ALL_PLANS, {
     fetchPolicy: 'cache-and-network',
@@ -38,7 +38,6 @@ export default function ViewPlans({ user }) {
           <Box textAlign="center">
             <Heading>Your Subscriptions</Heading>
           </Box>
-          {console.log('------> data:', data)}
           {data
             && (data.viewAllPlans.map((plan) => (
               <div
@@ -67,7 +66,7 @@ export default function ViewPlans({ user }) {
                     {plan.activeMembers.length === 0
                       && (<div>There are currently no other members on this plan.</div>)}
                     Copy link to join:&nbsp;
-                    <Tooltip label={hasCopied ? 'Copied to clipboard' : 'Click to copy'}>
+                    <Tooltip label={hasCopied ? 'Copied to clipboard' : 'Click to copy'} closeOnClick={false}>
                       <CopyIcon onClick={onCopy} />
                     </Tooltip>
                   </GridItem>
