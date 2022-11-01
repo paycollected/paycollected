@@ -19,7 +19,7 @@ const generateMailConfig = (name, firstName, email, token) => ({
     <h3>Hi ${firstName}!</h3>
     <div>Thanks for signing up with PayCollected!</div>
     <div>To verify your email address, please click
-      <a href="http://localhost:5647/verify/${token}">here</a>.
+      <a href="${process.env.HOST}/verify/${token}">here</a>.
     </div>
     <div>We look forward to serving you!</div>
   </div>`,

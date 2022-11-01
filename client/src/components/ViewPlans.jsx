@@ -12,7 +12,7 @@ import ConfirmDeletePlan from './ConfirmDeletePlan.jsx';
 
 export default function ViewPlans({ user }) {
   const [planToCopy, setPlanToCopy] = useState(null);
-  const { hasCopied, onCopy } = useClipboard(`${process.env.CLIENT_HOST}:${process.env.SERVER_PORT}/join/${planToCopy}`);
+  const { hasCopied, onCopy } = useClipboard(`${process.env.HOST}/join/${planToCopy}`);
 
   const { loading, data, error } = useQuery(GET_ALL_PLANS, {
     fetchPolicy: 'cache-and-network',
@@ -33,12 +33,13 @@ export default function ViewPlans({ user }) {
   return (
     <div>
       <Button onClick={() => { submitEditPayment(); }}>Manage Payment Methods</Button>
+      {console.log('------> planToCopy', planToCopy)}
+      {console.log('------> string', `${process.env.HOST}/join/${planToCopy}`)}
       <Flex justifyContent="center">
         <Box p={2} my={8} width="60%" bg="white" borderRadius="15">
           <Box textAlign="center">
             <Heading>Your Subscriptions</Heading>
           </Box>
-          {console.log('------> data:', data)}
           {data
             && (data.viewAllPlans.map((plan) => (
               <div
