@@ -1,6 +1,6 @@
 import express from 'express';
 import stripeSDK from 'stripe';
-import handleSubscriptionStart from './eventHandlers/subsStartNewCard';
+import handleSubscriptionStart from './eventHandlers/subscribeWithNewCard';
 
 const webhook = express.Router();
 const endpointSecret = process.env.STRIPE_WEBHOOK_ENDPOINT_SECRET;
@@ -18,12 +18,7 @@ webhook.post('/', express.raw({ type: 'application/json' }), (req, res) => {
 
   // Handle the event
   let invoice;
-  let subscription;
   let setupIntent;
-  let price;
-  let deletePlan;
-  let quantChanged;
-  let cancelSubs;
   switch (event.type) {
     case 'invoice.payment_failed':
       invoice = event.data.object;

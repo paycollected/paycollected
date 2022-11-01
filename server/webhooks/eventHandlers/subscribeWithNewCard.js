@@ -25,7 +25,7 @@ export default async function handleSubscriptionStart(setupIntent) {
         cycleFrequency, perCycleCost, count, prevPriceId, startDate, members, existingQuant, active
       } = rows[0];
 
-      if (active || existingQuant === 0) {
+      if (active && existingQuant === 0) {
         // ensure idempotency -- do not run this code if user already subscribed
         // if plan no longer active, also don't run code
         const productTotalQuantity = quantity + count;

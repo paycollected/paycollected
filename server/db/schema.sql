@@ -41,11 +41,11 @@ CREATE TABLE IF NOT EXISTS user_plan (
 );
 
 
-CREATE TABLE IF NOT EXISTS plans_history(
+CREATE TABLE IF NOT EXISTS plans_history (
   id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   plan_id VARCHAR(50) NOT NULL REFERENCES plans(plan_id) ON DELETE CASCADE,
   start_date TIMESTAMP WITH TIME ZONE NOT NULL, -- indicating the interval for which plan_cost & unit_cost were used
-  end_date TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT 'INFINITY'::TIMESTAMPTZ CHECK(end_date > start_date),
+  end_date TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT 'INFINITY'::TIMESTAMPTZ CHECK (end_date > start_date),
   -- indicating the interval for which plan_cost & unit_cost were used
   plan_cost INTEGER NOT NULL CHECK (plan_cost >= 1000), -- similar to per_cycle_cost in plans table
   UNIQUE (plan_id, start_date)
