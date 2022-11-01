@@ -589,8 +589,7 @@ export function getProductInfoAndInvoiceUsingPlanId(planId, username) {
           FROM user_on_plan
           WHERE
             plan_id = $1
-            AND subscription_id != $1
-            AND subscription_id IS NOT NULL
+            AND plan_owner = False
             AND active = True
       ) AS members,
       ( SELECT invoice_id
@@ -686,7 +685,6 @@ export function archivePlan(planId) {
     UPDATE plans
       SET active = FALSE
       WHERE plan_id = $1
-    )
   `;
   return pool.query(query, [planId]);
 }

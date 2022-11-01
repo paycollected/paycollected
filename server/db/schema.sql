@@ -74,7 +74,8 @@ CREATE VIEW user_on_plan AS
     up.subscription_id,
     up.subscription_item_id,
     up.quantity,
-    up.active
+    up.active,
+    up.plan_owner
   FROM user_plan up
   JOIN users u
   ON up.username = u.username;

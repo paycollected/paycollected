@@ -12,7 +12,6 @@ export default async function deletePlanResolver(planId, username) {
     console.log(e);
     throw new GraphQLError('Unable to delete plan', { extensions: { code: 'INTERNAL_SERVER_ERROR' } });
   }
-
   if (rows.length === 0) {
     throw new GraphQLError('User is not on plan', { extensions: { code: 'FORBIDDEN' } });
   }

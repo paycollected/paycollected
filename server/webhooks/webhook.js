@@ -1,6 +1,5 @@
 import express from 'express';
 import stripeSDK from 'stripe';
-import * as helpers from './helpers.js';
 import handleSubscriptionStart from './eventHandlers/subsStartNewCard';
 
 const webhook = express.Router();
@@ -30,30 +29,9 @@ webhook.post('/', express.raw({ type: 'application/json' }), (req, res) => {
       invoice = event.data.object;
       // Then define and call a function to handle the event invoice.payment_failed
       break;
-    case 'price.updated': // plan deleted
-      price = event.data.object;
-      ({ deletePlan } = price.metadata);
-      if (JSON.parse(deletePlan)) {
-        helpers.handlePlanDelete(price);
-      }
-      break;
     case 'setup_intent.succeeded': // someone new joining plan
       setupIntent = event.data.object;
       handleSubscriptionStart(setupIntent);
-      break;
-    case 'customer.subscription.updated':
-      subscription = event.data.object;
-      ({ quantChanged, cancelSubs } = subscription.metadata);
-      switch (true) {
-        case (JSON.parse(quantChanged)):
-          // helpers.handleSubscriptionQuantChange(subscription);
-          break;
-        case (JSON.parse(cancelSubs)):
-          // helpers.handleSubscriptionCancel(subscription);
-          break;
-        default:
-          break;
-      }
       break;
     default:
       console.log(`Unhandled event type ${event.type}`);

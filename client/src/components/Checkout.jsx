@@ -122,10 +122,10 @@ function CheckoutForm({ setupIntentId, paymentMethods, planId }) {
           <div hidden={selectedCard === 'newCard'}>
             To use a saved card, please retype your password to confirm identity:
             <input
-              required
               type="password"
               value={password}
-              onChange={(e) => { setPassword(e.target.value) }}
+              required={selectedCard !== 'newCard'}
+              onChange={(e) => { setPassword(e.target.value); }}
             />
           </div>
         </div>
