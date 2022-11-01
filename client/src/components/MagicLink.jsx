@@ -6,7 +6,7 @@ import {
 
 export default function MagicLink({ planToJoin, setShowMagicLink }) {
   const navigate = useNavigate();
-  const { hasCopied, onCopy } = useClipboard(`${process.env.CLIENT_HOST}:${process.env.SERVER_PORT}/join/${planToJoin}`);
+  const { hasCopied, onCopy } = useClipboard(`${process.env.HOST}/join/${planToJoin}`);
 
   return (
     <Flex width="full" align="center" justifyContent="center">
@@ -18,7 +18,7 @@ export default function MagicLink({ planToJoin, setShowMagicLink }) {
           <p>Have other members on your plan join by sharing this link:</p>
           <Box>
             <Heading size="m">
-              {`${process.env.CLIENT_HOST}:${process.env.SERVER_PORT}/join/${planToJoin}`}
+              {`${process.env.HOST}/join/${planToJoin}`}
             </Heading>
             <Button size="sm" onClick={onCopy}>
               {hasCopied ? 'Copied' : 'Copy'}
