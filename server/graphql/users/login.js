@@ -28,7 +28,7 @@ export default async function loginResolver(username, password) {
         username,
         stripeCusId,
       }
-    }, process.env.SECRET_KEY);
+    }, process.env.SIGNIN_SECRET_KEY);
 
     return { username, token };
   } catch (asyncError) {

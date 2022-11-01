@@ -1,11 +1,29 @@
-import stripeSDK from 'stripe';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import sgMail from '@sendgrid/mail';
 import { GraphQLError } from 'graphql';
 import { checkUser, createUser } from '../../db/models.js';
 
-const stripe = stripeSDK(process.env.STRIPE_SECRET_KEY);
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 const saltRounds = 10;
+
+const generateMailConfig = (name, firstName, email, token) => ({
+  from: {
+    name: 'PayCollected',
+    email: 'admin@paycollected.com',
+  },
+  to: { name, email },
+  subject: 'Welcome to PayCollected!',
+  html: `
+  <div>
+    <h3>Hi ${firstName}!</h3>
+    <div>Thanks for signing up with PayCollected!</div>
+    <div>To verify your email address, please click
+      <a href="http://localhost:5647/verify/${token}">here</a>.
+    </div>
+    <div>We look forward to serving you!</div>
+  </div>`,
+});
 
 export default async function createAccount(
   firstName,
@@ -28,30 +46,27 @@ export default async function createAccount(
       throw new Error();
     }
 
-    // username and email do not exist -> create user
-    const [
-      { id: stripeCusId },
-      hashedPass
-    ] = await Promise.all([
-      stripe.customers.create({
-        name: `${firstName} ${lastName}`,
-        email,
-        metadata: { username }
-      }),
-      bcrypt.hash(password, saltRounds)
-    ]);
-
-    await createUser(firstName, lastName, username, hashedPass, email, stripeCusId);
     const token = jwt.sign(
       {
-        // expires after 30 mins
-        exp: Math.floor(Date.now() / 1000) + (60 * 30),
-        // storing user's info in token so we can easily obtain it from context in any resolver
-        user: { username, stripeCusId }
+        exp: Math.floor(Date.now() / 1000) + (60 * 15),
+        username,
+        name: `${firstName} ${lastName}`,
+        email,
       },
-      process.env.SECRET_KEY
+      process.env.EMAIL_VERIFY_SECRET_KEY
     );
-    return { username, token };
+
+    const hashPassAndSave = async () => {
+      const hashedPass = await bcrypt.hash(password, saltRounds);
+      return createUser(firstName, lastName, username, hashedPass, email);
+    };
+
+    await Promise.all([
+      hashPassAndSave(),
+      sgMail.send(generateMailConfig(`${firstName} ${lastName}`, firstName, email, token)),
+    ]);
+
+    return true;
   } catch (asyncError) {
     // if this is an anticipated bad input error
     if (errMsg) {

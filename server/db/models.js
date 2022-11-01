@@ -12,17 +12,28 @@ export function checkUser(username, email) {
 }
 
 
-export function createUser(firstName, lastName, username, password, email, stripeCusId) {
+export function createUser(firstName, lastName, username, password, email) {
   const query = `
     INSERT INTO users
-      (first_name, last_name, username, password, email, s_cus_id)
+      (first_name, last_name, username, password, email)
     VALUES
-      ($1, $2, $3, $4, $5, $6)
+      ($1, $2, $3, $4, $5)
   `;
-  const args = [firstName, lastName, username, password, email, stripeCusId];
+  const args = [firstName, lastName, username, password, email];
   return pool.query(query, args);
 }
 
+
+export function verifyEmail(sCusId, username) {
+  const query = `
+    UPDATE users
+      SET
+        verified = TRUE,
+        s_cus_id = $1
+      WHERE username = $2
+  `;
+  return pool.query(query, [sCusId, username]);
+}
 
 export function addPlan(
   username,

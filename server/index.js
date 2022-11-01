@@ -11,6 +11,7 @@ import path from 'path';
 import typeDefs from './graphql/typeDefs';
 import resolvers from './graphql/resolvers';
 import webhook from './webhooks/webhook';
+import accountRouter from './accountRouter';
 
 dotenv.config();
 
@@ -36,6 +37,8 @@ async function startApolloServer() {
   // because req.body needs to be in json format
   // so that webhook could convert it into raw buffer
   app.use(cors(), json());
+  // app.set('query parser', true);
+  app.use(accountRouter);
 
   app.use('/graphql', expressMiddleware(server, {
     context: ({ req }) => {
@@ -43,7 +46,7 @@ async function startApolloServer() {
       // no Authorization (may be signing up)
       if (token.length > 0) {
         try {
-          const { user } = jwt.verify(token, process.env.SECRET_KEY);
+          const { user } = jwt.verify(token, process.env.SIGNIN_SECRET_KEY);
           const { username, stripeCusId } = user;
           return {
             user: {

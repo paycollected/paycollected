@@ -52,7 +52,7 @@ function App() {
             ? <Signup setUser={setUser} planToJoin={planToJoin} />
             : <Navigate to="/dashboard" />}
         />
-        <Route
+        {/* <Route
           path="/dashboard"
           element={user
             ? (
@@ -63,7 +63,8 @@ function App() {
               />
             )
             : <Navigate to="/" />}
-        />
+        /> */}
+        <Route path="/dashboard" element={<Dashboard username={user} setUser={setUser} setPlanToJoin={setPlanToJoin} />} />
         <Route
           path="/plan/create"
           element={user

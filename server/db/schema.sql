@@ -10,7 +10,8 @@ CREATE TABLE IF NOT EXISTS users (
   last_name VARCHAR (100) NOT NULL,
   password VARCHAR(200) NOT NULL, -- hashed
   email VARCHAR(100) NOT NULL UNIQUE,
-  s_cus_id VARCHAR(50) NOT NULL UNIQUE
+  s_cus_id VARCHAR(50) UNIQUE,
+  verified BOOLEAN NOT NULL DEFAULT FALSE
 );
 
 CREATE TYPE cycle_freq AS ENUM ('weekly', 'monthly', 'yearly');
