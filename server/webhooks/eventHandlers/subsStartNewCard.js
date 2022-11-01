@@ -79,7 +79,7 @@ export default async function handleSubscriptionStart(setupIntent) {
               quantity,
               subscriptionId,
               subscriptionItemId,
-              username,
+              customer,
               newPriceId
             );
           };
@@ -119,7 +119,7 @@ export default async function handleSubscriptionStart(setupIntent) {
             quantity,
             subscriptionId,
             subscriptionItemId,
-            username,
+            customer,
           );
         }
       }

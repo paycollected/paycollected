@@ -182,7 +182,7 @@ export function subscriptionSetup(planId, stripeCusId) {
       ( SELECT quantity
         FROM user_plan
         WHERE plan_id = $1
-          AND username = (SELECT username FROM users WHERE s_cus_id = $1)
+          AND username = (SELECT username FROM users WHERE s_cus_id = $2)
       ),
       0
     ) AS "existingQuant",
@@ -255,20 +255,21 @@ export function startSubsNoPriceUpdate(
   quantity,
   subscriptionId,
   subscriptionItemId,
-  username,
+  sCusId,
 ) {
   const query = `
   INSERT INTO user_plan
       (quantity, subscription_id, subscription_item_id, plan_id, username)
     VALUES
-      ($1, $2, $3, $4, $5)
+      ($1, $2, $3, $4, (SELECT username FROM users WHERE s_cus_id = $5))
     ON CONFLICT
       (username, plan_id)
     DO UPDATE SET
       quantity = $1, subscription_id = $2, subscription_item_id = $3
-    WHERE user_plan.username = $5 AND user_plan.plan_id = $4
+    WHERE user_plan.plan_id = $4
+      AND user_plan.username = (SELECT username FROM users WHERE s_cus_id = $5)
   `;
-  const args = [quantity, subscriptionId, subscriptionItemId, planId, username];
+  const args = [quantity, subscriptionId, subscriptionItemId, planId, sCusId];
   return pool.query(query, args);
 }
 
@@ -385,7 +386,7 @@ export function startSubscription(
   quantity,
   subscriptionId,
   subscriptionItemId,
-  username,
+  stripeCusId,
   newPriceId
 ) {
   const query = `
@@ -394,18 +395,19 @@ export function startSubscription(
       INSERT INTO user_plan
         (quantity, subscription_id, subscription_item_id, plan_id, username)
       VALUES
-        ($1, $2, $3, $4, $5)
+        ($1, $2, $3, $4, (SELECT username FROM users WHERE s_cus_id = $5))
       ON CONFLICT
         (username, plan_id)
       DO UPDATE SET
         quantity = $1, subscription_id = $2, subscription_item_id = $3
-      WHERE user_plan.username = $5 AND user_plan.plan_id = $4
+      WHERE user_plan.username = (SELECT username FROM users WHERE s_cus_id = $5)
+        AND user_plan.plan_id = $4
     )
     UPDATE plans
     SET price_id = $6
     WHERE plan_id = $4
   `;
-  const args = [quantity, subscriptionId, subscriptionItemId, planId, username, newPriceId];
+  const args = [quantity, subscriptionId, subscriptionItemId, planId, stripeCusId, newPriceId];
   return pool.query(query, args);
 }
 

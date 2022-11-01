@@ -16,6 +16,7 @@ export default async function joinPlanResolver(planId, newQuantity, username) {
     const { rows } = await joinPlan(username, planId);
     // What abt case when user used to be active on plan, but not anymore?
     // with this current setup, they can rejoin by calling this mutation!
+    // (but only as long as the plan itself is still active)
     const { quantity, stripeCusId, active } = rows[0];
     if (!active) {
       errMsg = 'This plan has already been archived';
@@ -37,7 +38,7 @@ export default async function joinPlanResolver(planId, newQuantity, username) {
         metadata: { planId, quantity: newQuantity }
       }),
       stripe.customers.listPaymentMethods(stripeCusId, { type: 'card' }),
-      stripe.customers.retrieve(stripeCusId)
+      stripe.customers.retrieve(stripeCusId),
     ]);
 
 
