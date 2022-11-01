@@ -89,11 +89,7 @@ export default async function handleSubscriptionStart(setupIntent) {
           } else {
             await Promise.all([
               createNewSubsAndUpdateDb(),
-              ...members.map((member) => updateStripePrice(
-                member,
-                newPriceId,
-                productTotalQuantity
-              ))
+              ...members.map((member) => updateStripePrice(member, newPriceId)),
             ]);
           }
         } else {

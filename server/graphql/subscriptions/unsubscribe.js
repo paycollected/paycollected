@@ -57,14 +57,14 @@ export default async function unsubscribeResolver(subscriptionId, username) {
         // archive in db
         await Promise.all([
           updatePriceIdArchiveSubs(price, product, subscriptionId),
-          ...members.map((member) => updateStripePrice(member, price, productTotalQuantity)),
+          ...members.map((member) => updateStripePrice(member, price)),
         ]);
       } else {
         // subscription never active
         // delete from db
         await Promise.all([
           updatePriceIdDelSubs(price, product, subscriptionId),
-          ...members.map((member) => updateStripePrice(member, price, productTotalQuantity)),
+          ...members.map((member) => updateStripePrice(member, price)),
         ]);
       }
     } else if (productTotalQuantity === 0 && invoiceId === null) {

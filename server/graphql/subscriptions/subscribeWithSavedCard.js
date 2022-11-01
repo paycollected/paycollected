@@ -134,7 +134,7 @@ export default async function subscribeWithSavedCardResolver(
       // there are other members --> also have to update their subscription
       [plan] = await Promise.all([
         createNewSubsAndUpdateDb(),
-        ...members.map((member) => updateStripePrice(member, newPriceId, productTotalQuantity)),
+        ...members.map((member) => updateStripePrice(member, newPriceId)),
       ]);
     }
     return plan;

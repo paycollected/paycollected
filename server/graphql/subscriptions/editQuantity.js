@@ -85,7 +85,7 @@ export default async function editQuantityResolver(
     } else {
       await Promise.all([
         ...promises,
-        ...members.map((member) => updateStripePrice(member, price, productTotalQuantity)),
+        ...members.map((member) => updateStripePrice(member, price)),
       ]);
     }
     return { planId: product, quantity: newQuantity };
