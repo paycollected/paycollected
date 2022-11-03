@@ -11,7 +11,7 @@ import { buttonTheme, inputTheme } from './styles/styles.js';
 
 const httpLink = createHttpLink({
   // TODO: will need to find out how to 'hide' server URI when deployed
-  uri: 'https://few-baths-brake-73-49-54-64.loca.lt/graphql',
+  uri: 'http://localhost:5647/graphql',
 });
 
 const authLink = setContext((_, { headers }) => {
