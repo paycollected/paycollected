@@ -35,8 +35,6 @@ export default function ViewPlans({ user }) {
   return (
     <div>
       <Button onClick={() => { submitEditPayment(); }}>Manage Payment Methods</Button>
-      {console.log('------> planToCopy', planToCopy)}
-      {console.log('------> string', `${process.env.HOST}/join/${planToCopy}`)}
       <Flex justifyContent="center">
         <Box p={2} my={8} width="60%" bg="white" borderRadius="15">
           <Box textAlign="center">
