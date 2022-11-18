@@ -91,7 +91,7 @@ export default {
       try {
         const { url } = await stripe.billingPortal.sessions.create({
           customer,
-          return_url: 'http://localhost:5647/dashboard/',
+          return_url: `${process.env.HOST}/dashboard/`,
         });
         return { portalSessionURL: url };
       } catch (asyncError) {
