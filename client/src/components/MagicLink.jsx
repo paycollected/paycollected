@@ -6,7 +6,7 @@ import {
 
 export default function MagicLink({ planToJoin, setShowMagicLink }) {
   const navigate = useNavigate();
-  const { hasCopied, onCopy } = useClipboard(`${process.env.HOST}:${process.env.PORT}/join/${planToJoin}`);
+  const { hasCopied, onCopy } = useClipboard(`${process.env.HOST}/join/${planToJoin}`);
 
   return (
     <Flex width="full" align="center" justifyContent="center">

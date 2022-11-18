@@ -109,7 +109,7 @@ export default function JoinPlan({
                     onChange={(e) => { setQuantity(Number(e.target.value)); }}
                   />
                 </FormControl>
-                <Button type="submit" disabled={!!quantity} isLoading={payLoading}>Join</Button>
+                <Button type="submit" disabled={!!quantity || payLoading} isLoading={payLoading}>Join</Button>
               </form>
             )}
             <Button onClick={() => { navigate('/dashboard'); }}>Cancel</Button>

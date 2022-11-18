@@ -12,7 +12,7 @@ import ConfirmDeletePlan from './ConfirmDeletePlan.jsx';
 
 export default function ViewPlans({ user }) {
   const [planToCopy, setPlanToCopy] = useState(null);
-  const { hasCopied, onCopy } = useClipboard(`${process.env.HOST}:${process.env.PORT}/join/${planToCopy}`);
+  const { hasCopied, onCopy } = useClipboard(`${process.env.HOST}/join/${planToCopy}`);
 
   const { loading, data, error } = useQuery(GET_ALL_PLANS, {
     fetchPolicy: 'cache-and-network',
