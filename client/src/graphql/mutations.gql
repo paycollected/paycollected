@@ -3,8 +3,8 @@ mutation CreateUser ($firstName: String!, $lastName: String!, $username: String!
 }
 
 
-mutation LogIn ($username: String!, $password: String!) {
-  login(username: $username, password: $password) {
+mutation LogIn ($usernameOrEmail: String!, $password: String!) {
+  login(usernameOrEmail: $usernameOrEmail, password: $password) {
     username
     token
   }

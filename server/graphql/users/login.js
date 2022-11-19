@@ -1,20 +1,22 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { GraphQLError } from 'graphql';
-import { getUserInfo } from '../../db/models';
+import { getUserInfoEitherUsernameOrEmail } from '../../db/models';
 
-export default async function loginResolver(inputUsername, password) {
+export default async function loginResolver(usernameOrEmailInput, password) {
   let errMsg;
-  const username = inputUsername.trim().toLowerCase();
+  const usernameOrEmail = usernameOrEmailInput.trim().toLowerCase();
   try {
-    const { rows } = await getUserInfo(username);
+    const { rows } = await getUserInfoEitherUsernameOrEmail(usernameOrEmail);
     // if username does not exist, throw error
     if (rows.length === 0) {
-      errMsg = 'This username does not exist';
+      errMsg = 'This account does not exist';
       throw new Error();
     }
 
-    const { password: savedPass, stripeCusId, verified } = rows[0];
+    const {
+      savedPass, stripeCusId, verified, username
+    } = rows[0];
     // if unverified account, do not allow to log in
     if (!verified) {
       errMsg = 'Account exists but email still needs verification';

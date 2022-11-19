@@ -39,11 +39,14 @@ export default function Login({ setUser, planToJoin }) {
       localStorage.clear();
       setUser(null);
       switch (message) {
-        case 'This username does not exist':
-          setErrorMessage('Incorrect username and password');
+        case 'This account does not exist':
+          setErrorMessage(message);
           break;
         case 'Unable to log in':
           setErrorMessage('Please try logging in later');
+          break;
+        case 'Account exists but email still needs verification':
+          setErrorMessage(message);
           break;
         default:
           setErrorMessage('');
@@ -53,10 +56,10 @@ export default function Login({ setUser, planToJoin }) {
     },
   });
 
-  const onSubmit = ({ username, password }) => {
+  const onSubmit = ({ usernameOrEmail, password }) => {
     logUserIn({
       variables: {
-        username,
+        usernameOrEmail,
         password,
       },
     });
@@ -77,12 +80,12 @@ export default function Login({ setUser, planToJoin }) {
               isRequired
               isInvalid={errors.username || errorMessage === 'Incorrect username and password'}
             >
-              <FormLabel>Username</FormLabel>
+              <FormLabel>Username or Email</FormLabel>
               <Input
-                name="username"
-                placeholder="Enter Username"
+                name="usernameOrEmail"
+                placeholder="Enter Username or Email"
                 type="text"
-                {...register('username', { required: 'Username required' })}
+                {...register('usernameOrEmail', { required: 'Username or email required' })}
               />
               {errors.username ? (
                 <FormErrorMessage>

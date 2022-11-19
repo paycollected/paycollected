@@ -71,7 +71,7 @@ export default {
       createAccount(firstName, lastName, username, password, email, saltRounds)
     ),
 
-    login: (_, { username, password }) => (loginResolver(username, password)),
+    login: (_, { usernameOrEmail, password }) => (loginResolver(usernameOrEmail, password)),
 
     resendVerificationEmail: (_, { email }) => (resendVerificationEmailResolver(email)),
 

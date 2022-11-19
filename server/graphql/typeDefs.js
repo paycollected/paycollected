@@ -91,7 +91,7 @@ export default `#graphql
     ): Boolean!
 
     login(
-      username: String!
+      usernameOrEmail: String!
       # username: Username!
       password: String!
     ): LoginInfo

@@ -184,6 +184,17 @@ export function getUserInfo(username) {
   return pool.query(query, [username]);
 }
 
+export function getUserInfoEitherUsernameOrEmail(usernameOrEmail) {
+  const query = `
+    SELECT
+      s_cus_id AS "stripeCusId",
+      username,
+      password AS "savedPass",
+      verified
+    FROM users
+    WHERE username = $1 OR email = $1`;
+  return pool.query(query, [usernameOrEmail]);
+}
 
 export function getUserInfoCheckNewEmail(username, newEmail) {
   const query = `
