@@ -10,6 +10,7 @@ import loginResolver from './users/login';
 import resendVerificationEmailResolver from './users/resendVerificationEmail';
 import changeEmailResolver from './users/changeEmail';
 import changeUsernameResolver from './users/changeUsername';
+import changePasswordResolver from './users/changePassword';
 import joinPlanResolver from './plans/join';
 import unsubscribeResolver from './subscriptions/unsubscribe.js';
 import unsubscribeAsOwnerResolver from './subscriptions/unsubscribeAsOwner';
@@ -32,6 +33,7 @@ const recurringInterval = {
   yearly: 'year'
 };
 
+const saltRounds = 10;
 
 export default {
   Username: usernameScalar,
@@ -66,7 +68,7 @@ export default {
     createUser: (_, {
       firstName, lastName, username, password, email
     }) => (
-      createAccount(firstName, lastName, username, password, email)
+      createAccount(firstName, lastName, username, password, email, saltRounds)
     ),
 
     login: (_, { username, password }) => (loginResolver(username, password)),
@@ -80,6 +82,11 @@ export default {
     changeUsername: authResolverWrapper((_, { newUsername, password }, { user: { username } }) => (
       changeUsernameResolver(username, password, newUsername)
     )),
+
+    changePassword: authResolverWrapper(
+      (_, { newPassword, currentPassword }, { user: { username }}) => (
+        changePasswordResolver(username, currentPassword, newPassword, saltRounds)
+      )),
 
     createPlan: authResolverWrapper((_, {
       planName, cycleFrequency, perCycleCost, startDate, timeZone

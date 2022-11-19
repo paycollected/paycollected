@@ -6,14 +6,14 @@ import { checkUser, createUser } from '../../db/models';
 import { generateConfigEmailVerification } from '../../utils';
 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-const saltRounds = 10;
 
 export default async function createAccount(
   firstName,
   lastName,
   inputUsername,
   password,
-  inputEmail
+  inputEmail,
+  saltRounds,
 ) {
   let errMsg;
   const username = inputUsername.trim().toLowerCase();

@@ -110,6 +110,11 @@ export default `#graphql
       password: String!
     ): LoginInfo!
 
+    changePassword(
+      currentPassword: String!
+      newPassword: String!
+    ): Boolean!
+
     createPlan(
       planName: String!
       cycleFrequency: CycleFrequency!

@@ -222,6 +222,9 @@ export function changeUsername(username, newUsername) {
   return pool.query('UPDATE users SET username = $1 WHERE username = $2', [newUsername, username]);
 }
 
+export function changePassword(username, password) {
+  return pool.query('UPDATE users SET password = $1 WHERE username = $2', [password, username]);
+}
 
 export function joinPlan(username, planId) {
   const query = `
