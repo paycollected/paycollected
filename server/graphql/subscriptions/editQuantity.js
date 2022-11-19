@@ -22,7 +22,6 @@ export default async function editQuantityResolver(
   let rows;
   try {
     ({ rows } = await getSubsItemIdAndProductInfo(subscriptionId, username));
-    console.log(rows[0]);
   } catch (e) {
     console.log(e);
     throw new GraphQLError('Cannot update quantity', { extensions: { code: 'INTERNAL_SERVER_ERROR' } });
