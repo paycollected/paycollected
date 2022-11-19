@@ -2,12 +2,12 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import sgMail from '@sendgrid/mail';
 import { GraphQLError } from 'graphql';
-import { getUserInfoCheckNewEmail, changeEmail as changeEmailModel } from '../../db/models';
+import { getUserInfoCheckNewEmail, changeEmail } from '../../db/models';
 import { generateConfigEmailVerification } from '../../utils';
 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
-export default async function changeEmail(username, password, newEmail) {
+export default async function changeEmailResolver(username, password, newEmail) {
   let email;
   let savedPwd;
   let firstName;
@@ -25,12 +25,6 @@ export default async function changeEmail(username, password, newEmail) {
     throw new GraphQLError('Unable to change email', { extensions: { code: 'INTERNAL_SERVER_ERROR' } });
   }
 
-  if (email === newEmail) {
-    throw new GraphQLError('No change in email', { extensions: { code: 'BAD_USER_INPUT' } });
-  } else if (newEmailInput !== null) {
-    throw new GraphQLError('Email already taken', { extensions: { code: 'BAD_USER_INPUT' } });
-  }
-
   let result;
   try {
     result = await bcrypt.compare(password, savedPwd);
@@ -43,6 +37,12 @@ export default async function changeEmail(username, password, newEmail) {
     throw new GraphQLError('Incorrect password', { extensions: { code: 'BAD_USER_INPUT' } });
   }
 
+  if (email === newEmail) {
+    throw new GraphQLError('No change in email', { extensions: { code: 'BAD_USER_INPUT' } });
+  } else if (newEmailInput !== null) {
+    throw new GraphQLError('Email already taken', { extensions: { code: 'BAD_USER_INPUT' } });
+  }
+
   const token = jwt.sign(
     {
       exp: Math.floor(Date.now() / 1000) + (60 * 15), email: newEmail, name, username, sCusId
@@ -52,7 +52,7 @@ export default async function changeEmail(username, password, newEmail) {
 
   try {
     await Promise.all([
-      changeEmailModel(username, newEmail),
+      changeEmail(username, newEmail),
       sgMail.send(generateConfigEmailVerification(name, firstName, newEmail, token, 'returning'))
     ]);
     return true;

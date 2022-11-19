@@ -201,8 +201,25 @@ export function getUserInfoCheckNewEmail(username, newEmail) {
 }
 
 
+export function getUserInfoCheckNewUsername(username, newUsername) {
+  const query = `
+    SELECT
+      s_cus_id AS "stripeCusId",
+      password AS "savedPwd",
+      (SELECT username FROM users WHERE username = $1) AS "newUsernameInput"
+    FROM users
+    WHERE username = $2`;
+  return pool.query(query, [newUsername, username]);
+}
+
+
 export function changeEmail(username, newEmail) {
   return pool.query('UPDATE users SET email = $1, verified = False WHERE username = $2', [newEmail, username]);
+}
+
+
+export function changeUsername(username, newUsername) {
+  return pool.query('UPDATE users SET username = $1 WHERE username = $2', [newUsername, username]);
 }
 
 

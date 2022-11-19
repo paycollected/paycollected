@@ -77,7 +77,7 @@ export default {
       changeEmailResolver(username, password, newEmail)
     )),
 
-    changeUsername: authResolverWrapper((_, { newUsername, password }, { user: { username }}) => (
+    changeUsername: authResolverWrapper((_, { newUsername, password }, { user: { username } }) => (
       changeUsernameResolver(username, password, newUsername)
     )),
 

@@ -108,7 +108,7 @@ export default `#graphql
     changeUsername(
       newUsername: String!
       password: String!
-    ): Boolean!
+    ): LoginInfo!
 
     createPlan(
       planName: String!

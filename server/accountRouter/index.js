@@ -13,7 +13,6 @@ accountRouter.get('/verify/:token', async (req, res) => {
       email, name, username, sCusId
     } = jwt.verify(token, process.env.EMAIL_VERIFY_SECRET_KEY);
 
-    console.log(email);
 
     let stripeCusId;
     if (sCusId === null) {
@@ -23,7 +22,6 @@ accountRouter.get('/verify/:token', async (req, res) => {
       await verifyEmailUpdateStripeCustomerId(stripeCusId, username);
     } else {
       stripeCusId = sCusId;
-      console.log('aaa');
       await Promise.all([verifyEmail(username), stripe.customers.update(stripeCusId, { email })]);
     }
 
