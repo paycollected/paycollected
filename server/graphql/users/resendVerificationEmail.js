@@ -23,7 +23,7 @@ export default async function resendVerificationEmailResolver(email) {
     verified, firstName, name, username, sCusId
   } = rows[0];
   if (verified) {
-    throw new GraphQLError('Email has already been verified', { extensions: { code: 'BAD_USER_INPUT' } });
+    throw new GraphQLError('This email has already been verified.', { extensions: { code: 'BAD_USER_INPUT' } });
   }
 
   const token = jwt.sign(

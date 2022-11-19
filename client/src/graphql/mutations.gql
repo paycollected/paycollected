@@ -96,3 +96,8 @@ mutation SubscribeWithSavedCard($paymentMethodId: PaymentMethodID!, $setupIntent
     subscriptionId
   }
 }
+
+
+mutation ResendVerificationEmail($email: Email!) {
+  resendVerificationEmail(email: $email)
+}
