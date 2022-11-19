@@ -84,9 +84,10 @@ export default {
     )),
 
     changePassword: authResolverWrapper(
-      (_, { newPassword, currentPassword }, { user: { username }}) => (
+      (_, { newPassword, currentPassword }, { user: { username } }) => (
         changePasswordResolver(username, currentPassword, newPassword, saltRounds)
-      )),
+      )
+    ),
 
     createPlan: authResolverWrapper((_, {
       planName, cycleFrequency, perCycleCost, startDate, timeZone
