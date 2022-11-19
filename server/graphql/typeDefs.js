@@ -100,6 +100,11 @@ export default `#graphql
       email: Email!
     ): Boolean!
 
+    changeEmail(
+      newEmail: Email!
+      password: String!
+    ): Boolean!
+
     createPlan(
       planName: String!
       cycleFrequency: CycleFrequency!

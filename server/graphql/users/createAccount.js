@@ -8,24 +8,6 @@ import { generateConfigEmailVerification } from '../../utils';
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 const saltRounds = 10;
 
-// const generateMailConfig = (name, firstName, email, token) => ({
-//   from: {
-//     name: 'PayCollected',
-//     email: 'admin@paycollected.com',
-//   },
-//   to: { name, email },
-//   subject: 'Welcome to PayCollected!',
-//   html: `
-//   <div>
-//     <h3>Hi ${firstName}!</h3>
-//     <div>Thanks for signing up with PayCollected!</div>
-//     <div>To verify your email address, please click
-//       <a href="${process.env.HOST}/verify/${token}">here</a>.
-//     </div>
-//     <div>We look forward to serving you!</div>
-//   </div>`,
-// });
-
 export default async function createAccount(
   firstName,
   lastName,

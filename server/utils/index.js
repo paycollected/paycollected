@@ -1,10 +1,6 @@
 import stripeSDK from 'stripe';
-import sgMail from '@sendgrid/mail';
-
 
 const stripe = stripeSDK(process.env.STRIPE_SECRET_KEY);
-sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-
 
 export function updateStripePrice(member, price) {
   const {
@@ -27,7 +23,10 @@ export function cancelSubs(member) {
   return stripe.subscriptions.del(subscriptionId);
 }
 
-export function generateConfigEmailVerification(name, firstName, email, token) {
+export function generateConfigEmailVerification(name, firstName, email, token, type = 'firstTime') {
+  const greeting = type === 'returning'
+    ? "We've received your request to change email address."
+    : 'Thanks for signing up with PayCollected!';
   return {
     from: {
       name: 'PayCollected',
@@ -38,8 +37,8 @@ export function generateConfigEmailVerification(name, firstName, email, token) {
     html: `
     <div>
       <h3>Hi ${firstName}!</h3>
-      <div>Thanks for signing up with PayCollected!</div>
-      <div>To verify your email address, please click
+      <div>${greeting}</div>
+      <div>To verify this email account, please click
         <a href="${process.env.HOST}/verify/${token}">here</a>.
       </div>
       <div>We look forward to serving you!</div>

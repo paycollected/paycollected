@@ -181,6 +181,11 @@ export function getUserInfo(username) {
 }
 
 
+export function changeEmail(username, newEmail) {
+  return pool.query('UPDATE users SET email = $1, verified = False WHERE username = $2', [newEmail, username]);
+}
+
+
 export function joinPlan(username, planId) {
   const query = `
   SELECT

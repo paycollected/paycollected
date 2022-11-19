@@ -4,6 +4,7 @@ import { GraphQLError } from 'graphql';
 import { checkBeforeVerifyEmail } from '../../db/models';
 import { generateConfigEmailVerification } from '../../utils';
 
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 export default async function resendVerificationEmailResolver(email) {
   let rows;
