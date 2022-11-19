@@ -23,8 +23,18 @@ export function createUser(firstName, lastName, username, password, email) {
 }
 
 
-export function checkBeforeVerifyEmail(username) {
-  return pool.query('SELECT verified, s_cus_id AS "stripeCusId" FROM users WHERE username = $1', [username]);
+export function checkBeforeVerifyEmail(email) {
+  const query = `
+    SELECT
+      verified,
+      s_cus_id AS "stripeCusId",
+      first_name || ' ' || last_name AS name,
+      first_name AS "firstName",
+      username
+    FROM users
+    WHERE email = $1
+  `;
+  return pool.query(query, [email]);
 }
 
 

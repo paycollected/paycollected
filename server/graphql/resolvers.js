@@ -7,6 +7,7 @@ import {
 } from './customScalarTypes';
 import createAccount from './users/createAccount';
 import loginResolver from './users/login';
+import resendVerificationEmailResolver from './users/resendVerificationEmail';
 import joinPlanResolver from './plans/join';
 import unsubscribeResolver from './subscriptions/unsubscribe.js';
 import unsubscribeAsOwnerResolver from './subscriptions/unsubscribeAsOwner';
@@ -67,6 +68,8 @@ export default {
     ),
 
     login: (_, { username, password }) => (loginResolver(username, password)),
+
+    resendVerificationEmail: (_, { email }) => (resendVerificationEmailResolver(email)),
 
     createPlan: authResolverWrapper((_, {
       planName, cycleFrequency, perCycleCost, startDate, timeZone

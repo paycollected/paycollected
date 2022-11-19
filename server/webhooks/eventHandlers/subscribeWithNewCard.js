@@ -1,6 +1,6 @@
 import stripeSDK from 'stripe';
-import { updateStripePrice } from '../../utils/helperFn.js';
-import { subscriptionSetup, startSubscription, startSubsNoPriceUpdate } from '../../db/models.js';
+import { updateStripePrice } from '../../utils';
+import { subscriptionSetup, startSubscription, startSubsNoPriceUpdate } from '../../db/models';
 
 const stripe = stripeSDK(process.env.STRIPE_SECRET_KEY);
 

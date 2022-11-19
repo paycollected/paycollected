@@ -1,7 +1,7 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { GraphQLError } from 'graphql';
-import { getUserInfo } from '../../db/models.js';
+import { getUserInfo } from '../../db/models';
 
 export default async function loginResolver(inputUsername, password) {
   let errMsg;

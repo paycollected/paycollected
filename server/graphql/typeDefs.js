@@ -96,6 +96,10 @@ export default `#graphql
       password: String!
     ): LoginInfo
 
+    resendVerificationEmail(
+      email: Email!
+    ): Boolean!
+
     createPlan(
       planName: String!
       cycleFrequency: CycleFrequency!

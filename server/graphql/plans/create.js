@@ -1,6 +1,6 @@
 import stripeSDK from 'stripe';
 import { GraphQLError } from 'graphql';
-import { addPlan } from '../../db/models.js';
+import { addPlan } from '../../db/models';
 
 const stripe = stripeSDK(process.env.STRIPE_SECRET_KEY);
 

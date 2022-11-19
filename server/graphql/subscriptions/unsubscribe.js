@@ -1,13 +1,13 @@
 import stripeSDK from 'stripe';
 import { GraphQLError } from 'graphql';
-import { updateStripePrice } from '../../utils/helperFn.js';
+import { updateStripePrice } from '../../utils';
 import {
   getProductInfoAndInvoice,
   updatePriceIdDelSubs,
   updatePriceIdArchiveSubs,
   deleteSubscription,
   archiveSubs,
-} from '../../db/models.js';
+} from '../../db/models';
 
 const stripe = stripeSDK(process.env.STRIPE_SECRET_KEY);
 

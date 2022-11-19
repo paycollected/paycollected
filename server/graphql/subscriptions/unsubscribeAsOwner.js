@@ -1,6 +1,6 @@
 import stripeSDK from 'stripe';
 import { GraphQLError } from 'graphql';
-import { updateStripePrice } from '../../utils/helperFn.js';
+import { updateStripePrice } from '../../utils';
 import {
   getProductInfoAndInvoiceCheckNewOwner,
   updatePriceOwnerArchiveSubs,
