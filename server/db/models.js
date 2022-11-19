@@ -27,7 +27,7 @@ export function checkBeforeVerifyEmail(email) {
   const query = `
     SELECT
       verified,
-      s_cus_id AS "stripeCusId",
+      s_cus_id AS "sCusId",
       first_name || ' ' || last_name AS name,
       first_name AS "firstName",
       username
@@ -38,15 +38,19 @@ export function checkBeforeVerifyEmail(email) {
 }
 
 
-export function verifyEmail(sCusId, username) {
+export function verifyEmailUpdateStripeCustomerId(sCusId, username) {
   const query = `
     UPDATE users
       SET
-        verified = TRUE,
+        verified = True,
         s_cus_id = $1
       WHERE username = $2
   `;
   return pool.query(query, [sCusId, username]);
+}
+
+export function verifyEmail(username) {
+  return pool.query('UPDATE users SET verified = True WHERE username = $1', [username]);
 }
 
 export function addPlan(
@@ -178,6 +182,22 @@ export function getUserInfo(username) {
     FROM users
     WHERE username = $1`;
   return pool.query(query, [username]);
+}
+
+
+export function getUserInfoCheckNewEmail(username, newEmail) {
+  const query = `
+  SELECT
+      first_name AS "firstName",
+      first_name || ' ' || last_name AS name,
+      email,
+      password AS "savedPwd",
+      s_cus_id AS "sCusId",
+      (SELECT email FROM users WHERE email = $1) AS "newEmailInput"
+    FROM users
+    WHERE username = $2
+  `;
+  return pool.query(query, [newEmail, username]);
 }
 
 

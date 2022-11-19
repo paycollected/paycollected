@@ -9,6 +9,7 @@ import createAccount from './users/createAccount';
 import loginResolver from './users/login';
 import resendVerificationEmailResolver from './users/resendVerificationEmail';
 import changeEmailResolver from './users/changeEmail';
+import changeUsernameResolver from './users/changeUsername';
 import joinPlanResolver from './plans/join';
 import unsubscribeResolver from './subscriptions/unsubscribe.js';
 import unsubscribeAsOwnerResolver from './subscriptions/unsubscribeAsOwner';
@@ -74,6 +75,10 @@ export default {
 
     changeEmail: authResolverWrapper((_, { newEmail, password }, { user: { username } }) => (
       changeEmailResolver(username, password, newEmail)
+    )),
+
+    changeUsername: authResolverWrapper((_, { newUsername, password }, { user: { username }}) => (
+      changeUsernameResolver(username, password, newUsername)
     )),
 
     createPlan: authResolverWrapper((_, {

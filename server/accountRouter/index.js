@@ -1,7 +1,7 @@
 import express from 'express';
 import jwt from 'jsonwebtoken';
 import stripeSDK from 'stripe';
-import { verifyEmail } from '../db/models';
+import { verifyEmailUpdateStripeCustomerId, verifyEmail } from '../db/models';
 
 const stripe = stripeSDK(process.env.STRIPE_SECRET_KEY);
 const accountRouter = express.Router();
@@ -9,13 +9,23 @@ const accountRouter = express.Router();
 accountRouter.get('/verify/:token', async (req, res) => {
   const { params: { token } } = req;
   try {
-    const { email, name, username } = jwt.verify(token, process.env.EMAIL_VERIFY_SECRET_KEY);
+    const {
+      email, name, username, sCusId
+    } = jwt.verify(token, process.env.EMAIL_VERIFY_SECRET_KEY);
 
-    const { id: stripeCusId } = await stripe.customers.create(
-      { name, email, metadata: { username } }
-    );
-    await verifyEmail(stripeCusId, username);
+    console.log(email);
 
+    let stripeCusId;
+    if (sCusId === null) {
+      ({ id: stripeCusId } = await stripe.customers.create(
+        { name, email, metadata: { username } }
+      ));
+      await verifyEmailUpdateStripeCustomerId(stripeCusId, username);
+    } else {
+      stripeCusId = sCusId;
+      console.log('aaa');
+      await Promise.all([verifyEmail(username), stripe.customers.update(stripeCusId, { email })]);
+    }
 
     const loginToken = jwt.sign({
       // expires after 30 mins
@@ -26,7 +36,8 @@ accountRouter.get('/verify/:token', async (req, res) => {
       }
     }, process.env.SIGNIN_SECRET_KEY);
     res.redirect(`/dashboard/?username=${username}&token=${loginToken}`);
-  } catch {
+  } catch (e) {
+    console.log(e);
     res.redirect('/signup/?status=failed');
   }
 });

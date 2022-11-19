@@ -27,13 +27,17 @@ export function generateConfigEmailVerification(name, firstName, email, token, t
   const greeting = type === 'returning'
     ? "We've received your request to change email address."
     : 'Thanks for signing up with PayCollected!';
+  const subject = type === 'returning'
+    ? 'Email address change'
+    : 'Welcome to PayCollected!';
+
   return {
     from: {
       name: 'PayCollected',
       email: 'admin@paycollected.com',
     },
     to: { name, email },
-    subject: 'Welcome to PayCollected!',
+    subject,
     html: `
     <div>
       <h3>Hi ${firstName}!</h3>

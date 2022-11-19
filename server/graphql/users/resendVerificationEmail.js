@@ -20,7 +20,7 @@ export default async function resendVerificationEmailResolver(email) {
   }
 
   const {
-    verified, firstName, name, username
+    verified, firstName, name, username, sCusId
   } = rows[0];
   if (verified) {
     throw new GraphQLError('Email has already been verified', { extensions: { code: 'BAD_USER_INPUT' } });
@@ -28,7 +28,7 @@ export default async function resendVerificationEmailResolver(email) {
 
   const token = jwt.sign(
     {
-      exp: Math.floor(Date.now() / 1000) + (60 * 15), email, name, username
+      exp: Math.floor(Date.now() / 1000) + (60 * 15), email, name, username, sCusId,
     },
     process.env.EMAIL_VERIFY_SECRET_KEY
   );

@@ -14,7 +14,7 @@ export default async function editQuantityResolver(
   // a preexisting subscriptionId
 
   // Validating quantity input
-  if (newQuantity > 6 || newQuantity <= 0) {
+  if (newQuantity <= 0) {
     // upper limit for our system
     throw new GraphQLError('Invalid quantity', { extensions: { code: 'BAD_USER_INPUT' } });
   }

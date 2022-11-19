@@ -105,6 +105,11 @@ export default `#graphql
       password: String!
     ): Boolean!
 
+    changeUsername(
+      newUsername: String!
+      password: String!
+    ): Boolean!
+
     createPlan(
       planName: String!
       cycleFrequency: CycleFrequency!

@@ -35,6 +35,7 @@ export default async function createAccount(
         email,
         name: `${firstName} ${lastName}`,
         username,
+        sCusId: null,
       },
       process.env.EMAIL_VERIFY_SECRET_KEY
     );
