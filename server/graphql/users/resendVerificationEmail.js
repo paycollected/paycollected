@@ -16,7 +16,7 @@ export default async function resendVerificationEmailResolver(email) {
   }
 
   if (rows.length === 0) {
-    throw new GraphQLError('No existing account with this email', { extensions: { code: 'BAD_USER_INPUT' } });
+    throw new GraphQLError('No account associated with this email was found.', { extensions: { code: 'BAD_USER_INPUT' } });
   }
 
   const {

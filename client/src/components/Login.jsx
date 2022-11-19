@@ -6,7 +6,7 @@ import {
   Button, Input, InputGroup, InputRightElement,
   FormControl, FormLabel, FormErrorMessage,
   Box, Heading, Flex, useDisclosure, Modal, ModalOverlay,
-  ModalContent, ModalCloseButton, ModalHeader, ModalBody, ModalFooter
+  ModalContent, ModalHeader, ModalBody, ModalFooter
 } from '@chakra-ui/react';
 import { ViewIcon, ViewOffIcon } from '@chakra-ui/icons';
 import { LogIn as LOG_IN, ResendVerificationEmail as REVERIFY } from '../graphql/mutations.gql';
@@ -72,7 +72,7 @@ export default function Login({ setUser, planToJoin }) {
     },
     onError: ({ message }) => {
       switch (message) {
-        case 'No account was found associated with this email.':
+        case 'No account associated with this email was found.':
           setVerificationError(message);
           break;
         case 'This email has already been verified.':
