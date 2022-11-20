@@ -10,10 +10,12 @@ import {
 import { ViewIcon, ViewOffIcon } from '@chakra-ui/icons';
 import { LogIn as LOG_IN } from '../graphql/mutations.gql';
 import ReverifyEmail from '../components/ReverifyEmail.jsx';
+import ForgotPwd from '../components/ForgotPwd.jsx';
 
 export default function Login({ setUser, planToJoin }) {
   const navigate = useNavigate();
   const { isOpen: isOpenVerify, onOpen: onOpenVerify, onClose: onCloseVerify } = useDisclosure();
+  const { isOpen: isOpenReset, onOpen: onOpenReset, onClose: onCloseReset } = useDisclosure();
   const { register, handleSubmit, formState: { errors } } = useForm();
   // if login info is valid
   const [showPassword, setShowPassword] = useState(false);
@@ -70,10 +72,8 @@ export default function Login({ setUser, planToJoin }) {
 
   return (
     <div>
-      <ReverifyEmail
-        isOpen={isOpenVerify}
-        onClose={onCloseVerify}
-      />
+      <ReverifyEmail isOpen={isOpenVerify} onClose={onCloseVerify} />
+      <ForgotPwd isOpen={isOpenReset} onClose={onCloseReset} />
       <Flex width="full" align="center" justifyContent="center">
         <Box p={2} my={8} width="40%" bg="white" borderRadius="15">
           <Box textAlign="center">
@@ -144,6 +144,7 @@ export default function Login({ setUser, planToJoin }) {
             <p>Don&apos;t have an account? Sign up!</p>
             <Button onClick={() => { navigate('/signup'); }}>Sign up</Button>
             <Button onClick={() => { navigate('/'); }}>Cancel</Button>
+            <button type="button" onClick={onOpenReset}>Forgot your password?</button>
             <button type="button" onClick={onOpenVerify}>Still need to verify your email?</button>
           </Box>
         </Box>

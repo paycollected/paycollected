@@ -29,7 +29,6 @@ export default async function resetPasswordResolver(usernameOrEmailInput) {
   const token = jwt.sign({
     exp: Math.floor(Date.now() / 1000) + (60 * 15), username,
   }, process.env.RESET_PWD_SECRET_KEY);
-
   try {
     await sgMail.send(generateConfigPwdReset(name, firstName, email, token));
     return true;
