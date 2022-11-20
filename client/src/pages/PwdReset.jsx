@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMutation } from '@apollo/client';
 import { useForm } from 'react-hook-form';
@@ -35,9 +35,15 @@ export default function PwdReset({ setUser }) {
     reset({ variables: { token, newPassword: password1 } });
   };
 
+  useEffect(() => {
+    if (!token) {
+      navigate('/404');
+    }
+  }, []);
+
   return (
     <div>
-      {errorMessage && (<div>{errorMsg}</div>)}
+      {errorMsg && (<div>{errorMsg}</div>)}
       <form onSubmit={handleSubmit(onSubmit)}>
         <FormControl isRequired isInvalid={errors.password1}>
           <FormLabel>New Password</FormLabel>
