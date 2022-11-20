@@ -8,6 +8,7 @@ import {
 import createAccount from './users/createAccount';
 import loginResolver from './users/login';
 import resetPasswordResolver from './users/resetPassword';
+import resetPwdFromTokenResolver from './users/resetPwdFromToken';
 import resendVerificationEmailResolver from './users/resendVerificationEmail';
 import changeEmailResolver from './users/changeEmail';
 import changeUsernameResolver from './users/changeUsername';
@@ -75,6 +76,10 @@ export default {
     login: (_, { usernameOrEmail, password }) => (loginResolver(usernameOrEmail, password)),
 
     resetPassword: (_, { usernameOrEmail }) => (resetPasswordResolver(usernameOrEmail)),
+
+    resetPasswordFromToken: (_, { token, newPassword }) => (
+      resetPwdFromTokenResolver(token, newPassword, saltRounds)
+    ),
 
     resendVerificationEmail: (_, { email }) => (resendVerificationEmailResolver(email)),
 

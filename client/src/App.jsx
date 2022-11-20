@@ -11,8 +11,9 @@ import Cards from './components/Cards.jsx';
 import Checkout from './components/Checkout.jsx';
 import ViewPlans from './components/ViewPlans.jsx';
 import MagicLink from './components/MagicLink.jsx';
-import FourOhFour from './components/404.jsx';
+import FourOhFour from './pages/404.jsx';
 import NavBar from './components/NavBar.jsx';
+import PwdReset from './pages/PwdReset.jsx';
 
 // check that token is still valid before displaying logged-in state
 let token = localStorage.getItem('token');
@@ -96,6 +97,7 @@ function App() {
             : <Navigate to="/" />}
         />
         <Route path="/plan/all" element={user ? <ViewPlans user={user} /> : <Navigate to="/" />} />
+        <Route path="/password-reset" element={<PwdReset setUser={setUser} />} />
         <Route path="/404" element={<FourOhFour />} />
         <Route path="*" element={<FourOhFour />} />
       </Routes>

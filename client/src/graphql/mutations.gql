@@ -105,3 +105,11 @@ mutation ResendVerificationEmail($email: Email!) {
 mutation ResetPassword($usernameOrEmail: String!) {
   resetPassword(usernameOrEmail: $usernameOrEmail)
 }
+
+
+mutation ResetPasswordFromToken($token: String!, $newPassword: String!) {
+  resetPasswordFromToken(token: $token, newPassword: $newPassword) {
+    username
+    token
+  }
+}

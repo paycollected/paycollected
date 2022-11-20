@@ -57,16 +57,16 @@ export default function Signup({ setUser }) {
   });
 
   const onSubmit = ({
-    firstName, lastName, username, password, password2, email,
+    firstName, lastName, username, password, password2, email: inputEmail,
   }) => {
     if (password !== password2) {
       setErrorMessage('Passwords must match');
     } else {
       setErrorMessage('');
-      setEmail(email);
+      setEmail(inputEmail);
       signup({
         variables: {
-          firstName, lastName, username, password, email,
+          firstName, lastName, username, password, email: inputEmail,
         },
       });
     }

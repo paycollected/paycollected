@@ -26,7 +26,7 @@ export default function ForgotPwd({ isOpen, onClose }) {
         <ModalBody>
           {!resetEmailSent && (
             <form onSubmit={handleSubmit(onSubmit)}>
-              <FormControl>
+              <FormControl isRequired>
                 <FormLabel>Username or Email</FormLabel>
                 <Input
                   {...register('usernameOrEmail', { required: 'Missing username/email'})}
@@ -36,10 +36,22 @@ export default function ForgotPwd({ isOpen, onClose }) {
               <Button type="submit">Submit</Button>
             </form>
           )}
-
+          {resetEmailSent && (
+            <div>
+              {`We've sent instructions on how to reset your password to the email address on file.
+              Please check your inbox including your spam folder.
+              `}
+            </div>)}
         </ModalBody>
         <ModalFooter>
-          <Button onClick={onClose}>Back</Button>
+          <Button
+            onClick={() => {
+              setResetEmailSent(false);
+              onClose();
+            }}
+          >
+            Back
+          </Button>
         </ModalFooter>
       </ModalContent>
     </Modal>

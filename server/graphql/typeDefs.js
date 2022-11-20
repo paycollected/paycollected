@@ -98,22 +98,15 @@ export default `#graphql
 
     resetPassword(usernameOrEmail: String!): Boolean!
 
+    resetPasswordFromToken(token: String!, newPassword: String!): LoginInfo!
+
     resendVerificationEmail(email: Email!): Boolean!
 
-    changeEmail(
-      newEmail: Email!
-      password: String!
-    ): Boolean!
+    changeEmail(newEmail: Email!, password: String!): Boolean!
 
-    changeUsername(
-      newUsername: String!
-      password: String!
-    ): LoginInfo!
+    changeUsername(newUsername: String!, password: String!): LoginInfo!
 
-    changePassword(
-      currentPassword: String!
-      newPassword: String!
-    ): Boolean!
+    changePassword(currentPassword: String!, newPassword: String!): Boolean!
 
     createPlan(
       planName: String!
@@ -126,9 +119,7 @@ export default `#graphql
 
     editPayment: PortalSession!
 
-    unsubscribe(
-      subscriptionId: SubscriptionID!
-    ): PlanIdResponse!
+    unsubscribe(subscriptionId: SubscriptionID!): PlanIdResponse!
 
     unsubscribeAsOwner(
       subscriptionId: SubscriptionID!
@@ -136,18 +127,11 @@ export default `#graphql
       # newOwner: Username!
     ): PlanIdResponse!
 
-    editQuantity(
-      subscriptionId: SubscriptionID!
-      newQuantity: Int!
-    ): EditQuantResponse!
+    editQuantity(subscriptionId: SubscriptionID!, newQuantity: Int!): EditQuantResponse!
 
-    deletePlan(
-      planId: PlanID!
-    ): PlanIdResponse!
+    deletePlan(planId: PlanID!): PlanIdResponse!
 
-    cancelTransaction(
-      setupIntentId: SetupIntentID!
-    ): Boolean!
+    cancelTransaction(setupIntentId: SetupIntentID!): Boolean!
 
     subscribeWithSavedCard(
       paymentMethodId: PaymentMethodID!
@@ -156,9 +140,6 @@ export default `#graphql
       planId: PlanID!
     ): Plan!
 
-    joinPlan(
-      planId: PlanID!
-      quantity: Int!
-    ): PaymentIntentAndPaymentMethods! # returning client secret
+    joinPlan(planId: PlanID!, quantity: Int!): PaymentIntentAndPaymentMethods! # returning client secret
   }
 `;

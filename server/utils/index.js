@@ -72,7 +72,7 @@ export function generateConfigPwdReset(name, firstName, email, token) {
       <h3>Hi ${firstName}!</h3>
       <div>We've received your request to reset your password.</div>
       <div>To reset your password, please click
-        <a href="${process.env.HOST}/password-reset/${token}">here</a>.
+        <a href="${process.env.HOST}/password-reset/?token=${token}">here</a>.
       </div>
       <div>If you didn't initiate this request, please log in and change your password immediately to secure your account.</div>
       <div>Thank you for being a valued customer of PayCollected.</div>

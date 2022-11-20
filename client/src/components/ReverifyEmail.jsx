@@ -43,7 +43,7 @@ export default function ReverifyEmail({ isOpen, onClose }) {
         <ModalBody>
           {!verificationEmailSent && !verificationError && (
             <form onSubmit={handleSubmit(onSubmit)}>
-              <FormControl>
+              <FormControl isRequired>
                 <FormLabel>Email</FormLabel>
                 <Input
                   {...register('reverifyEmail', { required: 'Missing email'})}

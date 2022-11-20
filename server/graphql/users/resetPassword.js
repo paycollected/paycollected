@@ -20,14 +20,15 @@ export default async function resetPasswordResolver(usernameOrEmailInput) {
     throw new GraphQLError('This account does not exist', { extensions: { code: 'BAD_USER_INPUT' } });
   }
   const {
-    verified, email, firstName, name, username
+    verified, email, firstName, name, username, stripeCusId,
   } = rows[0];
   if (!verified) {
     throw new GraphQLError('The email associated with this account has not been verified yet.', { extensions: { code: 'BAD_USER_INPUT' } });
   }
 
   const token = jwt.sign({
-    exp: Math.floor(Date.now() / 1000) + (60 * 15), username,
+    exp: Math.floor(Date.now() / 1000) + (60 * 15),
+    user: { username, stripeCusId },
   }, process.env.RESET_PWD_SECRET_KEY);
   try {
     await sgMail.send(generateConfigPwdReset(name, firstName, email, token));
