@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMutation } from '@apollo/client';
 import { useForm } from 'react-hook-form';
@@ -15,13 +15,19 @@ if (queryStr.length > 0) {
 }
 
 export default function PwdReset({ setUser }) {
+  const [errorMsg, setErrorMsg] = useState('');
   const navigate = useNavigate();
-  const { register, handleSubmit, getValues, formState: { errors } } = useForm({ reValidateMode: 'onBlur' });
+  const {
+    register, handleSubmit, getValues, formState: { errors }
+  } = useForm({ reValidateMode: 'onBlur' });
   const [reset, { loading }] = useMutation(RESET_FROM_TOKEN, {
     onCompleted: ({ resetPasswordFromToken: { username, token: logInToken } }) => {
       setUser(username);
       localStorage.setItem('token', logInToken);
       navigate('/dashboard');
+    },
+    onError: ({ message }) => {
+      setErrorMsg(message);
     }
   });
 
@@ -31,6 +37,7 @@ export default function PwdReset({ setUser }) {
 
   return (
     <div>
+      {errorMessage && (<div>{errorMsg}</div>)}
       <form onSubmit={handleSubmit(onSubmit)}>
         <FormControl isRequired isInvalid={errors.password1}>
           <FormLabel>New Password</FormLabel>
@@ -51,7 +58,6 @@ export default function PwdReset({ setUser }) {
             })}
             type="password"
           />
-          {console.log(errors.password2)}
           {errors.password2 && (
             <FormErrorMessage>{errors.password2.message}</FormErrorMessage>
           )}
