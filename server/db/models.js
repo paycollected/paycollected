@@ -777,3 +777,20 @@ export function archivePlan(planId) {
   `;
   return pool.query(query, [planId]);
 }
+
+
+export function addInvoice(invoiceId, customerId, productId, quantity, chargeDate, total) {
+  const query = `
+    INSERT INTO invoices (
+      invoice_id, username, plan_id, quantity, charge_date, paid_amount
+    ) VALUES (
+      $1,
+      (SELECT username FROM users WHERE s_cus_id = $2),
+      $3,
+      $4,
+      TO_TIMESTAMP($5),
+      $6
+    ) ON CONFLICT (username, plan_id, charge_date) DO NOTHING
+  `;
+  return pool.query(query, [invoiceId, customerId, productId, quantity, chargeDate, total]);
+}

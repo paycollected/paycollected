@@ -17,7 +17,7 @@ accountRouter.get('/verify/:token', async (req, res) => {
     let stripeCusId;
     if (sCusId === null) {
       ({ id: stripeCusId } = await stripe.customers.create(
-        { name, email, metadata: { username } }
+        { name, email, metadata: { username }, test_clock: 'clock_1M694cAJ5Ik974ueEHJ7ZceX' }
       ));
       await verifyEmailUpdateStripeCustomerId(stripeCusId, username);
     } else {

@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS plans (
 CREATE TABLE IF NOT EXISTS user_plan (
   -- reflective of the NEXT billing cycle
   id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-  username VARCHAR(50) NOT NULL REFERENCES users(username) ON DELETE CASCADE,
+  username VARCHAR(50) NOT NULL REFERENCES users(username) ON UPDATE CASCADE ON DELETE CASCADE,
   plan_id VARCHAR(50) NOT NULL REFERENCES plans(plan_id) ON DELETE CASCADE,
   plan_owner BOOLEAN NOT NULL DEFAULT FALSE,
   quantity INTEGER NOT NULL DEFAULT 0,
@@ -55,13 +55,12 @@ CREATE TABLE IF NOT EXISTS plans_history (
 
 CREATE TABLE IF NOT EXISTS invoices (
   invoice_id VARCHAR(50) PRIMARY KEY, -- invoice ID pulled from stripe
-  username VARCHAR(50) NOT NULL REFERENCES users(username) ON DELETE CASCADE,
+  username VARCHAR(50) NOT NULL REFERENCES users(username) ON UPDATE CASCADE ON DELETE CASCADE,
   plan_id VARCHAR(50) NOT NULL REFERENCES plans(plan_id) ON DELETE CASCADE,
   quantity INTEGER NOT NULL DEFAULT 1,
-  start_date TIMESTAMP WITH TIME ZONE NOT NULL, -- charge date
-  end_date TIMESTAMP WITH TIME ZONE NOT NULL CHECK(end_date > start_date),
+  charge_date TIMESTAMP WITH TIME ZONE NOT NULL, -- charge date
   paid_amount INTEGER NOT NULL CHECK (paid_amount > 0), -- including platform fees, takes into account quantity purchased
-  UNIQUE (username, plan_id, start_date)
+  UNIQUE (username, plan_id, charge_date)
 );
 
 

@@ -35,11 +35,7 @@ export default function PwdReset({ setUser }) {
     reset({ variables: { token, newPassword: password1 } });
   };
 
-  useEffect(() => {
-    if (!token) {
-      navigate('/404');
-    }
-  }, []);
+  useEffect(() => { if (!token) { navigate('/404'); } }, []);
 
   return (
     <div>
