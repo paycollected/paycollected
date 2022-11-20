@@ -29,12 +29,13 @@ export default async function createPlanResolver(
   // check that date input string is between 2022-01-01 until 2099-12-31
   // perhaps move regex check to custom scalar if needs to incorporate date string
   // in other data fields arise in the future
-  const dateStrRegEx = /^20(?:(2([^0-1]))|[3-9][0-9])-((?:(0[13578])|(1[02]))-(?:([0-2][1-9])|(30|31))|(?:(0[469])|(11))-(?:([0-2][1-9])|(30))|02-(?:([0-2][0-9])))$/;
-  // this regex works BUT it's very verbose, specifying almost every single case
-  // --> TODO if have time: rewrite to improve "regex"-ness
-  if (!dateStrRegEx.test(startDate)) {
-    throw new GraphQLError('Invalid start date', { extensions: { code: 'BAD_USER_INPUT' } });
-  }
+  // const dateStrRegEx = /^20(?:(2([^0-1]))|[3-9][0-9])-((?:(0[13578])|(1[02]))-(?:([0-2][1-9])|(30|31))|(?:(0[469])|(11))-(?:([0-2][1-9])|(30))|02-(?:([0-2][0-9])))$/;
+  // // this regex works BUT it's very verbose, specifying almost every single case
+  // // --> TODO if have time: rewrite to improve "regex"-ness
+  // if (!dateStrRegEx.test(startDate)) {
+  //   throw new GraphQLError('Invalid start date', { extensions: { code: 'BAD_USER_INPUT' } });
+  // }
+  // need to recheck date regex 2022-11-20 was failing validation
   // just doing a simple input date validation using server's local time
   let startArr = startDate.split('-');
   startArr = startArr.map((ele) => Number(ele)); // convert str to number
