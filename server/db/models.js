@@ -189,6 +189,9 @@ export function getUserInfoEitherUsernameOrEmail(usernameOrEmail) {
     SELECT
       s_cus_id AS "stripeCusId",
       username,
+      email,
+      first_name AS "firstName",
+      first_name || ' ' || last_name AS name,
       password AS "savedPass",
       verified
     FROM users

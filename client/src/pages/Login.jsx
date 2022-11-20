@@ -5,29 +5,21 @@ import { useForm } from 'react-hook-form';
 import {
   Button, Input, InputGroup, InputRightElement,
   FormControl, FormLabel, FormErrorMessage,
-  Box, Heading, Flex, useDisclosure, Modal, ModalOverlay,
-  ModalContent, ModalHeader, ModalBody, ModalFooter
+  Box, Heading, Flex, useDisclosure,
 } from '@chakra-ui/react';
 import { ViewIcon, ViewOffIcon } from '@chakra-ui/icons';
-import { LogIn as LOG_IN, ResendVerificationEmail as REVERIFY } from '../graphql/mutations.gql';
+import { LogIn as LOG_IN } from '../graphql/mutations.gql';
+import ReverifyEmail from '../components/ReverifyEmail.jsx';
 
 export default function Login({ setUser, planToJoin }) {
   const navigate = useNavigate();
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const { isOpen: isOpenVerify, onOpen: onOpenVerify, onClose: onCloseVerify } = useDisclosure();
   const { register, handleSubmit, formState: { errors } } = useForm();
-  const {
-    register: registerReverify,
-    handleSubmit: handleSubmitReverify,
-    formState: { errors: reverifyErrors }
-  } = useForm();
   // if login info is valid
   const [showPassword, setShowPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
-  const [verificationEmailSent, setVerificationEmailSent] = useState(false);
-  const [email, setEmail] = useState('');
-  const [verificationError, setVerificationError] = useState('');
 
-  const [logUserIn, { loading: signInLoading }] = useMutation(LOG_IN, {
+  const [logUserIn, { loading }] = useMutation(LOG_IN, {
     onCompleted: ({ login }) => {
       // login = token returned; null if passwords do not match
       if (login) {
@@ -55,7 +47,7 @@ export default function Login({ setUser, planToJoin }) {
         case 'Unable to log in':
           setErrorMessage('Please try logging in later');
           break;
-        case 'Account exists but email still needs verification':
+        case 'The email associated with this account has not been verified yet.':
           setErrorMessage(message);
           break;
         default:
@@ -66,25 +58,8 @@ export default function Login({ setUser, planToJoin }) {
     },
   });
 
-  const [reverify, { loading }] = useMutation(REVERIFY, {
-    onCompleted: () => {
-      setVerificationEmailSent(true);
-    },
-    onError: ({ message }) => {
-      switch (message) {
-        case 'No account associated with this email was found.':
-          setVerificationError(message);
-          break;
-        case 'This email has already been verified.':
-          setVerificationError(message);
-          break;
-        default:
-          console.log(message);
-      }
-    },
-  });
 
-  const onSubmitLogIn = ({ usernameOrEmail, password }) => {
+  const onSubmit = ({ usernameOrEmail, password }) => {
     logUserIn({
       variables: {
         usernameOrEmail,
@@ -93,48 +68,12 @@ export default function Login({ setUser, planToJoin }) {
     });
   };
 
-  const onSubmitReverify = ({ reverifyEmail }) => {
-    setEmail(reverifyEmail);
-    reverify({ variables: { email: reverifyEmail } });
-  };
-
   return (
     <div>
-      <Modal isOpen={isOpen} onClose={onClose}>
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Resend Your Verification Email</ModalHeader>
-          <ModalBody>
-            {!verificationEmailSent && !verificationError && (
-              <form onSubmit={handleSubmitReverify(onSubmitReverify)}>
-                <FormControl>
-                  <FormLabel>Email</FormLabel>
-                  <Input
-                    {...registerReverify('reverifyEmail', { required: 'Missing email'})}
-                    type="email"
-                  />
-                </FormControl>
-                <Button type="submit">Submit</Button>
-              </form>
-            )}
-            {verificationEmailSent && (
-              <div>{`We've sent a verification email to ${email}. Please check your inbox for instructions.`}</div>
-            )}
-            {verificationError && (<div>{verificationError}</div>)}
-          </ModalBody>
-          <ModalFooter>
-            <Button
-              onClick={() => {
-                setVerificationEmailSent(false);
-                setVerificationError('');
-                onClose();
-              }}
-            >
-              Back
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+      <ReverifyEmail
+        isOpen={isOpenVerify}
+        onClose={onCloseVerify}
+      />
       <Flex width="full" align="center" justifyContent="center">
         <Box p={2} my={8} width="40%" bg="white" borderRadius="15">
           <Box textAlign="center">
@@ -143,7 +82,7 @@ export default function Login({ setUser, planToJoin }) {
           <Box my={4} textAlign="left">
             <form
               autoComplete="off"
-              onSubmit={handleSubmit(onSubmitLogIn)}
+              onSubmit={handleSubmit(onSubmit)}
             >
               <FormControl
                 isRequired
@@ -200,12 +139,12 @@ export default function Login({ setUser, planToJoin }) {
                   <div>&nbsp;</div>
                 )}
               </FormControl>
-              <Button type="submit" isLoading={signInLoading} disabled={signInLoading}>Sign in</Button>
+              <Button type="submit" isLoading={loading} disabled={loading}>Sign in</Button>
             </form>
             <p>Don&apos;t have an account? Sign up!</p>
             <Button onClick={() => { navigate('/signup'); }}>Sign up</Button>
             <Button onClick={() => { navigate('/'); }}>Cancel</Button>
-            <button type="button" onClick={onOpen}>Still need to verify your email?</button>
+            <button type="button" onClick={onOpenVerify}>Still need to verify your email?</button>
           </Box>
         </Box>
       </Flex>

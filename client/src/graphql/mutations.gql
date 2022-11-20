@@ -101,3 +101,7 @@ mutation SubscribeWithSavedCard($paymentMethodId: PaymentMethodID!, $setupIntent
 mutation ResendVerificationEmail($email: Email!) {
   resendVerificationEmail(email: $email)
 }
+
+mutation ResetPassword($usernameOrEmail: String!) {
+  resetPassword(usernameOrEmail: $usernameOrEmail)
+}

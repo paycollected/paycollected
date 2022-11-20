@@ -24,12 +24,21 @@ export function cancelSubs(member) {
 }
 
 export function generateConfigEmailVerification(name, firstName, email, token, type = 'firstTime') {
-  const greeting = type === 'returning'
-    ? "We've received your request to change email address."
-    : 'Thanks for signing up with PayCollected!';
-  const subject = type === 'returning'
-    ? 'Email address change'
-    : 'Welcome to PayCollected!';
+  let greeting;
+  let subject;
+  let ending;
+  switch (type) {
+    case 'returning':
+      greeting = "We've received your request to change email address.";
+      subject = 'Email address change';
+      ending = 'Thank you for being a valued customer of PayCollected.';
+      break;
+    default:
+      greeting = 'Thank you for signing up with PayCollected!';
+      subject = 'Welcome to PayCollected!';
+      ending = 'We look forward to serving you!';
+      break;
+  }
 
   return {
     from: {
@@ -45,7 +54,28 @@ export function generateConfigEmailVerification(name, firstName, email, token, t
       <div>To verify this email account, please click
         <a href="${process.env.HOST}/verify/${token}">here</a>.
       </div>
-      <div>We look forward to serving you!</div>
-    </div>`
+      <div>${ending}</div>
+    </div>`,
+  };
+}
+
+export function generateConfigPwdReset(name, firstName, email, token) {
+  return {
+    from: {
+      name: 'PayCollected',
+      email: 'admin@paycollected.com',
+    },
+    to: { name, email },
+    subject: 'PayCollected Password Reset',
+    html: `
+    <div>
+      <h3>Hi ${firstName}!</h3>
+      <div>We've received your request to reset your password.</div>
+      <div>To reset your password, please click
+        <a href="${process.env.HOST}/password-reset/${token}">here</a>.
+      </div>
+      <div>If you didn't initiate this request, please log in and change your password immediately to secure your account.</div>
+      <div>Thank you for being a valued customer of PayCollected.</div>
+    </div>`,
   };
 }

@@ -7,6 +7,7 @@ import {
 } from './customScalarTypes';
 import createAccount from './users/createAccount';
 import loginResolver from './users/login';
+import resetPasswordResolver from './users/resetPassword';
 import resendVerificationEmailResolver from './users/resendVerificationEmail';
 import changeEmailResolver from './users/changeEmail';
 import changeUsernameResolver from './users/changeUsername';
@@ -72,6 +73,8 @@ export default {
     ),
 
     login: (_, { usernameOrEmail, password }) => (loginResolver(usernameOrEmail, password)),
+
+    resetPassword: (_, { usernameOrEmail }) => (resetPasswordResolver(usernameOrEmail)),
 
     resendVerificationEmail: (_, { email }) => (resendVerificationEmailResolver(email)),
 

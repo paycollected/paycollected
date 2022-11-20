@@ -96,9 +96,9 @@ export default `#graphql
       password: String!
     ): LoginInfo
 
-    resendVerificationEmail(
-      email: Email!
-    ): Boolean!
+    resetPassword(usernameOrEmail: String!): Boolean!
+
+    resendVerificationEmail(email: Email!): Boolean!
 
     changeEmail(
       newEmail: Email!

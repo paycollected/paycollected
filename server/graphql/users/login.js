@@ -19,7 +19,7 @@ export default async function loginResolver(usernameOrEmailInput, password) {
     } = rows[0];
     // if unverified account, do not allow to log in
     if (!verified) {
-      errMsg = 'Account exists but email still needs verification';
+      errMsg = 'The email associated with this account has not been verified yet.';
       throw new Error();
     }
     // if username exists but password doesn't match, return null
