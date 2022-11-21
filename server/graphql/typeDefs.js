@@ -1,4 +1,3 @@
-
 export default `#graphql
   scalar PlanID
   scalar SubscriptionID

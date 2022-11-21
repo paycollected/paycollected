@@ -18,11 +18,6 @@ export function updateStripePrice(member, price) {
   );
 }
 
-export function cancelSubs(member) {
-  const { subscriptionId } = member;
-  return stripe.subscriptions.del(subscriptionId);
-}
-
 export function generateConfigEmailVerification(name, firstName, email, token, type, testClockId) {
   let greeting;
   let subject;
