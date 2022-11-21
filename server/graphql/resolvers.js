@@ -3,10 +3,16 @@ import { GraphQLError } from 'graphql';
 import authResolverWrapper from './authResolverWrapper';
 import {
   planIdScalar, subscriptionIdScalar, emailScalar, usernameScalar, paymentMethodIdScalar,
-  setupIntentIdScalar
+  setupIntentIdScalar, testClockScalar,
 } from './customScalarTypes';
 import createAccount from './users/createAccount';
 import loginResolver from './users/login';
+import resetPasswordResolver from './users/resetPassword';
+import resetPwdFromTokenResolver from './users/resetPwdFromToken';
+import resendVerificationEmailResolver from './users/resendVerificationEmail';
+import changeEmailResolver from './users/changeEmail';
+import changeUsernameResolver from './users/changeUsername';
+import changePasswordResolver from './users/changePassword';
 import joinPlanResolver from './plans/join';
 import unsubscribeResolver from './subscriptions/unsubscribe.js';
 import unsubscribeAsOwnerResolver from './subscriptions/unsubscribeAsOwner';
@@ -29,6 +35,7 @@ const recurringInterval = {
   yearly: 'year'
 };
 
+const saltRounds = 10;
 
 export default {
   Username: usernameScalar,
@@ -42,6 +49,8 @@ export default {
   SetupIntentID: setupIntentIdScalar,
 
   PaymentMethodID: paymentMethodIdScalar,
+
+  TestClockID: testClockScalar,
 
   Query: {
     viewOnePlan: authResolverWrapper((_, { planId }, { user: { username } }) => (
@@ -61,12 +70,36 @@ export default {
 
   Mutation: {
     createUser: (_, {
-      firstName, lastName, username, password, email
+      firstName, lastName, username, password, email, testClockId,
     }) => (
-      createAccount(firstName, lastName, username, password, email)
+      createAccount(firstName, lastName, username, password, email, saltRounds, testClockId)
     ),
 
-    login: (_, { username, password }) => (loginResolver(username, password)),
+    login: (_, { usernameOrEmail, password }) => (loginResolver(usernameOrEmail, password)),
+
+    resetPassword: (_, { usernameOrEmail }) => (resetPasswordResolver(usernameOrEmail)),
+
+    resetPasswordFromToken: (_, { token, newPassword }) => (
+      resetPwdFromTokenResolver(token, newPassword, saltRounds)
+    ),
+
+    resendVerificationEmail: (_, { email, testClockId }) => (
+      resendVerificationEmailResolver(email, testClockId)
+    ),
+
+    changeEmail: authResolverWrapper((_, { newEmail, password }, { user: { username } }) => (
+      changeEmailResolver(username, password, newEmail)
+    )),
+
+    changeUsername: authResolverWrapper((_, { newUsername, password }, { user: { username } }) => (
+      changeUsernameResolver(username, password, newUsername)
+    )),
+
+    changePassword: authResolverWrapper(
+      (_, { newPassword, currentPassword }, { user: { username } }) => (
+        changePasswordResolver(username, currentPassword, newPassword, saltRounds)
+      )
+    ),
 
     createPlan: authResolverWrapper((_, {
       planName, cycleFrequency, perCycleCost, startDate, timeZone
@@ -87,16 +120,15 @@ export default {
     )),
 
     editPayment: authResolverWrapper(async (_, __, { user }) => {
-      const { username, stripeCusId: customer } = user;
+      const { stripeCusId } = user;
       try {
         const { url } = await stripe.billingPortal.sessions.create({
-          customer,
+          stripeCusId,
           return_url: `${process.env.HOST}/dashboard/`,
         });
         return { portalSessionURL: url };
       } catch (asyncError) {
         console.log(asyncError);
-        // throw new ApolloError('Unable to get customer portal link');
         throw new GraphQLError('Unable to get customer portal link', {
           extensions: { code: 'INTERNAL_SERVER_ERROR' }
         });

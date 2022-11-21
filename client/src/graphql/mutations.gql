@@ -3,8 +3,8 @@ mutation CreateUser ($firstName: String!, $lastName: String!, $username: String!
 }
 
 
-mutation LogIn ($username: String!, $password: String!) {
-  login(username: $username, password: $password) {
+mutation LogIn ($usernameOrEmail: String!, $password: String!) {
+  login(usernameOrEmail: $usernameOrEmail, password: $password) {
     username
     token
   }
@@ -95,4 +95,39 @@ mutation SubscribeWithSavedCard($paymentMethodId: PaymentMethodID!, $setupIntent
     quantity
     subscriptionId
   }
+}
+
+
+mutation ResendVerificationEmail($email: Email!) {
+  resendVerificationEmail(email: $email)
+}
+
+mutation ResetPassword($usernameOrEmail: String!) {
+  resetPassword(usernameOrEmail: $usernameOrEmail)
+}
+
+
+mutation ResetPasswordFromToken($token: String!, $newPassword: String!) {
+  resetPasswordFromToken(token: $token, newPassword: $newPassword) {
+    username
+    token
+  }
+}
+
+
+mutation ChangeEmail($newEmail: Email!, $password: String!) {
+  changeEmail(newEmail: $newEmail, password: $password)
+}
+
+
+mutation ChangeUsername($newUsername: String!, $password: String!) {
+  changeUsername(newUsername: $newUsername, password: $password) {
+    username
+    token
+  }
+}
+
+
+mutation ChangePassword($currentPassword: String!, $newPassword: String!) {
+  changePassword(currentPassword: $currentPassword, newPassword: $newPassword)
 }

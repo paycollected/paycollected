@@ -5,15 +5,17 @@ import { useForm } from 'react-hook-form';
 import {
   Flex, Box, Heading, Button, Input, FormControl, FormLabel, FormErrorMessage
 } from '@chakra-ui/react';
-import { CreateUser as SIGN_UP } from '../graphql/mutations.gql';
+import { CreateUser as SIGN_UP, ResendVerificationEmail as REVERIFY } from '../graphql/mutations.gql';
 
 export default function Signup({ setUser }) {
   const navigate = useNavigate();
   const { register, handleSubmit, formState: { errors } } = useForm();
   const [errorMessage, setErrorMessage] = useState('');
+  const [email, setEmail] = useState('');
   const [emailSent, setEmailSent] = useState(false);
+  const [emailResent, setEmailResent] = useState(false);
 
-  const [signup, { data, loading, error }] = useMutation(SIGN_UP, {
+  const [signup, { loading }] = useMutation(SIGN_UP, {
     onCompleted: () => { setEmailSent(true); },
     onError: ({ message }) => {
       localStorage.clear();
@@ -36,27 +38,64 @@ export default function Signup({ setUser }) {
     },
   });
 
+  const [reverify, { loading: reverifyLoading }] = useMutation(REVERIFY, {
+    onCompleted: () => {
+      setEmailResent(true);
+    },
+    onError: ({ message }) => {
+      switch (message) {
+        case 'No account associated with this email was found.':
+          setVerificationError(message);
+          break;
+        case 'This email has already been verified.':
+          setVerificationError(message);
+          break;
+        default:
+          console.log(message);
+      }
+    },
+  });
+
   const onSubmit = ({
-    firstName, lastName, username, password, password2, email,
+    firstName, lastName, username, password, password2, email: inputEmail,
   }) => {
     if (password !== password2) {
       setErrorMessage('Passwords must match');
     } else {
       setErrorMessage('');
+      setEmail(inputEmail);
       signup({
         variables: {
-          firstName, lastName, username, password, email,
+          firstName, lastName, username, password, email: inputEmail,
         },
       });
     }
+  };
+
+  const onSubmitReverify = () => {
+    setEmailSent(false);
+    reverify({ variables: { email } });
   };
 
   return (
     <div>
       {emailSent && (
         <div>
-          {`We've sent an email to the provided address.
-          Please check your inbox and follow the instructions to complete the sign up process!`}
+          <div>
+            {`We've sent an email to the provided address.
+            Note that depending on your email settings, it may end up in the spam folder.
+            Please check your inbox and follow the instructions to complete the sign up process!`}
+          </div>
+          <button type="button" onClick={onSubmitReverify}>
+            Still haven&apos;t received the verification email? Resend it!
+          </button>
+        </div>
+      )}
+      {emailResent && (
+        <div>
+          {`We've resent the verification email to ${email}.
+          Please check your inbox again, including the spam folder.
+          If you're still having issues, please contact us at admin@paycollect.com.`}
         </div>
       )}
       <Flex width="full" align="center" justifyContent="center">

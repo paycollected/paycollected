@@ -53,3 +53,8 @@ export const setupIntentIdScalar = generateCustomScalar(
   'SetupIntentID',
   generateRegExValidationFn(/^seti_(?:[a-zA-Z0-9]{24})$/)
 );
+
+export const testClockScalar = generateCustomScalar(
+  'TestClockID',
+  generateRegExValidationFn(/^clock_(?:[a-zA-Z0-9]{24})$/)
+);
