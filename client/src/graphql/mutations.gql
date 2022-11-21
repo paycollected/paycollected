@@ -113,3 +113,21 @@ mutation ResetPasswordFromToken($token: String!, $newPassword: String!) {
     token
   }
 }
+
+
+mutation ChangeEmail($newEmail: Email!, $password: String!) {
+  changeEmail(newEmail: $newEmail, password: $password)
+}
+
+
+mutation ChangeUsername($newUsername: String!, $password: String!) {
+  changeUsername(newUsername: $newUsername, password: $password) {
+    username
+    token
+  }
+}
+
+
+mutation ChangePassword($currentPassword: String!, $newPassword: String!) {
+  changePassword(currentPassword: $currentPassword, newPassword: $newPassword)
+}

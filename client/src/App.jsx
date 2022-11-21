@@ -98,7 +98,7 @@ function App() {
             : <Navigate to="/" />}
         />
         <Route path="/plan/all" element={user ? <ViewPlans user={user} /> : <Navigate to="/" />} />
-        <Route path="manage-account" element={user ? <ManageAccount user={user} /> : <Navigate to="/" />} />
+        <Route path="manage-account" element={user ? <ManageAccount user={user} setUser={setUser} /> : <Navigate to="/" />} />
         <Route path="/password-reset" element={<PwdReset setUser={setUser} />} />
         <Route path="/404" element={<FourOhFour />} />
         <Route path="*" element={<FourOhFour />} />
