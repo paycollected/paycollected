@@ -128,7 +128,6 @@ export function membersOnOnePlan(planId, username) {
   return pool.query(query, [planId, username]);
 }
 
-// INCORRECT!
 export function viewAllPlans(username) {
   const query = `
     WITH select1 AS
@@ -435,6 +434,25 @@ export function startSubsPriceUpdateReturningPlan(
       SET price_id = $6
       WHERE plan_id = $4
   ),
+  update_notifications AS (
+    INSERT INTO notifications (username, message)
+      SELECT
+        username,
+        (
+          (SELECT first_name FROM users WHERE username = $5)
+          || ' has joined plan '
+          || (SELECT plan_name FROM plans WHERE plan_id = $4)
+          || '. The new unit cost for this plan is $'
+          || (SELECT
+                ROUND (CEIL ((SELECT per_cycle_cost::NUMERIC FROM plans WHERE plan_id = $4) /
+                (SELECT SUM(quantity)::INTEGER + $1 FROM user_plan WHERE plan_id = $4 AND username != $5)) / 100, 2)
+              )
+          || '/'
+          || (SELECT cycle_frequency FROM plans WHERE plan_id = $4)
+          || ', taking effect on the next charge date.'
+        )
+      FROM user_plan WHERE plan_id = $4 AND username != $5 AND active = True
+  ),
   select_owner AS (
     SELECT
         JSON_BUILD_OBJECT(
@@ -576,7 +594,8 @@ export function updatePriceOwnerArchiveSubs(newPriceId, productId, formerOwner, 
         quantity = 0,
         active = False,
         subscription_id = NULL,
-        subscription_item_id = NULL
+        subscription_item_id = NULL,
+        plan_owner = False
       WHERE plan_id = $2 AND username = $3
     ), update_new_owner_notification AS (
         INSERT INTO notifications (username, message)

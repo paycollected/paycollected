@@ -44,7 +44,7 @@ export default `#graphql
 
   type PlanIdResponse {
     planId: PlanID!
-    status: Status!
+    status: UpdateStatus!
   }
 
   type PortalSession {
@@ -69,7 +69,7 @@ export default `#graphql
     PACIFIC
   }
 
-  enum Status {
+  enum UpdateStatus {
     DELETED
     ARCHIVED
   }
