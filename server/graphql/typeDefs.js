@@ -72,6 +72,7 @@ export default `#graphql
   enum UpdateStatus {
     DELETED
     ARCHIVED
+    CREATED
   }
 
   type Plan {

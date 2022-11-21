@@ -89,7 +89,7 @@ export default async function createPlanResolver(
       priceId
     );
 
-    return { planId };
+    return { planId, status: 'CREATED' };
   } catch (asyncError) {
     console.log(asyncError);
     throw new GraphQLError('Unable to create new plan', { extensions: { code: 'INTERNAL_SERVER_ERROR' } });

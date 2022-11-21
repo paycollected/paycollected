@@ -505,6 +505,28 @@ export function startSubscription(
         quantity = $1, subscription_id = $2, subscription_item_id = $3
       WHERE user_plan.username = (SELECT username FROM users WHERE s_cus_id = $5)
         AND user_plan.plan_id = $4
+    ),
+    update_notifications AS (
+      INSERT INTO notifications (username, message)
+        SELECT
+          username,
+          (
+            (SELECT first_name FROM users WHERE username = (SELECT username FROM users WHERE s_cus_id = $5))
+            || ' has joined plan '
+            || (SELECT plan_name FROM plans WHERE plan_id = $4)
+            || '. The new unit cost for this plan is $'
+            || (SELECT
+                  ROUND (CEIL ((SELECT per_cycle_cost::NUMERIC FROM plans WHERE plan_id = $4) /
+                  (SELECT SUM(quantity)::INTEGER + $1 FROM user_plan WHERE plan_id = $4 AND username != (SELECT username FROM users WHERE s_cus_id = $5))) / 100, 2)
+                )
+            || '/'
+            || (SELECT cycle_frequency FROM plans WHERE plan_id = $4)
+            || ', taking effect on the next charge date.'
+          )
+        FROM user_plan
+        WHERE plan_id = $4
+          AND username != (SELECT username FROM users WHERE s_cus_id = $5)
+          AND active = True
     )
     UPDATE plans
     SET price_id = $6
