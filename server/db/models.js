@@ -497,31 +497,67 @@ export function startSubscription(
 }
 
 
-export function updatePriceIdDelSubs(newPriceId, productId, subscriptionId) {
+export function updatePriceIdDelSubs(newPriceId, productId, username) {
   const query = `
     WITH update_price_id AS (
       UPDATE plans SET price_id = $1 WHERE plan_id = $2
+    ), del AS (
+      DELETE FROM user_plan WHERE plan_id = $2 AND username = $3
     )
-    DELETE FROM user_plan WHERE subscription_id = $3
+      INSERT INTO notifications (username, message)
+      SELECT
+        username,
+        (
+          (SELECT first_name FROM users WHERE username = $3)
+          || ' has dropped out of plan '
+          || (SELECT plan_name FROM plans WHERE plan_id = $2)
+          || '. The new unit cost for this plan is $'
+          || (SELECT
+                (SELECT per_cycle_cost FROM plans WHERE plan_id = $2) /
+                (SELECT SUM(quantity)::INTEGER FROM user_plan WHERE plan_id = $2 AND username != $3) / 100
+              )
+          || '/'
+          || (SELECT cycle_frequency FROM plans WHERE plan_id = $2)
+          || ', taking effect on the next charge date.'
+        )
+      FROM user_plan WHERE plan_id = $2 AND username != $3
   `;
-  return pool.query(query, [newPriceId, productId, subscriptionId]);
+  return pool.query(query, [newPriceId, productId, username]);
 }
 
 
-export function updatePriceIdArchiveSubs(newPriceId, productId, subscriptionId) {
+export function updatePriceIdArchiveSubs(newPriceId, productId, username) {
   const query = `
     WITH update_price_id AS (
       UPDATE plans SET price_id = $1 WHERE plan_id = $2
+    ), update_subs AS (
+      UPDATE user_plan
+      SET
+        quantity = 0,
+        active = FALSE,
+        subscription_id = NULL,
+        subscription_item_id = NULL
+      WHERE plan_id = $2 AND username = $3
     )
-    UPDATE user_plan
-    SET
-      quantity = 0,
-      active = FALSE,
-      subscription_id = NULL,
-      subscription_item_id = NULL
-    WHERE subscription_id = $3
+    INSERT INTO notifications (username, message)
+      SELECT
+        username,
+        (
+          (SELECT first_name FROM users WHERE username = $3)
+          || ' has dropped out of plan '
+          || (SELECT plan_name FROM plans WHERE plan_id = $2)
+          || '. The new unit cost for this plan is $'
+          || (SELECT
+                (SELECT per_cycle_cost FROM plans WHERE plan_id = $2) /
+                (SELECT SUM(quantity)::INTEGER FROM user_plan WHERE plan_id = $2 AND username != $3) / 100
+              )
+          || '/'
+          || (SELECT cycle_frequency FROM plans WHERE plan_id = $2)
+          || ', taking effect on the next charge date.'
+        )
+      FROM user_plan WHERE plan_id = $2 AND username != $3
   `;
-  return pool.query(query, [newPriceId, productId, subscriptionId]);
+  return pool.query(query, [newPriceId, productId, username]);
 }
 
 export function updatePriceOwnerArchiveSubs(newPriceId, productId, subscriptionId, newOwner) {
@@ -562,22 +598,47 @@ export function updatePriceOwnerDelSubs(newPriceId, planId, subscriptionId, newO
 }
 
 
-export function deleteSubscription(subscriptionId) {
-  return pool.query('DELETE FROM user_plan WHERE subscription_id = $1', [subscriptionId]);
+export function deleteSubscription(username, planId) {
+  const query = `
+    WITH del AS (DELETE FROM user_plan WHERE username = $1 AND plan_id = $2)
+      INSERT INTO notifications (username, message)
+        SELECT
+          username,
+          (
+            (SELECT first_name FROM users WHERE username = $1)
+            || ' has dropped out of plan '
+            || (SELECT plan_name FROM plans WHERE plan_id = $2)
+            || '. There are no more active members on this plan. You can either invite new members to join it, or delete the plan.'
+          )
+        FROM user_plan WHERE plan_id = $2 AND username != $1
+  `;
+  return pool.query(query, [username, planId]);
 }
 
 
-export function archiveSubs(subscriptionId) {
+export function archiveSubs(username, planId) {
   const query = `
-  UPDATE user_plan
-    SET
-      quantity = 0,
-      active = FALSE,
-      subscription_id = NULL,
-      subscription_item_id = NULL
-    WHERE subscription_id = $1
+    WITH u AS (
+      UPDATE user_plan
+      SET
+        quantity = 0,
+        active = False,
+        subscription_id = NULL,
+        subscription_item_id = NULL
+      WHERE username = $1 AND plan_id = $2
+    )
+    INSERT INTO notifications (username, message)
+      SELECT
+        username,
+        (
+          (SELECT first_name FROM users WHERE username = $1)
+          || ' has dropped out of plan '
+          || (SELECT plan_name FROM plans WHERE plan_id = $2)
+          || '. There are no more active members on this plan. You can still invite new members to join it.'
+        )
+      FROM user_plan WHERE plan_id = $2 AND username != $1
   `;
-  return pool.query(query, [subscriptionId]);
+  return pool.query(query, [username, planId]);
 }
 
 
@@ -730,14 +791,34 @@ export function getProductInfoAndInvoiceCheckNewOwner(username, subscriptionId, 
 }
 
 
-export function updatePriceQuant(planId, subscriptionId, newQuantity, newPriceId) {
+export function updatePriceQuant(planId, newQuantity, newPriceId, username) {
   const query = `
   WITH update_price AS (
-    UPDATE plans SET price_id = $4 WHERE plan_id = $1
+    UPDATE plans SET price_id = $3 WHERE plan_id = $1
+  ), update_quantity AS (
+    UPDATE user_plan SET quantity = $2 WHERE plan_id = $1 AND username = $4
   )
-  UPDATE user_plan SET quantity = $3 WHERE subscription_id = $2
+    INSERT INTO notifications (username, message)
+      SELECT
+        username,
+        (
+          (SELECT first_name FROM users WHERE username = $4)
+          || ' has updated their quantity in plan '
+          || (SELECT plan_name FROM plans WHERE plan_id = $1)
+          || ' to '
+          || (SELECT $2)
+          || '. The new unit cost for this plan is $'
+          || (SELECT
+                (SELECT per_cycle_cost FROM plans WHERE plan_id = $1) /
+                (SELECT SUM(quantity)::INTEGER + $2 FROM user_plan WHERE plan_id = $1 AND username != $4) / 100
+              )
+          || '/'
+          || (SELECT cycle_frequency FROM plans WHERE plan_id = $1)
+          || ', taking effect on the next charge date.'
+        )
+      FROM user_plan WHERE plan_id = $1 AND username != $4
   `;
-  return pool.query(query, [planId, subscriptionId, newQuantity, newPriceId]);
+  return pool.query(query, [planId, newQuantity, newPriceId, username]);
 }
 
 
@@ -755,27 +836,52 @@ export function getPriceFromPlan(planId, username) {
 }
 
 
-export function deletePlan(planId) {
-  return pool.query('DELETE FROM plans WHERE plan_id = $1', [planId]);
+export function deletePlan(planId, username) {
+  const query = `
+    WITH del AS (DELETE FROM plans WHERE plan_id = $1)
+      INSERT INTO notifications (username, message)
+      SELECT
+        username,
+        (
+          (SELECT first_name FROM users WHERE username = $2)
+          || ' has deleted plan '
+          || (SELECT plan_name FROM plans WHERE plan_id = $1)
+          || '. This plan will no longer be available.'
+        )
+      FROM user_plan WHERE plan_id = $1 AND plan_owner = False
+  `;
+  return pool.query(query, [planId, username]);
 }
 
 
-export function archivePlan(planId) {
+export function archivePlan(planId, username) {
   const query = `
     WITH update_subs AS (
       UPDATE user_plan
         SET
           quantity = 0,
-          active = FALSE,
+          active = False,
           subscription_id = NULL,
           subscription_item_id = NULL
         WHERE plan_id = $1
+    ), update_plan AS (
+      UPDATE plans
+        SET active = False
+        WHERE plan_id = $1
     )
-    UPDATE plans
-      SET active = FALSE
-      WHERE plan_id = $1
+    INSERT INTO notifications (username, message)
+      SELECT
+        username,
+        (
+          (SELECT first_name FROM users WHERE username = $2)
+          || ' has archived plan '
+          || (SELECT plan_name FROM plans WHERE plan_id = $1)
+          || '. This plan will no longer be available, but you can still access its past invoices and activity.'
+        )
+      FROM user_plan WHERE plan_id = $1 AND plan_owner = False
+
   `;
-  return pool.query(query, [planId]);
+  return pool.query(query, [planId, username]);
 }
 
 

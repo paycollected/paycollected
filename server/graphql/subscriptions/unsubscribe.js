@@ -39,6 +39,7 @@ export default async function unsubscribeResolver(subscriptionId, username) {
 
   const productTotalQuantity = count - quantity;
   try {
+    let status;
     if (productTotalQuantity > 0) {
       // there are still active members on the plan
       const [{ id: price }] = await Promise.all([
@@ -53,38 +54,42 @@ export default async function unsubscribeResolver(subscriptionId, username) {
       ]);
 
       if (invoiceId !== null) {
+        status = 'ARCHIVED';
         // if there has been at least 1 active billing cycle for this subscription
         // archive in db
         await Promise.all([
-          updatePriceIdArchiveSubs(price, product, subscriptionId),
+          updatePriceIdArchiveSubs(price, product, username),
           ...members.map((member) => updateStripePrice(member, price)),
         ]);
       } else {
+        status = 'DELETED';
         // subscription never active
         // delete from db
         await Promise.all([
-          updatePriceIdDelSubs(price, product, subscriptionId),
+          updatePriceIdDelSubs(price, product, username),
           ...members.map((member) => updateStripePrice(member, price)),
         ]);
       }
     } else if (productTotalQuantity === 0 && invoiceId === null) {
+      status = 'DELETED';
       // this person is the last active member on plan
       // & subs has never been active
       // will NOT create a new price ID and does not have to update anybody else
       await Promise.all([
         stripe.subscriptions.del(subscriptionId),
-        deleteSubscription(subscriptionId),
+        deleteSubscription(username, product),
       ]);
     } else {
+      status = 'ARCHIVED';
       // this person is the last active member on plan
       // & subs has had at least 1 active billing cycle
       await Promise.all([
         stripe.subscriptions.del(subscriptionId),
-        archiveSubs(subscriptionId),
+        archiveSubs(username, product),
       ]);
     }
 
-    return { planId: product };
+    return { planId: product, status };
   } catch (e) {
     console.log(e);
     throw new GraphQLError('Cannot unsubscribe', { extensions: { code: 'INTERNAL_SERVER_ERROR' } });

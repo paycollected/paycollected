@@ -120,16 +120,15 @@ export default {
     )),
 
     editPayment: authResolverWrapper(async (_, __, { user }) => {
-      const { username, stripeCusId: customer } = user;
+      const { stripeCusId } = user;
       try {
         const { url } = await stripe.billingPortal.sessions.create({
-          customer,
+          stripeCusId,
           return_url: `${process.env.HOST}/dashboard/`,
         });
         return { portalSessionURL: url };
       } catch (asyncError) {
         console.log(asyncError);
-        // throw new ApolloError('Unable to get customer portal link');
         throw new GraphQLError('Unable to get customer portal link', {
           extensions: { code: 'INTERNAL_SERVER_ERROR' }
         });

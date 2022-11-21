@@ -39,18 +39,22 @@ export default async function deletePlanResolver(planId, username) {
         member.subscriptionId
       )));
     }
+
+    let status;
     if (invoiceId === null) {
+      status = 'DELETED';
       await Promise.all([
         ...promises,
-        deletePlan(planId),
+        deletePlan(planId, username),
       ]);
     } else {
+      status = 'ARCHIVED';
       await Promise.all([
         ...promises,
-        archivePlan(planId),
+        archivePlan(planId, username),
       ]);
     }
-    return { planId };
+    return { planId, status };
   } catch (e) {
     console.log(e);
     throw new GraphQLError('Unable to delete plan', { extensions: { code: 'INTERNAL_SERVER_ERROR' } });

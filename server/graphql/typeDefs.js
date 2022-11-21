@@ -44,6 +44,7 @@ export default `#graphql
 
   type PlanIdResponse {
     planId: PlanID!
+    status: Status!
   }
 
   type PortalSession {
@@ -66,6 +67,11 @@ export default `#graphql
     CENTRAL
     MOUNTAIN
     PACIFIC
+  }
+
+  enum Status {
+    DELETED
+    ARCHIVED
   }
 
   type Plan {

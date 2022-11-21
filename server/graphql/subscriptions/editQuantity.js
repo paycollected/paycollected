@@ -69,7 +69,7 @@ export default async function editQuantityResolver(
         }
       ),
       // update this subscription with new price ID
-      updatePriceQuant(product, subscriptionId, newQuantity, price),
+      updatePriceQuant(product, newQuantity, price, username),
       // save to db
     ];
 
