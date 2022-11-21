@@ -6,7 +6,7 @@ import { generateConfigEmailVerification } from '../../utils';
 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
-export default async function resendVerificationEmailResolver(email) {
+export default async function resendVerificationEmailResolver(email, testClockId) {
   let rows;
   try {
     ({ rows } = await checkBeforeVerifyEmail(email));
@@ -34,7 +34,11 @@ export default async function resendVerificationEmailResolver(email) {
   );
 
   try {
-    await sgMail.send(generateConfigEmailVerification(name, firstName, email, token));
+    if (!sCusId) {
+      await sgMail.send(generateConfigEmailVerification(name, firstName, email, token, 'firstTime', testClockId));
+    } else {
+      await sgMail.send(generateConfigEmailVerification(name, firstName, email, token, 'returning'));
+    }
     return true;
   } catch (e) {
     console.log(e);

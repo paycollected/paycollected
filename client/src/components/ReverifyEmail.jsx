@@ -13,9 +13,7 @@ export default function ReverifyEmail({ isOpen, onClose }) {
   const [verificationError, setVerificationError] = useState('');
   const { register, handleSubmit, formState: { errors } } = useForm();
   const [reverify, { loading }] = useMutation(REVERIFY, {
-    onCompleted: () => {
-      setVerificationEmailSent(true);
-    },
+    onCompleted: () => setVerificationEmailSent(true),
     onError: ({ message }) => {
       switch (message) {
         case 'No account associated with this email was found.':

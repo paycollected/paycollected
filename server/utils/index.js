@@ -23,7 +23,7 @@ export function cancelSubs(member) {
   return stripe.subscriptions.del(subscriptionId);
 }
 
-export function generateConfigEmailVerification(name, firstName, email, token, type = 'firstTime', testClockId = null) {
+export function generateConfigEmailVerification(name, firstName, email, token, type, testClockId) {
   let greeting;
   let subject;
   let ending;

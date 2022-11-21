@@ -14,6 +14,7 @@ export default async function createAccount(
   password,
   inputEmail,
   saltRounds,
+  testClockId,
 ) {
   let errMsg;
   const username = inputUsername.trim().toLowerCase();
@@ -47,7 +48,7 @@ export default async function createAccount(
 
     await Promise.all([
       hashPassAndSave(),
-      sgMail.send(generateConfigEmailVerification(`${firstName} ${lastName}`, firstName, email, token)),
+      sgMail.send(generateConfigEmailVerification(`${firstName} ${lastName}`, firstName, email, token, 'firstTime', testClockId)),
     ]);
 
     return true;
