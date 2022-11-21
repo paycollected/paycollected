@@ -6,8 +6,8 @@ import { verifyEmailUpdateStripeCustomerId, verifyEmail } from '../db/models';
 const stripe = stripeSDK(process.env.STRIPE_SECRET_KEY);
 const accountRouter = express.Router();
 
-accountRouter.get('/verify/:token', async (req, res) => {
-  const { params: { token } } = req;
+accountRouter.get('/verify/', async (req, res) => {
+  const { token, testClockId } = req.query;
   try {
     const {
       email, name, username, sCusId
@@ -16,9 +16,11 @@ accountRouter.get('/verify/:token', async (req, res) => {
 
     let stripeCusId;
     if (sCusId === null) {
-      ({ id: stripeCusId } = await stripe.customers.create(
-        { name, email, metadata: { username }, test_clock: 'clock_1M694cAJ5Ik974ueEHJ7ZceX' }
-      ));
+      const customer = { name, email, metadata: { username } };
+      if (testClockId) {
+        customer.test_clock = testClockId;
+      }
+      ({ id: stripeCusId } = await stripe.customers.create(customer));
       await verifyEmailUpdateStripeCustomerId(stripeCusId, username);
     } else {
       stripeCusId = sCusId;

@@ -23,7 +23,7 @@ export function cancelSubs(member) {
   return stripe.subscriptions.del(subscriptionId);
 }
 
-export function generateConfigEmailVerification(name, firstName, email, token, type = 'firstTime') {
+export function generateConfigEmailVerification(name, firstName, email, token, type = 'firstTime', testClockId = null) {
   let greeting;
   let subject;
   let ending;
@@ -40,6 +40,11 @@ export function generateConfigEmailVerification(name, firstName, email, token, t
       break;
   }
 
+  let url = `${process.env.HOST}/verify/?token=${token}`;
+  if (testClockId) {
+    url = url.concat(`&testClockId=${testClockId}`);
+  }
+
   return {
     from: {
       name: 'PayCollected',
@@ -52,7 +57,7 @@ export function generateConfigEmailVerification(name, firstName, email, token, t
       <h3>Hi ${firstName}!</h3>
       <div>${greeting}</div>
       <div>To verify this email account, please click
-        <a href="${process.env.HOST}/verify/${token}">here</a>.
+        <a href="${url}">here</a>.
       </div>
       <div>${ending}</div>
     </div>`,
