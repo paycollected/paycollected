@@ -1,6 +1,7 @@
 import express from 'express';
 import stripeSDK from 'stripe';
 import handleSubscriptionStart from './eventHandlers/subscribeWithNewCard';
+import handleInvoicePaymentSucceeded from './eventHandlers/addInvoice';
 
 const webhook = express.Router();
 const endpointSecret = process.env.STRIPE_WEBHOOK_ENDPOINT_SECRET;
@@ -23,6 +24,10 @@ webhook.post('/', express.raw({ type: 'application/json' }), (req, res) => {
     case 'invoice.payment_failed':
       invoice = event.data.object;
       // Then define and call a function to handle the event invoice.payment_failed
+      break;
+    case 'invoice.payment_succeeded':
+      invoice = event.data.object;
+      handleInvoicePaymentSucceeded(invoice);
       break;
     case 'setup_intent.succeeded': // someone new joining plan
       setupIntent = event.data.object;

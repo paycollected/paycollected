@@ -2,7 +2,7 @@ import stripeSDK from 'stripe';
 import bcrypt from 'bcrypt';
 import { GraphQLError } from 'graphql';
 import { subscriptionSetupSavedCard, startSubsNoPriceUpdateReturningPlan, startSubsPriceUpdateReturningPlan } from '../../db/models.js';
-import { updateStripePrice } from '../../utils/helperFn.js';
+import { updateStripePrice } from '../../utils';
 
 const stripe = stripeSDK(process.env.STRIPE_SECRET_KEY);
 

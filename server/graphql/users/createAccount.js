@@ -2,35 +2,19 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import sgMail from '@sendgrid/mail';
 import { GraphQLError } from 'graphql';
-import { checkUser, createUser } from '../../db/models.js';
+import { checkUser, createUser } from '../../db/models';
+import { generateConfigEmailVerification } from '../../utils';
 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-const saltRounds = 10;
-
-const generateMailConfig = (name, firstName, email, token) => ({
-  from: {
-    name: 'PayCollected',
-    email: 'admin@paycollected.com',
-  },
-  to: { name, email },
-  subject: 'Welcome to PayCollected!',
-  html: `
-  <div>
-    <h3>Hi ${firstName}!</h3>
-    <div>Thanks for signing up with PayCollected!</div>
-    <div>To verify your email address, please click
-      <a href="${process.env.HOST}/verify/${token}">here</a>.
-    </div>
-    <div>We look forward to serving you!</div>
-  </div>`,
-});
 
 export default async function createAccount(
   firstName,
   lastName,
   inputUsername,
   password,
-  inputEmail
+  inputEmail,
+  saltRounds,
+  testClockId,
 ) {
   let errMsg;
   const username = inputUsername.trim().toLowerCase();
@@ -49,9 +33,10 @@ export default async function createAccount(
     const token = jwt.sign(
       {
         exp: Math.floor(Date.now() / 1000) + (60 * 15),
-        username,
-        name: `${firstName} ${lastName}`,
         email,
+        name: `${firstName} ${lastName}`,
+        username,
+        sCusId: null,
       },
       process.env.EMAIL_VERIFY_SECRET_KEY
     );
@@ -63,7 +48,7 @@ export default async function createAccount(
 
     await Promise.all([
       hashPassAndSave(),
-      sgMail.send(generateMailConfig(`${firstName} ${lastName}`, firstName, email, token)),
+      sgMail.send(generateConfigEmailVerification(`${firstName} ${lastName}`, firstName, email, token, 'firstTime', testClockId)),
     ]);
 
     return true;

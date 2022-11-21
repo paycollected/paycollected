@@ -1,18 +1,20 @@
 import React, { useState } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import jwtDecode from 'jwt-decode';
-import Home from './Home.jsx';
-import Login from './Login.jsx';
-import Signup from './Signup.jsx';
-import Dashboard from './Dashboard.jsx';
-import CreatePlan from './CreatePlan.jsx';
-import JoinPlan from './JoinPlan.jsx';
-import Cards from './Cards.jsx';
-import Checkout from './Checkout.jsx';
-import ViewPlans from './ViewPlans.jsx';
-import MagicLink from './MagicLink.jsx';
-import FourOhFour from './404.jsx';
-import NavBar from './NavBar.jsx';
+import Home from './components/Home.jsx';
+import Login from './pages/Login.jsx';
+import Signup from './components/Signup.jsx';
+import Dashboard from './components/Dashboard.jsx';
+import CreatePlan from './components/CreatePlan.jsx';
+import JoinPlan from './components/JoinPlan.jsx';
+import Cards from './components/Cards.jsx';
+import Checkout from './components/Checkout.jsx';
+import ViewPlans from './components/ViewPlans.jsx';
+import MagicLink from './components/MagicLink.jsx';
+import FourOhFour from './pages/404.jsx';
+import NavBar from './components/NavBar.jsx';
+import PwdReset from './pages/PwdReset.jsx';
+import ManageAccount from './pages/ManageAccount.jsx';
 
 // check that token is still valid before displaying logged-in state
 let token = localStorage.getItem('token');
@@ -96,6 +98,8 @@ function App() {
             : <Navigate to="/" />}
         />
         <Route path="/plan/all" element={user ? <ViewPlans user={user} /> : <Navigate to="/" />} />
+        <Route path="manage-account" element={user ? <ManageAccount user={user} setUser={setUser} /> : <Navigate to="/" />} />
+        <Route path="/password-reset" element={<PwdReset setUser={setUser} />} />
         <Route path="/404" element={<FourOhFour />} />
         <Route path="*" element={<FourOhFour />} />
       </Routes>

@@ -6,7 +6,7 @@ import {
 import { setContext } from '@apollo/client/link/context';
 import { BrowserRouter } from 'react-router-dom';
 import { ChakraProvider, extendTheme, Box } from '@chakra-ui/react';
-import App from './components/App.jsx';
+import App from './App.jsx';
 import { buttonTheme, inputTheme } from './styles/styles.js';
 
 const httpLink = createHttpLink({
