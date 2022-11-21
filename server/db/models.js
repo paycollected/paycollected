@@ -496,7 +496,7 @@ export function startSubscription(
   return pool.query(query, args);
 }
 
-
+//
 export function updatePriceIdDelSubs(newPriceId, productId, username) {
   const query = `
     WITH update_price_id AS (
@@ -513,19 +513,19 @@ export function updatePriceIdDelSubs(newPriceId, productId, username) {
           || (SELECT plan_name FROM plans WHERE plan_id = $2)
           || '. The new unit cost for this plan is $'
           || (SELECT
-                (SELECT per_cycle_cost FROM plans WHERE plan_id = $2) /
-                (SELECT SUM(quantity)::INTEGER FROM user_plan WHERE plan_id = $2 AND username != $3) / 100
+                ROUND (CEIL ((SELECT per_cycle_cost::NUMERIC FROM plans WHERE plan_id = $2) /
+                (SELECT SUM(quantity)::INTEGER FROM user_plan WHERE plan_id = $2 AND username != $3)) / 100, 2)
               )
           || '/'
           || (SELECT cycle_frequency FROM plans WHERE plan_id = $2)
           || ', taking effect on the next charge date.'
         )
-      FROM user_plan WHERE plan_id = $2 AND username != $3
+      FROM user_plan WHERE plan_id = $2 AND username != $3 AND active = True
   `;
   return pool.query(query, [newPriceId, productId, username]);
 }
 
-
+//
 export function updatePriceIdArchiveSubs(newPriceId, productId, username) {
   const query = `
     WITH update_price_id AS (
@@ -548,14 +548,14 @@ export function updatePriceIdArchiveSubs(newPriceId, productId, username) {
           || (SELECT plan_name FROM plans WHERE plan_id = $2)
           || '. The new unit cost for this plan is $'
           || (SELECT
-                (SELECT per_cycle_cost FROM plans WHERE plan_id = $2) /
-                (SELECT SUM(quantity)::INTEGER FROM user_plan WHERE plan_id = $2 AND username != $3) / 100
+                ROUND (CEIL ((SELECT per_cycle_cost::NUMERIC FROM plans WHERE plan_id = $2) /
+                (SELECT SUM(quantity)::INTEGER FROM user_plan WHERE plan_id = $2 AND username != $3)) / 100, 2)
               )
           || '/'
           || (SELECT cycle_frequency FROM plans WHERE plan_id = $2)
           || ', taking effect on the next charge date.'
         )
-      FROM user_plan WHERE plan_id = $2 AND username != $3
+      FROM user_plan WHERE plan_id = $2 AND username != $3 AND active = True
   `;
   return pool.query(query, [newPriceId, productId, username]);
 }
@@ -597,7 +597,7 @@ export function updatePriceOwnerDelSubs(newPriceId, planId, subscriptionId, newO
   return pool.query(query, [newPriceId, planId, subscriptionId, newOwner]);
 }
 
-
+//
 export function deleteSubscription(username, planId) {
   const query = `
     WITH del AS (DELETE FROM user_plan WHERE username = $1 AND plan_id = $2)
@@ -610,12 +610,12 @@ export function deleteSubscription(username, planId) {
             || (SELECT plan_name FROM plans WHERE plan_id = $2)
             || '. There are no more active members on this plan. You can either invite new members to join it, or delete the plan.'
           )
-        FROM user_plan WHERE plan_id = $2 AND username != $1
+        FROM user_plan WHERE plan_id = $2 AND username != $1 AND active = True
   `;
   return pool.query(query, [username, planId]);
 }
 
-
+//
 export function archiveSubs(username, planId) {
   const query = `
     WITH u AS (
@@ -636,7 +636,7 @@ export function archiveSubs(username, planId) {
           || (SELECT plan_name FROM plans WHERE plan_id = $2)
           || '. There are no more active members on this plan. You can still invite new members to join it.'
         )
-      FROM user_plan WHERE plan_id = $2 AND username != $1
+      FROM user_plan WHERE plan_id = $2 AND username != $1 AND active = True
   `;
   return pool.query(query, [username, planId]);
 }
@@ -809,14 +809,14 @@ export function updatePriceQuant(planId, newQuantity, newPriceId, username) {
           || (SELECT $2)
           || '. The new unit cost for this plan is $'
           || (SELECT
-                (SELECT per_cycle_cost FROM plans WHERE plan_id = $1) /
-                (SELECT SUM(quantity)::INTEGER + $2 FROM user_plan WHERE plan_id = $1 AND username != $4) / 100
+                ROUND (CEIL ((SELECT per_cycle_cost FROM plans WHERE plan_id = $1) /
+                (SELECT SUM(quantity)::INTEGER + $2 FROM user_plan WHERE plan_id = $1 AND username != $4)) / 100, 2)
               )
           || '/'
           || (SELECT cycle_frequency FROM plans WHERE plan_id = $1)
           || ', taking effect on the next charge date.'
         )
-      FROM user_plan WHERE plan_id = $1 AND username != $4
+      FROM user_plan WHERE plan_id = $1 AND username != $4 AND active = True
   `;
   return pool.query(query, [planId, newQuantity, newPriceId, username]);
 }
@@ -848,7 +848,7 @@ export function deletePlan(planId, username) {
           || (SELECT plan_name FROM plans WHERE plan_id = $1)
           || '. This plan will no longer be available.'
         )
-      FROM user_plan WHERE plan_id = $1 AND plan_owner = False
+      FROM user_plan WHERE plan_id = $1 AND plan_owner = False AND active = True
   `;
   return pool.query(query, [planId, username]);
 }
@@ -878,7 +878,7 @@ export function archivePlan(planId, username) {
           || (SELECT plan_name FROM plans WHERE plan_id = $1)
           || '. This plan will no longer be available, but you can still access its past invoices and activity.'
         )
-      FROM user_plan WHERE plan_id = $1 AND plan_owner = False
+      FROM user_plan WHERE plan_id = $1 AND plan_owner = False AND active = True
 
   `;
   return pool.query(query, [planId, username]);
