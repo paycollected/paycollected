@@ -9,12 +9,14 @@ import {
   ChangePassword as CHANGE_PASSWORD,
   ChangeUsername as CHANGE_USERNAME,
   ChangeEmail as CHANGE_EMAIL,
+  ResendVerificationEmail as REVERIFY,
 } from '../graphql/mutations.gql';
 
 export default function ManageAccount({ user, setUser }) {
   const [action, setAction] = useState('password');
   const [status, setStatus] = useState('');
   const [errMsg, setErrMsg] = useState('');
+  const [email, setEmail] = useState('');
   const navigate = useNavigate();
   const {
     register, handleSubmit, formState: { errors }, getValues
@@ -44,6 +46,13 @@ export default function ManageAccount({ user, setUser }) {
       setStatus('error');
     }
   });
+  const [resendVerificationEmail, { loading: reverifyLoading }] = useMutation(REVERIFY, {
+    onCompleted: () => setStatus('resent'),
+    onError: ({ message }) => {
+      setErrMsg(message);
+      setStatus('error');
+    }
+  });
 
   const onSubmit = (data) => {
     let newUsername;
@@ -58,6 +67,7 @@ export default function ManageAccount({ user, setUser }) {
         break;
       case 'email':
         ({ newEmail, currentPassword: password } = data);
+        setEmail(newEmail);
         changeEmail({ variables: { newEmail, password } });
         break;
       default:
@@ -67,15 +77,31 @@ export default function ManageAccount({ user, setUser }) {
     }
   };
 
+  const reverify = () => { resendVerificationEmail({ variables: { email } }); };
+
   return (
     <>
       <h3>This is the manage account page</h3>
       {status === 'error' && (<div>{errMsg}</div>)}
       {status === 'success' && action === 'email' && (
-        <div>{
-          `Your request has been successfully submitted.
-          Please follow the instructions sent to this new address to complete the verification process.`
-        }</div>
+        <div>
+          <div>
+            Your request has been successfully submitted.
+            Please follow the instructions sent to this new address to complete the verification process.
+          </div>
+          <div>
+            Still haven&apos;t received the email?
+            <Button type="button" onClick={reverify}>Resend it!</Button>
+          </div>
+        </div>
+      )}
+      {status === 'resent' && (
+        <div>
+          <div>
+          {`Another verification has been sent to ${email}. Please check your mailbox, including the spam folder.`}
+          </div>
+          <div>If you&apos;re still having trouble, please contact us at admin@paycollected.com for support.</div>
+        </div>
       )}
       {status === 'success' && action === 'password' && (
         <div>{
