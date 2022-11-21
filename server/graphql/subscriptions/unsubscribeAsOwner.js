@@ -1,6 +1,6 @@
 import stripeSDK from 'stripe';
 import { GraphQLError } from 'graphql';
-import { updateStripePrice } from '../../utils/helperFn.js';
+import { updateStripePrice } from '../../utils';
 import {
   getProductInfoAndInvoiceCheckNewOwner,
   updatePriceOwnerArchiveSubs,
@@ -60,23 +60,26 @@ export default async function unsubscribeAsOwnerResolver(
       stripe.subscriptions.del(subscriptionId),
     ]);
 
+    let status;
     if (invoiceId !== null) {
+      status = 'ARCHIVED';
       // if there has been at least 1 active billing cycle for this subscription
       // archive in db
       await Promise.all([
-        updatePriceOwnerArchiveSubs(price, product, subscriptionId, newOwner),
+        updatePriceOwnerArchiveSubs(price, product, username, newOwner),
         ...members.map((member) => updateStripePrice(member, price, productTotalQuantity)),
       ]);
     } else {
+      status = 'DELETED';
       // subscription never active
       // delete from db
       await Promise.all([
-        updatePriceOwnerDelSubs(price, product, subscriptionId, newOwner),
+        updatePriceOwnerDelSubs(price, product, username, newOwner),
         ...members.map((member) => updateStripePrice(member, price, productTotalQuantity)),
       ]);
     }
 
-    return { planId: product };
+    return { planId: product, status };
   } catch (e) {
     console.log(e);
     throw new GraphQLError('Cannot unsubscribe', { extensions: { code: 'INTERNAL_SERVER_ERROR' } });

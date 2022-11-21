@@ -1,4 +1,3 @@
-
 export default `#graphql
   scalar PlanID
   scalar SubscriptionID
@@ -6,6 +5,7 @@ export default `#graphql
   scalar Email
   scalar SetupIntentID
   scalar PaymentMethodID
+  scalar TestClockID
 
   type Query {
     viewOnePlan (planId: PlanID!): Plan!
@@ -43,6 +43,7 @@ export default `#graphql
 
   type PlanIdResponse {
     planId: PlanID!
+    status: UpdateStatus!
   }
 
   type PortalSession {
@@ -67,6 +68,12 @@ export default `#graphql
     PACIFIC
   }
 
+  enum UpdateStatus {
+    DELETED
+    ARCHIVED
+    CREATED
+  }
+
   type Plan {
     planId: PlanID!
     name: String!
@@ -88,13 +95,26 @@ export default `#graphql
       # username: Username!
       password: String!
       email: Email!
+      testClockId: TestClockID # for testing purposes, not for production
     ): Boolean!
 
     login(
-      username: String!
+      usernameOrEmail: String!
       # username: Username!
       password: String!
     ): LoginInfo
+
+    resetPassword(usernameOrEmail: String!): Boolean!
+
+    resetPasswordFromToken(token: String!, newPassword: String!): LoginInfo!
+
+    resendVerificationEmail(email: Email!, testClockId: TestClockID): Boolean!
+
+    changeEmail(newEmail: Email!, password: String!): Boolean!
+
+    changeUsername(newUsername: String!, password: String!): LoginInfo!
+
+    changePassword(currentPassword: String!, newPassword: String!): Boolean!
 
     createPlan(
       planName: String!
@@ -107,9 +127,7 @@ export default `#graphql
 
     editPayment: PortalSession!
 
-    unsubscribe(
-      subscriptionId: SubscriptionID!
-    ): PlanIdResponse!
+    unsubscribe(subscriptionId: SubscriptionID!): PlanIdResponse!
 
     unsubscribeAsOwner(
       subscriptionId: SubscriptionID!
@@ -117,18 +135,11 @@ export default `#graphql
       # newOwner: Username!
     ): PlanIdResponse!
 
-    editQuantity(
-      subscriptionId: SubscriptionID!
-      newQuantity: Int!
-    ): EditQuantResponse!
+    editQuantity(subscriptionId: SubscriptionID!, newQuantity: Int!): EditQuantResponse!
 
-    deletePlan(
-      planId: PlanID!
-    ): PlanIdResponse!
+    deletePlan(planId: PlanID!): PlanIdResponse!
 
-    cancelTransaction(
-      setupIntentId: SetupIntentID!
-    ): Boolean!
+    cancelTransaction(setupIntentId: SetupIntentID!): Boolean!
 
     subscribeWithSavedCard(
       paymentMethodId: PaymentMethodID!
@@ -137,9 +148,6 @@ export default `#graphql
       planId: PlanID!
     ): Plan!
 
-    joinPlan(
-      planId: PlanID!
-      quantity: Int!
-    ): PaymentIntentAndPaymentMethods! # returning client secret
+    joinPlan(planId: PlanID!, quantity: Int!): PaymentIntentAndPaymentMethods! # returning client secret
   }
 `;

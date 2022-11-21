@@ -45,6 +45,7 @@ export default function Dashboard({ user, setUser }) {
       </Heading>
       <Button onClick={() => { navigate('/plan/create'); }}>Create a New Plan</Button>
       <Button onClick={() => { navigate('/plan/all'); }}>Your Current Plans</Button>
+      <Button onClick={() => { navigate('/manage-account'); }}>Manage Your Account</Button>
       <Button onClick={() => { setShowCodeInput(true); }}>Have a Code? Join a Plan!</Button>
       <div>
         {showCodeInput && (

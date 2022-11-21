@@ -47,13 +47,7 @@ async function startApolloServer() {
       if (token.length > 0) {
         try {
           const { user } = jwt.verify(token, process.env.SIGNIN_SECRET_KEY);
-          const { username, stripeCusId } = user;
-          return {
-            user: {
-              username, stripeCusId,
-            },
-            err: null
-          };
+          return { user, err: null };
         } catch (e) {
           // handling error at resolver level
           return { user: null, err: 'Incorrect token' };

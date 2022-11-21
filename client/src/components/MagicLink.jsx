@@ -18,7 +18,7 @@ export default function MagicLink({ planToJoin, setShowMagicLink }) {
           <p>Have other members on your plan join by sharing this link:</p>
           <Box>
             <Heading size="m">
-              {`${process.env.HOST}:${process.env.PORT}/join/${planToJoin}`}
+              {`${process.env.HOST}/join/${planToJoin}`}
             </Heading>
             <Button size="sm" onClick={onCopy}>
               {hasCopied ? 'Copied' : 'Copy'}

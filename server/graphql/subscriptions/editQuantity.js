@@ -1,7 +1,7 @@
 import stripeSDK from 'stripe';
 import { GraphQLError } from 'graphql';
-import { getSubsItemIdAndProductInfo, updatePriceQuant } from '../../db/models.js';
-import { updateStripePrice } from '../../utils/helperFn.js';
+import { getSubsItemIdAndProductInfo, updatePriceQuant } from '../../db/models';
+import { updateStripePrice } from '../../utils';
 
 const stripe = stripeSDK(process.env.STRIPE_SECRET_KEY);
 
@@ -14,7 +14,7 @@ export default async function editQuantityResolver(
   // a preexisting subscriptionId
 
   // Validating quantity input
-  if (newQuantity > 6 || newQuantity <= 0) {
+  if (newQuantity <= 0) {
     // upper limit for our system
     throw new GraphQLError('Invalid quantity', { extensions: { code: 'BAD_USER_INPUT' } });
   }
@@ -22,7 +22,6 @@ export default async function editQuantityResolver(
   let rows;
   try {
     ({ rows } = await getSubsItemIdAndProductInfo(subscriptionId, username));
-    console.log(rows[0]);
   } catch (e) {
     console.log(e);
     throw new GraphQLError('Cannot update quantity', { extensions: { code: 'INTERNAL_SERVER_ERROR' } });
@@ -70,7 +69,7 @@ export default async function editQuantityResolver(
         }
       ),
       // update this subscription with new price ID
-      updatePriceQuant(product, subscriptionId, newQuantity, price),
+      updatePriceQuant(product, newQuantity, price, username),
       // save to db
     ];
 
