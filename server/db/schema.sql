@@ -58,7 +58,7 @@ CREATE TABLE IF NOT EXISTS invoices (
   username VARCHAR(50) NOT NULL REFERENCES users(username) ON UPDATE CASCADE ON DELETE CASCADE,
   plan_id VARCHAR(50) NOT NULL REFERENCES plans(plan_id) ON DELETE CASCADE,
   quantity INTEGER NOT NULL DEFAULT 1,
-  charge_date TIMESTAMP WITH TIME ZONE NOT NULL, -- charge date
+  charge_date TIMESTAMP WITH TIME ZONE NOT NULL,
   paid_amount INTEGER NOT NULL CHECK (paid_amount > 0), -- including platform fees, takes into account quantity purchased
   UNIQUE (username, plan_id, charge_date)
 );
