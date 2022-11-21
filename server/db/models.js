@@ -128,7 +128,7 @@ export function membersOnOnePlan(planId, username) {
   return pool.query(query, [planId, username]);
 }
 
-
+// INCORRECT!
 export function viewAllPlans(username) {
   const query = `
     WITH select1 AS
@@ -560,7 +560,7 @@ export function updatePriceIdArchiveSubs(newPriceId, productId, username) {
   return pool.query(query, [newPriceId, productId, username]);
 }
 
-export function updatePriceOwnerArchiveSubs(newPriceId, productId, subscriptionId, newOwner) {
+export function updatePriceOwnerArchiveSubs(newPriceId, productId, formerOwner, newOwner) {
   const query = `
     WITH update_price_id AS (
       UPDATE plans
@@ -568,33 +568,107 @@ export function updatePriceOwnerArchiveSubs(newPriceId, productId, subscriptionI
         WHERE plan_id = $2
     ), update_new_owner AS (
       UPDATE user_plan
-        SET plan_owner = TRUE
+        SET plan_owner = True
         WHERE plan_id = $2 AND username = $4
-    )
-    UPDATE user_plan
+    ), update_former_owner AS (
+      UPDATE user_plan
       SET
         quantity = 0,
-        active = FALSE,
+        active = False,
         subscription_id = NULL,
         subscription_item_id = NULL
-      WHERE subscription_id = $3
+      WHERE plan_id = $2 AND username = $3
+    ), update_new_owner_notification AS (
+        INSERT INTO notifications (username, message)
+          VALUES ($4,
+            (
+              (SELECT first_name FROM users WHERE username = $3)
+              || ' has dropped out of plan '
+              || (SELECT plan_name FROM plans WHERE plan_id = $2)
+              || ', and elected you as the new owner. The new unit cost for this plan is $'
+              || (SELECT
+                    ROUND (CEIL ((SELECT per_cycle_cost::NUMERIC FROM plans WHERE plan_id = $2) /
+                    (SELECT SUM(quantity)::INTEGER FROM user_plan WHERE plan_id = $2 AND username != $3)) / 100, 2)
+                  )
+              || '/'
+              || (SELECT cycle_frequency FROM plans WHERE plan_id = $2)
+              || ', taking effect on the next charge date.'
+            )
+          )
+    )
+    INSERT INTO notifications (username, message)
+    SELECT
+      username,
+      (
+        (SELECT first_name FROM users WHERE username = $3)
+        || ' has dropped out of plan '
+        || (SELECT plan_name FROM plans WHERE plan_id = $2)
+        || '. '
+        || (SELECT first_name FROM users WHERE username =$4)
+        || ' is now the new plan owner, and the new unit cost is $'
+        || (SELECT
+              ROUND (CEIL ((SELECT per_cycle_cost::NUMERIC FROM plans WHERE plan_id = $2) /
+              (SELECT SUM(quantity)::INTEGER FROM user_plan WHERE plan_id = $2 AND username != $3)) / 100, 2)
+            )
+        || '/'
+        || (SELECT cycle_frequency FROM plans WHERE plan_id = $2)
+        || ', taking effect on the next charge date.'
+      )
+    FROM user_plan WHERE plan_id = $2 AND username NOT IN ($3, $4) AND active = True
   `;
-  return pool.query(query, [newPriceId, productId, subscriptionId, newOwner]);
+  return pool.query(query, [newPriceId, productId, formerOwner, newOwner]);
 }
 
 
-export function updatePriceOwnerDelSubs(newPriceId, planId, subscriptionId, newOwner) {
+export function updatePriceOwnerDelSubs(newPriceId, planId, formerOwner, newOwner) {
   const query = `
     WITH update_price_id AS (
       UPDATE plans SET price_id = $1 WHERE plan_id = $2
     ), del_sub AS (
-      DELETE FROM user_plan WHERE subscription_id = $3
+      DELETE FROM user_plan WHERE plan_id = $2 AND username = $3
+    ), update_new_owner AS (
+      UPDATE user_plan
+      SET plan_owner = True
+      WHERE plan_id = $2 AND username = $4
+    ), update_new_owner_notification AS (
+      INSERT INTO notifications (username, message)
+        VALUES ($4,
+          (
+            (SELECT first_name FROM users WHERE username = $3)
+            || ' has dropped out of plan '
+            || (SELECT plan_name FROM plans WHERE plan_id = $2)
+            || ', and elected you as the new owner. The new unit cost for this plan is $'
+            || (SELECT
+                  ROUND (CEIL ((SELECT per_cycle_cost::NUMERIC FROM plans WHERE plan_id = $2) /
+                  (SELECT SUM(quantity)::INTEGER FROM user_plan WHERE plan_id = $2 AND username != $3)) / 100, 2)
+                )
+            || '/'
+            || (SELECT cycle_frequency FROM plans WHERE plan_id = $2)
+            || ', taking effect on the next charge date.'
+          )
+        )
     )
-    UPDATE user_plan
-    SET plan_owner = TRUE
-    WHERE plan_id = $2 AND username = $4
-    `;
-  return pool.query(query, [newPriceId, planId, subscriptionId, newOwner]);
+    INSERT INTO notifications (username, message)
+    SELECT
+      username,
+      (
+        (SELECT first_name FROM users WHERE username = $3)
+        || ' has dropped out of plan '
+        || (SELECT plan_name FROM plans WHERE plan_id = $2)
+        || '. '
+        || (SELECT first_name FROM users WHERE username =$4)
+        || ' is now the new plan owner, and the new unit cost is $'
+        || (SELECT
+              ROUND (CEIL ((SELECT per_cycle_cost::NUMERIC FROM plans WHERE plan_id = $2) /
+              (SELECT SUM(quantity)::INTEGER FROM user_plan WHERE plan_id = $2 AND username != $3)) / 100, 2)
+            )
+        || '/'
+        || (SELECT cycle_frequency FROM plans WHERE plan_id = $2)
+        || ', taking effect on the next charge date.'
+      )
+    FROM user_plan WHERE plan_id = $2 AND username NOT IN ($3, $4) AND active = True
+  `;
+  return pool.query(query, [newPriceId, planId, formerOwner, newOwner]);
 }
 
 //
