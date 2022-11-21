@@ -6,6 +6,7 @@ export default `#graphql
   scalar Email
   scalar SetupIntentID
   scalar PaymentMethodID
+  scalar TestClockID
 
   type Query {
     viewOnePlan (planId: PlanID!): Plan!
@@ -88,6 +89,7 @@ export default `#graphql
       # username: Username!
       password: String!
       email: Email!
+      testClockId: TestClockID # for testing purposes, not for production
     ): Boolean!
 
     login(
@@ -100,7 +102,7 @@ export default `#graphql
 
     resetPasswordFromToken(token: String!, newPassword: String!): LoginInfo!
 
-    resendVerificationEmail(email: Email!): Boolean!
+    resendVerificationEmail(email: Email!, testClockId: TestClockID): Boolean!
 
     changeEmail(newEmail: Email!, password: String!): Boolean!
 

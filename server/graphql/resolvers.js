@@ -3,7 +3,7 @@ import { GraphQLError } from 'graphql';
 import authResolverWrapper from './authResolverWrapper';
 import {
   planIdScalar, subscriptionIdScalar, emailScalar, usernameScalar, paymentMethodIdScalar,
-  setupIntentIdScalar
+  setupIntentIdScalar, testClockScalar,
 } from './customScalarTypes';
 import createAccount from './users/createAccount';
 import loginResolver from './users/login';
@@ -50,6 +50,8 @@ export default {
 
   PaymentMethodID: paymentMethodIdScalar,
 
+  TestClockID: testClockScalar,
+
   Query: {
     viewOnePlan: authResolverWrapper((_, { planId }, { user: { username } }) => (
       viewOnePlanResolver(planId, username)
@@ -68,9 +70,9 @@ export default {
 
   Mutation: {
     createUser: (_, {
-      firstName, lastName, username, password, email
+      firstName, lastName, username, password, email, testClockId,
     }) => (
-      createAccount(firstName, lastName, username, password, email, saltRounds)
+      createAccount(firstName, lastName, username, password, email, saltRounds, testClockId)
     ),
 
     login: (_, { usernameOrEmail, password }) => (loginResolver(usernameOrEmail, password)),
@@ -81,7 +83,9 @@ export default {
       resetPwdFromTokenResolver(token, newPassword, saltRounds)
     ),
 
-    resendVerificationEmail: (_, { email }) => (resendVerificationEmailResolver(email)),
+    resendVerificationEmail: (_, { email, testClockId }) => (
+      resendVerificationEmailResolver(email, testClockId)
+    ),
 
     changeEmail: authResolverWrapper((_, { newEmail, password }, { user: { username } }) => (
       changeEmailResolver(username, password, newEmail)
