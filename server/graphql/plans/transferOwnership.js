@@ -32,7 +32,6 @@ export default async function transferOwnershipResolver(planId, newOwner, former
   }
 
   try {
-    console.log('a');
     await updatePlanOwner(newOwner, formerOwner, planId);
   } catch (e) {
     console.log(e);
