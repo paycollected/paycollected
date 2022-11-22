@@ -6,7 +6,7 @@ import { verifyEmailUpdateStripeCustomerId, verifyEmail } from '../db/models';
 const stripe = stripeSDK(process.env.STRIPE_SECRET_KEY);
 const accountRouter = express.Router();
 
-accountRouter.get('/verify/', async (req, res) => {
+accountRouter.get('/verify', async (req, res) => {
   const { token, testClockId } = req.query;
   try {
     const {
