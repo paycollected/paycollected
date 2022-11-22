@@ -68,7 +68,7 @@ export default async function createPlanResolver(
       freq,
       cost,
       planId,
-      `${startDate.getUTCFullYear()}-${(startDate.getUTCMonth() + 1) % 12}-${startDate.getUTCDate()} 23:59:59 ${formatTimeZone[timeZone]}`,
+      `${startDate.getUTCFullYear()}-${startDate.getUTCMonth() + 1}-${startDate.getUTCDate()} 23:59:59 ${formatTimeZone[timeZone]}`,
       priceId
     );
 

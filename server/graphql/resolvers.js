@@ -28,6 +28,7 @@ import createPlanResolver from './plans/create.js';
 import deletePlanResolver from './plans/delete.js';
 import cancelTransactionResolver from './payment/cancelTransaction';
 import { retrieveNotificationsResolver, deleteNotificationResolver } from './users/notifications';
+import transferOwnershipResolver from './plans/transferOwnership';
 
 const stripe = stripeSDK(process.env.STRIPE_SECRET_KEY);
 
@@ -183,6 +184,10 @@ export default {
 
     deleteNotification: authResolverWrapper((_, { notificationId }, { user: { username } }) => (
       deleteNotificationResolver(notificationId, username)
+    )),
+
+    transferOwnership: authResolverWrapper((_, { planId, newOwner }, { user: { username }}) => (
+      transferOwnershipResolver(planId, newOwner, username)
     )),
   }
 };

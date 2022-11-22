@@ -1045,3 +1045,55 @@ export function getNotifications(user) {
 export function markNotificationAsRead(id, username) {
   return pool.query('DELETE FROM notifications WHERE id = $1 AND username = $2 RETURNING id', [id, username]);
 }
+
+export function checkBeforeTransferOwnership(newOwner, planId, formerOwner) {
+  const query = `
+    SELECT
+      p.active AS "planActive",
+      up.active AS "subscriptionActive",
+      up.plan_owner AS "planOwner",
+      (SELECT username FROM user_plan WHERE username = $1 AND plan_id = $2 AND active = True) AS "newOwnerUsername"
+    FROM plans p
+    JOIN user_plan up
+    ON p.plan_id = up.plan_id
+    WHERE up.plan_id = $2
+      AND username = $3`;
+  return pool.query(query, [newOwner, planId, formerOwner]);
+}
+
+export function updatePlanOwner(newOwner, formerOwner, planId) {
+  const query = `
+    WITH update_new AS (
+      UPDATE user_plan
+        SET plan_owner = True
+        WHERE username = $1 AND plan_id = $3
+    ), update_former AS (
+      UPDATE user_plan
+        SET plan_owner = False
+        WHERE username = $2 AND plan_id = $3
+    ), update_new_owner_notification AS (
+      INSERT INTO notifications (username, message)
+        VALUES ($1,
+          (
+            (SELECT first_name FROM users WHERE username = $2)
+            || ' has transferred the ownership for plan '
+            || (SELECT plan_name FROM plans WHERE plan_id = $3)
+            || ' to you.'
+          )
+        )
+    )
+    INSERT INTO notifications (username, message)
+    SELECT
+      username,
+      (
+        (SELECT first_name FROM users WHERE username = $2)
+        || ' has transferred the ownership for plan '
+        || (SELECT plan_name FROM plans WHERE plan_id = $3)
+        || ' to '
+        || (SELECT first_name FROM users WHERE username = $1)
+        || '.'
+      )
+    FROM user_plan WHERE plan_id = $3 AND username NOT IN ($1, $2) AND active = True
+  `;
+  return pool.query(query, [newOwner, formerOwner, planId]);
+}

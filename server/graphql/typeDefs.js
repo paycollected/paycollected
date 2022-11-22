@@ -164,5 +164,7 @@ export default `#graphql
     joinPlan(planId: PlanID!, quantity: Int!): PaymentIntentAndPaymentMethods! # returning client secret
 
     deleteNotification(notificationId: ID!): ID!
+
+    transferOwnership(planId: PlanID!, newOwner: String!): PlanID!
   }
 `;
