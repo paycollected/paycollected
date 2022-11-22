@@ -9,7 +9,8 @@
     "db-schema": "psql postgres -f ./server/db/schema.sql",
     "stripe-webhook": "stripe listen --forward-to http://localhost:5647/webhook",
     "custom-code": "node ./server/customCode.js",
-    "lt": "lt --port 5647"
+    "lt": "lt --port 5647",
+    "test": "npx jest"
   },
   "repository": {
     "type": "git",
@@ -62,6 +63,7 @@
     "eslint-plugin-react": "^7.31.1",
     "eslint-plugin-react-hooks": "^4.6.0",
     "graphql-tag": "^2.12.6",
+    "jest": "^29.3.1",
     "nodemon": "^2.0.19",
     "webpack": "^5.74.0",
     "webpack-cli": "^4.10.0"
