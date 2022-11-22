@@ -17,6 +17,7 @@ const time = Math.floor(new Date().valueOf() / 1000);
   // (or resend email verification mutation - note: MUST BE A NEW, UNVERIFIED USER)
   // web client is not set up to use test clock (which is only meant for testing
   // & not production anyway)
+  // Manually test using Apollo sandbox, or programmatically using Apollo Client
   // all subscriptions that these test clock customers made will be automatically attached to
   // the test clock
 
