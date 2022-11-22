@@ -2,7 +2,6 @@ mutation CreateUser ($firstName: String!, $lastName: String!, $username: String!
   createUser(firstName: $firstName, lastName: $lastName, username: $username, password: $password, email: $email)
 }
 
-
 mutation LogIn ($usernameOrEmail: String!, $password: String!) {
   login(usernameOrEmail: $usernameOrEmail, password: $password) {
     username
@@ -10,14 +9,12 @@ mutation LogIn ($usernameOrEmail: String!, $password: String!) {
   }
 }
 
-
 mutation CreatePlanMutation (
-  $planName: String!, $cycleFrequency: CycleFrequency!, $perCycleCost: Float!, $startDate: String!, $timeZone: TimeZone!) {
+  $planName: String!, $cycleFrequency: CycleFrequency!, $perCycleCost: Float!, $startDate: Date!, $timeZone: TimeZone!) {
   createPlan(planName: $planName, cycleFrequency: $cycleFrequency, perCycleCost: $perCycleCost, startDate: $startDate, timeZone: $timeZone) {
     planId
   }
 }
-
 
 mutation JoinPlan ($planId: PlanID!, $quantity: Int!) {
   joinPlan(planId: $planId, quantity: $quantity) {
@@ -34,13 +31,11 @@ mutation JoinPlan ($planId: PlanID!, $quantity: Int!) {
   }
 }
 
-
 mutation EditPayment {
   editPayment {
     portalSessionURL
   }
 }
-
 
 mutation Unsubscribe ($subscriptionId: SubscriptionID!) {
   unsubscribe(subscriptionId: $subscriptionId) {
@@ -48,13 +43,11 @@ mutation Unsubscribe ($subscriptionId: SubscriptionID!) {
   }
 }
 
-
 mutation UnsubscribeAsPlanOwner($subscriptionId: SubscriptionID!, $newOwner: String!) {
   unsubscribeAsOwner(subscriptionId: $subscriptionId, newOwner: $newOwner) {
     planId
   }
 }
-
 
 mutation EditQuantity($subscriptionId: SubscriptionID!, $newQuantity: Int!) {
   editQuantity(subscriptionId: $subscriptionId, newQuantity: $newQuantity) {
@@ -63,13 +56,11 @@ mutation EditQuantity($subscriptionId: SubscriptionID!, $newQuantity: Int!) {
   }
 }
 
-
 mutation DeletePlan($planId: PlanID!) {
   deletePlan(planId: $planId) {
     planId
   }
 }
-
 
 mutation CancelTransaction($setupIntentId: SetupIntentID!) {
   cancelTransaction(setupIntentId: $setupIntentId)
@@ -97,7 +88,6 @@ mutation SubscribeWithSavedCard($paymentMethodId: PaymentMethodID!, $setupIntent
   }
 }
 
-
 mutation ResendVerificationEmail($email: Email!) {
   resendVerificationEmail(email: $email)
 }
@@ -106,7 +96,6 @@ mutation ResetPassword($usernameOrEmail: String!) {
   resetPassword(usernameOrEmail: $usernameOrEmail)
 }
 
-
 mutation ResetPasswordFromToken($token: String!, $newPassword: String!) {
   resetPasswordFromToken(token: $token, newPassword: $newPassword) {
     username
@@ -114,11 +103,9 @@ mutation ResetPasswordFromToken($token: String!, $newPassword: String!) {
   }
 }
 
-
 mutation ChangeEmail($newEmail: Email!, $password: String!) {
   changeEmail(newEmail: $newEmail, password: $password)
 }
-
 
 mutation ChangeUsername($newUsername: String!, $password: String!) {
   changeUsername(newUsername: $newUsername, password: $password) {
@@ -127,7 +114,10 @@ mutation ChangeUsername($newUsername: String!, $password: String!) {
   }
 }
 
-
 mutation ChangePassword($currentPassword: String!, $newPassword: String!) {
   changePassword(currentPassword: $currentPassword, newPassword: $newPassword)
+}
+
+mutation DeleteNotification($notificationId: ID!) {
+  deleteNotification(notificationId: $notificationId)
 }

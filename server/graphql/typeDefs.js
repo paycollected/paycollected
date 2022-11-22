@@ -6,10 +6,13 @@ export default `#graphql
   scalar SetupIntentID
   scalar PaymentMethodID
   scalar TestClockID
+  scalar DateTime
+  scalar Date
 
   type Query {
     viewOnePlan (planId: PlanID!): Plan!
     viewAllPlans: [Plan]!
+    retrieveNotifications: RetrieveNotifications! # offset pagination?
   }
 
   type PlanMember {
@@ -87,6 +90,17 @@ export default `#graphql
     quantity: Int! # unit quant of this plan for current user
   }
 
+  type Notification {
+    id: ID!
+    content: String!
+    createdAt: DateTime!
+  }
+
+  type RetrieveNotifications {
+    count: Int!
+    notifications: [Notification]!
+  }
+
   type Mutation {
     createUser(
       firstName: String!
@@ -120,10 +134,9 @@ export default `#graphql
       planName: String!
       cycleFrequency: CycleFrequency!
       perCycleCost: Float!
-      startDate: String! # datestring
+      startDate: Date!
       timeZone: TimeZone!
     ): PlanIdResponse!
-    # returning stripe product ID here, which will be used as code
 
     editPayment: PortalSession!
 
@@ -149,5 +162,9 @@ export default `#graphql
     ): Plan!
 
     joinPlan(planId: PlanID!, quantity: Int!): PaymentIntentAndPaymentMethods! # returning client secret
+
+    deleteNotification(notificationId: ID!): ID!
+
+    transferOwnership(planId: PlanID!, newOwner: String!): PlanID!
   }
 `;

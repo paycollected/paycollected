@@ -1,5 +1,6 @@
 import stripeSDK from 'stripe';
 import { GraphQLError } from 'graphql';
+import { DateTimeResolver, DateResolver } from 'graphql-scalars';
 import authResolverWrapper from './authResolverWrapper';
 import {
   planIdScalar, subscriptionIdScalar, emailScalar, usernameScalar, paymentMethodIdScalar,
@@ -26,6 +27,8 @@ import {
 import createPlanResolver from './plans/create.js';
 import deletePlanResolver from './plans/delete.js';
 import cancelTransactionResolver from './payment/cancelTransaction';
+import { retrieveNotificationsResolver, deleteNotificationResolver } from './users/notifications';
+import transferOwnershipResolver from './plans/transferOwnership';
 
 const stripe = stripeSDK(process.env.STRIPE_SECRET_KEY);
 
@@ -52,6 +55,10 @@ export default {
 
   TestClockID: testClockScalar,
 
+  DateTime: DateTimeResolver,
+
+  Date: DateResolver,
+
   Query: {
     viewOnePlan: authResolverWrapper((_, { planId }, { user: { username } }) => (
       viewOnePlanResolver(planId, username)
@@ -59,6 +66,10 @@ export default {
 
     viewAllPlans: authResolverWrapper((_, __, { user: { username } }) => (
       viewAllPlansResolver(username)
+    )),
+
+    retrieveNotifications: authResolverWrapper((_, __, { user: { username } }) => (
+      retrieveNotificationsResolver(username)
     )),
   },
 
@@ -170,5 +181,13 @@ export default {
         subscribeWithSavedCardResolver(paymentMethodId, setupIntentId, password, planId, username)
       )
     ),
+
+    deleteNotification: authResolverWrapper((_, { notificationId }, { user: { username } }) => (
+      deleteNotificationResolver(notificationId, username)
+    )),
+
+    transferOwnership: authResolverWrapper((_, { planId, newOwner }, { user: { username }}) => (
+      transferOwnershipResolver(planId, newOwner, username)
+    )),
   }
 };
