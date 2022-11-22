@@ -162,5 +162,7 @@ export default `#graphql
     ): Plan!
 
     joinPlan(planId: PlanID!, quantity: Int!): PaymentIntentAndPaymentMethods! # returning client secret
+
+    deleteNotification(notificationId: ID!): ID!
   }
 `;

@@ -27,7 +27,7 @@ import {
 import createPlanResolver from './plans/create.js';
 import deletePlanResolver from './plans/delete.js';
 import cancelTransactionResolver from './payment/cancelTransaction';
-import retrieveNotificationsResolver from './users/retrieveNotifications';
+import { retrieveNotificationsResolver, deleteNotificationResolver } from './users/notifications';
 
 const stripe = stripeSDK(process.env.STRIPE_SECRET_KEY);
 
@@ -180,5 +180,9 @@ export default {
         subscribeWithSavedCardResolver(paymentMethodId, setupIntentId, password, planId, username)
       )
     ),
+
+    deleteNotification: authResolverWrapper((_, { notificationId }, { user: { username } }) => (
+      deleteNotificationResolver(notificationId, username)
+    )),
   }
 };

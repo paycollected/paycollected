@@ -1019,20 +1019,29 @@ export function addInvoice(invoiceId, customerId, productId, quantity, chargeDat
 
 export function getNotifications(user) {
   const query = `
-    SELECT
-      COUNT(*) AS count,
-      COALESCE (
-        JSON_AGG (
-          JSON_BUILD_OBJECT (
-            'id', id,
-            'createdAt', created_on,
-            'content', message
-          )
-        ),
-        '[]'::JSON
-      ) AS notifications
+  WITH n AS (
+    SELECT *
     FROM notifications
     WHERE username = $1
+    ORDER BY created_on DESC, id ASC
+  )
+  SELECT
+    COUNT(*) AS count,
+    COALESCE (
+      JSON_AGG (
+        JSON_BUILD_OBJECT (
+          'id', id,
+          'createdAt', created_on,
+          'content', message
+        )
+      ),
+      '[]'::JSON
+    ) AS notifications
+  FROM n;
   `;
   return pool.query(query, [user]);
+}
+
+export function markNotificationAsRead(id, username) {
+  return pool.query('DELETE FROM notifications WHERE id = $1 AND username = $2 RETURNING id', [id, username]);
 }
