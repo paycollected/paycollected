@@ -1031,7 +1031,7 @@ export function getNotifications(user) {
       JSON_AGG (
         JSON_BUILD_OBJECT (
           'id', id,
-          'createdAt', created_on,
+          'createdAt', TO_CHAR (created_on AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.MSZ'),
           'content', message
         )
       ),
