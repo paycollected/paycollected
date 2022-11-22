@@ -1,5 +1,6 @@
 import stripeSDK from 'stripe';
 import { GraphQLError } from 'graphql';
+import { DateTimeResolver } from 'graphql-scalars';
 import authResolverWrapper from './authResolverWrapper';
 import {
   planIdScalar, subscriptionIdScalar, emailScalar, usernameScalar, paymentMethodIdScalar,
@@ -26,6 +27,7 @@ import {
 import createPlanResolver from './plans/create.js';
 import deletePlanResolver from './plans/delete.js';
 import cancelTransactionResolver from './payment/cancelTransaction';
+import retrieveNotificationsResolver from './users/retrieveNotifications';
 
 const stripe = stripeSDK(process.env.STRIPE_SECRET_KEY);
 
@@ -52,6 +54,8 @@ export default {
 
   TestClockID: testClockScalar,
 
+  DateTime: DateTimeResolver,
+
   Query: {
     viewOnePlan: authResolverWrapper((_, { planId }, { user: { username } }) => (
       viewOnePlanResolver(planId, username)
@@ -59,6 +63,10 @@ export default {
 
     viewAllPlans: authResolverWrapper((_, __, { user: { username } }) => (
       viewAllPlansResolver(username)
+    )),
+
+    retrieveNotifications: authResolverWrapper((_, __, { user: { username } }) => (
+      retrieveNotificationsResolver(username)
     )),
   },
 

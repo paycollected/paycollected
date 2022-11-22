@@ -6,10 +6,12 @@ export default `#graphql
   scalar SetupIntentID
   scalar PaymentMethodID
   scalar TestClockID
+  scalar DateTime
 
   type Query {
     viewOnePlan (planId: PlanID!): Plan!
     viewAllPlans: [Plan]!
+    retrieveNotifications: [Notification]!
   }
 
   type PlanMember {
@@ -85,6 +87,12 @@ export default `#graphql
     # does not include user requesting this info
     subscriptionId: SubscriptionID
     quantity: Int! # unit quant of this plan for current user
+  }
+
+  type Notification {
+    id: ID!
+    content: String!
+    createdAt: DateTime!
   }
 
   type Mutation {
