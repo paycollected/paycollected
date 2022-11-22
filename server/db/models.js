@@ -1015,3 +1015,24 @@ export function addInvoice(invoiceId, customerId, productId, quantity, chargeDat
   `;
   return pool.query(query, [invoiceId, customerId, productId, quantity, chargeDate, total]);
 }
+
+
+export function getNotifications(user) {
+  const query = `
+    SELECT
+      COUNT(*) AS count,
+      COALESCE (
+        JSON_AGG (
+          JSON_BUILD_OBJECT (
+            'id', id,
+            'createdAt', created_on,
+            'content', message
+          )
+        ),
+        '[]'::JSON
+      ) AS notifications
+    FROM notifications
+    WHERE username = $1
+  `;
+  return pool.query(query, [user]);
+}

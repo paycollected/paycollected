@@ -11,7 +11,7 @@ export default `#graphql
   type Query {
     viewOnePlan (planId: PlanID!): Plan!
     viewAllPlans: [Plan]!
-    retrieveNotifications: [Notification]!
+    retrieveNotifications: RetrieveNotifications!
   }
 
   type PlanMember {
@@ -93,6 +93,11 @@ export default `#graphql
     id: ID!
     content: String!
     createdAt: DateTime!
+  }
+
+  type RetrieveNotifications {
+    count: Int!
+    notifications: [Notification]!
   }
 
   type Mutation {
