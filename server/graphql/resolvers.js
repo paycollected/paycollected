@@ -1,6 +1,6 @@
 import stripeSDK from 'stripe';
 import { GraphQLError } from 'graphql';
-import { DateTimeResolver } from 'graphql-scalars';
+import { DateTimeResolver, DateResolver } from 'graphql-scalars';
 import authResolverWrapper from './authResolverWrapper';
 import {
   planIdScalar, subscriptionIdScalar, emailScalar, usernameScalar, paymentMethodIdScalar,
@@ -55,6 +55,8 @@ export default {
   TestClockID: testClockScalar,
 
   DateTime: DateTimeResolver,
+
+  Date: DateResolver,
 
   Query: {
     viewOnePlan: authResolverWrapper((_, { planId }, { user: { username } }) => (

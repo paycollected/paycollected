@@ -12,7 +12,7 @@ mutation LogIn ($usernameOrEmail: String!, $password: String!) {
 
 
 mutation CreatePlanMutation (
-  $planName: String!, $cycleFrequency: CycleFrequency!, $perCycleCost: Float!, $startDate: String!, $timeZone: TimeZone!) {
+  $planName: String!, $cycleFrequency: CycleFrequency!, $perCycleCost: Float!, $startDate: Date!, $timeZone: TimeZone!) {
   createPlan(planName: $planName, cycleFrequency: $cycleFrequency, perCycleCost: $perCycleCost, startDate: $startDate, timeZone: $timeZone) {
     planId
   }

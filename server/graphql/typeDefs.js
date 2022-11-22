@@ -7,6 +7,7 @@ export default `#graphql
   scalar PaymentMethodID
   scalar TestClockID
   scalar DateTime
+  scalar Date
 
   type Query {
     viewOnePlan (planId: PlanID!): Plan!
@@ -133,10 +134,9 @@ export default `#graphql
       planName: String!
       cycleFrequency: CycleFrequency!
       perCycleCost: Float!
-      startDate: String! # datestring
+      startDate: Date!
       timeZone: TimeZone!
     ): PlanIdResponse!
-    # returning stripe product ID here, which will be used as code
 
     editPayment: PortalSession!
 
