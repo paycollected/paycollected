@@ -19,7 +19,6 @@ query ViewOnePlan ($planId: PlanID!) {
   }
 }
 
-
 query ViewAllPlans {
   viewAllPlans {
     planId
@@ -39,5 +38,16 @@ query ViewAllPlans {
     }
     quantity
     subscriptionId
+  }
+}
+
+query RetrieveNotifications {
+  retrieveNotifications {
+    count
+    notifications {
+      id
+      content
+      createdAt
+    }
   }
 }
