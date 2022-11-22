@@ -98,7 +98,6 @@ export default function Dashboard({ user, setUser }) {
         <div>
           <div>
             {`You have ${data.retrieveNotifications.count} notifications`}
-            {console.log(showNotifications)}
           </div>
           <button type="button" onClick={() => setShowNotifications(!showNotifications)}>{`${!showNotifications ? 'Show' : 'Hide'} notifications`}</button>
           {showNotifications && (
