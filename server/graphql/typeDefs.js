@@ -64,7 +64,6 @@ export default `#graphql
     YEARLY
   }
 
-
   enum UpdateStatus {
     DELETED
     ARCHIVED

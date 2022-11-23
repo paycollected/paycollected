@@ -53,7 +53,7 @@ afterAll(async () => {
     pgClient.query("DELETE FROM users WHERE username = 'testUser'"),
   ]);
   await pgClient.end();
-})
+});
 
 describe('createPlan mutation', () => {
   let planId;
@@ -106,7 +106,7 @@ describe('createPlan mutation', () => {
       ON p.plan_id = up.plan_id
       JOIN plans_history ph
       ON up.plan_id = ph.plan_id
-      WHERE p.plan_id = $1;
+      WHERE p.plan_id = $1
     `;
 
     const { rows } = await pgClient.query(query, [planId]);

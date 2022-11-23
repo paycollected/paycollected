@@ -4,3 +4,4 @@ client/dist/bundle.js
 server/customCode.js
 .DS_Store
 .env
+coverage
