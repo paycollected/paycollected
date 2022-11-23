@@ -221,7 +221,6 @@ describe('createPlan mutation', () => {
   });
 
   it('Should throw an error if plan cost is less than $10', async () => {
-    const randomStr = 'some random string';
     try {
       await apolloClient.mutate({
         mutation,
@@ -229,6 +228,23 @@ describe('createPlan mutation', () => {
           planName: 'Test Plan',
           cycleFrequency: 'WEEKLY',
           perCycleCost: 9.75,
+          startDate: `${tomorrow.getFullYear()}-${(tomorrow.getMonth() + 1).toString().padStart(2, '0')}-${(tomorrow.getDate()).toString().padStart(2, '0')}`,
+          timeZone: 'EASTERN',
+        }
+      });
+    } catch (e) {
+      expect(e.message).toBe('Invalid cost');
+    }
+  });
+
+  it('Should throw an error if plan cost is not a full number in cents', async () => {
+    try {
+      await apolloClient.mutate({
+        mutation,
+        variables: {
+          planName: 'Test Plan',
+          cycleFrequency: 'WEEKLY',
+          perCycleCost: 12.75982,
           startDate: `${tomorrow.getFullYear()}-${(tomorrow.getMonth() + 1).toString().padStart(2, '0')}-${(tomorrow.getDate()).toString().padStart(2, '0')}`,
           timeZone: 'EASTERN',
         }
