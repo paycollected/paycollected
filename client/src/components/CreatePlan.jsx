@@ -108,10 +108,6 @@ export default function CreatePlan({ setPlanToJoin, setShowMagicLink }) {
             </FormControl>
             <FormControl
               isRequired
-              isInvalid={errors.timeZone}
-            >
-            <FormControl
-              isRequired
               isInvalid={errors.perCycleCost}
             >
               <FormLabel>Per-Cycle Cost</FormLabel>

@@ -91,6 +91,8 @@ afterAll(async () => {
   await Promise.all([
     ...delStripeCustomers,
     pgClient.query(query, [planId]),
+    stripe.prices.update(priceId, { active: false }),
+    stripe.products.update(planId, { active: false }),
   ]);
   await pgClient.end();
 });
