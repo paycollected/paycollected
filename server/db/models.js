@@ -73,7 +73,7 @@ export function addPlan(
         VALUES ($5, $6::TIMESTAMPTZ, $4)
     )
     INSERT INTO user_plan (username, plan_id, plan_owner)
-      VALUES ($1, $5, TRUE)
+      VALUES ($1, $5, True)
   `;
 
   const args = [username, planName, cycleFrequency, perCycleCost, productId, startDate, priceId];
