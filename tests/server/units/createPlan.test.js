@@ -15,7 +15,7 @@ const mutation = gql`
   }`;
 
 beforeAll(async () => {
-  ({ id: customerId } = await stripe.customers.create({
+  ({ id: customerId, status } = await stripe.customers.create({
     email: 'test-user@email.com',
     name: 'Test User',
     metadata: { username: 'testUser' },
@@ -67,16 +67,17 @@ describe('createPlan mutation', () => {
   });
 
   it('Should create a new test plan', async () => {
-    ({ data: { createPlan: { planId } }} = await apolloClient.mutate({
+    ({ data: { createPlan: { planId, status } }} = await apolloClient.mutate({
       mutation,
       variables: {
         planName: 'Test Plan',
         cycleFrequency: 'WEEKLY',
         perCycleCost: 49.87,
         startDate: `${tomorrow.getFullYear()}-${(tomorrow.getMonth() + 1).toString().padStart(2, '0')}-${(tomorrow.getDate()).toString().padStart(2, '0')}`,
-        timeZone: 'EASTERN',
       }
     }));
+
+    expect(status).toBe('CREATED');
 
     const query = `
       SELECT
@@ -156,7 +157,6 @@ describe('createPlan mutation', () => {
           cycleFrequency: 'WEEKLY',
           perCycleCost: 49.87,
           startDate: `${today.getFullYear()}-${(today.getMonth() + 1).toString().padStart(2, '0')}-${(today.getDate()).toString().padStart(2, '0')}`,
-          timeZone: 'EASTERN',
         }
       });
     } catch (e) {
@@ -175,7 +175,6 @@ describe('createPlan mutation', () => {
           cycleFrequency: 'WEEKLY',
           perCycleCost: 49.87,
           startDate: `${day.getFullYear()}-${(day.getMonth() + 1).toString().padStart(2, '0')}-${(day.getDate()).toString().padStart(2, '0')}`,
-          timeZone: 'EASTERN',
         }
       });
     } catch (e) {
@@ -193,7 +192,6 @@ describe('createPlan mutation', () => {
           cycleFrequency: 'WEEKLY',
           perCycleCost: 49.87,
           startDate: random,
-          timeZone: 'EASTERN',
         }
       });
     } catch (e) {
@@ -212,7 +210,6 @@ describe('createPlan mutation', () => {
           cycleFrequency: randomStr,
           perCycleCost: 49.87,
           startDate: `${tomorrow.getFullYear()}-${(tomorrow.getMonth() + 1).toString().padStart(2, '0')}-${(tomorrow.getDate()).toString().padStart(2, '0')}`,
-          timeZone: 'EASTERN',
         }
       });
     } catch (e) {
@@ -229,7 +226,6 @@ describe('createPlan mutation', () => {
           cycleFrequency: 'WEEKLY',
           perCycleCost: 9.75,
           startDate: `${tomorrow.getFullYear()}-${(tomorrow.getMonth() + 1).toString().padStart(2, '0')}-${(tomorrow.getDate()).toString().padStart(2, '0')}`,
-          timeZone: 'EASTERN',
         }
       });
     } catch (e) {
@@ -246,7 +242,6 @@ describe('createPlan mutation', () => {
           cycleFrequency: 'WEEKLY',
           perCycleCost: 12.75982,
           startDate: `${tomorrow.getFullYear()}-${(tomorrow.getMonth() + 1).toString().padStart(2, '0')}-${(tomorrow.getDate()).toString().padStart(2, '0')}`,
-          timeZone: 'EASTERN',
         }
       });
     } catch (e) {
