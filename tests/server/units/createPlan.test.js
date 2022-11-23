@@ -5,17 +5,19 @@ const { formatInTimeZone } = require('date-fns-tz');
 
 let customerId;
 let apolloClient;
+let status;
 
 const mutation = gql`
   mutation CreatePlanMutation (
-    $planName: String!, $cycleFrequency: CycleFrequency!, $perCycleCost: Float!, $startDate: Date!, $timeZone: TimeZone!) {
-    createPlan(planName: $planName, cycleFrequency: $cycleFrequency, perCycleCost: $perCycleCost, startDate: $startDate, timeZone: $timeZone) {
+    $planName: String!, $cycleFrequency: CycleFrequency!, $perCycleCost: Float!, $startDate: Date!) {
+    createPlan(planName: $planName, cycleFrequency: $cycleFrequency, perCycleCost: $perCycleCost, startDate: $startDate) {
       planId
+      status
     }
   }`;
 
 beforeAll(async () => {
-  ({ id: customerId, status } = await stripe.customers.create({
+  ({ id: customerId } = await stripe.customers.create({
     email: 'test-user@email.com',
     name: 'Test User',
     metadata: { username: 'testUser' },
