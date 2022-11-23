@@ -17,17 +17,11 @@ const mutation = gql`
   }`;
 
 beforeAll(async () => {
-  ({ id: customerId } = await stripe.customers.create({
-    email: 'test-user@email.com',
-    name: 'Test User',
-    metadata: { username: 'testUser' },
-  }));
-
   const token = jwt.sign({
     exp: Math.floor(Date.now() / 1000) + (60 * 5),
     user: {
       username: 'testUser',
-      stripeCusId: customerId,
+      stripeCusId: null,
     }
   }, process.env.SIGNIN_SECRET_KEY);
 
@@ -41,17 +35,14 @@ beforeAll(async () => {
 
   const query = `
     INSERT INTO users
-      (username, first_name, last_name, password, email, s_cus_id, verified)
-    VALUES ('testUser', 'Test', 'User', 'secure', 'test-user@email.com', $1, True)`;
+      (username, first_name, last_name, password, email, verified)
+    VALUES ('testUser', 'Test', 'User', 'secure', 'test-user@email.com', True)`;
   await pgClient.connect();
-  await pgClient.query(query, [customerId]);
+  await pgClient.query(query);
 });
 
 afterAll(async () => {
-  await Promise.all([
-    stripe.customers.del(customerId),
-    pgClient.query("DELETE FROM users WHERE username = 'testUser'"),
-  ]);
+  await pgClient.query("DELETE FROM users WHERE username = 'testUser'");
   await pgClient.end();
 });
 
