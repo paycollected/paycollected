@@ -1,6 +1,7 @@
 const { pgClient, stripe } = require('../client.js');
 const { gql, ApolloClient, InMemoryCache } = require('@apollo/client');
 const jwt = require('jsonwebtoken');
+const { deletePlanTests } = require('./deletePlan.js');
 
 class TestUser {
   constructor(firstName, lastName, username, email, quantity = 0, owner = false) {
@@ -196,9 +197,5 @@ describe('After users have joined plan', () => {
     await Promise.all([...cancelSubs, ...detachPmntMethods]);
   });
 
-  describe ('deletePlan mutation', () => {
-    it('setup should be complete', () => {
-      expect(1).toBe(1);
-    })
-  });
+  describe ('deletePlan mutation', deletePlanTest);
 });
