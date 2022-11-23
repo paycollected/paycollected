@@ -4,13 +4,6 @@ import { addPlan } from '../../db/models';
 
 const stripe = stripeSDK(process.env.STRIPE_SECRET_KEY);
 
-// const formatTimeZone = {
-//   EASTERN: 'America/New_York',
-//   CENTRAL: 'America/Chicago',
-//   MOUNTAIN: 'America/Phoenix',
-//   PACIFIC: 'America/Los_Angeles'
-// };
-
 export default async function createPlanResolver(
   planName,
   cycleFrequency,
