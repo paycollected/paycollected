@@ -1,9 +1,18 @@
 const { pgClient, stripe } = require('../client.js');
 const { gql, ApolloClient, InMemoryCache } = require('@apollo/client');
 const jwt = require('jsonwebtoken');
+const { formatInTimeZone } = require('date-fns-tz');
 
 let customerId;
 let apolloClient;
+
+const mutation = gql`
+  mutation CreatePlanMutation (
+    $planName: String!, $cycleFrequency: CycleFrequency!, $perCycleCost: Float!, $startDate: Date!, $timeZone: TimeZone!) {
+    createPlan(planName: $planName, cycleFrequency: $cycleFrequency, perCycleCost: $perCycleCost, startDate: $startDate, timeZone: $timeZone) {
+      planId
+    }
+  }`;
 
 beforeAll(async () => {
   ({ id: customerId } = await stripe.customers.create({
@@ -13,8 +22,7 @@ beforeAll(async () => {
   }));
 
   const token = jwt.sign({
-    // expires after 30 mins
-    exp: Math.floor(Date.now() / 1000) + (60 * 30),
+    exp: Math.floor(Date.now() / 1000) + (60 * 5),
     user: {
       username: 'testUser',
       stripeCusId: customerId,
@@ -48,8 +56,10 @@ afterAll(async () => {
 describe('createPlan mutation', () => {
   let planId;
   let priceId;
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
 
-  afterAll(async() => {
+  afterAll(async () => {
     const promises = [pgClient.query('DELETE FROM plans WHERE plan_id = $1', [planId])];
     if (planId) promises.push(stripe.products.update(planId, { active: false }));
     if (priceId) promises.push(stripe.prices.update(priceId, { active: false }));
@@ -58,24 +68,15 @@ describe('createPlan mutation', () => {
 
   it('Should create a new test plan', async () => {
     ({ data: { createPlan: { planId } }} = await apolloClient.mutate({
-      mutation: gql`
-        mutation CreatePlanMutation (
-          $planName: String!, $cycleFrequency: CycleFrequency!, $perCycleCost: Float!, $startDate: Date!, $timeZone: TimeZone!) {
-          createPlan(planName: $planName, cycleFrequency: $cycleFrequency, perCycleCost: $perCycleCost, startDate: $startDate, timeZone: $timeZone) {
-            planId
-          }
-        }
-      `,
+      mutation,
       variables: {
         planName: 'Test Plan',
         cycleFrequency: 'WEEKLY',
         perCycleCost: 49.87,
-        startDate: '2022-11-23',
+        startDate: `${tomorrow.getFullYear()}-${(tomorrow.getMonth() + 1).toString().padStart(2, '0')}-${(tomorrow.getDate()).toString().padStart(2, '0')}`,
         timeZone: 'EASTERN',
       }
     }));
-
-    expect(1).toBe(1);
 
     const query = `
       SELECT
@@ -93,20 +94,31 @@ describe('createPlan mutation', () => {
         up.plan_owner AS "planOwner",
         up.active AS "subscriptionActive",
         up.subscription_id AS "subscriptionId",
-        up.subscription_item_id AS "subscriptionItemId"
+        up.subscription_item_id AS "subscriptionItemId",
+        ph.start_date AS "priceStartDate",
+        ph.end_date AS "priceEndDate",
+        ph.plan_cost AS "pricePerCycleCost"
       FROM plans p
       JOIN user_plan up
       ON p.plan_id = up.plan_id
+      JOIN plans_history ph
+      ON up.plan_id = ph.plan_id
       WHERE p.plan_id = $1;
     `;
+
     const { rows } = await pgClient.query(query, [planId]);
-    expect(rows.length).toBe(1);
+
+    expect(rows).toHaveLength(1);
+
     const {
       planName, cycleFrequency, perCycleCost, startDate, planActive, quantity, planOwner,
-      subscriptionActive, subscriptionId, subscriptionItemId
+      subscriptionActive, subscriptionId, subscriptionItemId, priceStartDate, priceEndDate,
+      pricePerCycleCost,
     } = rows[0];
     priceId = rows[0].priceId;
+
     const [product, price] = await Promise.all([stripe.products.retrieve(planId), stripe.prices.retrieve(priceId)]);
+
     expect(price.product).toBe(planId);
     expect(price.unit_amount).toBe(perCycleCost);
     expect(price.unit_amount).toBe(4987);
@@ -124,15 +136,105 @@ describe('createPlan mutation', () => {
     expect(quantity).toBe(0);
     expect(planActive).toBe(true);
     expect(subscriptionActive).toBe(true);
-    expect(subscriptionId).toBe(null);
-    expect(subscriptionItemId).toBe(null);
+    expect(subscriptionId).toBeNull();
+    expect(subscriptionItemId).toBeNull();
+    expect(perCycleCost).toBe(pricePerCycleCost);
+    expect(priceEndDate).toBe(Infinity);
+    expect(priceStartDate).toBeInstanceOf(Date);
+    expect(priceStartDate).toMatchObject(startDate);
+    expect(startDate).toMatchObject(priceStartDate);
+    expect(formatInTimeZone(startDate, 'America/New_York', 'yyyy-MM-dd HH:mm:ss zzz')).toBe(`${tomorrow.getFullYear()}-${tomorrow.getMonth() + 1}-${tomorrow.getDate()} 23:59:59 EST`);
   });
 
-  // test('Should throw an error if cycleFrequency is not the correct type', () => {
+  it('Should throw an error if start date is before tomorrow', async () => {
+    const today = new Date();
+    try {
+      await apolloClient.mutate({
+        mutation,
+        variables: {
+          planName: 'Test Plan',
+          cycleFrequency: 'WEEKLY',
+          perCycleCost: 49.87,
+          startDate: `${today.getFullYear()}-${(today.getMonth() + 1).toString().padStart(2, '0')}-${(today.getDate()).toString().padStart(2, '0')}`,
+          timeZone: 'EASTERN',
+        }
+      });
+    } catch (e) {
+      expect(e.message).toBe('Invalid start date');
+    }
+  });
 
-  // });
+  it('Should throw an error if start date is after a month from tomorrow', async () => {
+    const day = new Date();
+    day.setMonth(day.getMonth() + 2);
+    try {
+      await apolloClient.mutate({
+        mutation,
+        variables: {
+          planName: 'Test Plan',
+          cycleFrequency: 'WEEKLY',
+          perCycleCost: 49.87,
+          startDate: `${day.getFullYear()}-${(day.getMonth() + 1).toString().padStart(2, '0')}-${(day.getDate()).toString().padStart(2, '0')}`,
+          timeZone: 'EASTERN',
+        }
+      });
+    } catch (e) {
+      expect(e.message).toBe('Invalid start date');
+    }
+  });
 
-  // test('Should throw an error if startDate is not the correct type', () => {
+  it('Should throw an error if startDate is not the correct type', async () => {
+    const random = 'some random string';
+    try {
+      await apolloClient.mutate({
+        mutation,
+        variables: {
+          planName: 'Test Plan',
+          cycleFrequency: 'WEEKLY',
+          perCycleCost: 49.87,
+          startDate: random,
+          timeZone: 'EASTERN',
+        }
+      });
+    } catch (e) {
+      expect(e.message).toBe(`Variable "$startDate" got invalid value "${random}"; Date cannot represent an invalid date-string ${random}.`)
+    }
+  });
 
-  // })
+  it('Should throw an error if cycleFrequency is not the correct type', async () => {
+    const randomStr = 'some random string';
+
+    try {
+      await apolloClient.mutate({
+        mutation,
+        variables: {
+          planName: 'Test Plan',
+          cycleFrequency: randomStr,
+          perCycleCost: 49.87,
+          startDate: `${tomorrow.getFullYear()}-${(tomorrow.getMonth() + 1).toString().padStart(2, '0')}-${(tomorrow.getDate()).toString().padStart(2, '0')}`,
+          timeZone: 'EASTERN',
+        }
+      });
+    } catch (e) {
+      expect(e.message).toBe(`Variable "$cycleFrequency" got invalid value "${randomStr}"; Value "${randomStr}" does not exist in "CycleFrequency" enum.`);
+    }
+  });
+
+  it('Should throw an error if plan cost is less than $10', async () => {
+    const randomStr = 'some random string';
+    try {
+      await apolloClient.mutate({
+        mutation,
+        variables: {
+          planName: 'Test Plan',
+          cycleFrequency: 'WEEKLY',
+          perCycleCost: 9.75,
+          startDate: `${tomorrow.getFullYear()}-${(tomorrow.getMonth() + 1).toString().padStart(2, '0')}-${(tomorrow.getDate()).toString().padStart(2, '0')}`,
+          timeZone: 'EASTERN',
+        }
+      });
+    } catch (e) {
+      expect(e.message).toBe('Invalid cost');
+    }
+  });
 });
