@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken');
 const { ApolloClient, InMemoryCache } = require('@apollo/client');
 const { pgClient, stripe } = require('../client.js');
-const { delPlanErrors, delPlan } = require('./deletePlan.js');
+const { delPlanErrors, delPlan, archivePlan } = require('./deletePlan.js');
 
 class TestUser {
   constructor(firstName, lastName, username, email, quantity = 0, owner = false) {
@@ -123,11 +123,11 @@ afterAll(async () => {
   await pgClient.end();
 });
 
-describe('After users have joined plan', () => {
+describe('deletePlan mutation', () => {
   let generateApolloClient;
   let generateToken;
 
-  beforeAll(async () => {
+  const beforeSetup = async () => {
     const generateSubsObj = (customer, quantity, paymentMethodId) => ({
       customer,
       items: [{ price: priceId, quantity }],
@@ -185,6 +185,13 @@ describe('After users have joined plan', () => {
       pmntMethods[i].id, { customer: user.stripeId }
     ));
 
+    if (users.every((user) => user.subscriptionId === null)) {
+      // if previous test has successfully deleted/archived plan
+      attachPmntMethods = attachPmntMethods.concat([
+        stripe.prices.update(priceId, { active: true }),
+        stripe.products.update(planId, { active: true }),
+      ]);
+    }
     await Promise.all(attachPmntMethods);
 
     users.forEach((user, i) => { user.pmntMethod = pmntMethods[i].id });
@@ -237,18 +244,22 @@ describe('After users have joined plan', () => {
       },
       cache: new InMemoryCache(),
     }));
-  });
+  };
 
-  afterAll(async () => {
+  const afterSetup = async () => {
     let cancelSubs = [];
     users.forEach((user) => {
       if (user.subscriptionId !== null) cancelSubs.push(stripe.subscriptions.del(user.subscriptionId));
     });
     const detachPmntMethods = users.map((user) => stripe.paymentMethods.detach(user.pmntMethod));
-    await Promise.all([...cancelSubs, ...detachPmntMethods]);
-  });
+    const query = "DELETE FROM user_plan WHERE username LIKE 'testUser_'";
+    await Promise.all([...cancelSubs, ...detachPmntMethods, pgClient.query(query)]);
+  };
 
-  describe('deletePlan mutation', () => {
+  describe('should handle error input', () => {
+    beforeAll(beforeSetup);
+    afterAll(afterSetup);
+
     it('should throw an error if a member tries to delete the plan', () =>
     delPlanErrors(generateApolloClient(generateToken(testUser2)), planId,
       'Non-plan owner cannot perform this action')
@@ -269,9 +280,19 @@ describe('After users have joined plan', () => {
       delPlanErrors(generateApolloClient(generateToken(testUser5)), 'prod_archivedPlanId',
         'Plan has already been archived')
       );
-
-    it('should delete a plan correctly if the plan has never been had an active billing cycle', () =>
-      delPlan(generateApolloClient(generateToken(testUser1)), planId, priceId, testUser1, testUser2, testUser3, testUser4, testUser6)
-      );
   });
+
+  describe('should delete or archive a plan correctly', () => {
+    beforeEach(beforeSetup);
+    afterEach(afterSetup);
+
+    it('should delete a plan if the plan has never had an active billing cycle', () =>
+      delPlan(generateApolloClient(generateToken(testUser1)), planId, priceId, testUser1, testUser2, testUser3, testUser4, testUser6)
+    );
+
+    // it('should archive a plan if the plan has had at least one active billing cycle', () =>
+    //   archivePlan(generateApolloClient(generateToken(testUser1)), planId, priceId, testUser1, testUser2, testUser3, testUser4, testUser6)
+    // );
+  });
+
 });
