@@ -118,7 +118,6 @@ describe('createPlan mutation', () => {
     expect(price.unit_amount).toBe(4987);
     expect(price.billing_scheme).toBe('per_unit');
     expect(price.type).toBe('recurring');
-    expect(price.unit_amount).toBe(perCycleCost);
     expect(price.active).toBe(true);
     expect(price.recurring.interval).toBe(cycleFrequency);
     expect(price.recurring.interval).toBe('week');
