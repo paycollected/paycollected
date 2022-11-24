@@ -22,50 +22,59 @@ async function delPlan(
   apolloClient, planId, priceId, testUser1, testUser2, testUser3, testUser4, testUser6,
   testClockId, currentTime,
 ) {
-  const notificationsQuery = `
-    SELECT username, message FROM notifications WHERE username in ($1, $2, $3, $4, $5)`;
-  const planQuery = `SELECT plan_id FROM plans WHERE plan_id = $1`;
+  // subscription status before calling mutation is 'trialing'
+  const [
+    { status: user1SubsPreStatus }, { status: user2SubsPreStatus }, { status: user3SubsPreStatus },
+    { status: user4SubsPreStatus }
+  ] = await Promise.all([testUser1, testUser2, testUser3, testUser4].map((user) => (
+    stripe.subscriptions.retrieve(user.subscriptionId)
+  )));
 
-  // const before = await stripe.subscriptions.retrieve(testUser1.subscriptionId);
+  expect(user1SubsPreStatus).toBe('trialing');
+  expect(user2SubsPreStatus).toBe('trialing');
+  expect(user3SubsPreStatus).toBe('trialing');
+  expect(user4SubsPreStatus).toBe('trialing');
 
-  // NOTE: The ideal test should get the status of all subscriptions from stripe BEFORE invoking
-  // this mutation and shows that their status is "active". Then grab the status of these subs once
-  // again AFTER the mutation and the status should be "cancelled".
-
-  // However this is currently unachievable using Jest testing environment due to these events
-  // being time-dependent. It takes an hour between an invoice being finalized on Stripe system
-  // and a charge attempt being made (which will convert subs status to active). In theory, we could
-  // mimic this time flow using Stripe test clock. However, advancing "fake time" using Stripe
-  // test clocks also requires waiting a few seconds before time is advanced to the chosen point.
-  // So test assertions made prior to the readiness of the test clock will be incorrect.
-  // Jest and tests generally don't support waiting in real time using setTimeout or setIntervals.
-  // The tests are done running before these setTimeouts are even finished.
-
+  // calling mutation
   const { data: { deletePlan: { planId: resultPlanId, status } } } = await apolloClient.mutate({
     mutation, variables: { planId }
   });
 
-  // const after = await stripe.subscriptions.retrieve(testUser1.subscriptionId);
-
   expect(resultPlanId).toBe(planId);
   expect(status).toBe('DELETED');
 
+
+  const notificationsQuery = `
+    SELECT username, message FROM notifications WHERE username in ($1, $2, $3, $4, $5)`;
+  const planQuery = `SELECT plan_id FROM plans WHERE plan_id = $1`;
+
   const [
-    { active: priceActive },
-    { active: productActive },
-    { rows: notiRows },
-    { rows: planRows }
+    { active: priceActive }, { active: productActive }, { rows: notiRows }, { rows: planRows },
+    { status: user1SubsPostStatus }, { status: user2SubsPostStatus }, { status: user3SubsPostStatus },
+    { status: user4SubsPostStatus }
   ] = await Promise.all([
     stripe.prices.retrieve(priceId),
     stripe.products.retrieve(planId),
     pgClient.query(notificationsQuery, [
-      testUser1.username, testUser2.username, testUser3.username, testUser4.username, testUser6.username
+      testUser1.username, testUser2.username, testUser3.username, testUser4.username,
+      testUser6.username,
     ]),
     pgClient.query(planQuery, [planId]),
+    ...[testUser1, testUser2, testUser3, testUser4].map((user) => (
+      stripe.subscriptions.retrieve(user.subscriptionId)
+    ))
   ]);
 
+  // subscription status after calling mutation is 'cancelled'
+  expect(user1SubsPostStatus).toBe('canceled');
+  expect(user2SubsPostStatus).toBe('canceled');
+  expect(user3SubsPostStatus).toBe('canceled');
+  expect(user4SubsPostStatus).toBe('canceled');
+
+  // price and product ID are archived on stripe system
   expect(priceActive).toBe(false);
   expect(productActive).toBe(false);
+
   expect(planRows).toHaveLength(0);
   expect(notiRows).toHaveLength(3);
   expect(notiRows.filter((row) => row.username === 'testUser2')[0].message).toBe('Test1 has deleted plan Test Plan. This plan will no longer be available.');
@@ -88,6 +97,17 @@ async function archivePlan(
       VALUES ($1, $2, $3, $4, CURRENT_TIMESTAMP, $5)
   `;
   await pgClient.query(addInvoice, ['randomInvoiceId', testUser1.username, planId, testUser1.quantity, 105]);
+
+  currentTime = currentTime + 60 * 60 * 24;
+  try {
+    await stripe.testHelpers.testClocks.advance(
+      testClockId,
+      { frozen_time: currentTime }
+    );
+  } catch (e) {
+    console.log(e);
+  }
+await new Promise(resolve => setTimeout(resolve, 12000));
 
   const { data: { deletePlan: { planId: resultPlanId, status } } } = await apolloClient.mutate({
     mutation, variables: { planId }
