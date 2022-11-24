@@ -181,15 +181,23 @@ describe('deletePlan mutation', () => {
       ]
     );
 
-    let attachPmntMethods = users.map((user, i) => stripe.paymentMethods.attach(
+    const attachPmntMethods = users.map((user, i) => stripe.paymentMethods.attach(
       pmntMethods[i].id, { customer: user.stripeId }
     ));
 
     try {
       await Promise.all(attachPmntMethods);
     } catch (e) {
-      console.log('-------->', e);
+      console.log(e);
     }
+
+    const createSetupIntents = users.map((user, i) => stripe.setupIntents.create({
+      customer: user.stripeId,
+      confirm: true,
+      payment_method: pmntMethods[i].id,
+    }));
+
+    const setupIntents = await Promise.all(createSetupIntents);
 
     users.forEach((user, i) => { user.pmntMethod = pmntMethods[i].id });
 
