@@ -39,23 +39,16 @@ const testUser4 = new TestUser('Test4', 'User4', 'testUser4', 'test-user4@email.
 const testUser5 = new TestUser('Test5', 'User5', 'testUser5', 'test-user5@email.com');
 const testUser6 = new TestUser('Test6', 'User6', 'testUser6', 'test-user6@email.com');
 const users = [testUser1, testUser2, testUser3, testUser4];
-let priceId, planId, testClockId, currentTime;
+let currentTime = new Date();
+currentTime = Math.ceil(currentTime.valueOf() / 1000);
+let priceId, planId;
 
 beforeAll(async () => {
-  currentTime = new Date();
-  currentTime = Math.ceil(currentTime.valueOf() / 1000);
-
-  ({ id: testClockId } = await stripe.testHelpers.testClocks.create({
-    frozen_time: currentTime,
-    name: 'Simulation',
-  }));
-
   const createStripeCustomers = users.map((user) => (
     stripe.customers.create({
       email: user.email,
       name: user.fullName,
       metadata: { username: user.username },
-      test_clock: testClockId,
     })
   ));
 
@@ -128,13 +121,12 @@ afterAll(async () => {
     pgClient.query(query, [planId]),
     stripe.prices.update(priceId, { active: false }),
     stripe.products.update(planId, { active: false }),
-    stripe.testHelpers.testClocks.del(testClockId),
   ]);
   await pgClient.end();
 });
 
 describe('deletePlan mutation', () => {
-  jest.setTimeout(30000);
+  jest.setTimeout(20000);
 
   let generateApolloClient;
   let generateToken;
@@ -153,6 +145,14 @@ describe('deletePlan mutation', () => {
       trial_end: currentTime + 60 * 60 * 24,
     });
 
+    // NOTE that this approach is a bit different from our actual application
+    // Here we create a payment method, then attach it to a customer during setup,
+    // then detach the payment method during teardown
+    // In our actual app, we first create a setupIntent on the backend, then
+    // use StripeJS on the frontend to confirm that setupIntent. The payment
+    // details are abstracted away from us, which is the recommended approach by Stripe
+    // Because there is no frontend in these tests to collect payment details
+    // like the actual integration, we'll use the following approach
     const pmntMethods = await Promise.all(
       [
         stripe.paymentMethods.create({
@@ -204,15 +204,6 @@ describe('deletePlan mutation', () => {
       console.log(e);
     }
 
-    // const createSetupIntents = users.map((user, i) => stripe.setupIntents.create({
-    //   customer: user.stripeId,
-    //   confirm: true,
-    //   payment_method: pmntMethods[i].id,
-    // }));
-
-    // const setupIntents = await Promise.all(createSetupIntents);
-    // console.log('------> setupIntents', setupIntents);
-
     users.forEach((user, i) => { user.pmntMethod = pmntMethods[i].id });
 
     const createSubs = users.map((user, i) => (stripe.subscriptions.create(
@@ -251,16 +242,6 @@ describe('deletePlan mutation', () => {
     } catch (e) {
       console.log(e);
     }
-
-    // currentTime = currentTime + 60 * 60;
-    // try {
-    //   await stripe.testHelpers.testClocks.advance(
-    //     testClockId,
-    //     { frozen_time: currentTime }
-    //   );
-    // } catch (e) {
-    //   console.log(e);
-    // }
 
     generateToken = (user) => (
       jwt.sign({
@@ -304,11 +285,13 @@ describe('deletePlan mutation', () => {
       ]
     }
     const deleteUserPlanAndNotifications = `
-    WITH del_noti AS (DELETE FROM notifications WHERE username LIKE 'testUser_')
-      DELETE FROM user_plan WHERE username LIKE 'testUser_'
+    WITH del_noti AS (DELETE FROM notifications WHERE username LIKE 'testUser_'),
+      del_invoices AS (DELETE FROM invoices WHERE plan_id = $1)
+    DELETE FROM user_plan WHERE username LIKE 'testUser_'
     `;
+
     try {
-      await Promise.all([...promises, pgClient.query(deleteUserPlanAndNotifications)]);
+      await Promise.all([...promises, pgClient.query(deleteUserPlanAndNotifications, [planId])]);
     } catch (e) {
       console.log(e);
     }
@@ -319,8 +302,8 @@ describe('deletePlan mutation', () => {
     afterAll(afterSetup);
 
     it('should throw an error if a member tries to delete the plan', () =>
-    delPlanErrors(generateApolloClient(generateToken(testUser2)), planId,
-      'Non-plan owner cannot perform this action')
+      delPlanErrors(generateApolloClient(generateToken(testUser2)), planId,
+        'Non-plan owner cannot perform this action')
     );
 
     it('should throw an error if a non-member tries to delete the plan', () =>
@@ -345,11 +328,13 @@ describe('deletePlan mutation', () => {
     afterEach(afterSetup);
 
     it('should delete a plan if the plan has never had an active billing cycle', () =>
-      delPlan(generateApolloClient(generateToken(testUser1)), planId, priceId, testUser1, testUser2, testUser3, testUser4, testUser6, testClockId, currentTime)
+      delPlan(generateApolloClient(generateToken(testUser1)), planId, priceId, testUser6, users,
+      )
     );
 
-    // it('should archive a plan if the plan has had at least one active billing cycle', () =>
-    //   archivePlan(generateApolloClient(generateToken(testUser1)), planId, priceId, testUser1, testUser2, testUser3, testUser4, testUser6)
-    // );
+    it('should archive a plan if the plan has had at least one active billing cycle', () =>
+      archivePlan(generateApolloClient(generateToken(testUser1)), planId, priceId, testUser6, users,
+      )
+    );
   });
 });
