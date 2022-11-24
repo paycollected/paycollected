@@ -1,7 +1,7 @@
-const { pgClient, stripe } = require('../client.js');
-const { gql, ApolloClient, InMemoryCache } = require('@apollo/client');
 const jwt = require('jsonwebtoken');
-const { deletePlanTests } = require('./deletePlan.js');
+const { ApolloClient, InMemoryCache } = require('@apollo/client');
+const { pgClient, stripe } = require('../client.js');
+const { delPlanErrors, delPlan } = require('./deletePlan.js');
 
 class TestUser {
   constructor(firstName, lastName, username, email, quantity = 0, owner = false) {
@@ -27,10 +27,17 @@ class TestUser {
   }
 }
 
+/* testUser1 = owner of plan;
+testUsers 2 - 4 are active members;
+testUser5 is NOT member; but former member of an ARCHIVED plan
+testUser6 used to be a member of active plan but subscription has been archived
+*/
 const testUser1 = new TestUser('Test1', 'User1', 'testUser1', 'test-user1@email.com', 2, true);
-const testUser2 = new TestUser('Test2', 'User2', 'testUser2', 'test-user2@email.com', 1, false);
-const testUser3 = new TestUser('Test3', 'User3', 'testUser3', 'test-user3@email.com', 3, false);
-const testUser4 = new TestUser('Test4', 'User4', 'testUser4', 'test-user4@email.com', 2, false);
+const testUser2 = new TestUser('Test2', 'User2', 'testUser2', 'test-user2@email.com', 1);
+const testUser3 = new TestUser('Test3', 'User3', 'testUser3', 'test-user3@email.com', 3);
+const testUser4 = new TestUser('Test4', 'User4', 'testUser4', 'test-user4@email.com', 2);
+const testUser5 = new TestUser('Test5', 'User5', 'testUser5', 'test-user5@email.com');
+const testUser6 = new TestUser('Test6', 'User6', 'testUser6', 'test-user6@email.com');
 const users = [testUser1, testUser2, testUser3, testUser4];
 let priceId, planId;
 
@@ -65,12 +72,28 @@ beforeAll(async () => {
       ($1, $2, $3, 'secure', $4, $5, True),
       ($6, $7, $8, 'secure', $9, $10, True),
       ($11, $12, $13, 'secure', $14, $15, True),
-      ($16, $17, $18, 'secure', $19, $20, True)
+      ($16, $17, $18, 'secure', $19, $20, True),
+      ($21, $22, $23, 'secure', $24, null, True),
+      ($25, $26, $27, 'secure', $28, null, True)
     )
     INSERT INTO plans (
       plan_id, price_id, plan_name, cycle_frequency, per_cycle_cost, start_date, active
-    ) VALUES (
-      $21, $22, 'Test Plan', 'weekly', 4000, CURRENT_TIMESTAMP, True
+    ) VALUES
+    ( $29,
+      $30,
+      'Test Plan',
+      'weekly',
+      4000,
+      CURRENT_TIMESTAMP,
+      True
+    ),
+    ( 'prod_archivedPlanId',
+      'archivedPriceId',
+      'Some Archived Plan',
+      'monthly',
+      7489,
+      CURRENT_TIMESTAMP - interval '1 year',
+      False
     )
   `;
   await pgClient.connect();
@@ -79,6 +102,8 @@ beforeAll(async () => {
     ...testUser2.getPgParamsForUsers(),
     ...testUser3.getPgParamsForUsers(),
     ...testUser4.getPgParamsForUsers(),
+    ...testUser5.getPgParamsForUsers().slice(0, -1),
+    ...testUser6.getPgParamsForUsers().slice(0, -1),
     product, priceId,
   ]);
 });
@@ -86,7 +111,7 @@ beforeAll(async () => {
 afterAll(async () => {
   const delStripeCustomers = users.map((user) => stripe.customers.del(user.stripeId));
   const query = `
-    WITH del AS (DELETE FROM plans WHERE plan_id = $1)
+    WITH del AS (DELETE FROM plans WHERE plan_id IN ($1, 'prod_archivedPlanId'))
     DELETE FROM users WHERE username LIKE 'testUser_'
   `;
   await Promise.all([
@@ -99,6 +124,9 @@ afterAll(async () => {
 });
 
 describe('After users have joined plan', () => {
+  let generateApolloClient;
+  let generateToken;
+
   beforeAll(async () => {
     const generateSubsObj = (customer, quantity, paymentMethodId) => ({
       customer,
@@ -174,12 +202,14 @@ describe('After users have joined plan', () => {
 
     const query = `
       INSERT INTO user_plan (
-        username, plan_id, plan_owner, quantity, subscription_id, subscription_item_id
+        username, plan_id, plan_owner, quantity, subscription_id, subscription_item_id, active
       ) VALUES
-        ($1, $21, $2, $3, $4, $5),
-        ($6, $21, $7, $8, $9, $10),
-        ($11, $21, $12, $13, $14, $15),
-        ($16, $21, $17, $18, $19, $20)
+        ($1, $24, $2, $3, $4, $5, True),
+        ($6, $24, $7, $8, $9, $10, True),
+        ($11, $24, $12, $13, $14, $15, True),
+        ($16, $24, $17, $18, $19, $20, True),
+        ($21, $24, $22, $23, null, null, False),
+        ($25, 'prod_archivedPlanId', True, 0, null, null, False)
     `;
 
     await pgClient.query(query, [
@@ -187,15 +217,61 @@ describe('After users have joined plan', () => {
       ...testUser2.getPgParamsForUserPlan(),
       ...testUser3.getPgParamsForUserPlan(),
       ...testUser4.getPgParamsForUserPlan(),
+      ...testUser6.getPgParamsForUserPlan().slice(0, -2),
       planId,
+      testUser5.username,
     ]);
+
+    generateToken = (user) => (
+      jwt.sign({
+        exp: Math.floor(Date.now() / 1000) + (60 * 5),
+        user: { username: user.username, stripeCusId: user.stripeId },
+      },
+      process.env.SIGNIN_SECRET_KEY)
+    );
+
+    generateApolloClient = (authHeader) => (new ApolloClient({
+      uri: 'http://localhost:5647/graphql',
+      headers: {
+        'Authorization': authHeader,
+      },
+      cache: new InMemoryCache(),
+    }));
   });
 
   afterAll(async () => {
-    const cancelSubs = users.map((user) => stripe.subscriptions.del(user.subscriptionId));
+    let cancelSubs = [];
+    users.forEach((user) => {
+      if (user.subscriptionId !== null) cancelSubs.push(stripe.subscriptions.del(user.subscriptionId));
+    });
     const detachPmntMethods = users.map((user) => stripe.paymentMethods.detach(user.pmntMethod));
     await Promise.all([...cancelSubs, ...detachPmntMethods]);
   });
 
-  describe ('deletePlan mutation', deletePlanTest);
+  describe('deletePlan mutation', () => {
+    it('should throw an error if a member tries to delete the plan', () =>
+    delPlanErrors(generateApolloClient(generateToken(testUser2)), planId,
+      'Non-plan owner cannot perform this action')
+    );
+
+    it('should throw an error if a non-member tries to delete the plan', () =>
+      delPlanErrors(generateApolloClient(generateToken(testUser5)), planId,
+        'User is not on plan')
+      );
+
+    it(`should throw an error if a former member whose subscription has already
+    been archived tries to delete plan`, () =>
+      delPlanErrors(generateApolloClient(generateToken(testUser6)), planId,
+        'Subscription has already been archived')
+      );
+
+    it('should throw an error if an owner tries to delete an archived plan', () =>
+      delPlanErrors(generateApolloClient(generateToken(testUser5)), 'prod_archivedPlanId',
+        'Plan has already been archived')
+      );
+
+    it('should delete a plan correctly if the plan has never been had an active billing cycle', () =>
+      delPlan(generateApolloClient(generateToken(testUser1)), planId, priceId, testUser1, testUser2, testUser3, testUser4, testUser6)
+      );
+  });
 });
