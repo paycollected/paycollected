@@ -19,15 +19,33 @@ async function delPlanErrors(apolloClient, planId, expectedError) {
 }
 
 async function delPlan(
-  apolloClient, planId, priceId, testUser1, testUser2, testUser3, testUser4, testUser6
+  apolloClient, planId, priceId, testUser1, testUser2, testUser3, testUser4, testUser6,
+  testClockId, currentTime,
 ) {
   const notificationsQuery = `
     SELECT username, message FROM notifications WHERE username in ($1, $2, $3, $4, $5)`;
   const planQuery = `SELECT plan_id FROM plans WHERE plan_id = $1`;
 
+  // const before = await stripe.subscriptions.retrieve(testUser1.subscriptionId);
+
+  // NOTE: The ideal test should get the status of all subscriptions from stripe BEFORE invoking
+  // this mutation and shows that their status is "active". Then grab the status of these subs once
+  // again AFTER the mutation and the status should be "cancelled".
+
+  // However this is currently unachievable using Jest testing environment due to these events
+  // being time-dependent. It takes an hour between an invoice being finalized on Stripe system
+  // and a charge attempt being made (which will convert subs status to active). In theory, we could
+  // mimic this time flow using Stripe test clock. However, advancing "fake time" using Stripe
+  // test clocks also requires waiting a few seconds before time is advanced to the chosen point.
+  // So test assertions made prior to the readiness of the test clock will be incorrect.
+  // Jest and tests generally don't support waiting in real time using setTimeout or setIntervals.
+  // The tests are done running before these setTimeouts are even finished.
+
   const { data: { deletePlan: { planId: resultPlanId, status } } } = await apolloClient.mutate({
     mutation, variables: { planId }
   });
+
+  // const after = await stripe.subscriptions.retrieve(testUser1.subscriptionId);
 
   expect(resultPlanId).toBe(planId);
   expect(status).toBe('DELETED');

@@ -39,14 +39,23 @@ const testUser4 = new TestUser('Test4', 'User4', 'testUser4', 'test-user4@email.
 const testUser5 = new TestUser('Test5', 'User5', 'testUser5', 'test-user5@email.com');
 const testUser6 = new TestUser('Test6', 'User6', 'testUser6', 'test-user6@email.com');
 const users = [testUser1, testUser2, testUser3, testUser4];
-let priceId, planId;
+let priceId, planId, testClockId, currentTime;
 
 beforeAll(async () => {
+  currentTime = new Date();
+  currentTime = Math.ceil(currentTime.valueOf() / 1000);
+
+  ({ id: testClockId } = await stripe.testHelpers.testClocks.create({
+    frozen_time: currentTime,
+    name: 'Simulation',
+  }));
+
   const createStripeCustomers = users.map((user) => (
     stripe.customers.create({
       email: user.email,
       name: user.fullName,
-      metadata: { username: user.username }
+      metadata: { username: user.username },
+      test_clock: testClockId,
     })
   ));
 
@@ -55,7 +64,7 @@ beforeAll(async () => {
       stripe.prices.create({
         currency: 'usd', unit_amount: 525, recurring: { interval: 'week' },
         product_data: { name: 'Test Plan'},
-      })
+      }),
   ]);
 
   const { id, product } = resolvedPromises[4];
@@ -119,6 +128,7 @@ afterAll(async () => {
     pgClient.query(query, [planId]),
     stripe.prices.update(priceId, { active: false }),
     stripe.products.update(planId, { active: false }),
+    stripe.testHelpers.testClocks.del(testClockId),
   ]);
   await pgClient.end();
 });
@@ -238,6 +248,15 @@ describe('deletePlan mutation', () => {
       console.log(e);
     }
 
+    // currentTime = currentTime + 60 * 60;
+    // try {
+    //   await stripe.testHelpers.testClocks.advance(
+    //     testClockId,
+    //     { frozen_time: currentTime }
+    //   );
+    // } catch (e) {
+    //   console.log(e);
+    // }
 
     generateToken = (user) => (
       jwt.sign({
@@ -322,12 +341,11 @@ describe('deletePlan mutation', () => {
     afterEach(afterSetup);
 
     it('should delete a plan if the plan has never had an active billing cycle', () =>
-      delPlan(generateApolloClient(generateToken(testUser1)), planId, priceId, testUser1, testUser2, testUser3, testUser4, testUser6)
+      delPlan(generateApolloClient(generateToken(testUser1)), planId, priceId, testUser1, testUser2, testUser3, testUser4, testUser6, testClockId, currentTime)
     );
 
     it('should archive a plan if the plan has had at least one active billing cycle', () =>
       archivePlan(generateApolloClient(generateToken(testUser1)), planId, priceId, testUser1, testUser2, testUser3, testUser4, testUser6)
     );
   });
-
 });
