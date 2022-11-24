@@ -181,18 +181,15 @@ describe('deletePlan mutation', () => {
       ]
     );
 
-    const attachPmntMethods = users.map((user, i) => stripe.paymentMethods.attach(
+    let attachPmntMethods = users.map((user, i) => stripe.paymentMethods.attach(
       pmntMethods[i].id, { customer: user.stripeId }
     ));
 
-    if (users.every((user) => user.subscriptionId === null)) {
-      // if previous test has successfully deleted/archived plan
-      attachPmntMethods = attachPmntMethods.concat([
-        stripe.prices.update(priceId, { active: true }),
-        stripe.products.update(planId, { active: true }),
-      ]);
+    try {
+      await Promise.all(attachPmntMethods);
+    } catch (e) {
+      console.log('-------->', e);
     }
-    await Promise.all(attachPmntMethods);
 
     users.forEach((user, i) => { user.pmntMethod = pmntMethods[i].id });
 
@@ -219,15 +216,20 @@ describe('deletePlan mutation', () => {
         ($25, 'prod_archivedPlanId', True, 0, null, null, False)
     `;
 
-    await pgClient.query(query, [
-      ...testUser1.getPgParamsForUserPlan(),
-      ...testUser2.getPgParamsForUserPlan(),
-      ...testUser3.getPgParamsForUserPlan(),
-      ...testUser4.getPgParamsForUserPlan(),
-      ...testUser6.getPgParamsForUserPlan().slice(0, -2),
-      planId,
-      testUser5.username,
-    ]);
+    try {
+      await pgClient.query(query, [
+        ...testUser1.getPgParamsForUserPlan(),
+        ...testUser2.getPgParamsForUserPlan(),
+        ...testUser3.getPgParamsForUserPlan(),
+        ...testUser4.getPgParamsForUserPlan(),
+        ...testUser6.getPgParamsForUserPlan().slice(0, -2),
+        planId,
+        testUser5.username,
+      ]);
+    } catch (e) {
+      console.log(e);
+    }
+
 
     generateToken = (user) => (
       jwt.sign({
@@ -247,13 +249,38 @@ describe('deletePlan mutation', () => {
   };
 
   const afterSetup = async () => {
-    let cancelSubs = [];
-    users.forEach((user) => {
-      if (user.subscriptionId !== null) cancelSubs.push(stripe.subscriptions.del(user.subscriptionId));
-    });
-    const detachPmntMethods = users.map((user) => stripe.paymentMethods.detach(user.pmntMethod));
-    const query = "DELETE FROM user_plan WHERE username LIKE 'testUser_'";
-    await Promise.all([...cancelSubs, ...detachPmntMethods, pgClient.query(query)]);
+    let promises = users.map((user) => stripe.paymentMethods.detach(user.pmntMethod));
+    const insertPlan = `
+    INSERT INTO plans (
+      plan_id, price_id, plan_name, cycle_frequency, per_cycle_cost, start_date, active
+    ) VALUES
+    ($1, $2, 'Test Plan', 'weekly', 4000, CURRENT_TIMESTAMP, True)
+    ON CONFLICT (plan_id) DO NOTHING
+  `;
+    if (users.every((user) => user.subscriptionId === null)) {
+      // if previous test has successfully deleted/archived plan
+      // want to reset up stripe + our db
+      promises = [
+        ...promises,
+        stripe.prices.update(priceId, { active: true }),
+        stripe.products.update(planId, { active: true }),
+        pgClient.query(insertPlan, [planId, priceId]),
+      ];
+    } else {
+      promises = [
+        ...promises,
+        ...users.map((user) => stripe.subscriptions.del(user.subscriptionId))
+      ]
+    }
+    const deleteUserPlanAndNotifications = `
+    WITH del_noti AS (DELETE FROM notifications WHERE username LIKE 'testUser_')
+      DELETE FROM user_plan WHERE username LIKE 'testUser_'
+    `;
+    try {
+      await Promise.all([...promises, pgClient.query(deleteUserPlanAndNotifications)]);
+    } catch (e) {
+      console.log(e);
+    }
   };
 
   describe('should handle error input', () => {
@@ -290,9 +317,9 @@ describe('deletePlan mutation', () => {
       delPlan(generateApolloClient(generateToken(testUser1)), planId, priceId, testUser1, testUser2, testUser3, testUser4, testUser6)
     );
 
-    // it('should archive a plan if the plan has had at least one active billing cycle', () =>
-    //   archivePlan(generateApolloClient(generateToken(testUser1)), planId, priceId, testUser1, testUser2, testUser3, testUser4, testUser6)
-    // );
+    it('should archive a plan if the plan has had at least one active billing cycle', () =>
+      archivePlan(generateApolloClient(generateToken(testUser1)), planId, priceId, testUser1, testUser2, testUser3, testUser4, testUser6)
+    );
   });
 
 });

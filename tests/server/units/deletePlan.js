@@ -65,8 +65,6 @@ async function delPlan(
 async function archivePlan(
   apolloClient, planId, priceId, testUser1, testUser2, testUser3, testUser4, testUser6
 ) {
-
-
   const addInvoice = `
     INSERT INTO invoices (invoice_id, username, plan_id, quantity, charge_date, paid_amount)
       VALUES ($1, $2, $3, $4, CURRENT_TIMESTAMP, $5)
@@ -79,7 +77,7 @@ async function archivePlan(
 
   const notificationsQuery = `
     SELECT username, message FROM notifications WHERE username in ($1, $2, $3, $4, $5)`;
-  const planQuery = `SELECT plan_id FROM plans WHERE plan_id = $1`;
+  const planQuery = `SELECT active FROM plans WHERE plan_id = $1`;
 
   expect(resultPlanId).toBe(planId);
   expect(status).toBe('ARCHIVED');
@@ -100,17 +98,15 @@ async function archivePlan(
 
   expect(priceActive).toBe(false);
   expect(productActive).toBe(false);
-  expect(planRows).toHaveLength(0);
+  expect(planRows).toHaveLength(1);
+  expect(planRows[0].active).toBe(false);
   expect(notiRows).toHaveLength(3);
   expect(notiRows.filter((row) => row.username === 'testUser2')[0].message).toBe(
-    `Test1 has archived plan Test Plan. This plan will no longer be available,
-    but you can still access its past invoices and activity.`);
+    'Test1 has archived plan Test Plan. This plan will no longer be available, but you can still access its past invoices and activity.');
   expect(notiRows.filter((row) => row.username === 'testUser3')[0].message).toBe(
-    `Test1 has archived plan Test Plan. This plan will no longer be available,
-    but you can still access its past invoices and activity.`);
+    'Test1 has archived plan Test Plan. This plan will no longer be available, but you can still access its past invoices and activity.');
   expect(notiRows.filter((row) => row.username === 'testUser4')[0].message).toBe(
-    `Test1 has archived plan Test Plan. This plan will no longer be available,
-    but you can still access its past invoices and activity.`);
+    'Test1 has archived plan Test Plan. This plan will no longer be available, but you can still access its past invoices and activity.');
   expect(notiRows.filter((row) => row.username === 'testUser1')).toHaveLength(0);
   expect(notiRows.filter((row) => row.username === 'testUser6')).toHaveLength(0);
 
