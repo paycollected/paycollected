@@ -76,7 +76,7 @@ async function delPlan(apolloClient, planId, priceId, testUser6, users) {
   expect(notiRows.filter((row) => row.username === 'testUser1')).toHaveLength(0);
   expect(notiRows.filter((row) => row.username === 'testUser6')).toHaveLength(0);
 
-  // reset subscription ID so that clean up function
+  // reset subscription ID so that teardown function
   // will not call Stripe API to cancel nonexisting subscription IDs
   users.forEach((user) => { user.subscriptionId = null; });
 }
@@ -159,7 +159,7 @@ async function archivePlan(apolloClient, planId, priceId, testUser6, users) {
   expect(notiRows.filter((row) => row.username === 'testUser1')).toHaveLength(0);
   expect(notiRows.filter((row) => row.username === 'testUser6')).toHaveLength(0);
 
-  // reset subscription ID so that clean up function
+  // reset subscription ID so that teardown function
   // will not call Stripe API to cancel nonexisting subscription IDs
   users.forEach((user) => { user.subscriptionId = null; });
 }

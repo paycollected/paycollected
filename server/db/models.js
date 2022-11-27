@@ -892,6 +892,7 @@ export function getProductInfoAndInvoiceCheckNewOwner(username, subscriptionId, 
       ( SELECT invoice_id
           FROM invoices
           WHERE plan_id = (SELECT plan_id FROM user_plan WHERE subscription_id = $1)
+            AND username = $2
           LIMIT 1
       ) AS "invoiceId",
       ( SELECT plan_owner
