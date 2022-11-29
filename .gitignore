@@ -5,3 +5,4 @@ server/customCode.js
 .DS_Store
 .env
 coverage
+client/public
