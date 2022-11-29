@@ -4,7 +4,7 @@ import jwtDecode from 'jwt-decode';
 import Home from './components/Home.jsx';
 import Login from './pages/Login.jsx';
 import Signup from './components/Signup.jsx';
-import Dashboard from './components/Dashboard.jsx';
+import Dashboard from './pages/Dashboard.jsx';
 import CreatePlan from './components/CreatePlan.jsx';
 import JoinPlan from './components/JoinPlan.jsx';
 import Cards from './components/Cards.jsx';

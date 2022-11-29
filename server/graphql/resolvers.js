@@ -133,7 +133,7 @@ export default {
       const { stripeCusId } = user;
       try {
         const { url } = await stripe.billingPortal.sessions.create({
-          stripeCusId,
+          customer: stripeCusId,
           return_url: `${process.env.HOST}/dashboard/`,
         });
         return { portalSessionURL: url };

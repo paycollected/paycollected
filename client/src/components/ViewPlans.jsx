@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { useQuery, useMutation } from '@apollo/client';
+import { useQuery } from '@apollo/client';
 import {
   Flex, Box, Grid, GridItem, Heading, Button, useClipboard, UnorderedList, ListItem, Tooltip
 } from '@chakra-ui/react';
 import { CopyIcon } from '@chakra-ui/icons';
 import { ViewAllPlans as GET_ALL_PLANS } from '../graphql/queries.gql';
-import { EditPayment as EDIT_PAYMENT } from '../graphql/mutations.gql';
 import ConfirmCancel from './ConfirmCancel.jsx';
 import ModifyQuantity from './ModifyQuantity.jsx';
 import ConfirmDeletePlan from './ConfirmDeletePlan.jsx';
@@ -21,20 +20,8 @@ export default function ViewPlans({ user }) {
     nextFetchPolicy: 'cache-only',
   });
 
-  const [
-    submitEditPayment,
-    { loading: editPaymentLoading, error: editPaymentError, data: editPaymentData }
-  ] = useMutation(EDIT_PAYMENT, {
-    onCompleted: ({ editPayment }) => {
-      const { portalSessionURL } = editPayment;
-      window.location.replace(portalSessionURL);
-    },
-    onError: ({ message }) => { console.log(message); }
-  });
-
   return (
     <div>
-      <Button onClick={() => { submitEditPayment(); }}>Manage Payment Methods</Button>
       <Flex justifyContent="center">
         <Box p={2} my={8} width="60%" bg="white" borderRadius="15">
           <Box textAlign="center">

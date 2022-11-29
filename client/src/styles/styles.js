@@ -1,4 +1,5 @@
 import { defineStyle, defineStyleConfig } from '@chakra-ui/react';
+import styled from 'styled-components';
 
 export const buttonTheme = defineStyleConfig({
   baseStyle: {
@@ -52,3 +53,9 @@ export const inputTheme = defineStyleConfig({
     width: '40%'
   },
 });
+
+export const NavBarBtn = styled.button`
+  &:hover {
+    text-decoration: underline;
+  }
+`;
