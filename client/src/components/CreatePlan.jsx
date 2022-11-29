@@ -41,7 +41,7 @@ export default function CreatePlan({ setPlanToJoin, setShowMagicLink }) {
   });
 
   const onSubmit = ({
-    planName, cycleFrequency, perCycleCost, timeZone
+    planName, cycleFrequency, perCycleCost
   }) => {
     createNewPlan({
       variables: {
@@ -49,7 +49,6 @@ export default function CreatePlan({ setPlanToJoin, setShowMagicLink }) {
         cycleFrequency: cycleFrequency.toUpperCase(),
         perCycleCost: Number(perCycleCost),
         startDate,
-        timeZone: timeZone.toUpperCase(),
       },
     });
   };
@@ -109,30 +108,6 @@ export default function CreatePlan({ setPlanToJoin, setShowMagicLink }) {
             </FormControl>
             <FormControl
               isRequired
-              isInvalid={errors.timeZone}
-            >
-              <FormLabel>Time Zone</FormLabel>
-              <Select
-                name="timeZone"
-                placeholder="Select a Time Zone"
-                {...register('timeZone', { required: 'Select time zone' })}
-              >
-                {['Eastern', 'Central', 'Mountain', 'Pacific'].map((zone) => (
-                  <option key={zone} value={zone}>
-                    {zone}
-                  </option>
-                ))}
-              </Select>
-              {errors.timeZone ? (
-                <FormErrorMessage>
-                  {errors.timeZone.message}
-                </FormErrorMessage>
-              ) : (
-                <div>&nbsp;</div>
-              )}
-            </FormControl>
-            <FormControl
-              isRequired
               isInvalid={errors.perCycleCost}
             >
               <FormLabel>Per-Cycle Cost</FormLabel>
@@ -143,8 +118,11 @@ export default function CreatePlan({ setPlanToJoin, setShowMagicLink }) {
                 <Input
                   name="perCycleCost"
                   placeholder="Per-Cycle Cost"
-                  type="number"
-                  {...register('perCycleCost', { required: 'Enter total cost per pay cycle' })}
+                  type="text"
+                  {...register('perCycleCost', {
+                    required: 'Enter total cost per pay cycle',
+                    validate: (val) => Number.isInteger(Number(val) * 100) && Number(val) >= 10 || 'Cost must be a valid amount in US dollars at least $10'
+                  })}
                 />
               </InputGroup>
               {errors.perCycleCost ? (

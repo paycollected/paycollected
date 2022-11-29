@@ -43,7 +43,7 @@ const time = Math.floor(new Date().valueOf() / 1000);
 
   // Once test clock has advanced to this point, webhook events such as subscriptions trial will
   // end, or new invoices are created will be sent to the server. The invoices are only finalized
-  // and a payment attempt is made an hour after the invoice has been made.
+  // and a payment attempt is made an hour after the invoice has been created.
   // So continue to advance the test clock an hour or two from the base to receive these webhook
   // events, which will write to our invoices table in the db.
 
@@ -55,10 +55,10 @@ const time = Math.floor(new Date().valueOf() / 1000);
 
 
   // RETRIEVE TEST CLOCKS
-  // const testClocks = await stripe.testHelpers.testClocks.list({
-  //   limit: 3,
-  // });
-  // console.log(testClocks);
+  const testClocks = await stripe.testHelpers.testClocks.list({
+    limit: 3,
+  });
+  console.log(testClocks);
 
 
   // RETRIEVE A PARTICULAR TEST CLOCK

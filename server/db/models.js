@@ -60,20 +60,20 @@ export function addPlan(
   perCycleCost,
   productId,
   startDate,
-  priceId
+  priceId,
 ) {
   const query = `
     WITH plan_insert AS (
-        INSERT INTO plans
-          (plan_name, cycle_frequency, per_cycle_cost, plan_id, start_date, price_id)
-        VALUES
-          ($2, $3, $4, $5, $6::TIMESTAMPTZ, $7)
+      INSERT INTO plans
+        (plan_name, cycle_frequency, per_cycle_cost, plan_id, start_date, price_id)
+      VALUES
+        ($2, $3, $4, $5, $6::TIMESTAMPTZ, $7)
     ), plan_history_insert AS (
       INSERT INTO plans_history (plan_id, start_date, plan_cost)
         VALUES ($5, $6::TIMESTAMPTZ, $4)
     )
     INSERT INTO user_plan (username, plan_id, plan_owner)
-      VALUES ($1, $5, TRUE)
+      VALUES ($1, $5, True)
   `;
 
   const args = [username, planName, cycleFrequency, perCycleCost, productId, startDate, priceId];
@@ -892,6 +892,7 @@ export function getProductInfoAndInvoiceCheckNewOwner(username, subscriptionId, 
       ( SELECT invoice_id
           FROM invoices
           WHERE plan_id = (SELECT plan_id FROM user_plan WHERE subscription_id = $1)
+            AND username = $2
           LIMIT 1
       ) AS "invoiceId",
       ( SELECT plan_owner
