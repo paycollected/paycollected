@@ -5,9 +5,9 @@ import {
   Flex, Box, Text, Stack, Link, Button, Image,
 } from '@chakra-ui/react';
 import { CloseIcon, HamburgerIcon } from '@chakra-ui/icons';
-import Logo from '../public/Pay_Collected_Logo.png';
-import { EditPayment as EDIT_PAYMENT } from '../graphql/mutations.gql';
-import { NavBarBtn } from '../styles/styles.js';
+import Logo from '../../public/Pay_Collected_Logo.png';
+import { EditPayment as EDIT_PAYMENT } from '../../graphql/mutations.gql';
+import { NavBarBtn } from '../../styles/styles.js';
 
 export default function NavBar({ user, setUser, setPlanToJoin }) {
   const navigate = useNavigate();

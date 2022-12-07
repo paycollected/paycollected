@@ -7,7 +7,7 @@ import {
   FormControl, FormLabel, FormErrorMessage,
   Box, Heading, Flex
 } from '@chakra-ui/react';
-import { CreatePlanMutation as CREATE_PLAN } from '../graphql/mutations.gql';
+import { CreatePlanMutation as CREATE_PLAN } from '../../../graphql/mutations.gql';
 
 const tomorrow = new Date();
 tomorrow.setDate(tomorrow.getDate() + 1);

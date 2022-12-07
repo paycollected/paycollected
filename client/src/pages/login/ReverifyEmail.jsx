@@ -5,7 +5,7 @@ import {
 } from '@chakra-ui/react';
 import { useForm } from 'react-hook-form';
 import { useMutation } from '@apollo/client';
-import { ResendVerificationEmail as REVERIFY } from '../graphql/mutations.gql';
+import { ResendVerificationEmail as REVERIFY } from '../../graphql/mutations.gql';
 
 export default function ReverifyEmail({ isOpen, onClose }) {
   const [verificationEmailSent, setVerificationEmailSent] = useState(false);

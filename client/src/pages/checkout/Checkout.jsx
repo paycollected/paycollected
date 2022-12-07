@@ -2,23 +2,20 @@ import React, { useState } from 'react';
 import {
   useStripe, useElements, Elements, PaymentElement,
 } from '@stripe/react-stripe-js';
-import { useMutation, gql } from '@apollo/client';
+import { useMutation } from '@apollo/client';
 import { useNavigate } from 'react-router-dom';
-import {
-  Flex, Box, FormControl, FormLabel, FormErrorMessage, Button, Input
-} from '@chakra-ui/react';
+import { Button } from '@chakra-ui/react';
 import { loadStripe } from '@stripe/stripe-js';
-import { ViewAllPlans as viewAllPlansQuery } from '../graphql/queries.gql';
-import { CancelTransaction as CANCEL_TRANSC, SubscribeWithSavedCard as SUBSCRIBE } from '../graphql/mutations.gql';
+import { ViewAllPlans as viewAllPlansQuery } from '../../graphql/queries.gql';
+import { CancelTransaction as CANCEL_TRANSC, SubscribeWithSavedCard as SUBSCRIBE } from '../../graphql/mutations.gql';
 import SavedCards from './SavedCards.jsx';
 
 const stripePromise = loadStripe(process.env.STRIPE_PUBLISHABLE_KEY);
-
 function CheckoutForm({ setupIntentId, paymentMethods, planId }) {
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
   // CACHE IS UPDATING CORRECTLY
-  // BUT UI IN viewPlans is not rendering from cache??
+  // BUT UI IN PlansTable is not rendering from cache??
   const [cancel, { loading }] = useMutation(CANCEL_TRANSC, {
     onCompleted: () => {
       navigate('/plan/all');

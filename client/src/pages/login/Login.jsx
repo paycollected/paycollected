@@ -8,9 +8,9 @@ import {
   Box, Heading, Flex, useDisclosure,
 } from '@chakra-ui/react';
 import { ViewIcon, ViewOffIcon } from '@chakra-ui/icons';
-import { LogIn as LOG_IN } from '../graphql/mutations.gql';
-import ReverifyEmail from '../components/ReverifyEmail.jsx';
-import ForgotPwd from '../components/ForgotPwd.jsx';
+import ReverifyEmail from './ReverifyEmail.jsx';
+import ForgotPwd from './ForgotPwd.jsx';
+import { LogIn as LOG_IN } from '../../graphql/mutations.gql';
 
 export default function Login({ setUser, planToJoin }) {
   const navigate = useNavigate();

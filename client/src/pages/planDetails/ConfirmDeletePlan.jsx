@@ -4,8 +4,8 @@ import {
   useDisclosure, Button,
   Modal, ModalOverlay, ModalContent, ModalCloseButton, ModalHeader, ModalBody, ModalFooter
 } from '@chakra-ui/react';
-import { DeletePlan as DELETE_PLAN } from '../graphql/mutations.gql';
-import { ViewAllPlans as GET_ALL_PLANS } from '../graphql/queries.gql';
+import { DeletePlan as DELETE_PLAN } from '../../graphql/mutations.gql';
+import { ViewAllPlans as GET_ALL_PLANS } from '../../graphql/queries.gql';
 
 export default function ConfirmDeletePlan({ plan }) {
   const { isOpen, onOpen, onClose } = useDisclosure();

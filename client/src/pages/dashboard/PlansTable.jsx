@@ -4,12 +4,12 @@ import {
   Flex, Box, Grid, GridItem, Heading, Button, useClipboard, UnorderedList, ListItem, Tooltip
 } from '@chakra-ui/react';
 import { CopyIcon } from '@chakra-ui/icons';
-import { ViewAllPlans as GET_ALL_PLANS } from '../graphql/queries.gql';
-import ConfirmCancel from './ConfirmCancel.jsx';
-import ModifyQuantity from './ModifyQuantity.jsx';
-import ConfirmDeletePlan from './ConfirmDeletePlan.jsx';
+import { ViewAllPlans as GET_ALL_PLANS } from '../../graphql/queries.gql';
+import ConfirmCancel from '../planDetails/ConfirmCancel.jsx';
+import ModifyQuantity from '../planDetails/ModifyQuantity.jsx';
+import ConfirmDeletePlan from '../planDetails/ConfirmDeletePlan.jsx';
 
-export default function ViewPlans({ user }) {
+export default function PlansTable({ user }) {
   const [planToCopy, setPlanToCopy] = useState(null);
   const { hasCopied, onCopy, setValue } = useClipboard('');
 
