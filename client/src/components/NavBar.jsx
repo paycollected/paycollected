@@ -45,13 +45,15 @@ export default function NavBar({ user, setUser, setPlanToJoin }) {
       borderColor="gray.200"
     >
       <Box display="flex">
-        <Image
-          src={Logo}
-          alt="Pay Collected Logo"
-          fit="cover"
-          htmlWidth="200px"
-          onClick={() => {}}
-        />
+        <Link as={ReactLink} to="/">
+          <Image
+            src={Logo}
+            alt="Pay Collected Logo"
+            fit="cover"
+            htmlWidth="200px"
+            loading="eager"
+          />
+        </Link>
         {user
           && (
             <Stack
