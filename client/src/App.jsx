@@ -35,7 +35,7 @@ function App() {
 
   return (
     <Routes>
-      <Route path="/" element={<Home setPlanToJoin={setPlanToJoin} />} />
+      <Route path="/" element={<Home user={user} setUser={setUser} setPlanToJoin={setPlanToJoin} />} />
       <Route
         path="/login"
         element={!user
@@ -53,7 +53,7 @@ function App() {
         path="/join/:planId"
         element={
           !user
-            ? <Home setPlanToJoin={setPlanToJoin} />
+            ? <Home user={user} setUser={setUser} setPlanToJoin={setPlanToJoin} />
             : (
               <JoinPlan
                 setPlanToJoin={setPlanToJoin}
