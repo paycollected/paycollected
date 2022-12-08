@@ -8,7 +8,6 @@ import Dashboard from './pages/dashboard/Dashboard.jsx';
 import JoinPlan from './pages/JoinPlan.jsx';
 import Checkout from './pages/checkout/Checkout.jsx';
 import FourOhFour from './pages/404.jsx';
-import NavBar from './pages/home/NavBar.jsx';
 import PwdReset from './pages/PwdReset.jsx';
 import ManageAccount from './pages/ManageAccount.jsx';
 import PlanDetails from './pages/planDetails/PlanDetails.jsx';
@@ -35,63 +34,60 @@ function App() {
   const [paymentMethods, setPaymentMethods] = useState([]);
 
   return (
-    <div>
-      <NavBar user={user} setUser={setUser} setPlanToJoin={setPlanToJoin} />
-      <Routes>
-        <Route path="/" element={<Home setPlanToJoin={setPlanToJoin} />} />
-        <Route
-          path="/login"
-          element={!user
-            ? <Login setUser={setUser} planToJoin={planToJoin} />
-            : <Navigate to="/dashboard" />}
-        />
-        <Route
-          path="/create-account"
-          element={!user
-            ? <CreateAccount setUser={setUser} />
-            : <Navigate to="/dashboard" />}
-        />
-        <Route path="/dashboard" element={<Dashboard user={user} setUser={setUser} />} />
-        <Route
-          path="/join/:planId"
-          element={
-            !user
-              ? <Home setPlanToJoin={setPlanToJoin} />
-              : (
-                <JoinPlan
-                  setPlanToJoin={setPlanToJoin}
-                  setStripeClientSecret={setStripeClientSecret}
-                  setSetupIntentId={setSetupIntentId}
-                  setPaymentMethods={setPaymentMethods}
-                />
-              )
-            }
-        />
-        <Route
-          path="/checkout"
-          element={user && stripeClientSecret
-            ? (
-              <Checkout
-                planId={planToJoin}
-                stripeClientSecret={stripeClientSecret}
-                setupIntentId={setupIntentId}
+    <Routes>
+      <Route path="/" element={<Home setPlanToJoin={setPlanToJoin} />} />
+      <Route
+        path="/login"
+        element={!user
+          ? <Login setUser={setUser} planToJoin={planToJoin} />
+          : <Navigate to="/dashboard" />}
+      />
+      <Route
+        path="/create-account"
+        element={!user
+          ? <CreateAccount setUser={setUser} />
+          : <Navigate to="/dashboard" />}
+      />
+      <Route path="/dashboard" element={<Dashboard user={user} setUser={setUser} />} />
+      <Route
+        path="/join/:planId"
+        element={
+          !user
+            ? <Home setPlanToJoin={setPlanToJoin} />
+            : (
+              <JoinPlan
+                setPlanToJoin={setPlanToJoin}
                 setStripeClientSecret={setStripeClientSecret}
                 setSetupIntentId={setSetupIntentId}
-                paymentMethods={paymentMethods}
+                setPaymentMethods={setPaymentMethods}
               />
             )
-            : <Navigate to="/" />}
-        />
-        <Route
-          path="/view/:planId"
-          element={user ? <PlanDetails /> : <Navigate to="/" />}
-        />
-        <Route path="/manage-account" element={user ? <ManageAccount user={user} setUser={setUser} /> : <Navigate to="/" />} />
-        <Route path="/password-reset" element={<PwdReset setUser={setUser} />} />
-        <Route path="/404" element={<FourOhFour />} />
-        <Route path="*" element={<FourOhFour />} />
-      </Routes>
-    </div>
+          }
+      />
+      <Route
+        path="/checkout"
+        element={user && stripeClientSecret
+          ? (
+            <Checkout
+              planId={planToJoin}
+              stripeClientSecret={stripeClientSecret}
+              setupIntentId={setupIntentId}
+              setStripeClientSecret={setStripeClientSecret}
+              setSetupIntentId={setSetupIntentId}
+              paymentMethods={paymentMethods}
+            />
+          )
+          : <Navigate to="/" />}
+      />
+      <Route
+        path="/view/:planId"
+        element={user ? <PlanDetails /> : <Navigate to="/" />}
+      />
+      <Route path="/manage-account" element={user ? <ManageAccount user={user} setUser={setUser} /> : <Navigate to="/" />} />
+      <Route path="/password-reset" element={<PwdReset setUser={setUser} />} />
+      <Route path="/404" element={<FourOhFour />} />
+      <Route path="*" element={<FourOhFour />} />
+    </Routes>
   );
 }
 
