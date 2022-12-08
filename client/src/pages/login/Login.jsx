@@ -1,15 +1,16 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link as ReactLink } from 'react-router-dom';
 import { useMutation } from '@apollo/client';
 import { useForm } from 'react-hook-form';
 import {
-  Button, Input, InputGroup, InputRightElement,
-  FormControl, FormLabel, FormErrorMessage,
-  Box, Heading, Flex, useDisclosure,
+  Button, Input, InputGroup, InputRightElement, Image, Link, Center,
+  FormControl, FormLabel, FormErrorMessage, IconButton,
+  Container, Box, Stack, HStack, Text, Heading, useDisclosure, useBreakpointValue, useColorModeValue
 } from '@chakra-ui/react';
 import { ViewIcon, ViewOffIcon } from '@chakra-ui/icons';
-import ReverifyEmail from './ReverifyEmail.jsx';
-import ForgotPwd from './ForgotPwd.jsx';
+import ReverifyEmailModal from './ReverifyEmailModal.jsx';
+import ForgotPwdModal from './ForgotPwdModal.jsx';
+import Logo from '../../public/Pay_Collected_Logo.png';
 import { LogIn as LOG_IN } from '../../graphql/mutations.gql';
 
 export default function Login({ setUser, planToJoin }) {
@@ -53,10 +54,11 @@ export default function Login({ setUser, planToJoin }) {
           setErrorMessage(message);
           break;
         default:
-          setErrorMessage('');
+          setErrorMessage('See console for login error');
           console.log('login error: ', message);
           break;
       }
+      console.log('error');
     },
   });
 
@@ -72,83 +74,120 @@ export default function Login({ setUser, planToJoin }) {
 
   return (
     <div>
-      <ReverifyEmail isOpen={isOpenVerify} onClose={onCloseVerify} />
-      <ForgotPwd isOpen={isOpenReset} onClose={onCloseReset} />
-      <Flex width="full" align="center" justifyContent="center">
-        <Box p={2} my={8} width="40%" bg="white" borderRadius="15">
-          <Box textAlign="center">
-            <Heading>Login</Heading>
-          </Box>
-          <Box my={4} textAlign="left">
-            <form
-              autoComplete="off"
-              onSubmit={handleSubmit(onSubmit)}
+      <ReverifyEmailModal isOpen={isOpenVerify} onClose={onCloseVerify} />
+      <ForgotPwdModal isOpen={isOpenReset} onClose={onCloseReset} />
+      <Container maxW="lg" py={{ base: '12', md: '24' }} px={{ base: '0', sm: '8' }}>
+        <Stack spacing="8">
+          <form
+            autoComplete="off"
+            onSubmit={handleSubmit(onSubmit)}
+          >
+            <Stack spacing="6">
+              <Center>
+                <Link as={ReactLink} to="/">
+                  <Image src={Logo} alt="Pay Collected Logo" fit="cover" htmlWidth="200px" loading="eager" />
+                </Link>
+              </Center>
+              <Stack spacing={{ base: '2', md: '3' }} textAlign="center">
+                <Heading size="lg">
+                  Log in to your account
+                </Heading>
+                <HStack spacing="1" justify="center">
+                  <Text color="muted">Don&apos;t have an account?</Text>
+                  <Button variant="link" colorScheme="blue" onClick={() => { navigate('/signup'); }}>
+                    Sign up
+                  </Button>
+                </HStack>
+              </Stack>
+            </Stack>
+            <Box
+              py={{ base: '0', sm: '8' }}
+              px={{ base: '4', sm: '10' }}
+              bg={useBreakpointValue({ base: 'transparent', sm: 'bg-surface' })}
+              boxShadow={{ base: 'none', sm: useColorModeValue('md', 'md-dark') }}
+              borderRadius={{ base: 'none', sm: 'xl' }}
             >
-              <FormControl
-                isRequired
-                isInvalid={errors.usernameOrEmail || errorMessage === 'Incorrect username and password'}
-              >
-                <FormLabel>Username or Email</FormLabel>
-                <Input
-                  name="usernameOrEmail"
-                  placeholder="Enter Username or Email"
-                  type="text"
-                  {...register('usernameOrEmail', { required: 'Username or email required' })}
-                />
-                {errors.usernameOrEmail ? (
-                  <FormErrorMessage>
-                    {errors.usernameOrEmail.message}
-                  </FormErrorMessage>
-                ) : (
-                  <div>&nbsp;</div>
-                )}
-              </FormControl>
-              <FormControl
-                isRequired
-                isInvalid={errors.password || errorMessage === 'Incorrect username and password'}
-              >
-                <FormLabel>Password</FormLabel>
-                <InputGroup>
-                  <Input
-                    name="password"
-                    placeholder="Enter password"
-                    type={showPassword ? 'text' : 'password'}
-                    {...register('password', {
-                      required: 'Password required',
-                      minLength: { value: 3, message: 'Password must be at least 3 characters' }
-                    })}
-                  />
-                  <InputRightElement>
-                    <Button onClick={() => setShowPassword(!showPassword)}>
-                      {showPassword ? <ViewIcon /> : <ViewOffIcon />}
-                    </Button>
-                  </InputRightElement>
-                </InputGroup>
-                {errors.password ? (
-                  <FormErrorMessage>
-                    {errors.password.message}
-                  </FormErrorMessage>
-                ) : (
-                  <div>&nbsp;</div>
-                )}
-              </FormControl>
-              <FormControl isInvalid={errorMessage.length > 0}>
-                {errorMessage.length > 0 ? (
-                  <FormErrorMessage>{errorMessage}</FormErrorMessage>
-                ) : (
-                  <div>&nbsp;</div>
-                )}
-              </FormControl>
-              <Button type="submit" isLoading={loading} disabled={loading}>Sign in</Button>
-            </form>
-            <p>Don&apos;t have an account? Sign up!</p>
-            <Button onClick={() => { navigate('/signup'); }}>Sign up</Button>
-            <Button onClick={() => { navigate('/'); }}>Cancel</Button>
-            <button type="button" onClick={onOpenReset}>Forgot your password?</button>
-            <button type="button" onClick={onOpenVerify}>Still need to verify your email?</button>
-          </Box>
-        </Box>
-      </Flex>
+              <Stack spacing="2">
+                <Stack spacing="2">
+                  <FormControl
+                    isRequired
+                    isInvalid={errors.usernameOrEmail || errorMessage === 'Incorrect username and password'}
+                  >
+                    <FormLabel htmlFor="usernameOrEmail">Username or Email</FormLabel>
+                    <Input
+                      name="usernameOrEmail"
+                      type="text"
+                      {...register('usernameOrEmail', { required: 'Username or email required' })}
+                    />
+                    {errors.usernameOrEmail ? (
+                      <FormErrorMessage>
+                        {errors.usernameOrEmail.message}
+                      </FormErrorMessage>
+                    ) : (
+                      <div>&nbsp;</div>
+                    )}
+                  </FormControl>
+                  <FormControl
+                    isRequired
+                    isInvalid={errors.password || errorMessage === 'Incorrect username and password'}
+                  >
+                    <FormLabel htmlFor="password">Password</FormLabel>
+                    <InputGroup>
+                      <Input
+                        name="password"
+                        type={showPassword ? 'text' : 'password'}
+                        {...register('password', {
+                          required: 'Password required',
+                          minLength: { value: 3, message: 'Password must be at least 3 characters' }
+                        })}
+                      />
+                      <InputRightElement>
+                        <IconButton
+                          variant="link"
+                          icon={showPassword ? <ViewOffIcon /> : <ViewIcon />}
+                          onClick={() => setShowPassword(!showPassword)}
+                        />
+                      </InputRightElement>
+                    </InputGroup>
+                    {errors.password ? (
+                      <FormErrorMessage>
+                        {errors.password.message}
+                      </FormErrorMessage>
+                    ) : (
+                      <div>&nbsp;</div>
+                    )}
+                    <FormControl isInvalid={errorMessage.length > 0} mt="-2">
+                      {errorMessage.length > 0 ? (
+                        <FormErrorMessage>{errorMessage}</FormErrorMessage>
+                      ) : (
+                        <div>&nbsp;</div>
+                      )}
+                    </FormControl>
+                  </FormControl>
+                </Stack>
+                <HStack justify="space-between">
+                  <Button variant="link" colorScheme="blue" size="sm" onClick={onOpenVerify}>
+                    Reverify Email
+                  </Button>
+                  <Button variant="link" colorScheme="blue" size="sm" onClick={onOpenReset}>
+                    Forgot password?
+                  </Button>
+                </HStack>
+                <Stack spacing="6">
+                  <Button
+                    type="submit"
+                    onClick={() => handleSubmit(onSubmit)}
+                    isLoading={loading}
+                    disabled={loading}
+                  >
+                    Sign in
+                  </Button>
+                </Stack>
+              </Stack>
+            </Box>
+          </form>
+        </Stack>
+      </Container>
     </div>
   );
 }
