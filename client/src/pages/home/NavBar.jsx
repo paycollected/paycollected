@@ -41,6 +41,8 @@ export default function NavBar({ user, setUser, setPlanToJoin }) {
       p={8}
       bg={['white']}
       color={['gray.600']}
+      borderBottomWidth="1px"
+      borderColor="gray.200"
     >
       <Box display="flex">
         <Image src={Logo} alt="Pay Collected Logo" fit="cover" htmlWidth="200px" />
