@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link as ReactLink } from 'react-router-dom';
 import { useMutation } from '@apollo/client';
 import {
-  Flex, Box, Text, Stack, Link, Button, Image,
+  Flex, Box, Text, Stack, Link, Button, Image, Avatar, Menu, MenuButton, MenuList, MenuItem
 } from '@chakra-ui/react';
 import { CloseIcon, HamburgerIcon } from '@chakra-ui/icons';
 import Logo from '../../public/Pay_Collected_Logo.png';
@@ -34,7 +34,7 @@ export default function NavBar({ user, setUser, setPlanToJoin }) {
   return (
     <Flex
       align="center"
-      justify={user ? 'start' : 'space-between'}
+      justify="space-between"
       wrap="wrap"
       w="100%"
       mb={8}
@@ -42,31 +42,18 @@ export default function NavBar({ user, setUser, setPlanToJoin }) {
       bg={['white']}
       color={['gray.600']}
     >
-      <Box>
-        <Box>
-          <Image src={Logo} alt="Pay Collected Logo" fit="cover" htmlWidth="200px" />
-        </Box>
-      </Box>
-      <Box
-        display={{ base: 'block', md: 'none' }}
-        onClick={() => setToggleMenu(!toggleMenu)}
-      >
-        {toggleMenu ? <CloseIcon /> : <HamburgerIcon />}
-      </Box>
-      <Box
-        display={{ base: toggleMenu ? 'block' : 'none', md: 'block' }}
-        flexBasis={{ base: '100%', md: 'auto' }}
-      >
-        <Stack
-          spacing={8}
-          align="center"
-          justify={['center', 'space-between', 'flex-end', 'flex-end']}
-          direction={['column', 'row', 'row', 'row']}
-          pt={[4, 4, 0, 0]}
-          pl="4"
-        >
-          {user ? (
-            <>
+      <Box display="flex">
+        <Image src={Logo} alt="Pay Collected Logo" fit="cover" htmlWidth="200px" />
+        {user
+          && (
+            <Stack
+              spacing={8}
+              align="center"
+              justify="flex-end"
+              direction="row"
+              pt="0"
+              pl="4"
+            >
               <Link as={ReactLink} to="/dashboard">
                 <Text display="block">
                   Dashboard
@@ -78,26 +65,61 @@ export default function NavBar({ user, setUser, setPlanToJoin }) {
                   Statements
                 </Text>
               </Link>
-            </>
-          ) : (
-            <>
-              <Link href="/">
-                <Text display="block">
-                  How to use
-                </Text>
-              </Link>
-              <Link href="/">
-                <Text display="block">
-                  FAQs
-                </Text>
-              </Link>
-              <Button onClick={() => { navigate('/login'); }}>
-                Login
-              </Button>
-            </>
+            </Stack>
           )}
-        </Stack>
       </Box>
+      <Box>
+        {user ? (
+          <Menu>
+            <MenuButton>
+              {/* TO-DO: Add Avatar Icon */}
+              <Avatar src="insert-url" />
+            </MenuButton>
+            <MenuList>
+              {/* TO-DO: Link to Edit Profile page */}
+              <MenuItem>Profile</MenuItem>
+              <MenuItem onClick={() => logUserOut()}>Log Out</MenuItem>
+            </MenuList>
+          </Menu>
+        ) : (
+          <Box
+            display={{ base: 'block', md: 'none' }}
+            onClick={() => setToggleMenu(!toggleMenu)}
+          >
+            {toggleMenu ? <CloseIcon /> : <HamburgerIcon />}
+          </Box>
+        )}
+      </Box>
+      {!user
+        && (
+        <Box
+          display={{ base: toggleMenu ? 'block' : 'none', md: 'block' }}
+          flexBasis={{ base: '100%', md: 'auto' }}
+        >
+          <Stack
+            spacing={8}
+            align="center"
+            justify={['center', 'space-between', 'flex-end', 'flex-end']}
+            direction={['column', 'row', 'row', 'row']}
+            pt={[4, 4, 0, 0]}
+            pl="4"
+          >
+            <Link href="/">
+              <Text display="block">
+                How to use
+              </Text>
+            </Link>
+            <Link href="/">
+              <Text display="block">
+                FAQs
+              </Text>
+            </Link>
+            <Button onClick={() => { navigate('/login'); }}>
+              Login
+            </Button>
+          </Stack>
+        </Box>
+        )}
     </Flex>
   );
 }
