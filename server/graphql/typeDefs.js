@@ -64,13 +64,6 @@ export default `#graphql
     YEARLY
   }
 
-  enum TimeZone {
-    EASTERN
-    CENTRAL
-    MOUNTAIN
-    PACIFIC
-  }
-
   enum UpdateStatus {
     DELETED
     ARCHIVED
@@ -135,7 +128,6 @@ export default `#graphql
       cycleFrequency: CycleFrequency!
       perCycleCost: Float!
       startDate: Date!
-      timeZone: TimeZone!
     ): PlanIdResponse!
 
     editPayment: PortalSession!

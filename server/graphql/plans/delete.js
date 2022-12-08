@@ -20,12 +20,12 @@ export default async function deletePlanResolver(planId, username) {
     subscriptionId, invoiceId, prevPriceId, members, planActive, subsActive, planOwner
   } = rows[0];
 
-  if (!planOwner) {
-    throw new GraphQLError('Non-plan owner cannot perform this action', { extensions: { code: 'FORBIDDEN' } });
-  } else if (!planActive) {
+  if (!planActive) {
     throw new GraphQLError('Plan has already been archived', { extensions: { code: 'FORBIDDEN' } });
   } else if (!subsActive) {
     throw new GraphQLError('Subscription has already been archived', { extensions: { code: 'FORBIDDEN' } });
+  } else if (!planOwner) {
+    throw new GraphQLError('Non-plan owner cannot perform this action', { extensions: { code: 'FORBIDDEN' } });
   }
 
   try {

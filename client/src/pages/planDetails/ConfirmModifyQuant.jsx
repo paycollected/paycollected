@@ -4,7 +4,7 @@ import {
   useDisclosure, Button,
   Modal, ModalOverlay, ModalContent, ModalCloseButton, ModalHeader, ModalBody, ModalFooter
 } from '@chakra-ui/react';
-import { EditQuantity as EDIT_QUANTITY } from '../graphql/mutations.gql';
+import { EditQuantity as EDIT_QUANTITY } from '../../graphql/mutations.gql';
 
 
 export default function ConfirmModifyQuant({

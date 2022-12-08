@@ -113,14 +113,13 @@ export default {
     ),
 
     createPlan: authResolverWrapper((_, {
-      planName, cycleFrequency, perCycleCost, startDate, timeZone
+      planName, cycleFrequency, perCycleCost, startDate,
     }, { user: { username } }) => (
       createPlanResolver(
         planName,
         cycleFrequency,
         perCycleCost,
         startDate,
-        timeZone,
         username,
         recurringInterval
       )
@@ -134,7 +133,7 @@ export default {
       const { stripeCusId } = user;
       try {
         const { url } = await stripe.billingPortal.sessions.create({
-          stripeCusId,
+          customer: stripeCusId,
           return_url: `${process.env.HOST}/dashboard/`,
         });
         return { portalSessionURL: url };

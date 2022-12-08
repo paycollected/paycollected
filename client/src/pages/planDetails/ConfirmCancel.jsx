@@ -7,7 +7,7 @@ import {
 import {
   Unsubscribe as UNSUBSCRIBE,
   UnsubscribeAsPlanOwner as UNSUBSCRIBE_AS_OWNER
-} from '../graphql/mutations.gql';
+} from '../../graphql/mutations.gql';
 
 export default function ConfirmCancel({ plan, user }) {
   const { isOpen, onOpen, onClose } = useDisclosure();

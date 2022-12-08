@@ -1,20 +1,17 @@
 import React, { useState } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import jwtDecode from 'jwt-decode';
-import Home from './components/Home.jsx';
-import Login from './pages/Login.jsx';
-import Signup from './components/Signup.jsx';
-import Dashboard from './components/Dashboard.jsx';
-import CreatePlan from './components/CreatePlan.jsx';
-import JoinPlan from './components/JoinPlan.jsx';
-import Cards from './components/Cards.jsx';
-import Checkout from './components/Checkout.jsx';
-import ViewPlans from './components/ViewPlans.jsx';
-import MagicLink from './components/MagicLink.jsx';
+import Home from './pages/home/Home.jsx';
+import Login from './pages/login/Login.jsx';
+import CreateAccount from './pages/CreateAccount.jsx';
+import Dashboard from './pages/dashboard/Dashboard.jsx';
+import JoinPlan from './pages/JoinPlan.jsx';
+import Checkout from './pages/checkout/Checkout.jsx';
 import FourOhFour from './pages/404.jsx';
-import NavBar from './components/NavBar.jsx';
+import NavBar from './pages/home/NavBar.jsx';
 import PwdReset from './pages/PwdReset.jsx';
 import ManageAccount from './pages/ManageAccount.jsx';
+import PlanDetails from './pages/planDetails/PlanDetails.jsx';
 
 // check that token is still valid before displaying logged-in state
 let token = localStorage.getItem('token');
@@ -41,7 +38,7 @@ function App() {
     <div>
       <NavBar user={user} setUser={setUser} setPlanToJoin={setPlanToJoin} />
       <Routes>
-        <Route path="/" element={!user ? <Home setPlanToJoin={setPlanToJoin} /> : <Navigate to="/dashboard" />} />
+        <Route path="/" element={<Home setPlanToJoin={setPlanToJoin} />} />
         <Route
           path="/login"
           element={!user
@@ -49,23 +46,12 @@ function App() {
             : <Navigate to="/dashboard" />}
         />
         <Route
-          path="/signup"
+          path="/create-account"
           element={!user
-            ? <Signup setUser={setUser} />
+            ? <CreateAccount setUser={setUser} />
             : <Navigate to="/dashboard" />}
         />
         <Route path="/dashboard" element={<Dashboard user={user} setUser={setUser} />} />
-        <Route
-          path="/plan/create"
-          element={user
-            ?
-            (!showMagicLink
-              ? <CreatePlan setPlanToJoin={setPlanToJoin} setShowMagicLink={setShowMagicLink} />
-              : <MagicLink planToJoin={planToJoin} setShowMagicLink={setShowMagicLink} />
-            )
-            : <Navigate to="/" />
-            }
-        />
         <Route
           path="/join/:planId"
           element={
@@ -81,7 +67,6 @@ function App() {
               )
             }
         />
-        <Route path="/cards" element={user ? <Cards /> : <Navigate to="/" />} />
         <Route
           path="/checkout"
           element={user && stripeClientSecret
@@ -97,8 +82,11 @@ function App() {
             )
             : <Navigate to="/" />}
         />
-        <Route path="/plan/all" element={user ? <ViewPlans user={user} /> : <Navigate to="/" />} />
-        <Route path="manage-account" element={user ? <ManageAccount user={user} setUser={setUser} /> : <Navigate to="/" />} />
+        <Route
+          path="/view/:planId"
+          element={user ? <PlanDetails /> : <Navigate to="/" />}
+        />
+        <Route path="/manage-account" element={user ? <ManageAccount user={user} setUser={setUser} /> : <Navigate to="/" />} />
         <Route path="/password-reset" element={<PwdReset setUser={setUser} />} />
         <Route path="/404" element={<FourOhFour />} />
         <Route path="*" element={<FourOhFour />} />

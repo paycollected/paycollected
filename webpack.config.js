@@ -27,6 +27,10 @@ module.exports = {
         exclude: /node_modules/,
         loader: 'graphql-tag/loader',
       },
+      {
+        test: /\.(png|jpeg)$/i,
+        type: 'asset/resource',
+      }
     ],
   },
   plugins: [

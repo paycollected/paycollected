@@ -5,7 +5,7 @@ import {
 } from '@chakra-ui/react';
 import { useForm } from 'react-hook-form';
 import { useMutation } from '@apollo/client';
-import { ResetPassword as RESET } from '../graphql/mutations.gql';
+import { ResetPassword as RESET } from '../../graphql/mutations.gql';
 
 export default function ForgotPwd({ isOpen, onClose }) {
   const [resetEmailSent, setResetEmailSent] = useState(false);

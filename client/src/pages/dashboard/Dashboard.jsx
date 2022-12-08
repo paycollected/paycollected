@@ -4,8 +4,8 @@ import { useQuery, useMutation } from '@apollo/client';
 import {
   Button, FormControl, FormLabel, Input, Heading
 } from '@chakra-ui/react';
-import { RetrieveNotifications as GET_NOTIFICATIONS } from '../graphql/queries.gql';
-import { DeleteNotification as DELETE_NOTI } from '../graphql/mutations.gql';
+import { RetrieveNotifications as GET_NOTIFICATIONS } from '../../graphql/queries.gql';
+import { DeleteNotification as DELETE_NOTI } from '../../graphql/mutations.gql';
 
 // actual redirect URL string 'http://localhost:5647/dashboard/?setup_intent=seti_1Lq9rqAJ5Ik974ueIdg7WHn9&setup_intent_client_secret=seti_1Lq9rqAJ5Ik974ueIdg7WHn9_secret_MZISJyXsMF6na4pA6ryaqOfvt8JbeGa&redirect_status=succeeded'
 const queryStr = window.location.search;
