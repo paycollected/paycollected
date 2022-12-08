@@ -84,7 +84,7 @@ root.render(
         <Box
           w="100%"
           h="100vh"
-          bg="#A6E1FA"
+          bg="white"
         >
           <App />
         </Box>
