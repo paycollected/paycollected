@@ -36,12 +36,14 @@ export default function ForgotPwdModal({ isOpen, onClose }) {
               <Button type="submit">Submit</Button>
             </form>
           )}
-          {resetEmailSent && (
+          {resetEmailSent
+            && (
             <div>
               {`We've sent instructions on how to reset your password to the email address on file.
               Please check your inbox including your spam folder.
               `}
-            </div>)}
+            </div>
+            )}
         </ModalBody>
         <ModalFooter>
           <Button
