@@ -7,6 +7,7 @@ import {
 import { CloseIcon, HamburgerIcon } from '@chakra-ui/icons';
 import Logo from '../public/Pay_Collected_Logo.png';
 import { EditPayment as EDIT_PAYMENT } from '../graphql/mutations.gql';
+import UnauthenticatedNavBar from './UnauthenticatedNavBar.jsx';
 import { NavBarBtn } from '../styles/styles.js';
 
 export default function NavBar({ user, setUser, setPlanToJoin }) {
@@ -31,6 +32,9 @@ export default function NavBar({ user, setUser, setPlanToJoin }) {
     onError: ({ message }) => { console.log(message); }
   });
 
+  if (!user) {
+    return (<UnauthenticatedNavBar />);
+  }
   return (
     <Flex
       align="center"
