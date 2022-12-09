@@ -11,7 +11,7 @@ export default `#graphql
 
   type Query {
     viewOnePlan (planId: PlanID!): Plan!
-    viewAllPlans: [Plan]!
+    viewAllPlans: [PlanSummary]!
     retrieveNotifications: RetrieveNotifications! # offset pagination?
   }
 
@@ -21,6 +21,14 @@ export default `#graphql
     username: ID!
     # username: Username
     quantity: Int # 0 means not paying # nullable because quantity for owner field is null
+  }
+
+  type newPlanMember {
+    firstName: String!
+    lastName: String!
+    quantity: Int!
+    joinedDate: Date!
+    isOwner: Boolean!
   }
 
   type LoginInfo {
@@ -70,6 +78,7 @@ export default `#graphql
     CREATED
   }
 
+  # prepare to remove this
   type Plan {
     planId: PlanID!
     name: String!
@@ -81,6 +90,23 @@ export default `#graphql
     # does not include user requesting this info
     subscriptionId: SubscriptionID
     quantity: Int! # unit quant of this plan for current user
+  }
+
+  type PlanOwner {
+    firstName: String!
+    lastName: String!
+  }
+
+  type PlanSummary {
+    planId: PlanID!
+    name : String!
+    quantity: Int!
+    selfCost: Float!
+    cycleFrequency: CycleFrequency!
+    perCycleCost: Float!
+    nextBillDate: Date!
+    isOwner: Boolean!
+    owner: PlanOwner!
   }
 
   type Notification {

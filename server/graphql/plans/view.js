@@ -1,8 +1,7 @@
 import { GraphQLError } from 'graphql';
 import {
   viewOnePlan as viewOnePlanModel,
-  viewAllPlans as viewAllPlansModel,
-  membersOnOnePlan
+  membersOnOnePlan, plansSummary,
 } from '../../db/models.js';
 
 
@@ -29,10 +28,7 @@ export async function viewOnePlan(planId, username) {
 
 export async function viewAllPlans(username) {
   try {
-    const { rows } = await viewAllPlansModel(username);
-    rows.forEach((row) => {
-      row.perCycleCost /= 100;
-    });
+    const { rows } = await plansSummary(username);
     return rows;
   } catch (asyncError) {
     console.log(asyncError);

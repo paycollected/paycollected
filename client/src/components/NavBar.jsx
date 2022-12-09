@@ -49,91 +49,52 @@ export default function NavBar({ user, setUser, setPlanToJoin }) {
       borderColor="gray.200"
     >
       <Box display="flex">
-        <Link as={ReactLink} to="/">
-          <Image
-            src={Logo}
-            alt="PayCollected Logo"
-            fit="cover"
-            htmlWidth="200px"
-            loading="eager"
-          />
-        </Link>
-        {user
-          && (
-            <Stack
-              spacing={8}
-              align="center"
-              justify="flex-end"
-              direction="row"
-              pt="0"
-              pl="4"
-            >
-              <Link as={ReactLink} to="/dashboard">
-                <Text display="block">
-                  Dashboard
-                </Text>
-              </Link>
-              <NavBarBtn type="button" onClick={submitEditPayment}>Payments</NavBarBtn>
-              <Link href="/">
-                <Text display="block">
-                  Statements
-                </Text>
-              </Link>
-            </Stack>
-          )}
+        <Box display="flex">
+          <Link as={ReactLink} to="/">
+            <Box w={[180, 300]}>
+              <Image
+                src={Logo}
+                alt="PayCollected Logo"
+                fit="cover"
+                loading="eager"
+              />
+            </Box>
+          </Link>
+        </Box>
+        <Stack
+          spacing={8}
+          align="center"
+          justify="flex-end"
+          direction="row"
+          pt="0"
+          pl="4"
+        >
+          <Link as={ReactLink} to="/dashboard">
+            <Text display="block">
+              Dashboard
+            </Text>
+          </Link>
+          <NavBarBtn type="button" onClick={submitEditPayment}>Payments</NavBarBtn>
+          <Link href="/">
+            <Text display="block">
+              Statements
+            </Text>
+          </Link>
+        </Stack>
       </Box>
       <Box>
-        {user ? (
-          <Menu>
-            <MenuButton>
-              {/* TO-DO: Add Avatar Icon */}
-              <Avatar src="insert-url" />
-            </MenuButton>
-            <MenuList>
-              {/* TO-DO: Link to Edit Profile page */}
-              <MenuItem>Profile</MenuItem>
-              <MenuItem onClick={() => logUserOut()}>Log Out</MenuItem>
-            </MenuList>
-          </Menu>
-        ) : (
-          <Box
-            display={{ base: 'block', md: 'none' }}
-            onClick={() => setToggleMenu(!toggleMenu)}
-          >
-            {toggleMenu ? <CloseIcon /> : <HamburgerIcon />}
-          </Box>
-        )}
+        <Menu>
+          <MenuButton>
+            {/* TO-DO: Add Avatar Icon */}
+            <Avatar src="insert-url" />
+          </MenuButton>
+          <MenuList>
+            {/* TO-DO: Link to Edit Profile page */}
+            <MenuItem>Profile</MenuItem>
+            <MenuItem onClick={() => logUserOut()}>Log Out</MenuItem>
+          </MenuList>
+        </Menu>
       </Box>
-      {!user
-        && (
-        <Box
-          display={{ base: toggleMenu ? 'block' : 'none', md: 'block' }}
-          flexBasis={{ base: '100%', md: 'auto' }}
-        >
-          <Stack
-            spacing={8}
-            align="center"
-            justify={['center', 'space-between', 'flex-end', 'flex-end']}
-            direction={['column', 'row', 'row', 'row']}
-            pt={[4, 4, 0, 0]}
-            pl="4"
-          >
-            <Link href="/">
-              <Text display="block">
-                How to use
-              </Text>
-            </Link>
-            <Link href="/">
-              <Text display="block">
-                FAQs
-              </Text>
-            </Link>
-            <Button onClick={() => { navigate('/login'); }}>
-              Login
-            </Button>
-          </Stack>
-        </Box>
-        )}
     </Flex>
   );
 }

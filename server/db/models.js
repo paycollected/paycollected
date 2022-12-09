@@ -128,43 +128,64 @@ export function membersOnOnePlan(planId, username) {
   return pool.query(query, [planId, username]);
 }
 
-export function viewAllPlans(username) {
+export function plansSummary(username) {
   const query = `
-    WITH select1 AS
-      (
-        SELECT
-          p.plan_id AS "planId",
-          p.plan_name AS name,
-          UPPER(p.cycle_frequency::VARCHAR) AS "cycleFrequency",
-          p.per_cycle_cost AS "perCycleCost",
-          up.subscription_id AS "subscriptionId",
-          up.quantity
-        FROM plans p
+    WITH c1 AS (
+      SELECT
+        p.plan_id AS "planId",
+        up.quantity,
+        p.plan_name AS name,
+        CASE
+          WHEN p.cycle_frequency = 'weekly'
+            THEN 'WEEKLY'
+          WHEN p.cycle_frequency = 'monthly'
+            THEN 'MONTHLY'
+          WHEN p.cycle_frequency = 'yearly'
+            THEN 'YEARLY'
+        END AS "cycleFrequency",
+        p.per_cycle_cost AS "perCycleCost",
+        nbd.next_bill_date AS "nextBillDate",
+        up.plan_owner AS "isOwner"
+      FROM user_plan up
+        JOIN plans p
+        ON up.plan_id = p.plan_id
+        JOIN next_bill_date nbd
+        ON nbd.plan_id = p.plan_id
+      WHERE
+        up.username = $1
+        AND p.active = True
+        AND up.active = True
+    ), c2 AS (
+      SELECT
+        c1.*,
+        CASE
+          WHEN SUM(up.quantity) = 0 THEN 0
+          ELSE CEIL("perCycleCost"::NUMERIC / SUM(up.quantity)) * c1.quantity
+        END AS "selfCost"
+      FROM c1
         JOIN user_plan up
-        ON p.plan_id = up.plan_id
-        WHERE up.username = $1
-      )
-    SELECT
-      "planId",
-      name,
-      "cycleFrequency",
-      "perCycleCost",
-      "subscriptionId",
-      select1.quantity,
-      JSON_BUILD_OBJECT
-      (
-        'firstName', u.first_name,
-        'lastName', u.last_name,
-        'username', u.username
-      ) AS owner
-    FROM select1
-    JOIN user_plan up
-    ON "planId" = up.plan_id
-    JOIN users u
-    ON up.username = u.username
-    WHERE up.plan_owner = True
-    ORDER BY name ASC`;
-
+        ON "planId" = up.plan_id
+      WHERE up.active = True
+      GROUP BY
+        "planId",
+        c1.quantity,
+        name,
+        "cycleFrequency",
+        "perCycleCost",
+        "nextBillDate",
+        "isOwner"
+    ) SELECT
+        c2.*,
+        "perCycleCost"::NUMERIC / 100 AS "perCycleCost",
+        "selfCost" / 100 AS "selfCost",
+        json_build_object('firstName', u.first_name, 'lastName', u.last_name) AS owner
+      FROM c2
+        JOIN user_plan up
+        ON "planId" = up.plan_id
+        JOIN users u
+        ON up.username = u.username
+      WHERE up.plan_owner = True
+  `;
   return pool.query(query, [username]);
 }
 

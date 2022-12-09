@@ -33,7 +33,6 @@ export default function UnauthenticatedNavBar() {
               loading="eager"
             />
           </Box>
-
         </Link>
       </Box>
       <Box>
