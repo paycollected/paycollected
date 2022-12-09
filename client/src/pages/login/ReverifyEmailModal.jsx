@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
-  Modal, ModalOverlay, ModalHeader, ModalBody, ModalFooter, ModalContent, Button, FormControl,
-  FormLabel, Input
+  Modal, ModalOverlay, ModalHeader, ModalBody, ModalContent, ModalCloseButton,
+  Button, FormControl, FormLabel, Input, Text
 } from '@chakra-ui/react';
 import { useForm } from 'react-hook-form';
 import { useMutation } from '@apollo/client';
@@ -13,7 +13,10 @@ export default function ReverifyEmailModal({ isOpen, onClose }) {
   const [verificationError, setVerificationError] = useState('');
   const { register, handleSubmit, formState: { errors } } = useForm();
   const [reverify, { loading }] = useMutation(REVERIFY, {
-    onCompleted: () => setVerificationEmailSent(true),
+    onCompleted: () => {
+      setVerificationEmailSent(true);
+      setVerificationError('');
+    },
     onError: ({ message }) => {
       switch (message) {
         case 'No account associated with this email was found.':
@@ -23,7 +26,8 @@ export default function ReverifyEmailModal({ isOpen, onClose }) {
           setVerificationError(message);
           break;
         default:
-          console.log(message);
+          setVerificationError('See console for error message');
+          console.log('verification error: ', message);
       }
     },
   });
@@ -37,9 +41,25 @@ export default function ReverifyEmailModal({ isOpen, onClose }) {
     <Modal isOpen={isOpen} onClose={onClose}>
       <ModalOverlay />
       <ModalContent>
-        <ModalHeader>Resend Your Verification Email</ModalHeader>
+        <ModalHeader>Verify Your Email</ModalHeader>
+        <ModalCloseButton
+          onClick={() => {
+            setVerificationEmailSent(false);
+            setVerificationError('');
+            setEmail('');
+            onClose();
+          }}
+        />
         <ModalBody>
-          {!verificationEmailSent && !verificationError && (
+          {!verificationEmailSent
+            && (
+              <div>
+                Enter your email and we will send you an email with a verification link.
+                <br />
+                <br />
+              </div>
+            )}
+          {!verificationEmailSent && verificationError !== 'This email has already been verified.' && (
             <form onSubmit={handleSubmit(onSubmit)}>
               <FormControl isRequired>
                 <FormLabel>Email</FormLabel>
@@ -54,19 +74,8 @@ export default function ReverifyEmailModal({ isOpen, onClose }) {
           {verificationEmailSent && (
             <div>{`We've sent a verification email to ${email}. Please check your inbox for instructions.`}</div>
           )}
-          {verificationError && (<div>{verificationError}</div>)}
+          {verificationError && (<Text color="red">{verificationError}</Text>)}
         </ModalBody>
-        <ModalFooter>
-          <Button
-            onClick={() => {
-              setVerificationEmailSent(false);
-              setVerificationError('');
-              onClose();
-            }}
-          >
-            Back
-          </Button>
-        </ModalFooter>
       </ModalContent>
     </Modal>
   );
