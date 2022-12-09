@@ -6,6 +6,7 @@ import {
 } from '@chakra-ui/react';
 import { RetrieveNotifications as GET_NOTIFICATIONS } from '../../graphql/queries.gql';
 import { DeleteNotification as DELETE_NOTI } from '../../graphql/mutations.gql';
+import NavBar from '../../components/NavBar.jsx';
 
 // actual redirect URL string 'http://localhost:5647/dashboard/?setup_intent=seti_1Lq9rqAJ5Ik974ueIdg7WHn9&setup_intent_client_secret=seti_1Lq9rqAJ5Ik974ueIdg7WHn9_secret_MZISJyXsMF6na4pA6ryaqOfvt8JbeGa&redirect_status=succeeded'
 const queryStr = window.location.search;
@@ -19,7 +20,7 @@ if (queryStr.length > 0) {
   redirectStatus = urlParams.get('redirect_status');
 }
 
-export default function Dashboard({ user, setUser }) {
+export default function Dashboard({ user, setUser, setPlanToJoin }) {
   const navigate = useNavigate();
   const [showCodeInput, setShowCodeInput] = useState(false);
   const [code, setCode] = useState('');
@@ -62,6 +63,7 @@ export default function Dashboard({ user, setUser }) {
 
   return (
     <div>
+      <NavBar user={user} setUser={setUser} setPlanToJoin={setPlanToJoin} />
       <Heading>
         {user}
         &apos;s Dashboard

@@ -48,7 +48,10 @@ function App() {
           ? <CreateAccount setUser={setUser} />
           : <Navigate to="/dashboard" />}
       />
-      <Route path="/dashboard" element={<Dashboard user={user} setUser={setUser} />} />
+      <Route
+        path="/dashboard"
+        element={<Dashboard user={user} setUser={setUser} setPlanToJoin={setPlanToJoin} />}
+      />
       <Route
         path="/join/:planId"
         element={

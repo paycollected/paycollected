@@ -38,7 +38,7 @@ export default function NavBar({ user, setUser, setPlanToJoin }) {
       wrap="wrap"
       w="100%"
       mb={8}
-      p={8}
+      p={4}
       bg={['white']}
       color={['gray.600']}
       borderBottomWidth="1px"
@@ -48,7 +48,7 @@ export default function NavBar({ user, setUser, setPlanToJoin }) {
         <Link as={ReactLink} to="/">
           <Image
             src={Logo}
-            alt="Pay Collected Logo"
+            alt="PayCollected Logo"
             fit="cover"
             htmlWidth="200px"
             loading="eager"
