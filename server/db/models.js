@@ -160,7 +160,7 @@ export function plansSummary(username) {
         c1.*,
         CASE
           WHEN SUM(up.quantity) = 0 THEN 0
-          ELSE CEIL("perCycleCost"::NUMERIC / SUM(up.quantity)) * c1.quantity
+          ELSE (CEIL("perCycleCost"::NUMERIC / SUM(up.quantity)) * c1.quantity)::INT
         END AS "selfCost"
       FROM c1
         JOIN user_plan up
@@ -176,8 +176,6 @@ export function plansSummary(username) {
         "isOwner"
     ) SELECT
         c2.*,
-        "perCycleCost"::NUMERIC / 100 AS "perCycleCost",
-        "selfCost" / 100 AS "selfCost",
         json_build_object('firstName', u.first_name, 'lastName', u.last_name) AS owner
       FROM c2
         JOIN user_plan up

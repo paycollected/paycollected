@@ -8,6 +8,7 @@ export default `#graphql
   scalar TestClockID
   scalar DateTime
   scalar Date
+  scalar USCurrency
 
   type Query {
     viewOnePlan (planId: PlanID!): Plan!
@@ -101,9 +102,9 @@ export default `#graphql
     planId: PlanID!
     name : String!
     quantity: Int!
-    selfCost: Float!
+    selfCost: USCurrency!
     cycleFrequency: CycleFrequency!
-    perCycleCost: Float!
+    perCycleCost: USCurrency!
     nextBillDate: Date!
     isOwner: Boolean!
     owner: PlanOwner!
