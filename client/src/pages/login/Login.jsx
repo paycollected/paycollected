@@ -94,7 +94,7 @@ export default function Login({ setUser, planToJoin }) {
                 </Heading>
                 <HStack spacing="1" justify="center">
                   <Text color="muted">Don&apos;t have an account?</Text>
-                  <Button variant="link" colorScheme="blue" onClick={() => { navigate('/signup'); }}>
+                  <Button variant="link" colorScheme="blue" onClick={() => { navigate('/create-account'); }}>
                     Sign up
                   </Button>
                 </HStack>
