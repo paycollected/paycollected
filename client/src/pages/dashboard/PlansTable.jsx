@@ -1,88 +1,61 @@
-import React, { useState, useEffect } from 'react';
-import { useQuery } from '@apollo/client';
+import * as React from 'react';
 import {
-  Flex, Box, Grid, GridItem, Heading, Button, useClipboard, UnorderedList, ListItem, Tooltip
+  Icon, IconButton, Table, Tbody, Td, Th, Thead, Tr,
 } from '@chakra-ui/react';
-import { CopyIcon } from '@chakra-ui/icons';
-import { ViewAllPlans as GET_ALL_PLANS } from '../../graphql/queries.gql';
-import ConfirmCancel from '../planDetails/ConfirmCancel.jsx';
-import ModifyQuantity from '../planDetails/ModifyQuantity.jsx';
-import ConfirmDeletePlan from '../planDetails/ConfirmDeletePlan.jsx';
 
-export default function PlansTable({ user }) {
-  const [planToCopy, setPlanToCopy] = useState(null);
-  const { hasCopied, onCopy, setValue } = useClipboard('');
+function MoreOptionsIcon() {
+  return (
+    <Icon viewBox="0 0 16 16" color="black">
+      <path
+        fill="currentColor"
+        d="M3 9.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z"
+      />
+    </Icon>
+  );
+}
 
-  useEffect(() => { setValue(`${process.env.HOST}/join/${planToCopy}`); }, [planToCopy, setValue]);
-
-  const { loading, data, error } = useQuery(GET_ALL_PLANS, {
-    fetchPolicy: 'cache-and-network',
-    nextFetchPolicy: 'cache-only',
-  });
-
-
-
-//   return (
-//     <div>
-//       <Flex justifyContent="center">
-//         <Box p={2} my={8} width="60%" bg="white" borderRadius="15">
-//           <Box textAlign="center">
-//             <Heading>Your Subscriptions</Heading>
-//           </Box>
-//           {data
-//             && (data.viewAllPlans.map((plan) => (
-//               <div
-//                 key={plan.name}
-//                 onMouseEnter={() => { setPlanToCopy(plan.planId); }}
-//               >
-//                 <Grid templateColumns="repeat(3, 1fr)" gap={3} mb={3}>
-//                   <GridItem colSpan={2} textAlign="left">
-//                     <Heading size="xl">{plan.name}</Heading>
-//                     <div>
-//                       Owned by:&nbsp;
-//                       {plan.owner.username !== user ? plan.owner.firstName.concat(' ', plan.owner.lastName) : 'you'}
-//                     </div>
-//                     <div>{`Total Plan Cost: $${plan.perCycleCost} ${plan.cycleFrequency.toLowerCase()}`}</div>
-//                     <div>{`Your quantity: ${plan.quantity}`}</div>
-//                     {plan.activeMembers.length > 0 && (
-//                       <>
-//                         <div>Others on this plan:</div>
-//                         <UnorderedList>
-//                           {plan.activeMembers.map((member) => (
-//                             <ListItem key={member.username}>{`${member.firstName} ${member.lastName} x ${member.quantity}`}</ListItem>
-//                           ))}
-//                         </UnorderedList>
-//                       </>
-//                     )}
-//                     {plan.activeMembers.length === 0
-//                       && (<div>There are currently no other members on this plan.</div>)}
-//                     Copy link to join:&nbsp;
-//                     <Tooltip label={hasCopied ? 'Copied to clipboard' : 'Click to copy'} closeOnClick={false}>
-//                       <CopyIcon onClick={onCopy} />
-//                     </Tooltip>
-//                   </GridItem>
-//                   <GridItem colSpan={1} textAlign="center">
-//                     <ModifyQuantity
-//                       originalQuant={plan.quantity}
-//                       plan={plan}
-//                     />
-//                     <br></br>
-//                     {(plan.owner.username !== user
-//                       || (plan.owner.username === user && plan.activeMembers.length > 0))
-//                       && (
-//                         <ConfirmCancel plan={plan} user={user} />
-//                       )}
-//                     {plan.owner.username === user && (
-//                       <ConfirmDeletePlan plan={plan} />
-//                     )}
-//                   </GridItem>
-//                 </Grid>
-//               </div>
-//             )))}
-//           {data && data.viewAllPlans.length === 0
-//             && (<div>You are not enrolled in any plans at the moment.</div>)}
-//         </Box>
-//       </Flex>
-//     </div>
-//   );
-// }
+export default function PlansTable({ plans }) {
+  return (
+    <Table>
+      <Thead>
+        <Tr>
+          <Th>Plan Name</Th>
+          <Th>Owner</Th>
+          <Th>Your Cost</Th>
+          <Th>Next Billing Date</Th>
+          <Th>Per Cycle Cost</Th>
+          <Th>Billing Cycle</Th>
+          <Th>Subscriptions</Th>
+          <Th />
+        </Tr>
+      </Thead>
+      <Tbody>
+        {plans.map((plan) => {
+          const {
+            planId, name, owner, isOwner, nextBillDate, cycleFrequency, perCycleCost, quantity,
+            selfCost,
+          } = plan;
+          return (
+            <Tr key={planId}>
+              <Td>{name}</Td>
+              {isOwner && (<Td>You</Td>)}
+              {!isOwner && (<Td>{`${owner.firstName} ${owner.lastName[0]}.`}</Td>)}
+              <Td>{selfCost}</Td>
+              <Td>{nextBillDate}</Td>{console.log(typeof nextBillDate)}
+              <Td>{perCycleCost}</Td>
+              <Td>{cycleFrequency.toLowerCase()}</Td>
+              <Td>{quantity}</Td>
+              <Td>
+                <IconButton
+                  icon={<MoreOptionsIcon fontSize="1.25rem" />}
+                  variant="ghost"
+                  aria-label="Plan's Options"
+                />
+              </Td>
+            </Tr>
+          );
+        })}
+      </Tbody>
+    </Table>
+  );
+}

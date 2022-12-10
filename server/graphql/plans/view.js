@@ -29,7 +29,7 @@ export async function viewOnePlan(planId, username) {
 export async function viewAllPlans(username) {
   try {
     const { rows } = await plansSummary(username);
-    return rows;
+    return { total: 5, plans: rows };
   } catch (asyncError) {
     console.log(asyncError);
     throw new GraphQLError('Unable to retrieve plans information', { extensions: { code: 'INTERNAL_SERVER_ERROR' } });

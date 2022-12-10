@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation } from '@apollo/client';
 import {
-  Button, FormControl, FormLabel, Input, Heading, Box, VStack, HStack, Container,
+  Button, FormControl, FormLabel, Input, Heading, VStack, HStack,
 } from '@chakra-ui/react';
 import {
   // RetrieveNotifications as GET_NOTIFICATIONS,
@@ -10,7 +10,7 @@ import {
 } from '../../graphql/queries.gql';
 import { DeleteNotification as DELETE_NOTI } from '../../graphql/mutations.gql';
 import NavBar from '../../components/NavBar.jsx';
-import { textTheme } from '../../styles/styles.js';
+import PlansTableLayout from './PlansTableLayout.jsx';
 
 // actual redirect URL string 'http://localhost:5647/dashboard/?setup_intent=seti_1Lq9rqAJ5Ik974ueIdg7WHn9&setup_intent_client_secret=seti_1Lq9rqAJ5Ik974ueIdg7WHn9_secret_MZISJyXsMF6na4pA6ryaqOfvt8JbeGa&redirect_status=succeeded'
 const queryStr = window.location.search;
@@ -69,59 +69,61 @@ export default function Dashboard({ user, setUser, setPlanToJoin }) {
     navigate(`/join/${formattedCode}`);
   };
 
-  return (
-    <>
-      <NavBar user={user} setUser={setUser} setPlanToJoin={setPlanToJoin} />
-      <VStack w="90%" justify="left" spacing="30px">
-        <HStack w="100%" spacing="50px">
-          <Heading as="h2">
-            Active Plans
-          </Heading>
-          <Button onClick={() => { navigate('/plan/create'); }}>Create Plan</Button>
-        </HStack>
-        <HStack w="100%" align="end" spacing="50px">
-          <FormControl
-            isRequired
-            w="max-content"
-          >
-            <FormLabel textStyle="note">Received a plan code?</FormLabel>
-            <Input
-              type="text"
-              w="250px"
-              bg="white"
-              placeholder="Enter Code"
-              value={code}
-              onChange={(e) => { setCode(e.target.value); }}
-            />
-          </FormControl>
-          <Button type="button" variant="outline" onClick={codeInputSubmit}>Join Plan</Button>
-        </HStack>
-      </VStack>
+  if (data) {
+    return (
+      <>
+        <NavBar user={user} setUser={setUser} setPlanToJoin={setPlanToJoin} />
+        <VStack w="90%" justify="left" spacing="30px">
+          <HStack w="100%" spacing="50px">
+            <Heading as="h2">
+              {`${data.viewAllPlans.total} Active Plans`}
+            </Heading>
+            <Button onClick={() => { navigate('/plan/create'); }}>Create Plan</Button>
+          </HStack>
+          <PlansTableLayout w="100%" total={data.viewAllPlans.total} plans={data.viewAllPlans.plans} />
+          <HStack w="100%" align="end" spacing="50px">
+            <FormControl
+              isRequired
+              w="max-content"
+            >
+              <FormLabel textStyle="note">Received a plan code?</FormLabel>
+              <Input
+                type="text"
+                w="250px"
+                bg="white"
+                placeholder="Enter Code"
+                value={code}
+                onChange={(e) => { setCode(e.target.value); }}
+              />
+            </FormControl>
+            <Button type="button" variant="outline" onClick={codeInputSubmit}>Join Plan</Button>
+          </HStack>
+        </VStack>
 
-      {console.log(data)}
-
-      {/* {data && data.retrieveNotifications.count > 0 && (
-        <div>
+        {/* {data && data.retrieveNotifications.count > 0 && (
           <div>
-            {`You have ${data.retrieveNotifications.count} notifications`}
-          </div>
-          <button type="button" onClick={() => setShowNotifications(!showNotifications)}>{`${!showNotifications ? 'Show' : 'Hide'} notifications`}</button>
-          {showNotifications && (
             <div>
-              {data.retrieveNotifications.notifications.map((noti) => (
-                <div key={noti.id}>
-                  <div style={{ font: '14px' }}>{noti.content}</div>
-                  <div style={{ font: '10px', fontStyle: 'italic' }}>{noti.createdAt}</div>
-                  <Button onClick={() => deleteNoti({ variables: { notificationId: noti.id } })}>
-                    Mark as read
-                  </Button>
-                </div>
-              ))}
+              {`You have ${data.retrieveNotifications.count} notifications`}
             </div>
-          )}
-        </div>
-      )} */}
-    {/* </Container> */}
-    </>
-  );
+            <button type="button" onClick={() => setShowNotifications(!showNotifications)}>{`${!showNotifications ? 'Show' : 'Hide'} notifications`}</button>
+            {showNotifications && (
+              <div>
+                {data.retrieveNotifications.notifications.map((noti) => (
+                  <div key={noti.id}>
+                    <div style={{ font: '14px' }}>{noti.content}</div>
+                    <div style={{ font: '10px', fontStyle: 'italic' }}>{noti.createdAt}</div>
+                    <Button onClick={() => deleteNoti({ variables: { notificationId: noti.id } })}>
+                      Mark as read
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )} */}
+      {/* </Container> */}
+      </>
+    );
+  }
+  return null;
 }

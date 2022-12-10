@@ -63,7 +63,8 @@ export const inputTheme = defineStyleConfig({
 export const globalTheme = extendTheme({
   components: {
     Button: buttonTheme,
-    Input: inputTheme
+    Input: inputTheme,
+    Heading: { baseStyle: { color: '#2B6CB0' } },
   },
   fonts: {
     heading: "'Inter' , sans-serif",
@@ -73,7 +74,8 @@ export const globalTheme = extendTheme({
     note: {
       color: '#718096',
       fontSize: '12px',
-    }
+    },
+    planNameHeader: { color: '#272088' }
   }
 });
 

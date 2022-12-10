@@ -12,7 +12,7 @@ export default `#graphql
 
   type Query {
     viewOnePlan (planId: PlanID!): Plan!
-    viewAllPlans: [PlanSummary]!
+    viewAllPlans: AllPlansSummary!
     retrieveNotifications: RetrieveNotifications! # offset pagination?
   }
 
@@ -96,6 +96,11 @@ export default `#graphql
   type PlanOwner {
     firstName: String!
     lastName: String!
+  }
+
+  type AllPlansSummary {
+    total: Int!,
+    plans: [PlanSummary]!
   }
 
   type PlanSummary {

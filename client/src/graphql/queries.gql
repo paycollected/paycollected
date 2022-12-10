@@ -21,18 +21,21 @@ query ViewOnePlan ($planId: PlanID!) {
 
 query ViewAllPlans {
   viewAllPlans {
-    planId
-    name
-    owner {
-      firstName
-      lastName
+    total
+    plans {
+      planId
+      name
+      owner {
+        firstName
+        lastName
+      }
+      isOwner
+      nextBillDate
+      cycleFrequency
+      perCycleCost
+      quantity
+      selfCost
     }
-    isOwner
-    nextBillDate
-    cycleFrequency
-    perCycleCost
-    quantity
-    selfCost
   }
 }
 
