@@ -76,7 +76,7 @@ const {
 
 const menuTheme = defineMultiStyleConfig({
   baseStyle: definePartsStyle({
-    item: { py: '4' },
+    item: { py: '4', fontFamily: "'Roboto', sans-serif", fontSize: '14px' },
   }),
 });
 
@@ -88,7 +88,7 @@ export const globalTheme = extendTheme({
     Menu: menuTheme,
   },
   fonts: {
-    heading: "'Inter' , sans-serif",
+    heading: "'Inter', sans-serif",
     body: "'Inter', sans-serif",
   },
   textStyles: {
