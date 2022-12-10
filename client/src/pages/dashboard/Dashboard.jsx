@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation } from '@apollo/client';
 import {
-  Button, FormControl, FormLabel, Input, Heading, Box,
+  Button, FormControl, FormLabel, Input, Heading, Box, VStack, Container,
 } from '@chakra-ui/react';
 import {
   // RetrieveNotifications as GET_NOTIFICATIONS,
@@ -72,29 +72,31 @@ export default function Dashboard({ user, setUser, setPlanToJoin }) {
   return (
     <>
       <NavBar user={user} setUser={setUser} setPlanToJoin={setPlanToJoin} />
-      <Box>
-        <Heading>
-          Active Plans
-        </Heading>
-        <Button onClick={() => { navigate('/plan/create'); }}>Create Plan</Button>
-      </Box>
-      <Box>
-        <FormControl
-          isRequired
-          my={2}
-        >
-          <FormLabel>Received a plan code?</FormLabel>
-          <Input
-            type="text"
-            width="50%"
-            bg="white"
-            placeholder="Enter Code"
-            value={code}
-            onChange={(e) => { setCode(e.target.value); }}
-          />
-        </FormControl>
-        <Button type="button" onClick={codeInputSubmit}>Join Plan</Button>
-      </Box>
+      <VStack>
+        <Box>
+          <Heading as="h2">
+            Active Plans
+          </Heading>
+          <Button onClick={() => { navigate('/plan/create'); }}>Create Plan</Button>
+        </Box>
+        <Box>
+          <FormControl
+            isRequired
+            my={2}
+          >
+            <FormLabel textStyle="note">Received a plan code?</FormLabel>
+            <Input
+              type="text"
+              width="50%"
+              bg="white"
+              placeholder="Enter Code"
+              value={code}
+              onChange={(e) => { setCode(e.target.value); }}
+            />
+          </FormControl>
+          <Button type="button" onClick={codeInputSubmit}>Join Plan</Button>
+        </Box>
+      </VStack>
       {console.log(data)}
 
       {/* {data && data.retrieveNotifications.count > 0 && (

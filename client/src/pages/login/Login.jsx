@@ -73,7 +73,7 @@ export default function Login({ setUser, planToJoin }) {
   };
 
   return (
-    <div>
+    <>
       <ReverifyEmailModal isOpen={isOpenVerify} onClose={onCloseVerify} />
       <ForgotPwdModal isOpen={isOpenReset} onClose={onCloseReset} />
       <Container maxW="lg" py={{ base: '12', md: '24' }} px={{ base: '0', sm: '8' }}>
@@ -186,6 +186,6 @@ export default function Login({ setUser, planToJoin }) {
           </form>
         </Stack>
       </Container>
-    </div>
+    </>
   );
 }

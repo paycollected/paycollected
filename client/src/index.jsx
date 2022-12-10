@@ -5,9 +5,9 @@ import {
 } from '@apollo/client';
 import { setContext } from '@apollo/client/link/context';
 import { BrowserRouter } from 'react-router-dom';
-import { ChakraProvider, extendTheme, Box } from '@chakra-ui/react';
+import { ChakraProvider, Box } from '@chakra-ui/react';
 import App from './App.jsx';
-import { buttonTheme, inputTheme } from './styles/styles.js';
+import { globalTheme } from './styles/styles.js';
 
 
 const httpLink = createHttpLink({
@@ -70,22 +70,13 @@ const client = new ApolloClient({
   connectToDevTools: true,
 });
 
-const theme = extendTheme({
-  components: {
-    Button: buttonTheme,
-    Input: inputTheme
-  },
-  fonts: {
-    heading: "'Inter' , sans-serif",
-    body: "'Inter', sans-serif",
-  }
-});
+
 
 const root = createRoot(document.getElementById('root'));
 root.render(
   <ApolloProvider client={client}>
     <BrowserRouter>
-      <ChakraProvider theme={theme}>
+      <ChakraProvider theme={globalTheme}>
         <Box
           w="100%"
           h="100vh"

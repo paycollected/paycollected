@@ -54,11 +54,19 @@ export const inputTheme = defineStyleConfig({
   },
 });
 
-export const textTheme = extendTheme({
+export const globalTheme = extendTheme({
+  components: {
+    Button: buttonTheme,
+    Input: inputTheme
+  },
+  fonts: {
+    heading: "'Inter' , sans-serif",
+    body: "'Inter', sans-serif",
+  },
   textStyles: {
     note: {
       color: '#718096',
-      forntSize: '14px',
+      fontSize: '12px',
     }
   }
 });
