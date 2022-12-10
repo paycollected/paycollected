@@ -82,12 +82,10 @@ export default function Login({ setUser, planToJoin }) {
             autoComplete="off"
             onSubmit={handleSubmit(onSubmit)}
           >
-            <Stack spacing="6">
-              <Center>
-                <Link as={ReactLink} to="/">
-                  <Image src={Logo} alt="Pay Collected Logo" fit="cover" htmlWidth="200px" loading="eager" />
-                </Link>
-              </Center>
+            <Stack spacing="6" align="center">
+              <Link as={ReactLink} to="/">
+                <Image src={Logo} alt="Pay Collected Logo" fit="cover" htmlWidth="200px" loading="eager" />
+              </Link>
               <Stack spacing={{ base: '2', md: '3' }} textAlign="center">
                 <Heading size="lg">
                   Log in to your account

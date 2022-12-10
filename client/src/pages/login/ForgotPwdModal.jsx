@@ -65,7 +65,13 @@ export default function ForgotPwdModal({ isOpen, onClose }) {
                   type="text"
                 />
               </FormControl>
-              <Button type="submit">Submit</Button>
+              <Button
+                type="submit"
+                isLoading={loading}
+                disabled={loading}
+              >
+                Submit
+              </Button>
             </form>
           )}
           {resetEmailSent
