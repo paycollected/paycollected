@@ -1,6 +1,6 @@
 import * as React from 'react';
 import {
-  Icon, IconButton, Table, Tbody, Td, Th, Thead, Tr,
+  Icon, IconButton, Table, Tbody, Td, Th, Thead, Tr, Menu, MenuButton, MenuList, MenuItem,
 } from '@chakra-ui/react';
 
 function MoreOptionsIcon() {
@@ -48,11 +48,18 @@ export default function PlansTable({ plans }) {
               <Td>{cycleFrequency[0].concat(cycleFrequency.slice(1).toLowerCase())}</Td>
               <Td>{quantity}</Td>
               <Td>
-                <IconButton
-                  icon={<MoreOptionsIcon fontSize="1.25rem" />}
-                  variant="ghost"
-                  aria-label="Plan's Options"
-                />
+                <Menu>
+                  <MenuButton
+                    as={IconButton}
+                    aria-label="Options"
+                    icon={<MoreOptionsIcon fontSize="1.25rem" bg="white" />}
+                    variant="menu"
+                  />
+                  <MenuList>
+                    <MenuItem>Share Plan</MenuItem>
+                    <MenuItem>View Details</MenuItem>
+                  </MenuList>
+                </Menu>
               </Td>
             </Tr>
           );

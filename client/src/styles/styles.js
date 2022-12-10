@@ -46,6 +46,9 @@ export const buttonTheme = defineStyleConfig({
         color: '##2B6CB0',
         border: '2px solid'
       }
+    },
+    menu: {
+      bg: 'transparent'
     }
   },
   defaultProps: {
