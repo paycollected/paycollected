@@ -177,7 +177,7 @@ export function plansSummary(username) {
     ), c3 AS (
       SELECT
         c2.*,
-        json_build_object('firstName', u.first_name, 'lastName', u.last_name) AS owner
+        JSON_BUILD_OBJECT('firstName', u.first_name, 'lastName', u.last_name) AS owner
       FROM c2
         JOIN user_plan up
         ON "planId" = up.plan_id
@@ -186,7 +186,7 @@ export function plansSummary(username) {
       WHERE up.plan_owner = True
     ) SELECT
         COUNT(*) AS total,
-        JSON_AGG(ROW_TO_JSON(c3)) AS plans
+        COALESCE(JSON_AGG(ROW_TO_JSON(c3)), '[]'::JSON) AS plans
       FROM c3
   `;
   return pool.query(query, [username]);
