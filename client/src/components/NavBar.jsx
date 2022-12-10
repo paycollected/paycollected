@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link as ReactLink } from 'react-router-dom';
 import { useMutation } from '@apollo/client';
 import {
-  Flex, Box, Text, Stack, Link, Button, Image, Avatar, Menu, MenuButton, MenuList, MenuItem
+  Flex, Box, Text, Stack, Link, Image, Avatar, Menu, MenuButton, MenuList, MenuItem
 } from '@chakra-ui/react';
 import { CloseIcon, HamburgerIcon } from '@chakra-ui/icons';
 import Logo from '../public/Pay_Collected_Logo.png';
