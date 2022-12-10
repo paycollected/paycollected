@@ -25,7 +25,7 @@ export default function PlansTableLayout({ total, plans }) {
   // });
 
   return (
-    <Container py={{ base: '4', md: '8' }} px={{ base: '0', md: 8 }}>
+    <Container pl="0" pr="8%" minWidth="100%">
       <Box
         bg="bg-surface"
         boxShadow={{ base: 'none', md: useColorModeValue('sm', 'sm-dark') }}

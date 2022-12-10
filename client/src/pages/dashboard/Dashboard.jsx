@@ -73,15 +73,15 @@ export default function Dashboard({ user, setUser, setPlanToJoin }) {
     return (
       <>
         <NavBar user={user} setUser={setUser} setPlanToJoin={setPlanToJoin} />
-        <VStack w="90%" justify="left" spacing="30px">
-          <HStack w="100%" spacing="50px">
+        <VStack w="93%" justify="left" spacing={{ base: '4', md: '8' }} mb="10">
+          <HStack w="100%" spacing={{ base: '4', md: '8' }}>
             <Heading as="h2">
               {`${data.viewAllPlans.total} Active Plans`}
             </Heading>
             <Button onClick={() => { navigate('/plan/create'); }}>Create Plan</Button>
           </HStack>
-          <PlansTableLayout w="100%" total={data.viewAllPlans.total} plans={data.viewAllPlans.plans} />
-          <HStack w="100%" align="end" spacing="50px">
+          <PlansTableLayout total={data.viewAllPlans.total} plans={data.viewAllPlans.plans} />
+          <HStack w="100%" align="end" spacing={{ base: '4', md: '8' }}>
             <FormControl
               isRequired
               w="max-content"

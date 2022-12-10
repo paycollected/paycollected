@@ -17,7 +17,7 @@ function MoreOptionsIcon() {
 export default function PlansTable({ plans }) {
   return (
     <Table>
-      <Thead>
+      <Thead bg="#F7FAFC">
         <Tr>
           <Th>Plan Name</Th>
           <Th>Owner</Th>
@@ -41,7 +41,7 @@ export default function PlansTable({ plans }) {
               {isOwner && (<Td>You</Td>)}
               {!isOwner && (<Td>{`${owner.firstName} ${owner.lastName[0]}.`}</Td>)}
               <Td>{selfCost}</Td>
-              <Td>{nextBillDate}</Td>{console.log(typeof nextBillDate)}
+              <Td>{nextBillDate}</Td>
               <Td>{perCycleCost}</Td>
               <Td>{cycleFrequency.toLowerCase()}</Td>
               <Td>{quantity}</Td>
