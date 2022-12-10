@@ -3,7 +3,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import jwtDecode from 'jwt-decode';
 import Home from './pages/home/Home.jsx';
 import Login from './pages/login/Login.jsx';
-import CreateAccount from './pages/CreateAccount.jsx';
+import CreateAccount from './pages/createAccount/CreateAccount.jsx';
 import Dashboard from './pages/dashboard/Dashboard.jsx';
 import JoinPlan from './pages/JoinPlan.jsx';
 import Checkout from './pages/checkout/Checkout.jsx';
