@@ -53,7 +53,7 @@ export default function PlansTable({ plans }) {
                     as={IconButton}
                     aria-label="Options"
                     icon={<MoreOptionsIcon fontSize="1.25rem" bg="white" />}
-                    variant="menu"
+                    variant="menuIcon"
                   />
                   <MenuList>
                     <MenuItem>Share Plan</MenuItem>

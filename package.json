@@ -25,11 +25,13 @@
   "dependencies": {
     "@apollo/client": "^3.6.9",
     "@apollo/server": "^4.0.4",
+    "@chakra-ui/anatomy": "^2.1.0",
     "@chakra-ui/icons": "^2.0.11",
     "@chakra-ui/react": "^2.3.5",
     "@emotion/react": "^11.10.4",
     "@emotion/styled": "^11.10.4",
     "@fontsource/inter": "^4.5.14",
+    "@fontsource/roboto": "^4.5.8",
     "@sendgrid/mail": "^7.7.0",
     "@stripe/react-stripe-js": "^1.12.0",
     "@stripe/stripe-js": "^1.38.1",
@@ -48,8 +50,7 @@
     "react-dom": "^18.2.0",
     "react-hook-form": "^7.35.0",
     "react-router-dom": "^6.3.0",
-    "stripe": "^10.10.0",
-    "styled-components": "^5.3.6"
+    "stripe": "^10.10.0"
   },
   "devDependencies": {
     "@babel/core": "^7.18.13",

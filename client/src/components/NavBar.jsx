@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link as ReactLink } from 'react-router-dom';
 import { useMutation } from '@apollo/client';
 import {
-  Flex, Box, Text, Stack, Link, Image, Avatar, Menu, MenuButton, MenuList, MenuItem
+  Flex, Box, Text, Stack, Link, Image, Avatar, Menu, MenuButton, MenuList, MenuItem, Button,
 } from '@chakra-ui/react';
 import { CloseIcon, HamburgerIcon } from '@chakra-ui/icons';
 import Logo from '../public/Pay_Collected_Logo.png';
@@ -74,7 +74,7 @@ export default function NavBar({ user, setUser, setPlanToJoin }) {
               Dashboard
             </Text>
           </Link>
-          <NavBarBtn type="button" onClick={submitEditPayment}>Payments</NavBarBtn>
+          <Button type="button" onClick={submitEditPayment} variant="navBarBtn">Payments</Button>
           <Link href="/">
             <Text display="block">
               Statements

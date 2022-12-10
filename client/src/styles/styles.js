@@ -1,5 +1,7 @@
-import { extendTheme, defineStyleConfig } from '@chakra-ui/react';
-import styled from 'styled-components';
+import {
+  extendTheme, defineStyleConfig, createMultiStyleConfigHelpers,
+} from '@chakra-ui/react';
+import { menuAnatomy } from '@chakra-ui/anatomy';
 
 export const buttonTheme = defineStyleConfig({
   baseStyle: {
@@ -47,8 +49,13 @@ export const buttonTheme = defineStyleConfig({
         border: '2px solid'
       }
     },
-    menu: {
-      bg: 'transparent'
+    menuIcon: { bg: 'transparent' },
+    navBarBtn: {
+      bg: 'transparent',
+      fontWeight: 'normal',
+      _hover: {
+        textDecoration: 'underline',
+      }
     }
   },
   defaultProps: {
@@ -63,11 +70,22 @@ export const inputTheme = defineStyleConfig({
   },
 });
 
+const {
+  definePartsStyle, defineMultiStyleConfig
+} = createMultiStyleConfigHelpers(menuAnatomy.keys);
+
+const menuTheme = defineMultiStyleConfig({
+  baseStyle: definePartsStyle({
+    item: { py: '4' },
+  }),
+});
+
 export const globalTheme = extendTheme({
   components: {
     Button: buttonTheme,
     Input: inputTheme,
     Heading: { baseStyle: { color: '#2B6CB0' } },
+    Menu: menuTheme,
   },
   fonts: {
     heading: "'Inter' , sans-serif",
@@ -81,9 +99,3 @@ export const globalTheme = extendTheme({
     planNameHeader: { color: '#272088' }
   }
 });
-
-export const NavBarBtn = styled.button`
-  &:hover {
-    text-decoration: underline;
-  }
-`;
