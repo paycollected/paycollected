@@ -1,7 +1,8 @@
 import * as React from 'react';
 import {
-  Icon, IconButton, Table, Tbody, Td, Th, Thead, Tr, Menu, MenuButton, MenuList, MenuItem,
+  Icon, IconButton, Table, Tbody, Td, Th, Thead, Tr, Menu, MenuButton, MenuList, MenuItem, Button,
 } from '@chakra-ui/react';
+import { useNavigate } from 'react-router-dom';
 
 function MoreOptionsIcon() {
   return (
@@ -15,6 +16,7 @@ function MoreOptionsIcon() {
 }
 
 export default function PlansTable({ plans }) {
+  const navigate = useNavigate();
   return (
     <Table>
       <Thead bg="#F7FAFC">
@@ -57,7 +59,7 @@ export default function PlansTable({ plans }) {
                   />
                   <MenuList>
                     <MenuItem>Share Plan</MenuItem>
-                    <MenuItem>View Details</MenuItem>
+                    <MenuItem onClick={() => navigate(`/view/${planId}`)}>View Details</MenuItem>
                   </MenuList>
                 </Menu>
               </Td>

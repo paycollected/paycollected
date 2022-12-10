@@ -144,7 +144,7 @@ export function plansSummary(username) {
             THEN 'YEARLY'
         END AS "cycleFrequency",
         p.per_cycle_cost AS "perCycleCost",
-        nbd.next_bill_date AS "nextBillDate",
+        TO_CHAR(nbd.next_bill_date, 'YYYY-MM-DD') AS "nextBillDate",
         up.plan_owner AS "isOwner"
       FROM user_plan up
         JOIN plans p
@@ -174,7 +174,8 @@ export function plansSummary(username) {
         "perCycleCost",
         "nextBillDate",
         "isOwner"
-    ) SELECT
+    ), c3 AS (
+      SELECT
         c2.*,
         json_build_object('firstName', u.first_name, 'lastName', u.last_name) AS owner
       FROM c2
@@ -183,6 +184,10 @@ export function plansSummary(username) {
         JOIN users u
         ON up.username = u.username
       WHERE up.plan_owner = True
+    ) SELECT
+        COUNT(*) AS total,
+        JSON_AGG(ROW_TO_JSON(c3)) AS plans
+      FROM c3
   `;
   return pool.query(query, [username]);
 }
