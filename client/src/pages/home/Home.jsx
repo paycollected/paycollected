@@ -13,7 +13,7 @@ export default function Home({ user, setUser, setPlanToJoin }) {
   }, []);
 
   return (
-    <div>
+    <>
       <NavBar user={user} setUser={setUser} setPlanToJoin={setPlanToJoin} />
       <h1>This is the Home page</h1>
       <Heading my={5}>
@@ -27,6 +27,6 @@ export default function Home({ user, setUser, setPlanToJoin }) {
       <Heading my={5}>
         Contact Us
       </Heading>
-    </div>
+    </>
   );
 }

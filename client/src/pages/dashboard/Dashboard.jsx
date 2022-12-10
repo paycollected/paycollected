@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation } from '@apollo/client';
 import {
-  Button, FormControl, FormLabel, Input, Heading, Box, VStack, Container,
+  Button, FormControl, FormLabel, Input, Heading, Box, VStack, HStack, Container,
 } from '@chakra-ui/react';
 import {
   // RetrieveNotifications as GET_NOTIFICATIONS,
@@ -72,22 +72,22 @@ export default function Dashboard({ user, setUser, setPlanToJoin }) {
   return (
     <>
       <NavBar user={user} setUser={setUser} setPlanToJoin={setPlanToJoin} />
-      <VStack>
-        <Box>
+      <VStack w="90%" justify="left">
+        <HStack w="100%">
           <Heading as="h2">
             Active Plans
           </Heading>
           <Button onClick={() => { navigate('/plan/create'); }}>Create Plan</Button>
-        </Box>
-        <Box>
+        </HStack>
+        <HStack w="100%" align="end">
           <FormControl
             isRequired
-            my={2}
+            w="max-content"
           >
             <FormLabel textStyle="note">Received a plan code?</FormLabel>
             <Input
               type="text"
-              width="50%"
+              w="250px"
               bg="white"
               placeholder="Enter Code"
               value={code}
@@ -95,8 +95,9 @@ export default function Dashboard({ user, setUser, setPlanToJoin }) {
             />
           </FormControl>
           <Button type="button" onClick={codeInputSubmit}>Join Plan</Button>
-        </Box>
+        </HStack>
       </VStack>
+
       {console.log(data)}
 
       {/* {data && data.retrieveNotifications.count > 0 && (
@@ -120,6 +121,7 @@ export default function Dashboard({ user, setUser, setPlanToJoin }) {
           )}
         </div>
       )} */}
+    {/* </Container> */}
     </>
   );
 }

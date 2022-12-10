@@ -20,67 +20,69 @@ export default function PlansTable({ user }) {
     nextFetchPolicy: 'cache-only',
   });
 
-  return (
-    <div>
-      <Flex justifyContent="center">
-        <Box p={2} my={8} width="60%" bg="white" borderRadius="15">
-          <Box textAlign="center">
-            <Heading>Your Subscriptions</Heading>
-          </Box>
-          {data
-            && (data.viewAllPlans.map((plan) => (
-              <div
-                key={plan.name}
-                onMouseEnter={() => { setPlanToCopy(plan.planId); }}
-              >
-                <Grid templateColumns="repeat(3, 1fr)" gap={3} mb={3}>
-                  <GridItem colSpan={2} textAlign="left">
-                    <Heading size="xl">{plan.name}</Heading>
-                    <div>
-                      Owned by:&nbsp;
-                      {plan.owner.username !== user ? plan.owner.firstName.concat(' ', plan.owner.lastName) : 'you'}
-                    </div>
-                    <div>{`Total Plan Cost: $${plan.perCycleCost} ${plan.cycleFrequency.toLowerCase()}`}</div>
-                    <div>{`Your quantity: ${plan.quantity}`}</div>
-                    {plan.activeMembers.length > 0 && (
-                      <>
-                        <div>Others on this plan:</div>
-                        <UnorderedList>
-                          {plan.activeMembers.map((member) => (
-                            <ListItem key={member.username}>{`${member.firstName} ${member.lastName} x ${member.quantity}`}</ListItem>
-                          ))}
-                        </UnorderedList>
-                      </>
-                    )}
-                    {plan.activeMembers.length === 0
-                      && (<div>There are currently no other members on this plan.</div>)}
-                    Copy link to join:&nbsp;
-                    <Tooltip label={hasCopied ? 'Copied to clipboard' : 'Click to copy'} closeOnClick={false}>
-                      <CopyIcon onClick={onCopy} />
-                    </Tooltip>
-                  </GridItem>
-                  <GridItem colSpan={1} textAlign="center">
-                    <ModifyQuantity
-                      originalQuant={plan.quantity}
-                      plan={plan}
-                    />
-                    <br></br>
-                    {(plan.owner.username !== user
-                      || (plan.owner.username === user && plan.activeMembers.length > 0))
-                      && (
-                        <ConfirmCancel plan={plan} user={user} />
-                      )}
-                    {plan.owner.username === user && (
-                      <ConfirmDeletePlan plan={plan} />
-                    )}
-                  </GridItem>
-                </Grid>
-              </div>
-            )))}
-          {data && data.viewAllPlans.length === 0
-            && (<div>You are not enrolled in any plans at the moment.</div>)}
-        </Box>
-      </Flex>
-    </div>
-  );
-}
+
+
+//   return (
+//     <div>
+//       <Flex justifyContent="center">
+//         <Box p={2} my={8} width="60%" bg="white" borderRadius="15">
+//           <Box textAlign="center">
+//             <Heading>Your Subscriptions</Heading>
+//           </Box>
+//           {data
+//             && (data.viewAllPlans.map((plan) => (
+//               <div
+//                 key={plan.name}
+//                 onMouseEnter={() => { setPlanToCopy(plan.planId); }}
+//               >
+//                 <Grid templateColumns="repeat(3, 1fr)" gap={3} mb={3}>
+//                   <GridItem colSpan={2} textAlign="left">
+//                     <Heading size="xl">{plan.name}</Heading>
+//                     <div>
+//                       Owned by:&nbsp;
+//                       {plan.owner.username !== user ? plan.owner.firstName.concat(' ', plan.owner.lastName) : 'you'}
+//                     </div>
+//                     <div>{`Total Plan Cost: $${plan.perCycleCost} ${plan.cycleFrequency.toLowerCase()}`}</div>
+//                     <div>{`Your quantity: ${plan.quantity}`}</div>
+//                     {plan.activeMembers.length > 0 && (
+//                       <>
+//                         <div>Others on this plan:</div>
+//                         <UnorderedList>
+//                           {plan.activeMembers.map((member) => (
+//                             <ListItem key={member.username}>{`${member.firstName} ${member.lastName} x ${member.quantity}`}</ListItem>
+//                           ))}
+//                         </UnorderedList>
+//                       </>
+//                     )}
+//                     {plan.activeMembers.length === 0
+//                       && (<div>There are currently no other members on this plan.</div>)}
+//                     Copy link to join:&nbsp;
+//                     <Tooltip label={hasCopied ? 'Copied to clipboard' : 'Click to copy'} closeOnClick={false}>
+//                       <CopyIcon onClick={onCopy} />
+//                     </Tooltip>
+//                   </GridItem>
+//                   <GridItem colSpan={1} textAlign="center">
+//                     <ModifyQuantity
+//                       originalQuant={plan.quantity}
+//                       plan={plan}
+//                     />
+//                     <br></br>
+//                     {(plan.owner.username !== user
+//                       || (plan.owner.username === user && plan.activeMembers.length > 0))
+//                       && (
+//                         <ConfirmCancel plan={plan} user={user} />
+//                       )}
+//                     {plan.owner.username === user && (
+//                       <ConfirmDeletePlan plan={plan} />
+//                     )}
+//                   </GridItem>
+//                 </Grid>
+//               </div>
+//             )))}
+//           {data && data.viewAllPlans.length === 0
+//             && (<div>You are not enrolled in any plans at the moment.</div>)}
+//         </Box>
+//       </Flex>
+//     </div>
+//   );
+// }

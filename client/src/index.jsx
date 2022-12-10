@@ -5,7 +5,7 @@ import {
 } from '@apollo/client';
 import { setContext } from '@apollo/client/link/context';
 import { BrowserRouter } from 'react-router-dom';
-import { ChakraProvider, Box } from '@chakra-ui/react';
+import { ChakraProvider, Box, Flex } from '@chakra-ui/react';
 import App from './App.jsx';
 import { globalTheme } from './styles/styles.js';
 
@@ -77,13 +77,15 @@ root.render(
   <ApolloProvider client={client}>
     <BrowserRouter>
       <ChakraProvider theme={globalTheme}>
-        <Box
+        <Flex
           w="100%"
-          h="100vh"
+          h="max-content"
           bg="white"
+          direction="column"
+          align="center"
         >
           <App />
-        </Box>
+        </Flex>
       </ChakraProvider>
     </BrowserRouter>
   </ApolloProvider>
