@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation } from '@apollo/client';
 import {
-  Button, FormControl, FormLabel, Input, Heading, VStack, HStack,
+  Button, FormControl, FormLabel, Input, Heading, VStack, HStack, WrapItem, Wrap,
 } from '@chakra-ui/react';
 import {
   // RetrieveNotifications as GET_NOTIFICATIONS,
@@ -74,30 +74,38 @@ export default function Dashboard({ user, setUser, setPlanToJoin }) {
       <>
         <NavBar user={user} setUser={setUser} setPlanToJoin={setPlanToJoin} />
         <VStack w="93%" justify="left" spacing={{ base: '4', md: '8' }} mb="10">
-          <HStack w="100%" spacing={{ base: '4', md: '8' }}>
-            <Heading as="h2">
-              {`${data.viewAllPlans.total} Active Plans`}
-            </Heading>
-            <Button onClick={() => { navigate('/plan/create'); }}>Create Plan</Button>
-          </HStack>
+          <Wrap w="100%" spacing={{ base: '4', md: '8' }}>
+            <WrapItem>
+              <Heading as="h2">
+                {`${data.viewAllPlans.total} Active Plans`}
+              </Heading>
+            </WrapItem>
+            <WrapItem>
+              <Button onClick={() => { navigate('/plan/create'); }}>Create Plan</Button>
+            </WrapItem>
+          </Wrap>
           <PlansTableLayout total={data.viewAllPlans.total} plans={data.viewAllPlans.plans} />
-          <HStack w="100%" align="end" spacing={{ base: '4', md: '8' }}>
-            <FormControl
-              isRequired
-              w="max-content"
-            >
-              <FormLabel textStyle="note">Received a plan code?</FormLabel>
-              <Input
-                type="text"
-                w="250px"
-                bg="white"
-                placeholder="Enter Code"
-                value={code}
-                onChange={(e) => { setCode(e.target.value); }}
-              />
-            </FormControl>
-            <Button type="button" variant="outline" onClick={codeInputSubmit}>Join Plan</Button>
-          </HStack>
+          <Wrap w="100%" align="end" spacing={{ base: '4', md: '8' }}>
+            <WrapItem>
+              <FormControl
+                isRequired
+                w="max-content"
+              >
+                <FormLabel textStyle="note">Received a plan code?</FormLabel>
+                <Input
+                  type="text"
+                  w="250px"
+                  bg="white"
+                  placeholder="Enter Code"
+                  value={code}
+                  onChange={(e) => { setCode(e.target.value); }}
+                />
+              </FormControl>
+            </WrapItem>
+            <WrapItem>
+              <Button type="button" variant="outline" onClick={codeInputSubmit}>Join Plan</Button>
+            </WrapItem>
+          </Wrap>
         </VStack>
 
         {/* {data && data.retrieveNotifications.count > 0 && (
