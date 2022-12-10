@@ -54,6 +54,15 @@ export const inputTheme = defineStyleConfig({
   },
 });
 
+export const textTheme = extendTheme({
+  textStyles: {
+    note: {
+      color: '#718096',
+      forntSize: '14px',
+    }
+  }
+});
+
 export const NavBarBtn = styled.button`
   &:hover {
     text-decoration: underline;

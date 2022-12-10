@@ -79,23 +79,21 @@ export default function Dashboard({ user, setUser, setPlanToJoin }) {
         <Button onClick={() => { navigate('/plan/create'); }}>Create Plan</Button>
       </Box>
       <Box>
-        <form onSubmit={codeInputSubmit}>
-          <FormControl
-            isRequired
-            my={2}
-          >
-            <FormLabel>Plan Code</FormLabel>
-            <Input
-              type="text"
-              width="50%"
-              bg="white"
-              placeholder="Enter Code"
-              value={code}
-              onChange={(e) => { setCode(e.target.value); }}
-            />
-          </FormControl>
-          <Button type="submit">Join Plan</Button>
-        </form>
+        <FormControl
+          isRequired
+          my={2}
+        >
+          <FormLabel>Received a plan code?</FormLabel>
+          <Input
+            type="text"
+            width="50%"
+            bg="white"
+            placeholder="Enter Code"
+            value={code}
+            onChange={(e) => { setCode(e.target.value); }}
+          />
+        </FormControl>
+        <Button type="button" onClick={codeInputSubmit}>Join Plan</Button>
       </Box>
       {console.log(data)}
 

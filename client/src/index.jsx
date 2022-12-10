@@ -9,6 +9,7 @@ import { ChakraProvider, extendTheme, Box } from '@chakra-ui/react';
 import App from './App.jsx';
 import { buttonTheme, inputTheme } from './styles/styles.js';
 
+
 const httpLink = createHttpLink({
   // TODO: will need to find out how to 'hide' server URI when deployed
   uri: 'http://localhost:5647/graphql',
@@ -73,6 +74,10 @@ const theme = extendTheme({
   components: {
     Button: buttonTheme,
     Input: inputTheme
+  },
+  fonts: {
+    heading: "'Inter' , sans-serif",
+    body: "'Inter', sans-serif",
   }
 });
 
