@@ -121,30 +121,33 @@ CREATE VIEW subs_on_plan AS
     JOIN c
     ON up.plan_id = c.plan_id;
 
+
 CREATE VIEW next_bill_date AS
-  SELECT p.plan_id,
-  CASE
-    WHEN CURRENT_TIMESTAMP < p.start_date
-      THEN p.start_date
-    ELSE
-      CASE
-        WHEN p.cycle_frequency = 'weekly'
-          THEN
+  SELECT
+    p.plan_id,
+    CASE
+      WHEN CURRENT_TIMESTAMP < p.start_date
+        THEN p.start_date
+      ELSE
+        CASE
+          WHEN p.cycle_frequency = 'weekly'
+            THEN
+              p.start_date
+              + MAKE_INTERVAL(weeks => (FLOOR (EXTRACT (DAY FROM (CURRENT_TIMESTAMP - p.start_date)) / 7))::INTEGER)
+              + interval '1 week'
+          WHEN p.cycle_frequency = 'monthly'
+            THEN
+              p.start_date
+              + DATE_TRUNC('month', AGE(CURRENT_TIMESTAMP, p.start_date))
+              + interval '1 month'
+          ELSE
             p.start_date
-            + MAKE_INTERVAL(weeks => (FLOOR (EXTRACT (DAY FROM (CURRENT_TIMESTAMP - p.start_date)) / 7))::INTEGER)
-            + interval '1 week'
-        WHEN p.cycle_frequency = 'monthly'
-          THEN
-            p.start_date
-            + DATE_TRUNC('month', AGE(CURRENT_TIMESTAMP, p.start_date))
-            + interval '1 month'
-        ELSE
-          p.start_date
-          + DATE_TRUNC('year', AGE(CURRENT_TIMESTAMP, p.start_date))
-          + interval '1 year'
-      END
-  END AS next_bill_date
+            + DATE_TRUNC('year', AGE(CURRENT_TIMESTAMP, p.start_date))
+            + interval '1 year'
+        END
+    END AS next_bill_date
   FROM plans p;
+
 
 CREATE VIEW subscription_setup AS
   SELECT

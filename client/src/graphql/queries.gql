@@ -26,18 +26,13 @@ query ViewAllPlans {
     owner {
       firstName
       lastName
-      username
     }
+    isOwner
+    nextBillDate
     cycleFrequency
     perCycleCost
-    activeMembers {
-      firstName
-      lastName
-      username
-      quantity
-    }
     quantity
-    subscriptionId
+    selfCost
   }
 }
 

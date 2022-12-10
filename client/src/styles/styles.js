@@ -1,4 +1,4 @@
-import { defineStyle, defineStyleConfig } from '@chakra-ui/react';
+import { extendTheme, defineStyleConfig } from '@chakra-ui/react';
 import styled from 'styled-components';
 
 export const buttonTheme = defineStyleConfig({

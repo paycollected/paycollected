@@ -2,11 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation } from '@apollo/client';
 import {
-  Button, FormControl, FormLabel, Input, Heading
+  Button, FormControl, FormLabel, Input, Heading, Box,
 } from '@chakra-ui/react';
-import { RetrieveNotifications as GET_NOTIFICATIONS } from '../../graphql/queries.gql';
+import {
+  // RetrieveNotifications as GET_NOTIFICATIONS,
+  ViewAllPlans as GET_ALL_PLANS,
+} from '../../graphql/queries.gql';
 import { DeleteNotification as DELETE_NOTI } from '../../graphql/mutations.gql';
 import NavBar from '../../components/NavBar.jsx';
+import { textTheme } from '../../styles/styles.js';
 
 // actual redirect URL string 'http://localhost:5647/dashboard/?setup_intent=seti_1Lq9rqAJ5Ik974ueIdg7WHn9&setup_intent_client_secret=seti_1Lq9rqAJ5Ik974ueIdg7WHn9_secret_MZISJyXsMF6na4pA6ryaqOfvt8JbeGa&redirect_status=succeeded'
 const queryStr = window.location.search;
@@ -22,28 +26,8 @@ if (queryStr.length > 0) {
 
 export default function Dashboard({ user, setUser, setPlanToJoin }) {
   const navigate = useNavigate();
-  const [showCodeInput, setShowCodeInput] = useState(false);
   const [code, setCode] = useState('');
-  const [showNotifications, setShowNotifications] = useState(false);
-
-  const { data } = useQuery(GET_NOTIFICATIONS, {
-    fetchPolicy: 'cache-and-network',
-    nextFetchPolicy: 'cache-only',
-  });
-
-  const [deleteNoti, { loading }] = useMutation(DELETE_NOTI, {
-    update: (cache, { data: { deleteNotification: id } }) => {
-      cache.modify({
-        fields: {
-          retrieveNotifications(obj) {
-            const { count, notifications } = obj;
-            return { count, notifications: notifications.filter((noti) => noti.__ref !== `Notification:${id}`) };
-          },
-        }
-      });
-    },
-    onError: ({ message }) => { console.log(message); },
-  });
+  // const [showNotifications, setShowNotifications] = useState(false);
 
   useEffect(() => {
     if (user === null && !!username && !!token) {
@@ -54,6 +38,30 @@ export default function Dashboard({ user, setUser, setPlanToJoin }) {
     }
   }, []);
 
+  const { loading, data, error } = useQuery(GET_ALL_PLANS, {
+    fetchPolicy: 'cache-and-network',
+    nextFetchPolicy: 'cache-only',
+  });
+
+  // const { data } = useQuery(GET_NOTIFICATIONS, {
+  //   fetchPolicy: 'cache-and-network',
+  //   nextFetchPolicy: 'cache-only',
+  // });
+
+  // const [deleteNoti, { loading }] = useMutation(DELETE_NOTI, {
+  //   update: (cache, { data: { deleteNotification: id } }) => {
+  //     cache.modify({
+  //       fields: {
+  //         retrieveNotifications(obj) {
+  //           const { count, notifications } = obj;
+  //           return { count, notifications: notifications.filter((noti) => noti.__ref !== `Notification:${id}`) };
+  //         },
+  //       }
+  //     });
+  //   },
+  //   onError: ({ message }) => { console.log(message); },
+  // });
+
   const codeInputSubmit = (e) => {
     e.preventDefault();
     const formattedCode = code.toString().trim();
@@ -62,41 +70,36 @@ export default function Dashboard({ user, setUser, setPlanToJoin }) {
   };
 
   return (
-    <div>
+    <>
       <NavBar user={user} setUser={setUser} setPlanToJoin={setPlanToJoin} />
-      <Heading>
-        {user}
-        &apos;s Dashboard
-      </Heading>
-      <Button onClick={() => { navigate('/plan/create'); }}>Create a New Plan</Button>
-      <Button onClick={() => { navigate('/plan/all'); }}>Your Current Plans</Button>
-      <Button onClick={() => { navigate('/manage-account'); }}>Manage Your Account</Button>
-      <Button onClick={() => { setShowCodeInput(true); }}>Have a Code? Join a Plan!</Button>
-      <div>
-        {showCodeInput && (
-        <div>
-          <form onSubmit={codeInputSubmit}>
-            <FormControl
-              isRequired
-              my={2}
-            >
-              <FormLabel>Plan Code</FormLabel>
-              <Input
-                type="text"
-                width="50%"
-                bg="white"
-                placeholder="Enter Code"
-                value={code}
-                onChange={(e) => { setCode(e.target.value); }}
-              />
-            </FormControl>
-            <Button type="submit">Join!</Button>
-            <Button onClick={() => { setShowCodeInput(false); }}>Cancel</Button>
-          </form>
-        </div>
-        )}
-      </div>
-      {data && data.retrieveNotifications.count > 0 && (
+      <Box>
+        <Heading>
+          Active Plans
+        </Heading>
+        <Button onClick={() => { navigate('/plan/create'); }}>Create Plan</Button>
+      </Box>
+      <Box>
+        <form onSubmit={codeInputSubmit}>
+          <FormControl
+            isRequired
+            my={2}
+          >
+            <FormLabel>Plan Code</FormLabel>
+            <Input
+              type="text"
+              width="50%"
+              bg="white"
+              placeholder="Enter Code"
+              value={code}
+              onChange={(e) => { setCode(e.target.value); }}
+            />
+          </FormControl>
+          <Button type="submit">Join Plan</Button>
+        </form>
+      </Box>
+      {console.log(data)}
+
+      {/* {data && data.retrieveNotifications.count > 0 && (
         <div>
           <div>
             {`You have ${data.retrieveNotifications.count} notifications`}
@@ -116,7 +119,7 @@ export default function Dashboard({ user, setUser, setPlanToJoin }) {
             </div>
           )}
         </div>
-      )}
-    </div>
+      )} */}
+    </>
   );
 }
