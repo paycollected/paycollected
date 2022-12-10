@@ -72,14 +72,14 @@ export default function Dashboard({ user, setUser, setPlanToJoin }) {
   return (
     <>
       <NavBar user={user} setUser={setUser} setPlanToJoin={setPlanToJoin} />
-      <VStack w="90%" justify="left">
-        <HStack w="100%">
+      <VStack w="90%" justify="left" spacing="30px">
+        <HStack w="100%" spacing="50px">
           <Heading as="h2">
             Active Plans
           </Heading>
           <Button onClick={() => { navigate('/plan/create'); }}>Create Plan</Button>
         </HStack>
-        <HStack w="100%" align="end">
+        <HStack w="100%" align="end" spacing="50px">
           <FormControl
             isRequired
             w="max-content"
@@ -94,7 +94,7 @@ export default function Dashboard({ user, setUser, setPlanToJoin }) {
               onChange={(e) => { setCode(e.target.value); }}
             />
           </FormControl>
-          <Button type="button" onClick={codeInputSubmit}>Join Plan</Button>
+          <Button type="button" variant="outline" onClick={codeInputSubmit}>Join Plan</Button>
         </HStack>
       </VStack>
 

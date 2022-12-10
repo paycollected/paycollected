@@ -21,23 +21,29 @@ export const buttonTheme = defineStyleConfig({
   variants: {
     outline: {
       bg: 'white',
-      color: '#001C55',
+      color: '#2B6CB0',
       border: '2px solid',
-      borderColor: '#001C55',
+      borderColor: '#2B6CB0',
+      borderRadius: '40px',
+      padding: '20px',
+      // TODO: Hover styling
       _hover: {
-        bg: '#001C55',
+        bg: '##2B6CB0',
         color: '#A6E1FA',
         border: '2px solid',
         borderColor: 'white'
       }
     },
     solid: {
-      bg: '#001C55',
+      bg: '#2B6CB0',
       color: 'white',
       border: '2px solid transparent',
+      borderRadius: '40px',
+      padding: '20px',
+      // TODO: Hover styling
       _hover: {
         bg: '#A6E1FA',
-        color: '#001C55',
+        color: '##2B6CB0',
         border: '2px solid'
       }
     }
