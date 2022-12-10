@@ -184,6 +184,7 @@ export function plansSummary(username) {
         JOIN users u
         ON up.username = u.username
       WHERE up.plan_owner = True
+      ORDER BY "nextBillDate" DESC, "planId" ASC
     ) SELECT
         COUNT(*) AS total,
         COALESCE(JSON_AGG(ROW_TO_JSON(c3)), '[]'::JSON) AS plans
