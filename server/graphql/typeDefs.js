@@ -93,25 +93,21 @@ export default `#graphql
     isOwner: Boolean!
   }
 
-  enum PlanStatus {
-    ACTIVE
-    ARCHIVED
-  }
 
   type PlanDetail {
-    planId: PlanID! //
-    name: String! //
-    quantity: Int!
-    selfCost: USCurrency!
-    cycleFrequency: CycleFrequency! //
-    perCycleCost: USCurrency! //
-    startDate: Date! //
-    totalMembers: Int! // # including self
-    totalQuantity: Int! // # including self
-    subscriptionId: SubscriptionID!
+    planId: PlanID! #
+    name: String! #
+    quantity: Int! #
+    selfCost: USCurrency! #
+    cycleFrequency: CycleFrequency! #
+    perCycleCost: USCurrency! #
+    startDate: Date! #
+    totalMembers: Int! # # including self
+    totalQuantity: Int! # # including self
+    subscriptionId: SubscriptionID #
     activeMembers: [PlanMember]! # also include owner, does NOT include self
-    isOwner: Boolean!
-    owner: PlanOwner!
+    isOwner: Boolean! #
+    owner: PlanOwner
   }
 
   type Notification {
@@ -177,12 +173,13 @@ export default `#graphql
 
     cancelTransaction(setupIntentId: SetupIntentID!): Boolean!
 
+    # need to change response type
     subscribeWithSavedCard(
       paymentMethodId: PaymentMethodID!
       setupIntentId: SetupIntentID!
       password: String!
       planId: PlanID!
-    ): Plan!
+    ): PlanSummary
 
     joinPlan(planId: PlanID!, quantity: Int!): PaymentIntentAndPaymentMethods! # returning client secret
 

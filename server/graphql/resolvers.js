@@ -75,11 +75,6 @@ export default {
     )),
   },
 
-  Plan: {
-    activeMembers: authResolverWrapper(({ planId }, _, { user: { username } }) => (
-      activeMembersResolver(planId, username)
-    )),
-  },
 
   Mutation: {
     createUser: (_, {

@@ -81,52 +81,74 @@ export function addPlan(
 }
 
 
-export function viewOnePlan(planId, username) {
+export function planDetail(planId, username) {
   const query = `
-    WITH select_owner AS (
-      SELECT
-        JSON_BUILD_OBJECT(
-          'firstName', u.first_name,
-          'lastName', u.last_name,
-          'username', u.username
-        ) AS owner
-      FROM users u
-      JOIN user_plan up
-      ON u.username = up.username
-      WHERE up.plan_owner = True AND up.plan_id = $1
-    )
-    SELECT p.plan_id AS "planId",
-    p.plan_name AS name,
-    UPPER(p.cycle_frequency::VARCHAR) AS "cycleFrequency",
-    p.per_cycle_cost AS "perCycleCost",
-    COALESCE(
-      ( SELECT quantity
-        FROM user_on_plan
-        WHERE username = $2 AND plan_id = $1
-      ),
-      0
-    ) AS quantity,
-    (SELECT owner FROM select_owner)
-    FROM plans p
-    WHERE p.plan_id = $1`;
-
-  return pool.query(query, [planId, username]);
-}
-
-
-export function membersOnOnePlan(planId, username) {
-  // does not include the user requesting this info
-  const query = `
+  WITH i AS (
     SELECT
-      username,
+      MIN(charge_date) AS joined_date,
+      username
+    FROM invoices
+    WHERE plan_id = $1
+    GROUP BY username
+  ),
+  j AS (
+    SELECT
       first_name AS "firstName",
       last_name AS "lastName",
-      quantity
-    FROM user_on_plan
-    WHERE quantity > 0 AND plan_id = $1 AND username != $2`;
-
+      quantity,
+      plan_owner AS "isOwner",
+      TO_CHAR (
+        COALESCE (
+          (SELECT joined_date FROM i WHERE i.username = up.username),
+          (SELECT next_bill_date FROM next_bill_date WHERE plan_id = $1)
+        ),
+        'YYYY-MM-DD'
+      ) AS "joinedDate"
+    FROM users u
+    JOIN user_plan up
+    ON u.username = up.username
+    WHERE plan_id = $1 AND up.active = True AND up.username != $2
+  ),
+  t1 AS (
+    SELECT
+      quantity,
+      subscription_id,
+      plan_owner
+    FROM user_plan up
+    WHERE plan_id = $1
+    AND username = $2
+  ),
+  t2 AS (
+    SELECT
+      p.plan_id AS "planId",
+      plan_name AS name,
+      UPPER(cycle_frequency::VARCHAR) AS "cycleFrequency",
+      per_cycle_cost AS "perCycleCost",
+      TO_CHAR(start_date, 'YYYY-MM-DD') AS "startDate",
+      COUNT(up) AS "totalMembers",
+      SUM(up.quantity) AS "totalQuantity",
+      COALESCE ((SELECT quantity FROM t1), 0) AS quantity,
+      COALESCE ((SELECT plan_owner FROM t1), False) AS "isOwner",
+      (SELECT subscription_id FROM t1) AS "subscriptionId"
+    FROM plans p
+    JOIN user_plan up
+    ON p.plan_id = up.plan_id
+    WHERE up.plan_id = $1
+    AND up.active = True AND p.active = True
+    GROUP BY p.plan_id
+  )
+  SELECT
+    t2.*,
+    CASE
+      WHEN quantity = 0 THEN 0
+      ELSE (CEIL("perCycleCost"::NUMERIC / "totalQuantity") * quantity)::INT
+    END AS "selfCost",
+    (SELECT COALESCE (JSON_AGG ( ROW_TO_JSON (j)), '[]'::JSON) FROM j) AS "activeMembers"
+  FROM t2;
+  `;
   return pool.query(query, [planId, username]);
 }
+
 
 export function plansSummary(username) {
   const query = `
