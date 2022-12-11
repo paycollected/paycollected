@@ -5,11 +5,11 @@ import {
 } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
 import NavBar from '../../components/NavBar.jsx';
+import PlanMembersTable from '../../components/PlanMembersTable.jsx';
 
 
 export default function PlanDetails({ user, setUser, setPlanToJoin }) {
   const navigate = useNavigate();
-  const isMobile = useBreakpointValue({ base: true, sm: false });
 
   return (
     <>
@@ -29,15 +29,16 @@ export default function PlanDetails({ user, setUser, setPlanToJoin }) {
         </Flex>
         <Box w="100%">
           <Card w={{ base: '95%', lg: '80%' }}>
-            <CardHeader mx="6" mt="8" mb="0">
+            <Container minWidth="100%">
+            <CardHeader mx={6} mt={8} mb={0}>
               <Heading as="h2" variant="nuanced">
                 Plan Details
               </Heading>
             </CardHeader>
-            <CardBody mx="6" mb="8" mt="0">
+            <CardBody mx={6} mb={8} mt={0}>
               <Grid
-                templateColumns={{ base: '1fr', sm: 'repeat(2, 1fr)' }}
-                templateRows={{ base: 'repeat(9, max-content)', sm: 'repeat(5, max-content)' }}
+                templateColumns={{ base: '1fr', md: 'repeat(2, 1fr)' }}
+                templateRows={{ base: 'repeat(10, max-content)', md: 'repeat(6, max-content)' }}
                 gap="6"
               >
                 <GridItem>
@@ -48,13 +49,10 @@ export default function PlanDetails({ user, setUser, setPlanToJoin }) {
                   <Text textStyle="formLabel">Start Date</Text>
                   <Text textStyle="formSavedInput">12/30/2022</Text>
                 </GridItem>
-                <GridItem>
+                <GridItem colSpan={{ base: 1, md: 2 }}>
                   <Text textStyle="formLabel">Owner</Text>
                   <Text textStyle="formSavedInput">You</Text>
                 </GridItem>
-                {!isMobile && (
-                  <GridItem />
-                )}
                 <GridItem>
                   <Text textStyle="formLabel">Billing Frequency</Text>
                   <Text textStyle="formSavedInput">Weekly</Text>
@@ -79,8 +77,13 @@ export default function PlanDetails({ user, setUser, setPlanToJoin }) {
                   <Text textStyle="formLabel">Total Subscriptions</Text>
                   <Text textStyle="formSavedInput">6</Text>
                 </GridItem>
+                <GridItem colSpan={{ base: 1, md: 2 }}>
+                  <Text textStyle="formLabel">Others on this plan</Text>
+                  <PlanMembersTable />
+                </GridItem>
               </Grid>
             </CardBody>
+            </Container>
           </Card>
         </Box>
       </VStack>

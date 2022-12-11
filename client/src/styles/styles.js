@@ -117,7 +117,7 @@ export const globalTheme = extendTheme({
   },
   textStyles: {
     note: { color: '#718096' },
-    formLabel: { color: 'gray.700', fontWeight: 500, fontSize: 'md' },
+    formLabel: { color: 'gray.700', fontWeight: 700, fontSize: 'md' },
     formSavedInput: { color: 'blackAlpha.700', fontSize: 'lg', fontWeight: 400 },
   },
 });
