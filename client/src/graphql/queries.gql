@@ -1,21 +1,22 @@
-query ViewOnePlan ($planId: PlanID!) {
+query PreJoinPlan ($planId: PlanID!) {
   viewOnePlan(planId: $planId) {
     planId
     name
-    owner {
-      firstName
-      lastName
-      username
-    }
     cycleFrequency
     perCycleCost
+    startDate
     activeMembers {
       firstName
       lastName
-      username
       quantity
+      joinedDate
+      isOwner
     }
     quantity
+    owner {
+      firstName
+      lastName
+    }
   }
 }
 

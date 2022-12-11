@@ -160,7 +160,7 @@ export function planDetail(planId, username) {
       WHERE up.plan_id = $1
         AND up.plan_owner = True
     ) AS "owner"
-  FROM t2;
+  FROM t2
   `;
   return pool.query(query, [planId, username]);
 }
