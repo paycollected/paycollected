@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation } from '@apollo/client';
 import {
-  Button, FormControl, FormLabel, Input, Heading, VStack, HStack, WrapItem, Wrap,
+  Button, FormControl, FormLabel, Input, Heading, VStack, WrapItem, Wrap,
 } from '@chakra-ui/react';
 import {
   // RetrieveNotifications as GET_NOTIFICATIONS,
@@ -73,10 +73,10 @@ export default function Dashboard({ user, setUser, setPlanToJoin }) {
     return (
       <>
         <NavBar user={user} setUser={setUser} setPlanToJoin={setPlanToJoin} />
-        <VStack w="93%" justify="left" spacing={{ base: '4', md: '8' }} mb="10">
+        <VStack w="93%" justify="left" spacing={{ base: '6', md: '10' }} mb="10">
           <Wrap w="100%" spacing={{ base: '4', md: '8' }}>
             <WrapItem>
-              <Heading as="h2">
+              <Heading as="h1">
                 {`${data.viewAllPlans.total} Active Plans`}
               </Heading>
             </WrapItem>

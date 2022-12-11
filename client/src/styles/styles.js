@@ -56,6 +56,17 @@ export const buttonTheme = defineStyleConfig({
       _hover: {
         textDecoration: 'underline',
       }
+    },
+    navActionBtn: {
+      bg: 'transparent',
+      color: 'blue.600',
+      fontSize: 'md',
+      fontWeight: 'normal',
+      px: 0,
+      py: 0,
+      _hover: {
+        textDecoration: 'underline',
+      }
     }
   },
   defaultProps: {
@@ -80,11 +91,23 @@ const menuTheme = defineMultiStyleConfig({
   }),
 });
 
+const headingTheme = defineStyleConfig({
+  baseStyle: { color: '#2B6CB0' },
+  variants: {
+    accented: {
+      color: '#272088'
+    },
+    nuanced: {
+      color: 'blackAlpha.700', fontSize: '28px', fontWeight: 500,
+    }
+  }
+});
+
 export const globalTheme = extendTheme({
   components: {
     Button: buttonTheme,
     Input: inputTheme,
-    Heading: { baseStyle: { color: '#2B6CB0' } },
+    Heading: headingTheme,
     Menu: menuTheme,
   },
   fonts: {
@@ -92,10 +115,6 @@ export const globalTheme = extendTheme({
     body: "'Inter', sans-serif",
   },
   textStyles: {
-    note: {
-      color: '#718096',
-      fontSize: '12px',
-    },
-    planNameHeader: { color: '#272088' }
+    note: { color: '#718096' },
   }
 });

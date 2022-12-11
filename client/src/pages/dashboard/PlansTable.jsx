@@ -18,7 +18,7 @@ function MoreOptionsIcon() {
 export default function PlansTable({ plans }) {
   const navigate = useNavigate();
   return (
-    <Table>
+    <Table size={{ base: 'sm', md: 'md' }}>
       <Thead bg="#F7FAFC">
         <Tr>
           <Th>Plan Name</Th>

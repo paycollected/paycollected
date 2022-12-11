@@ -83,7 +83,11 @@ function App() {
       />
       <Route
         path="/view/:planId"
-        element={user ? <PlanDetails /> : <Navigate to="/404" />}
+        element={
+          user
+            ? <PlanDetails user={user} setUser={setUser} setPlanToJoin={setPlanToJoin} />
+            : <Navigate to="/404" />
+        }
       />
       <Route path="/manage-account" element={user ? <ManageAccount user={user} setUser={setUser} /> : <Navigate to="/" />} />
       <Route path="/password-reset" element={<PwdReset setUser={setUser} />} />
