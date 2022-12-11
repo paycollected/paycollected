@@ -69,7 +69,7 @@ export default function CreateAccount({ setUser }) {
   };
 
   return (
-    <div>
+    <>
       <EmailSentModal isOpen={isOpen} onClose={onClose} email={email} />
       <Container maxW="lg" py={{ base: '12', md: '24' }} px={{ base: '0', sm: '8' }}>
         <Stack spacing="8">
@@ -217,6 +217,6 @@ export default function CreateAccount({ setUser }) {
           </form>
         </Stack>
       </Container>
-    </div>
+    </>
   );
 }
