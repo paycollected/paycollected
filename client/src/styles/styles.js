@@ -62,8 +62,9 @@ export const buttonTheme = defineStyleConfig({
       color: 'blue.600',
       fontSize: 'md',
       fontWeight: 'normal',
-      px: 0,
-      py: 0,
+      padding: 0,
+      margin: 0,
+      h: 'min-content',
       _hover: {
         textDecoration: 'underline',
       }
@@ -92,13 +93,13 @@ const menuTheme = defineMultiStyleConfig({
 });
 
 const headingTheme = defineStyleConfig({
-  baseStyle: { color: '#2B6CB0' },
+  baseStyle: { color: '#2B6CB0', },
   variants: {
     accented: {
-      color: '#272088'
+      color: '#272088',
     },
     nuanced: {
-      color: 'blackAlpha.700', fontSize: '28px', fontWeight: 500,
+      color: 'blackAlpha.700', fontSize: '2xl', fontWeight: 500,
     }
   }
 });
@@ -116,7 +117,7 @@ export const globalTheme = extendTheme({
   },
   textStyles: {
     note: { color: '#718096' },
-    formLabel: { color: 'gray.700', fontWeight: 500, fontSize: 'lg' },
-    formSavedInput: { color: 'blackAlpha.700', fontSize: 'xl', fontWeight: 400 },
+    formLabel: { color: 'gray.700', fontWeight: 500, fontSize: 'md' },
+    formSavedInput: { color: 'blackAlpha.700', fontSize: 'lg', fontWeight: 400 },
   },
 });
