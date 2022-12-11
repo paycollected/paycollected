@@ -51,7 +51,7 @@ export default async function handleSubscriptionStart(setupIntent) {
             stripe.prices.create({
               currency: 'usd',
               product: planId,
-              unit_amount: Math.ceil(perCycleCost / productTotalQuantity),
+              unit_amount: Math.round((Math.ceil(perCycleCost / productTotalQuantity)) * 1.05),
               recurring: { interval: cycleFrequency },
             }),
             // create new price ID;

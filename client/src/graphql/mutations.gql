@@ -67,25 +67,7 @@ mutation CancelTransaction($setupIntentId: SetupIntentID!) {
 }
 
 mutation SubscribeWithSavedCard($paymentMethodId: PaymentMethodID!, $setupIntentId: SetupIntentID!, $planId: PlanID!, $password: String!) {
-  subscribeWithSavedCard(paymentMethodId: $paymentMethodId, setupIntentId: $setupIntentId, planId: $planId, password: $password) {
-    planId
-    name
-    owner {
-      firstName
-      lastName
-      username
-    }
-    cycleFrequency
-    perCycleCost
-    activeMembers {
-      firstName
-      lastName
-      username
-      quantity
-    }
-    quantity
-    subscriptionId
-  }
+  subscribeWithSavedCard(paymentMethodId: $paymentMethodId, setupIntentId: $setupIntentId, planId: $planId, password: $password)
 }
 
 mutation ResendVerificationEmail($email: Email!) {

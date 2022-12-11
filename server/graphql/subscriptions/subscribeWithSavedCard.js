@@ -130,7 +130,7 @@ export default async function subscribeWithSavedCardResolver(
         ...members.map((member) => updateStripePrice(member, newPriceId)),
       ]);
     }
-    return plan;
+    return null;
   } catch (e) {
     if (err) {
       throw new GraphQLError(err, { extensions: { code: 'FORBIDDEN' } });
