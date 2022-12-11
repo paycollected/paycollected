@@ -116,7 +116,7 @@ export function planDetail(planId, username) {
       plan_owner
     FROM user_plan up
     WHERE plan_id = $1
-    AND username = $2
+      AND username = $2
   ),
   t2 AS (
     SELECT
@@ -134,7 +134,8 @@ export function planDetail(planId, username) {
     JOIN user_plan up
     ON p.plan_id = up.plan_id
     WHERE up.plan_id = $1
-    AND up.active = True AND p.active = True
+      AND up.active = True
+      AND p.active = True
     GROUP BY p.plan_id
   )
   SELECT
@@ -143,7 +144,22 @@ export function planDetail(planId, username) {
       WHEN quantity = 0 THEN 0
       ELSE (CEIL("perCycleCost"::NUMERIC / "totalQuantity") * quantity)::INT
     END AS "selfCost",
-    (SELECT COALESCE (JSON_AGG ( ROW_TO_JSON (j)), '[]'::JSON) FROM j) AS "activeMembers"
+    ( SELECT
+        COALESCE (JSON_AGG ( ROW_TO_JSON (j)), '[]'::JSON)
+      FROM j
+    ) AS "activeMembers",
+    ( SELECT
+        JSON_BUILD_OBJECT
+        (
+          'firstName', u.first_name,
+          'lastName', u.last_name
+        )
+      FROM users u
+      JOIN user_plan up
+      ON u.username = up.username
+      WHERE up.plan_id = $1
+        AND up.plan_owner = True
+    ) AS "owner"
   FROM t2;
   `;
   return pool.query(query, [planId, username]);
