@@ -29,7 +29,6 @@ export async function viewOnePlan(planId, username) {
 export async function viewAllPlans(username) {
   try {
     const { rows } = await plansSummary(username);
-    console.log(rows[0]);
     return rows[0];
   } catch (asyncError) {
     console.log(asyncError);

@@ -135,14 +135,7 @@ export function plansSummary(username) {
         p.plan_id AS "planId",
         up.quantity,
         p.plan_name AS name,
-        CASE
-          WHEN p.cycle_frequency = 'weekly'
-            THEN 'WEEKLY'
-          WHEN p.cycle_frequency = 'monthly'
-            THEN 'MONTHLY'
-          WHEN p.cycle_frequency = 'yearly'
-            THEN 'YEARLY'
-        END AS "cycleFrequency",
+        UPPER(p.cycle_frequency::VARCHAR) AS "cycleFrequency",
         p.per_cycle_cost AS "perCycleCost",
         TO_CHAR(nbd.next_bill_date, 'YYYY-MM-DD') AS "nextBillDate",
         up.plan_owner AS "isOwner"
@@ -184,7 +177,7 @@ export function plansSummary(username) {
         JOIN users u
         ON up.username = u.username
       WHERE up.plan_owner = True
-      ORDER BY "nextBillDate" DESC, "planId" ASC
+      ORDER BY "nextBillDate" ASC, "planId" ASC
     ) SELECT
         COUNT(*) AS total,
         COALESCE(JSON_AGG(ROW_TO_JSON(c3)), '[]'::JSON) AS plans

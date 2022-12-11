@@ -11,25 +11,9 @@ export default `#graphql
   scalar USCurrency
 
   type Query {
-    viewOnePlan (planId: PlanID!): Plan!
+    viewOnePlan (planId: PlanID!): PlanDetail!
     viewAllPlans: AllPlansSummary!
     retrieveNotifications: RetrieveNotifications! # offset pagination?
-  }
-
-  type PlanMember {
-    firstName: String!
-    lastName: String!
-    username: ID!
-    # username: Username
-    quantity: Int # 0 means not paying # nullable because quantity for owner field is null
-  }
-
-  type newPlanMember {
-    firstName: String!
-    lastName: String!
-    quantity: Int!
-    joinedDate: Date!
-    isOwner: Boolean!
   }
 
   type LoginInfo {
@@ -79,25 +63,6 @@ export default `#graphql
     CREATED
   }
 
-  # prepare to remove this
-  type Plan {
-    planId: PlanID!
-    name: String!
-    owner: PlanMember!
-    cycleFrequency: CycleFrequency!
-    perCycleCost: Float!
-    activeMembers: [PlanMember]!
-    # can include owner, will only include members whose quantity > 0
-    # does not include user requesting this info
-    subscriptionId: SubscriptionID
-    quantity: Int! # unit quant of this plan for current user
-  }
-
-  type PlanOwner {
-    firstName: String!
-    lastName: String!
-  }
-
   type AllPlansSummary {
     total: Int!,
     plans: [PlanSummary]!
@@ -111,6 +76,40 @@ export default `#graphql
     cycleFrequency: CycleFrequency!
     perCycleCost: USCurrency!
     nextBillDate: Date!
+    isOwner: Boolean!
+    owner: PlanOwner!
+  }
+
+  type PlanOwner {
+    firstName: String!
+    lastName: String!
+  }
+
+  type PlanMember {
+    firstName: String!
+    lastName: String!
+    quantity: Int!
+    joinedDate: Date!
+    isOwner: Boolean!
+  }
+
+  enum PlanStatus {
+    ACTIVE
+    ARCHIVED
+  }
+
+  type PlanDetail {
+    planId: PlanID! //
+    name: String! //
+    quantity: Int!
+    selfCost: USCurrency!
+    cycleFrequency: CycleFrequency! //
+    perCycleCost: USCurrency! //
+    startDate: Date! //
+    totalMembers: Int! // # including self
+    totalQuantity: Int! // # including self
+    subscriptionId: SubscriptionID!
+    activeMembers: [PlanMember]! # also include owner, does NOT include self
     isOwner: Boolean!
     owner: PlanOwner!
   }
