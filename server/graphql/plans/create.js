@@ -45,7 +45,7 @@ export default async function createPlanResolver(
     // create both a Stripe product ID & price ID in 1 API call
     const { id: priceId, product: planId } = await stripe.prices.create({
       currency: 'usd',
-      unit_amount: cost,
+      unit_amount: Math.round(cost * 1.05),
       recurring: {
         interval: recurringInterval[freq],
         // could consider allowing customers to do interval count in the future?

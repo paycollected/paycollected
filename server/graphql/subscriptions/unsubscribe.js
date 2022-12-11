@@ -46,7 +46,7 @@ export default async function unsubscribeResolver(subscriptionId, username) {
         stripe.prices.create({
           currency: 'usd',
           product,
-          unit_amount: Math.ceil(perCycleCost / productTotalQuantity),
+          unit_amount: Math.round((Math.ceil(perCycleCost / productTotalQuantity)) * 1.05),
           recurring: { interval },
         }),
         stripe.prices.update(prevPriceId, { active: false }),
