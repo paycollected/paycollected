@@ -115,7 +115,8 @@ export default async function subscribeWithSavedCardResolver(
         username,
         newPriceId,
       );
-      return newRows[0];
+      return true;
+      // return newRows[0];
     };
 
     let plan;
@@ -130,7 +131,7 @@ export default async function subscribeWithSavedCardResolver(
         ...members.map((member) => updateStripePrice(member, newPriceId)),
       ]);
     }
-    return null;
+    return true;
   } catch (e) {
     if (err) {
       throw new GraphQLError(err, { extensions: { code: 'FORBIDDEN' } });

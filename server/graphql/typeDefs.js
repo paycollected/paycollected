@@ -180,7 +180,7 @@ export default `#graphql
       setupIntentId: SetupIntentID!
       password: String!
       planId: PlanID!
-    ): PlanSummary
+    ): Boolean
 
     joinPlan(planId: PlanID!, quantity: Int!): PaymentIntentAndPaymentMethods! # returning client secret
 

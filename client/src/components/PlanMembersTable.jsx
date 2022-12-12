@@ -20,7 +20,7 @@ export default function PlanMembersTable({ members }) {
               const dateAsArr = member.joinedDate.split('-');
               const fDate = `${dateAsArr[1]}/${dateAsArr[2]}/${dateAsArr[0]}`;
               return (
-                <Tr key={member.firstName + member.lastName}>
+                <Tr key={member.username}>
                   <Td pt={i === 0 ? 4 : 2} pb={i === members.length - 1 ? 4 : 2}>
                     {`${member.firstName} ${member.lastName}`}
                     {member.isOwner && (

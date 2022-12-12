@@ -25,7 +25,7 @@ const processDateStr = (date) => {
 const fullDate = processDateStr(tomorrow);
 const nextMonthFullDate = processDateStr(oneMonthFromTmr);
 
-export default function CreatePlan({ setPlanToJoin, setShowMagicLink }) {
+export default function CreatePlan({ setPlanToJoin }) {
   const navigate = useNavigate();
   const { register, handleSubmit, formState: { errors } } = useForm();
   const [startDate, setStartDate] = useState(fullDate);
@@ -33,7 +33,6 @@ export default function CreatePlan({ setPlanToJoin, setShowMagicLink }) {
   const [createNewPlan, { data, loading, error }] = useMutation(CREATE_PLAN, {
     onCompleted: ({ createPlan: { planId } }) => {
       setPlanToJoin(planId);
-      setShowMagicLink(true);
     },
     onError: ({ message }) => {
       console.log('error creating plan: ', message);

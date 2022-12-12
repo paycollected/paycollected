@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useMutation } from '@apollo/client';
 import {
   Button, Modal, ModalOverlay, ModalContent, ModalCloseButton, ModalHeader, ModalBody, ModalFooter,
-  Text, HStack, VStack,
+  Text, HStack, VStack, Flex, FormControl, FormLabel, Select,
 } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -14,6 +14,7 @@ import {
 export default function ActionConfirmationModal({
   action, isOpen, onClose, subscriptionId, planId, planName, members, setPlanToView,
 }) {
+  const [newOwner, setNewOwner] = useState(members[0].username);
   const navigate = useNavigate();
   const requestCompleted = () => {
     setPlanToView(null);
@@ -71,10 +72,25 @@ export default function ActionConfirmationModal({
               <Text>You are about to discontinue your membership on this plan. Are you sure you would like to proceed?</Text>
             )}
             {action === 'delete' && (
-              <Text>You are about to delete this plan.
-                This action cannot be reversed and will make the plan unavailable to all current members.
-                Are you sure you would like to proceed?
-              </Text>
+              <>
+                <Flex w="100%" justify="start">
+                  <Text>You are about to delete this plan.</Text>
+                </Flex>
+                <Text>
+                  This action cannot be reversed and will make the plan unavailable to all current members.
+                  Are you sure you would like to proceed?
+                </Text>
+              </>
+            )}
+            {action === 'cancelAsOwner' && (
+              <FormControl isRequired>
+                <FormLabel>Change plan&apos;s owner:</FormLabel>
+                <Select value={newOwner} onChange={(e) => setNewOwner(e.target.value)}>
+                  {members.map((member) => (
+                    <option key={member.username} value={member.username}>{`${member.firstName} ${member.lastName}`}</option>
+                  ))}
+                </Select>
+              </FormControl>
             )}
             <Text textStyle="note">
               Once your request has been successfully processed, you will be redirected to the Dashboard.
