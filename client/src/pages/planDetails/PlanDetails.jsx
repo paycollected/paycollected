@@ -24,10 +24,11 @@ export default function PlanDetails({ user, setUser, setPlanToJoin }) {
             Back to Dashboard
           </Button>
         </Flex>
-        <Flex w="100%" align="center">
-          <Heading as="h1" variant="accented" pb={0}>Poke Bowls</Heading>
-        </Flex>
         <Box w="100%">
+          <Flex w={{ base: '95%', lg: '80%' }} align="center" justify="space-between" mb={6}>
+            <Heading as="h1" variant="accented" pb={0}>Poke Bowls</Heading>
+            <Button>Share Plan</Button>
+          </Flex>
           <Card w={{ base: '95%', lg: '80%' }}>
             <CardHeader mx={6} mt={8} pb={0}>
               <Heading as="h2" variant="nuanced">
@@ -39,7 +40,7 @@ export default function PlanDetails({ user, setUser, setPlanToJoin }) {
                 templateColumns={{ base: '1fr', md: 'repeat(2, 1fr)' }}
                 templateRows={{ base: 'repeat(10, max-content)', md: 'repeat(6, max-content)' }}
                 gap={4}
-                mb={{ base: 4, md: 6 }}
+                mb={{ base: 6, md: 8 }}
               >
                 <GridItem>
                   <VStack justify="left" spacing={{ base: 1, md: 2 }}>
