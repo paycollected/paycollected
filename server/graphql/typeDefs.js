@@ -91,6 +91,7 @@ export default `#graphql
     quantity: Int!
     joinedDate: Date!
     isOwner: Boolean!
+    username: String!
   }
 
 

@@ -11,7 +11,6 @@ export async function viewOnePlan(planId, username) {
       errMsg = 'No plan matched search or plan has been archived';
       throw new Error();
     }
-
     return rows[0];
   } catch (asyncError) {
     if (errMsg) {

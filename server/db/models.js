@@ -95,6 +95,7 @@ export function planDetail(planId, username) {
     SELECT
       first_name AS "firstName",
       last_name AS "lastName",
+      u.username,
       quantity,
       plan_owner AS "isOwner",
       TO_CHAR (

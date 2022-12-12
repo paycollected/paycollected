@@ -44,6 +44,7 @@ query PlanDetails ($planId: PlanID!) {
       quantity
       joinedDate
       isOwner
+      username
     }
   }
 }
