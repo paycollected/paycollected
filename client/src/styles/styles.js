@@ -1,7 +1,7 @@
 import {
   extendTheme, defineStyleConfig, createMultiStyleConfigHelpers,
 } from '@chakra-ui/react';
-import { menuAnatomy } from '@chakra-ui/anatomy';
+import { menuAnatomy, modalAnatomy } from '@chakra-ui/anatomy';
 
 export const buttonTheme = defineStyleConfig({
   baseStyle: {
@@ -95,13 +95,27 @@ export const inputTheme = defineStyleConfig({
 });
 
 const {
-  definePartsStyle, defineMultiStyleConfig
+  definePartsStyle: definePartsStyleMenu, defineMultiStyleConfig: defineMultiStyleConfigMenu
 } = createMultiStyleConfigHelpers(menuAnatomy.keys);
 
-const menuTheme = defineMultiStyleConfig({
-  baseStyle: definePartsStyle({
+const { definePartsStyle: definePartsStyleModal, defineMultiStyleConfig: defineMultiStyleConfigModal } =
+  createMultiStyleConfigHelpers(modalAnatomy.keys);
+
+
+const menuTheme = defineMultiStyleConfigMenu({
+  baseStyle: definePartsStyleMenu({
     item: { py: '4', fontFamily: "'Roboto', sans-serif", fontSize: '14px' },
   }),
+});
+
+const modalTheme = defineMultiStyleConfigModal({
+  baseStyle: definePartsStyleModal({
+    header: { pt: '10', px: '12' },
+    body: { px: '12' },
+    footer: { pb: '10', px: '12' },
+    closeButton: { top: '6', right: '6' },
+  }),
+  defaultProps: { size: 'lg' },
 });
 
 const headingTheme = defineStyleConfig({
@@ -124,6 +138,7 @@ export const globalTheme = extendTheme({
     Input: inputTheme,
     Heading: headingTheme,
     Menu: menuTheme,
+    Modal: modalTheme,
   },
   fonts: {
     heading: "'Inter', sans-serif",

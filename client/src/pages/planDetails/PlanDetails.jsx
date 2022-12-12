@@ -1,27 +1,26 @@
 import React, { useState } from 'react';
 import {
-  Button, FormControl, FormLabel, Input, Heading, VStack, Box, Flex,
-  Card, CardHeader, CardBody, Grid, GridItem, Text, HStack, IconButton,
+  Button, Heading, VStack, Box, Flex, Card, CardHeader, CardBody, HStack, useDisclosure,
 } from '@chakra-ui/react';
-import { EditIcon } from '@chakra-ui/icons';
 import { useNavigate } from 'react-router-dom';
-import { useQuery, useMutation } from '@apollo/client';
-import NavBar from '../../components/NavBar.jsx';
-import PlanMembersTable from '../../components/PlanMembersTable.jsx';
+import { useQuery } from '@apollo/client';
 import { PlanDetails as GET_PLAN } from '../../graphql/queries.gql';
-
+import ActionConfirmationModal from './ActionConfirmationModal.jsx';
+import NavBar from '../../components/NavBar.jsx';
+import EditableGrid from './EditableGrid.jsx';
 
 export default function PlanDetails({
   user, setUser, setPlanToJoin, planToView, setPlanToView, edit,
 }) {
+  const [editAsOwner, setEditAsOwner] = useState(edit);
+  const [action, setAction] = useState(null);
+  const { isOpen, onOpen, onClose } = useDisclosure();
   const navigate = useNavigate();
   const { loading, data, error } = useQuery(GET_PLAN, {
     variables: { planId: planToView },
     fetchPolicy: 'cache-and-network',
     nextFetchPolicy: 'cache-only',
   });
-  const [editAsOwner, setEditAsOwner] = useState(edit);
-  const [editAsMember, setEditAsMember] = useState(false);
 
   if (data) {
     const {
@@ -34,7 +33,22 @@ export default function PlanDetails({
     const fStartDate = `${startDateAsArr[1]}/${startDateAsArr[2]}/${startDateAsArr[0]}`;
     return (
       <>
-        <NavBar user={user} setUser={setUser} setPlanToJoin={setPlanToJoin} setPlanToView={setPlanToView} />
+        <NavBar
+          user={user}
+          setUser={setUser}
+          setPlanToJoin={setPlanToJoin}
+          setPlanToView={setPlanToView}
+        />
+        <ActionConfirmationModal
+          onClose={onClose}
+          isOpen={isOpen}
+          action={action}
+          planName={name}
+          planId={planId}
+          subscriptionId={subscriptionId}
+          members={activeMembers}
+          setPlanToView={setPlanToView}
+        />
         <VStack w="93%" justify="left" spacing={{ base: 4, md: 6 }} mb={{ base: 4, md: 6 }}>
           <Flex w="100%" align="center">
             <Button
@@ -78,107 +92,67 @@ export default function PlanDetails({
                 )}
               </CardHeader>
               <CardBody mx={6} mb={8} mt={0}>
-                <Grid
-                  templateColumns={{ base: '1fr', md: 'repeat(2, 1fr)' }}
-                  templateRows={{ base: 'repeat(10, max-content)', md: 'repeat(6, max-content)' }}
-                  gap={4}
-                  mb={{ base: 6, md: 8 }}
-                >
-                  <GridItem>
-                    <VStack justify="left" spacing={{ base: 1, md: 2 }}>
-                      <Text w="100%" textStyle="formLabel">Plan Name</Text>
-                      <Text w="100%" textStyle="formSavedInput">{name}</Text>
-                    </VStack>
-                  </GridItem>
-                  <GridItem>
-                    <VStack justify="left" spacing={{ base: 1, md: 2 }}>
-                      <Text w="100%" textStyle="formLabel">Start Date</Text>
-                      <Text w="100%" textStyle="formSavedInput">{fStartDate}</Text>
-                    </VStack>
-                  </GridItem>
-                  <GridItem colSpan={{ base: 1, md: 2 }}>
-                    <VStack justify="left" spacing={{ base: 1, md: 2 }}>
-                      <Text w="100%" textStyle="formLabel">Owner</Text>
-                      <Text w="100%" textStyle="formSavedInput">{isOwner ? 'You' : `${owner.firstName} ${owner.lastName}`}</Text>
-                    </VStack>
-                  </GridItem>
-                  <GridItem>
-                    <VStack justify="left" spacing={{ base: 1, md: 2 }}>
-                      <Text w="100%" textStyle="formLabel">Billing Frequency</Text>
-                      <Text w="100%" textStyle="formSavedInput">{cycleFrequency[0].concat(cycleFrequency.slice(1).toLowerCase())}</Text>
-                    </VStack>
-                  </GridItem>
-                  <GridItem>
-                    <VStack justify="left" spacing={{ base: 1, md: 2 }}>
-                      <Text w="100%" textStyle="formLabel">Total Cycle Cost</Text>
-                      <Text w="100%" textStyle="formSavedInput">{perCycleCost}</Text>
-                    </VStack>
-                  </GridItem>
-                  <GridItem>
-                    <VStack justify="left" spacing={{ base: 1, md: 2 }}>
-                      {(isOwner || (!isOwner && editAsMember)) && (
-                        <Text w="100%" textStyle="formLabel">Your Subscriptions</Text>
-                      )}
-                      {!isOwner && !editAsMember && (
-                        <HStack w="100%">
-                          <Text textStyle="formLabel">Your Subscriptions</Text>
-                          <Button variant="smEdit" onClick={() => setEditAsMember(true)}>
-                            <HStack color="blue.500">
-                              <Text color="blue.500" fontSize="sm">Edit</Text>
-                              <EditIcon boxSize={3} />
-                            </HStack>
-                          </Button>
-                        </HStack>
-                      )}
-                      {(isOwner || (!isOwner && !editAsMember)) && (
-                        <Text w="100%" textStyle="formSavedInput">{quantity}</Text>
-                      )}
-                      {!isOwner && editAsMember && (
-                        <HStack w="100%">
-                          <Text textStyle="formSavedInput">{quantity}</Text>
-                          <Button size="sm" onClick={() => setEditAsMember(false)}>Save</Button>
-                        </HStack>
-                      )}
-                    </VStack>
-                  </GridItem>
-                  <GridItem>
-                    <VStack justify="left" spacing={{ base: 1, md: 2 }}>
-                      <Text w="100%" textStyle="formLabel">Your Cycle Cost</Text>
-                      <Text w="100%" textStyle="formSavedInput">{selfCost}</Text>
-                    </VStack>
-                  </GridItem>
-                  <GridItem>
-                    <VStack justify="left" spacing={{ base: 1, md: 2 }}>
-                      <Text w="100%" textStyle="formLabel">Total Members</Text>
-                      <Text w="100%" textStyle="formSavedInput">{totalMembers}</Text>
-                    </VStack>
-                  </GridItem>
-                  <GridItem>
-                    <VStack justify="left" spacing={{ base: 1, md: 2 }}>
-                      <Text w="100%" textStyle="formLabel">Total Subscriptions</Text>
-                      <Text w="100%" textStyle="formSavedInput">{totalQuantity}</Text>
-                    </VStack>
-                  </GridItem>
-                  <GridItem colSpan={{ base: 1, md: 2 }}>
-                    <VStack justify="left" spacing={{ base: 4, md: 6 }}>
-                      <Text w="100%" textStyle="formLabel">Others on this plan</Text>
-                      <PlanMembersTable members={activeMembers} />
-                    </VStack>
-                  </GridItem>
-                </Grid>
-                {isOwner && (
+                <EditableGrid
+                  name={name}
+                  fStartDate={fStartDate}
+                  isOwner={isOwner}
+                  owner={owner}
+                  cycleFrequency={cycleFrequency}
+                  perCycleCost={perCycleCost}
+                  quantity={quantity}
+                  selfCost={selfCost}
+                  totalMembers={totalMembers}
+                  totalQuantity={totalQuantity}
+                  activeMembers={activeMembers}
+                />
+                {isOwner && totalMembers > 1 && (
                   <VStack justify="left">
                     <Box w="100%">
-                      <Button variant="navActionBtn">Cancel your subscription</Button>
+                      <Button
+                        variant="navActionBtn"
+                        onClick={() => {
+                          setAction('cancelAsOwner');
+                          onOpen();
+                        }}
+                      >
+                        Cancel your subscription
+                      </Button>
                     </Box>
                     <Box w="100%">
-                      <Button variant="navActionBtn">Delete this plan</Button>
+                      <Button
+                        variant="navActionBtn"
+                        onClick={() => {
+                          setAction('delete');
+                          onOpen();
+                        }}
+                      >
+                        Delete this plan
+                      </Button>
                     </Box>
                   </VStack>
                 )}
+                {isOwner && totalMembers === 1 && (
+                  <Button
+                    variant="navActionBtn"
+                    onClick={() => {
+                      setAction('delete');
+                      onOpen();
+                    }}
+                  >
+                    Delete this plan
+                  </Button>
+                )}
                 {!isOwner && (
                   <Box w="100%">
-                    <Button variant="navActionBtn">Cancel your subscription</Button>
+                    <Button
+                      variant="navActionBtn"
+                      onClick={() => {
+                        setAction('cancel');
+                        onOpen();
+                      }}
+                    >
+                      Cancel your subscription
+                    </Button>
                   </Box>
                 )}
               </CardBody>
