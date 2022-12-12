@@ -34,7 +34,7 @@ export default function PlanDetails({
     const fStartDate = `${startDateAsArr[1]}/${startDateAsArr[2]}/${startDateAsArr[0]}`;
     return (
       <>
-        <NavBar user={user} setUser={setUser} setPlanToJoin={setPlanToJoin} />
+        <NavBar user={user} setUser={setUser} setPlanToJoin={setPlanToJoin} setPlanToView={setPlanToView} />
         <VStack w="93%" justify="left" spacing={{ base: 4, md: 6 }} mb={{ base: 4, md: 6 }}>
           <Flex w="100%" align="center">
             <Button

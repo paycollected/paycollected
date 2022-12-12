@@ -82,38 +82,50 @@ function App() {
           )
           : <Navigate to="/" />}
       />
-      <Route
-        path="/view"
-        element={
-          user && planToView
-            ? (
-              <PlanDetails
-                user={user}
-                setUser={setUser}
-                planToView={planToView}
-                setPlanToView={setPlanToView}
-                edit={false}
-              />
-            )
-            : <Navigate to="/" />
-          }
-      />
-      <Route
-        path="/edit"
-        element={
-          user && planToView
-            ? (
-              <PlanDetails
-                user={user}
-                setUser={setUser}
-                planToView={planToView}
-                setPlanToView={setPlanToView}
-                edit
-              />
-            )
-            : <Navigate to="/" />
-          }
-      />
+      {user && (
+        <>
+          <Route
+            path="/view"
+            element={
+              planToView
+                ? (
+                  <PlanDetails
+                    user={user}
+                    setUser={setUser}
+                    planToView={planToView}
+                    setPlanToView={setPlanToView}
+                    setPlanToJoin={setPlanToJoin}
+                    edit={false}
+                  />
+                )
+                : <Navigate to="/dashboard" />
+              }
+          />
+          <Route
+            path="/edit"
+            element={
+              planToView
+                ? (
+                  <PlanDetails
+                    user={user}
+                    setUser={setUser}
+                    planToView={planToView}
+                    setPlanToView={setPlanToView}
+                    setPlanToJoin={setPlanToJoin}
+                    edit
+                  />
+                )
+                : <Navigate to="/dashboard" />
+              }
+          />
+        </>
+      )}
+      {!user && (
+        <>
+          <Route path="/view" element={<Navigate to="/404" />} />
+          <Route path="/edit" element={<Navigate to="/404" />} />
+        </>
+      )}
       <Route path="/manage-account" element={user ? <ManageAccount user={user} setUser={setUser} /> : <Navigate to="/" />} />
       <Route path="/password-reset" element={<PwdReset setUser={setUser} />} />
       <Route path="/404" element={<FourOhFour />} />
