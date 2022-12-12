@@ -6,7 +6,7 @@ export default function PlanMembersTable() {
     <Container minWidth="100%" padding={0}>
       <Box overflowX="auto" w={{ base: '70vw', md: '60%' }}>
         <Table size="sm" variant="unstyled">
-          <Thead bg="gray.200">
+          <Thead bg="gray.200" color="blackAlpha.700">
             <Tr>
               <Th textTransform="none" py={2}>Name</Th>
               <Th textTransform="none" py={2}>Subscriptions</Th>
