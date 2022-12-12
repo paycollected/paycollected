@@ -29,7 +29,7 @@ export default function PlanDetails({ user, setUser, setPlanToJoin }) {
         </Flex>
         <Box w="100%">
           <Card w={{ base: '95%', lg: '80%' }}>
-            <CardHeader mx={6} mt={8} mb={0}>
+            <CardHeader mx={6} mt={8} pb={0}>
               <Heading as="h2" variant="nuanced">
                 Plan Details
               </Heading>
@@ -39,6 +39,7 @@ export default function PlanDetails({ user, setUser, setPlanToJoin }) {
                 templateColumns={{ base: '1fr', md: 'repeat(2, 1fr)' }}
                 templateRows={{ base: 'repeat(10, max-content)', md: 'repeat(6, max-content)' }}
                 gap={4}
+                mb={{ base: 4, md: 6 }}
               >
                 <GridItem>
                   <VStack justify="left" spacing={{ base: 1, md: 2 }}>
@@ -101,6 +102,14 @@ export default function PlanDetails({ user, setUser, setPlanToJoin }) {
                   </VStack>
                 </GridItem>
               </Grid>
+              <VStack justify="left">
+                <Box w="100%">
+                  <Button variant="navActionBtn">Cancel your subscription</Button>
+                </Box>
+                <Box w="100%">
+                  <Button variant="navActionBtn">Delete this plan</Button>
+                </Box>
+              </VStack>
             </CardBody>
           </Card>
         </Box>
