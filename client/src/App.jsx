@@ -92,9 +92,26 @@ function App() {
                 setUser={setUser}
                 planToView={planToView}
                 setPlanToView={setPlanToView}
+                edit={false}
               />
             )
-            : <Navigate to="/404" />
+            : <Navigate to="/" />
+          }
+      />
+      <Route
+        path="/edit"
+        element={
+          user
+            ? (
+              <PlanDetails
+                user={user}
+                setUser={setUser}
+                planToView={planToView}
+                setPlanToView={setPlanToView}
+                edit
+              />
+            )
+            : <Navigate to="/" />
           }
       />
       <Route path="/manage-account" element={user ? <ManageAccount user={user} setUser={setUser} /> : <Navigate to="/" />} />

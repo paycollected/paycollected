@@ -9,16 +9,20 @@ export const buttonTheme = defineStyleConfig({
     borderRadius: '7px',
   },
   sizes: {
-    md: { fontSize: 'sm', px: 6, py: 4 },
-    lg: { fontSize: 'md', px: 8, py: 8 },
+    sm: { fontSize: 'sm', borderRadius: '6px' },
+    md: {
+      fontSize: 'md', px: 8, py: 4, borderRadius: '40px',
+    },
+    lg: {
+      fontSize: 'md', px: 10, py: 8, borderRadius: '40px',
+    },
   },
   variants: {
     outline: {
       bg: 'white',
       color: '#2B6CB0',
       border: '2px solid',
-      borderColor: '#2B6CB0',
-      borderRadius: '40px',
+      borderColor: 'blue.600',
       // TODO: Hover styling
       _hover: {
         bg: '##2B6CB0',
@@ -31,7 +35,6 @@ export const buttonTheme = defineStyleConfig({
       bg: '#2B6CB0',
       color: 'white',
       border: '2px solid transparent',
-      borderRadius: '40px',
       // TODO: Hover styling
       _hover: {
         bg: '#A6E1FA',
@@ -58,6 +61,24 @@ export const buttonTheme = defineStyleConfig({
       h: 'min-content',
       _hover: {
         textDecoration: 'underline',
+      }
+    },
+    outlineNuanced: {
+      bg: 'transparent',
+      color: 'gray.700',
+      border: '1px solid',
+      borderColor: 'gray.200',
+      _hover: {
+        opacity: 0.3,
+      }
+    },
+    smEdit: {
+      bg: 'transparent',
+      border: 'none',
+      fontWeight: 500,
+      padding: 0,
+      _hover: {
+        opacity: 0.3,
       }
     }
   },

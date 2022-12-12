@@ -1,17 +1,18 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Button, FormControl, FormLabel, Input, Heading, VStack, Box, Flex,
-  Card, CardHeader, CardBody, Grid, GridItem, Text,
+  Card, CardHeader, CardBody, Grid, GridItem, Text, HStack, IconButton,
 } from '@chakra-ui/react';
+import { EditIcon } from '@chakra-ui/icons';
 import { useNavigate } from 'react-router-dom';
+import { useQuery, useMutation } from '@apollo/client';
 import NavBar from '../../components/NavBar.jsx';
 import PlanMembersTable from '../../components/PlanMembersTable.jsx';
-import { useQuery, useMutation } from '@apollo/client';
 import { PlanDetails as GET_PLAN } from '../../graphql/queries.gql';
 
 
 export default function PlanDetails({
-  user, setUser, setPlanToJoin, planToView, setPlanToView,
+  user, setUser, setPlanToJoin, planToView, setPlanToView, edit,
 }) {
   const navigate = useNavigate();
   const { loading, data, error } = useQuery(GET_PLAN, {
@@ -19,6 +20,8 @@ export default function PlanDetails({
     fetchPolicy: 'cache-and-network',
     nextFetchPolicy: 'cache-only',
   });
+  const [editAsOwner, setEditAsOwner] = useState(edit);
+  const [editAsMember, setEditAsMember] = useState(false);
 
   if (data) {
     const {
@@ -52,9 +55,27 @@ export default function PlanDetails({
             </Flex>
             <Card w={{ base: '95%', lg: '80%' }}>
               <CardHeader mx={6} mt={8} pb={0}>
-                <Heading as="h2" variant="nuanced">
-                  Plan Details
-                </Heading>
+                {!isOwner && (
+                  <Heading as="h2" variant="nuanced">
+                    Plan Details
+                  </Heading>
+                )}
+                {isOwner && (
+                  <Flex justify="space-between">
+                    <Heading as="h2" variant="nuanced">
+                      Plan Details
+                    </Heading>
+                    {!editAsOwner && (
+                      <Button size="sm" onClick={() => setEditAsOwner(true)}>Edit Plan</Button>
+                    )}
+                    {editAsOwner && (
+                      <HStack>
+                        <Button size="sm" variant="outlineNuanced" onClick={() => setEditAsOwner(false)}>Cancel</Button>
+                        <Button size="sm" onClick={() => setEditAsOwner(false)}>Save</Button>
+                      </HStack>
+                    )}
+                  </Flex>
+                )}
               </CardHeader>
               <CardBody mx={6} mb={8} mt={0}>
                 <Grid
@@ -95,8 +116,29 @@ export default function PlanDetails({
                   </GridItem>
                   <GridItem>
                     <VStack justify="left" spacing={{ base: 1, md: 2 }}>
-                      <Text w="100%" textStyle="formLabel">Your Subscriptions</Text>
-                      <Text w="100%" textStyle="formSavedInput">{quantity}</Text>
+                      {(isOwner || (!isOwner && editAsMember)) && (
+                        <Text w="100%" textStyle="formLabel">Your Subscriptions</Text>
+                      )}
+                      {!isOwner && !editAsMember && (
+                        <HStack w="100%">
+                          <Text textStyle="formLabel">Your Subscriptions</Text>
+                          <Button variant="smEdit" onClick={() => setEditAsMember(true)}>
+                            <HStack color="blue.500">
+                              <Text color="blue.500" fontSize="sm">Edit</Text>
+                              <EditIcon boxSize={3} />
+                            </HStack>
+                          </Button>
+                        </HStack>
+                      )}
+                      {(isOwner || (!isOwner && !editAsMember)) && (
+                        <Text w="100%" textStyle="formSavedInput">{quantity}</Text>
+                      )}
+                      {!isOwner && editAsMember && (
+                        <HStack w="100%">
+                          <Text textStyle="formSavedInput">{quantity}</Text>
+                          <Button size="sm" onClick={() => setEditAsMember(false)}>Save</Button>
+                        </HStack>
+                      )}
                     </VStack>
                   </GridItem>
                   <GridItem>
@@ -124,14 +166,21 @@ export default function PlanDetails({
                     </VStack>
                   </GridItem>
                 </Grid>
-                <VStack justify="left">
+                {isOwner && (
+                  <VStack justify="left">
+                    <Box w="100%">
+                      <Button variant="navActionBtn">Cancel your subscription</Button>
+                    </Box>
+                    <Box w="100%">
+                      <Button variant="navActionBtn">Delete this plan</Button>
+                    </Box>
+                  </VStack>
+                )}
+                {!isOwner && (
                   <Box w="100%">
                     <Button variant="navActionBtn">Cancel your subscription</Button>
                   </Box>
-                  <Box w="100%">
-                    <Button variant="navActionBtn">Delete this plan</Button>
-                  </Box>
-                </VStack>
+                )}
               </CardBody>
             </Card>
           </Box>
