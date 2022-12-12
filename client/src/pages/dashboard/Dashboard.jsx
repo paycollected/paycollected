@@ -24,7 +24,7 @@ if (queryStr.length > 0) {
   redirectStatus = urlParams.get('redirect_status');
 }
 
-export default function Dashboard({ user, setUser, setPlanToJoin }) {
+export default function Dashboard({ user, setUser, setPlanToJoin, setPlanToView }) {
   const navigate = useNavigate();
   const [code, setCode] = useState('');
   // const [showNotifications, setShowNotifications] = useState(false);
@@ -72,7 +72,7 @@ export default function Dashboard({ user, setUser, setPlanToJoin }) {
   if (data) {
     return (
       <>
-        <NavBar user={user} setUser={setUser} setPlanToJoin={setPlanToJoin} />
+        <NavBar user={user} setUser={setUser} setPlanToJoin={setPlanToJoin} setPlanToView={setPlanToView} />
         <VStack w="93%" justify="left" spacing={{ base: '6', md: '10' }} mb="10">
           <Wrap w="100%" spacingX={{ base: '4', md: '8' }} align="end">
             <WrapItem>
@@ -84,7 +84,11 @@ export default function Dashboard({ user, setUser, setPlanToJoin }) {
               <Button onClick={() => { navigate('/plan/create'); }}>Create Plan</Button>
             </WrapItem>
           </Wrap>
-          <PlansTableLayout total={data.viewAllPlans.total} plans={data.viewAllPlans.plans} />
+          <PlansTableLayout
+            total={data.viewAllPlans.total}
+            plans={data.viewAllPlans.plans}
+            setPlanToView={setPlanToView}
+          />
           <Wrap w="100%" align="end" spacingX={{ base: '4', md: '8' }}>
             <WrapItem>
               <FormControl

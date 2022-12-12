@@ -1,7 +1,9 @@
 import React from 'react';
-import { Table, Tbody, Td, Th, Thead, Tr, Container, Box } from '@chakra-ui/react';
+import {
+  Table, Tbody, Td, Th, Thead, Tr, Container, Box, Badge,
+} from '@chakra-ui/react';
 
-export default function PlanMembersTable() {
+export default function PlanMembersTable({ members }) {
   return (
     <Container minWidth="100%" padding={0}>
       <Box overflowX="auto" w={{ base: '70vw', md: '60%' }}>
@@ -14,21 +16,24 @@ export default function PlanMembersTable() {
             </Tr>
           </Thead>
           <Tbody bg="gray.50">
-            <Tr>
-              <Td pt={4} pb={2}>Jessica Chen</Td>
-              <Td pt={4} pb={2}>2</Td>
-              <Td pt={4} pb={2}>10/24/2022</Td>
-            </Tr>
-            <Tr>
-              <Td py={2}>Random Name</Td>
-              <Td py={2}>0</Td>
-              <Td py={2}>10/02/2022</Td>
-            </Tr>
-            <Tr>
-              <Td pt={2} pb={4}>Mai-Ly Nguyen</Td>
-              <Td pt={2} pb={4}>1</Td>
-              <Td pt={2} pb={4}>10/30/2022</Td>
-            </Tr>
+            {members.map((member, i) => {
+              const dateAsArr = member.joinedDate.split('-');
+              const fDate = `${dateAsArr[1]}/${dateAsArr[2]}/${dateAsArr[0]}`;
+              return (
+                <Tr key={member.firstName + member.lastName}>
+                  <Td pt={i === 0 ? 4 : 2} pb={i === members.length - 1 ? 4 : 2}>
+                    {`${member.firstName} ${member.lastName}`}
+                    {member.isOwner && (
+                      <Badge ml={1} variant="subtle" colorScheme="green" fontSize="0.5rem">owner</Badge>
+                    )}
+                  </Td>
+                  <Td pt={i === 0 ? 4 : 2} pb={i === members.length - 1 ? 4 : 2}>
+                    {member.quantity}
+                  </Td>
+                  <Td pt={i === 0 ? 4 : 2} pb={i === members.length - 1 ? 4 : 2}>{fDate}</Td>
+                </Tr>
+              );
+            })}
           </Tbody>
         </Table>
       </Box>

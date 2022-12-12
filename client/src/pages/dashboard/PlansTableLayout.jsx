@@ -12,7 +12,7 @@ import ConfirmCancel from '../planDetails/ConfirmCancel.jsx';
 import ModifyQuantity from '../planDetails/ModifyQuantity.jsx';
 import ConfirmDeletePlan from '../planDetails/ConfirmDeletePlan.jsx';
 
-export default function PlansTableLayout({ total, plans }) {
+export default function PlansTableLayout({ total, plans, setPlanToView }) {
   // const [planToCopy, setPlanToCopy] = useState(null);
   // const { hasCopied, onCopy, setValue } = useClipboard('');
   const isMobile = useBreakpointValue({ base: true, md: false });
@@ -33,7 +33,7 @@ export default function PlansTableLayout({ total, plans }) {
       >
         <Stack spacing="5">
           <Box overflowX="auto">
-            <PlansTable plans={plans} />
+            <PlansTable plans={plans} setPlanToView={setPlanToView} />
           </Box>
           <Box px={{ base: '4', md: '6' }} pb="5">
             <HStack spacing="3" justify="space-between">

@@ -15,7 +15,7 @@ function MoreOptionsIcon() {
   );
 }
 
-export default function PlansTable({ plans }) {
+export default function PlansTable({ plans, setPlanToView }) {
   const navigate = useNavigate();
   return (
     <Table size={{ base: 'sm', md: 'md' }}>
@@ -59,7 +59,14 @@ export default function PlansTable({ plans }) {
                   />
                   <MenuList>
                     <MenuItem>Share Plan</MenuItem>
-                    <MenuItem onClick={() => navigate(`/view/${planId}`)}>View Details</MenuItem>
+                    <MenuItem
+                      onClick={
+                        () => {
+                          setPlanToView(planId);
+                          navigate('/view');
+                        }
+                      }
+                    >View Details</MenuItem>
                   </MenuList>
                 </Menu>
               </Td>

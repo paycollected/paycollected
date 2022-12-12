@@ -28,13 +28,14 @@ if (token) {
 function App() {
   const [user, setUser] = useState(token ? username : null);
   const [planToJoin, setPlanToJoin] = useState(null);
+  const [planToView, setPlanToView] = useState(null);
   const [stripeClientSecret, setStripeClientSecret] = useState(null);
   const [setupIntentId, setSetupIntentId] = useState(null);
   const [paymentMethods, setPaymentMethods] = useState([]);
 
   return (
     <Routes>
-      <Route path="/" element={<Home user={user} setUser={setUser} setPlanToJoin={setPlanToJoin} />} />
+      <Route path="/" element={<Home user={user} setUser={setUser} setPlanToJoin={setPlanToJoin} setPlanToView={setPlanToView} />} />
       <Route
         path="/login"
         element={!user
@@ -49,13 +50,13 @@ function App() {
       />
       <Route
         path="/dashboard"
-        element={<Dashboard user={user} setUser={setUser} setPlanToJoin={setPlanToJoin} />}
+        element={<Dashboard user={user} setUser={setUser} setPlanToJoin={setPlanToJoin} setPlanToView={setPlanToView} />}
       />
       <Route
         path="/join/:planId"
         element={
           !user
-            ? <Home user={user} setUser={setUser} setPlanToJoin={setPlanToJoin} />
+            ? <Home user={user} setUser={setUser} setPlanToJoin={setPlanToJoin} setPlanToView={setPlanToView} />
             : (
               <JoinPlan
                 setPlanToJoin={setPlanToJoin}
@@ -82,12 +83,19 @@ function App() {
           : <Navigate to="/" />}
       />
       <Route
-        path="/view/:planId"
+        path="/view"
         element={
           user
-            ? <PlanDetails user={user} setUser={setUser} setPlanToJoin={setPlanToJoin} />
+            ? (
+              <PlanDetails
+                user={user}
+                setUser={setUser}
+                planToView={planToView}
+                setPlanToView={setPlanToView}
+              />
+            )
             : <Navigate to="/404" />
-        }
+          }
       />
       <Route path="/manage-account" element={user ? <ManageAccount user={user} setUser={setUser} /> : <Navigate to="/" />} />
       <Route path="/password-reset" element={<PwdReset setUser={setUser} />} />

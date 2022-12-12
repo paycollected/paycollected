@@ -10,7 +10,7 @@ import { EditPayment as EDIT_PAYMENT } from '../graphql/mutations.gql';
 import UnauthenticatedNavBar from './UnauthenticatedNavBar.jsx';
 import { NavBarBtn } from '../styles/styles.js';
 
-export default function NavBar({ user, setUser, setPlanToJoin }) {
+export default function NavBar({ user, setUser, setPlanToJoin, setPlanToView }) {
   const navigate = useNavigate();
   const [toggleMenu, setToggleMenu] = useState(false);
 
@@ -18,6 +18,7 @@ export default function NavBar({ user, setUser, setPlanToJoin }) {
     localStorage.clear();
     setUser(null);
     setPlanToJoin(null);
+    setPlanToView(null);
     navigate('/');
   };
 

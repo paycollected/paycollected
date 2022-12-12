@@ -20,6 +20,35 @@ query PreJoinPlan ($planId: PlanID!) {
   }
 }
 
+
+query PlanDetails ($planId: PlanID!) {
+  viewOnePlan(planId: $planId) {
+    planId
+    name
+    cycleFrequency
+    perCycleCost
+    startDate
+    owner {
+      firstName
+      lastName
+    }
+    isOwner
+    quantity
+    selfCost
+    totalMembers
+    totalQuantity
+    subscriptionId
+    activeMembers {
+      firstName
+      lastName
+      quantity
+      joinedDate
+      isOwner
+    }
+  }
+}
+
+
 query ViewAllPlans {
   viewAllPlans {
     total
