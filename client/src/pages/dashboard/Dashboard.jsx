@@ -74,9 +74,9 @@ export default function Dashboard({ user, setUser, setPlanToJoin }) {
       <>
         <NavBar user={user} setUser={setUser} setPlanToJoin={setPlanToJoin} />
         <VStack w="93%" justify="left" spacing={{ base: '6', md: '10' }} mb="10">
-          <Wrap w="100%" spacing={{ base: '4', md: '8' }}>
+          <Wrap w="100%" spacingX={{ base: '4', md: '8' }} align="end">
             <WrapItem>
-              <Heading as="h1">
+              <Heading as="h1" fontSize="2xl">
                 {`${data.viewAllPlans.total} Active Plans`}
               </Heading>
             </WrapItem>
@@ -85,7 +85,7 @@ export default function Dashboard({ user, setUser, setPlanToJoin }) {
             </WrapItem>
           </Wrap>
           <PlansTableLayout total={data.viewAllPlans.total} plans={data.viewAllPlans.plans} />
-          <Wrap w="100%" align="end" spacing={{ base: '4', md: '8' }}>
+          <Wrap w="100%" align="end" spacingX={{ base: '4', md: '8' }}>
             <WrapItem>
               <FormControl
                 isRequired

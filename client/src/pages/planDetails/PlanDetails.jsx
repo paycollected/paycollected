@@ -1,7 +1,7 @@
 import React from 'react';
 import {
-  Button, FormControl, FormLabel, Input, Heading, VStack, WrapItem, Wrap, Box, Flex,
-  Card, CardHeader, CardBody, Grid, GridItem, Text, useBreakpointValue, Container,
+  Button, FormControl, FormLabel, Input, Heading, VStack, Box, Flex,
+  Card, CardHeader, CardBody, Grid, GridItem, Text,
 } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
 import NavBar from '../../components/NavBar.jsx';
@@ -14,7 +14,7 @@ export default function PlanDetails({ user, setUser, setPlanToJoin }) {
   return (
     <>
       <NavBar user={user} setUser={setUser} setPlanToJoin={setPlanToJoin} />
-      <VStack w="93%" justify="left" spacing={{ base: '4', md: '6' }} mb={{ base: '4', md: '6' }}>
+      <VStack w="93%" justify="left" spacing={{ base: 4, md: 6 }} mb={{ base: 4, md: 6 }}>
         <Flex w="100%" align="center">
           <Button
             variant="navActionBtn"
@@ -25,11 +25,10 @@ export default function PlanDetails({ user, setUser, setPlanToJoin }) {
           </Button>
         </Flex>
         <Flex w="100%" align="center">
-          <Heading as="h1" variant="accented">Poke Bowls</Heading>
+          <Heading as="h1" variant="accented" pb={0}>Poke Bowls</Heading>
         </Flex>
         <Box w="100%">
           <Card w={{ base: '95%', lg: '80%' }}>
-            <Container minWidth="100%">
             <CardHeader mx={6} mt={8} mb={0}>
               <Heading as="h2" variant="nuanced">
                 Plan Details
@@ -39,51 +38,70 @@ export default function PlanDetails({ user, setUser, setPlanToJoin }) {
               <Grid
                 templateColumns={{ base: '1fr', md: 'repeat(2, 1fr)' }}
                 templateRows={{ base: 'repeat(10, max-content)', md: 'repeat(6, max-content)' }}
-                gap="6"
+                gap={4}
               >
                 <GridItem>
-                  <Text textStyle="formLabel">Plan Name</Text>
-                  <Text textStyle="formSavedInput">Poke Bowls</Text>
+                  <VStack justify="left" spacing={{ base: 1, md: 2 }}>
+                    <Text w="100%" textStyle="formLabel">Plan Name</Text>
+                    <Text w="100%" textStyle="formSavedInput">Poke Bowls</Text>
+                  </VStack>
                 </GridItem>
                 <GridItem>
-                  <Text textStyle="formLabel">Start Date</Text>
-                  <Text textStyle="formSavedInput">12/30/2022</Text>
+                  <VStack justify="left" spacing={{ base: 1, md: 2 }}>
+                    <Text w="100%" textStyle="formLabel">Start Date</Text>
+                    <Text w="100%" textStyle="formSavedInput">12/30/2022</Text>
+                  </VStack>
                 </GridItem>
                 <GridItem colSpan={{ base: 1, md: 2 }}>
-                  <Text textStyle="formLabel">Owner</Text>
-                  <Text textStyle="formSavedInput">You</Text>
+                  <VStack justify="left" spacing={{ base: 1, md: 2 }}>
+                    <Text w="100%" textStyle="formLabel">Owner</Text>
+                    <Text w="100%" textStyle="formSavedInput">You</Text>
+                  </VStack>
                 </GridItem>
                 <GridItem>
-                  <Text textStyle="formLabel">Billing Frequency</Text>
-                  <Text textStyle="formSavedInput">Weekly</Text>
+                  <VStack justify="left" spacing={{ base: 1, md: 2 }}>
+                    <Text w="100%" textStyle="formLabel">Billing Frequency</Text>
+                    <Text w="100%" textStyle="formSavedInput">Weekly</Text>
+                  </VStack>
                 </GridItem>
                 <GridItem>
-                  <Text textStyle="formLabel">Total Cycle Cost</Text>
-                  <Text textStyle="formSavedInput">$100.00</Text>
+                  <VStack justify="left" spacing={{ base: 1, md: 2 }}>
+                    <Text w="100%" textStyle="formLabel">Total Cycle Cost</Text>
+                    <Text w="100%" textStyle="formSavedInput">$100.00</Text>
+                  </VStack>
                 </GridItem>
                 <GridItem>
-                  <Text textStyle="formLabel">Your Subscriptions</Text>
-                  <Text textStyle="formSavedInput">2</Text>
+                  <VStack justify="left" spacing={{ base: 1, md: 2 }}>
+                    <Text w="100%" textStyle="formLabel">Your Subscriptions</Text>
+                    <Text w="100%" textStyle="formSavedInput">2</Text>
+                  </VStack>
                 </GridItem>
                 <GridItem>
-                  <Text textStyle="formLabel">Your Cycle Cost</Text>
-                  <Text textStyle="formSavedInput">$20.00</Text>
+                  <VStack justify="left" spacing={{ base: 1, md: 2 }}>
+                    <Text w="100%" textStyle="formLabel">Your Cycle Cost</Text>
+                    <Text w="100%" textStyle="formSavedInput">$20.00</Text>
+                  </VStack>
                 </GridItem>
                 <GridItem>
-                  <Text textStyle="formLabel">Total Members</Text>
-                  <Text textStyle="formSavedInput">3</Text>
+                  <VStack justify="left" spacing={{ base: 1, md: 2 }}>
+                    <Text w="100%" textStyle="formLabel">Total Members</Text>
+                    <Text w="100%" textStyle="formSavedInput">3</Text>
+                  </VStack>
                 </GridItem>
                 <GridItem>
-                  <Text textStyle="formLabel">Total Subscriptions</Text>
-                  <Text textStyle="formSavedInput">6</Text>
+                  <VStack justify="left" spacing={{ base: 1, md: 2 }}>
+                    <Text w="100%" textStyle="formLabel">Total Subscriptions</Text>
+                    <Text w="100%" textStyle="formSavedInput">6</Text>
+                  </VStack>
                 </GridItem>
                 <GridItem colSpan={{ base: 1, md: 2 }}>
-                  <Text textStyle="formLabel">Others on this plan</Text>
-                  <PlanMembersTable />
+                  <VStack justify="left" spacing={{ base: 4, md: 6 }}>
+                    <Text w="100%" textStyle="formLabel">Others on this plan</Text>
+                    <PlanMembersTable />
+                  </VStack>
                 </GridItem>
               </Grid>
             </CardBody>
-            </Container>
           </Card>
         </Box>
       </VStack>

@@ -5,20 +5,12 @@ import { menuAnatomy } from '@chakra-ui/anatomy';
 
 export const buttonTheme = defineStyleConfig({
   baseStyle: {
-    fontWeight: 'bold',
+    fontWeight: 600,
     borderRadius: '7px',
   },
   sizes: {
-    md: {
-      fontSize: 'md',
-      px: 6,
-      py: 4
-    },
-    lg: {
-      fontSize: 'lg',
-      px: 6,
-      py: 8
-    }
+    md: { fontSize: 'sm', px: 6, py: 4 },
+    lg: { fontSize: 'md', px: 8, py: 8 },
   },
   variants: {
     outline: {
@@ -27,7 +19,6 @@ export const buttonTheme = defineStyleConfig({
       border: '2px solid',
       borderColor: '#2B6CB0',
       borderRadius: '40px',
-      padding: '20px',
       // TODO: Hover styling
       _hover: {
         bg: '##2B6CB0',
@@ -41,7 +32,6 @@ export const buttonTheme = defineStyleConfig({
       color: 'white',
       border: '2px solid transparent',
       borderRadius: '40px',
-      padding: '20px',
       // TODO: Hover styling
       _hover: {
         bg: '#A6E1FA',
@@ -53,6 +43,7 @@ export const buttonTheme = defineStyleConfig({
     navBarBtn: {
       bg: 'transparent',
       fontWeight: 'normal',
+      fontSize: 'md',
       _hover: {
         textDecoration: 'underline',
       }
@@ -60,7 +51,7 @@ export const buttonTheme = defineStyleConfig({
     navActionBtn: {
       bg: 'transparent',
       color: 'blue.600',
-      fontSize: 'md',
+      fontSize: 'sm',
       fontWeight: 'normal',
       padding: 0,
       margin: 0,
@@ -72,13 +63,13 @@ export const buttonTheme = defineStyleConfig({
   },
   defaultProps: {
     variant: 'solid',
-    size: 'md'
+    size: 'md',
   }
 });
 
 export const inputTheme = defineStyleConfig({
   baseStyle: {
-    width: '40%'
+    width: '40%',
   },
 });
 
@@ -93,13 +84,15 @@ const menuTheme = defineMultiStyleConfig({
 });
 
 const headingTheme = defineStyleConfig({
-  baseStyle: { color: '#2B6CB0', },
+  baseStyle: { color: '#2B6CB0' },
   variants: {
     accented: {
       color: '#272088',
+      fontSize: '2xl',
+      fontWeight: 700,
     },
     nuanced: {
-      color: 'blackAlpha.700', fontSize: '2xl', fontWeight: 500,
+      color: 'blackAlpha.700', fontSize: 'xl', fontWeight: 600,
     }
   }
 });
@@ -117,7 +110,7 @@ export const globalTheme = extendTheme({
   },
   textStyles: {
     note: { color: '#718096' },
-    formLabel: { color: 'gray.700', fontWeight: 700, fontSize: 'md' },
-    formSavedInput: { color: 'blackAlpha.700', fontSize: 'lg', fontWeight: 400 },
+    formLabel: { color: 'gray.700', fontWeight: 600, fontSize: 'sm' },
+    formSavedInput: { color: 'blackAlpha.700', fontSize: 'md', fontWeight: 400 },
   },
 });
