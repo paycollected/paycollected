@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useMutation } from '@apollo/client';
 import {
   Button, Modal, ModalOverlay, ModalContent, ModalCloseButton, ModalHeader, ModalBody, ModalFooter,
-  Text, HStack, VStack, Flex, FormControl, FormLabel, Select,
+  Text, HStack, VStack, Flex, FormControl, FormLabel, FormErrorMessage, Select,
 } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -15,6 +15,7 @@ export default function ActionConfirmationModal({
   action, isOpen, onClose, subscriptionId, planId, planName, members, setPlanToView,
 }) {
   const [newOwner, setNewOwner] = useState(members[0].username);
+  const [selectError, setSelectError] = useState('');
   const navigate = useNavigate();
   const requestCompleted = () => {
     setPlanToView(null);
@@ -48,7 +49,11 @@ export default function ActionConfirmationModal({
         confirmUnsubscribe({ variables: { subscriptionId } });
         break;
       case 'cancelAsOwner':
-        confirmUnsubscribeAsOwner({ variables: { subscriptionId, newOwner } });
+        if (members.filter((member) => member.username === newOwner).length > 0) {
+          confirmUnsubscribeAsOwner({ variables: { subscriptionId, newOwner } });
+        } else {
+          setSelectError("Input doesn't reflect an existing member of plan.");
+        }
         break;
       default:
         break;
@@ -90,6 +95,7 @@ export default function ActionConfirmationModal({
                     <option key={member.username} value={member.username}>{`${member.firstName} ${member.lastName}`}</option>
                   ))}
                 </Select>
+                {selectError && (<FormErrorMessage>{selectError}</FormErrorMessage>)}
               </FormControl>
             )}
             <Text textStyle="note">
