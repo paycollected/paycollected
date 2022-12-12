@@ -85,7 +85,7 @@ function App() {
       <Route
         path="/view"
         element={
-          user
+          user && planToView
             ? (
               <PlanDetails
                 user={user}
@@ -101,7 +101,7 @@ function App() {
       <Route
         path="/edit"
         element={
-          user
+          user && planToView
             ? (
               <PlanDetails
                 user={user}
