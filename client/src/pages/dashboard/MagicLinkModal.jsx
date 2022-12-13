@@ -16,7 +16,6 @@ export default function MagicLink({
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="xl">
-      {console.log(planId)}
       <ModalOverlay />
       <ModalContent>
         <ModalHeader><Heading as="h2">{`Invite Your Friends To Join ${planName}`}</Heading></ModalHeader>
