@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useMutation } from '@apollo/client';
 import {
   Button, Modal, ModalOverlay, ModalContent, ModalCloseButton, ModalHeader, ModalBody, ModalFooter,
-  Text, HStack, VStack, Flex, FormControl, FormLabel, FormErrorMessage, Select,
+  Text, HStack, VStack, Flex, FormControl, FormLabel, FormErrorMessage, Select, Heading,
 } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -78,10 +78,10 @@ export default function ActionConfirmationModal({
       <ModalOverlay />
       <ModalContent>
         {(action === 'cancel' || action === 'cancelAsOwner') && (
-          <ModalHeader>Cancel Your Subscription</ModalHeader>
+          <ModalHeader><Heading>Cancel Your Subscription</Heading></ModalHeader>
         )}
         {action === 'delete' && (
-          <ModalHeader>{`Delete Plan ${planName}`}</ModalHeader>
+          <ModalHeader><Heading>{`Delete Plan ${planName}`}</Heading></ModalHeader>
         )}
         <ModalCloseButton />
         <ModalBody>

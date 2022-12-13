@@ -5,6 +5,7 @@ import {
 } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
 import ActionConfirmationModal from '../../components/ActionConfirmationModal.jsx';
+import MagicLinkModal from './MagicLinkModal.jsx';
 
 function MoreOptionsIcon() {
   return (
@@ -20,8 +21,9 @@ function MoreOptionsIcon() {
 export default function PlansTable({ plans, setPlanToView }) {
   const navigate = useNavigate();
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const [planIdToDelete, setPlanIdToDelete] = useState(null);
-  const [planNameToDelete, setPlanNameToDelete] = useState(null);
+  const { isOpen: mlIsOpen, onOpen: mlOnOpen, onClose: mlOnClose } = useDisclosure();
+  const [planIdForAction, setPlanIdForAction] = useState(null);
+  const [planNameForAction, setPlanNameForAction] = useState(null);
 
   return (
     <>
@@ -29,14 +31,19 @@ export default function PlansTable({ plans, setPlanToView }) {
         onClose={onClose}
         isOpen={isOpen}
         action="delete"
-        planName={planNameToDelete}
-        planId={planIdToDelete}
+        planName={planNameForAction}
+        planId={planIdForAction}
         subscriptionId={null}
         members={null}
         setPlanToView={setPlanToView}
         inDashboard
       />
-      {console.log(planIdToDelete)}
+      <MagicLinkModal
+        onClose={mlOnClose}
+        isOpen={mlIsOpen}
+        planName={planNameForAction}
+        planId={planIdForAction}
+      />
       <Table size={{ base: 'sm', md: 'md' }}>
         <Thead bg="#F7FAFC">
           <Tr>
@@ -77,7 +84,14 @@ export default function PlansTable({ plans, setPlanToView }) {
                       variant="menuIcon"
                     />
                     <MenuList>
-                      <MenuItem>Share Plan</MenuItem>
+                      <MenuItem onClick={() => {
+                        setPlanIdForAction(planId);
+                        setPlanNameForAction(name);
+                        mlOnOpen();
+                      }}
+                      >
+                        Share Plan
+                      </MenuItem>
                       <MenuItem
                         onClick={() => {
                           setPlanToView(planId);
@@ -97,10 +111,11 @@ export default function PlansTable({ plans, setPlanToView }) {
                             Manage Plan
                           </MenuItem>
                           <MenuItem onClick={() => {
-                            setPlanIdToDelete(planId);
-                            setPlanNameToDelete(name);
+                            setPlanIdForAction(planId);
+                            setPlanNameForAction(name);
                             onOpen();
-                          }}>
+                          }}
+                          >
                             Delete Plan
                           </MenuItem>
                         </>

@@ -131,7 +131,12 @@ const headingTheme = defineStyleConfig({
     nuanced: {
       color: 'blackAlpha.700', fontSize: 'xl', fontWeight: 600,
     }
-  }
+  },
+  sizes: {
+    md: { fontSize: '2xl' },
+    lg: { fontSize: '3xl' },
+  },
+  defaultProps: { size: 'lg' }
 });
 
 export const globalTheme = extendTheme({
