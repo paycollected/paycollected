@@ -114,3 +114,18 @@ mutation TransferPlanOwnership($planId: PlanID!, $newOwner: String!) {
     }
   }
 }
+
+mutation EditSubsQuantAndTransferOwnership($planId: PlanID!, $newOwner: String!, $subscriptionId: SubscriptionID!, $newQuantity: Int!) {
+  editQuantity(subscriptionId: $subscriptionId, newQuantity: $newQuantity) {
+    planId
+    quantity
+  }
+
+  transferOwnership(planId: $planId, newOwner: $newOwner) {
+    newOwner {
+      username
+      firstName
+      lastName
+    }
+  }
+}

@@ -6,10 +6,15 @@ import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation } from '@apollo/client';
 import { useForm } from 'react-hook-form';
 import { PlanDetails as GET_PLAN } from '../../graphql/queries.gql';
-import { EditQuantity as EDIT_QUANTITY, TransferPlanOwnership as TRANSFER } from '../../graphql/mutations.gql';
+import {
+  EditQuantity as EDIT_QUANTITY,
+  TransferPlanOwnership as TRANSFER,
+  EditSubsQuantAndTransferOwnership as EDIT_QUANT_AND_TRANSFER,
+} from '../../graphql/mutations.gql';
 import ActionConfirmationModal from './ActionConfirmationModal.jsx';
 import NavBar from '../../components/NavBar.jsx';
 import EditableGrid from './EditableGrid.jsx';
+import updateActiveMembersInCache from './cacheUpdatingFns.js';
 
 export default function PlanDetails({
   user, setUser, setPlanToJoin, planToView, setPlanToView, edit,
@@ -19,6 +24,7 @@ export default function PlanDetails({
   const [action, setAction] = useState(null);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const navigate = useNavigate();
+  const { register, handleSubmit } = useForm();
 
   const { loading, data, error } = useQuery(GET_PLAN, {
     variables: { planId: planToView },
@@ -33,8 +39,7 @@ export default function PlanDetails({
       setEditAsMember(false);
       setEditAsOwner(false);
     },
-    update: (cache, { data: { editQuantity } }) => {
-      const { planId, quantity: resultQuant } = editQuantity;
+    update: (cache, { data: { editQuantity: { planId, quantity: resultQuant} } }) => {
       cache.modify({
         id: `PlanDetail:{"planId":"${planId}"}`,
         fields: {
@@ -53,20 +58,37 @@ export default function PlanDetails({
         id: `PlanDetail:{"planId":"${planId}"}`,
         fields: {
           isOwner() { return false; },
-          activeMembers(members) {
-            const modifiedMembers = members.slice();
-            modifiedMembers.forEach((member) => {
-              if (member.username === newOwner.username) member.isOwner = true;
-            });
-            return modifiedMembers;
-          },
+          activeMembers(members) { return updateActiveMembersInCache(members, newOwner); },
           owner() { return newOwner; },
         }
       });
     },
   });
 
-  const { register, handleSubmit } = useForm();
+  const [transferAndEditQuant, {
+    loading: transferEditLoading, error: transferEditError
+  }] = useMutation(EDIT_QUANT_AND_TRANSFER, {
+    onCompleted: () => {
+      setEditAsOwner(false);
+    },
+    update: (cache, {
+      data: {
+        transferOwnership: { newOwner },
+        editQuantity: { planId, quantity: resultQuant },
+      }
+    }) => {
+      cache.modify({
+        id: `PlanDetail:{"planId":"${planId}"}`,
+        fields: {
+          quantity() { return resultQuant; },
+          isOwner() { return false; },
+          owner() { return newOwner; },
+          activeMembers(members) { return updateActiveMembersInCache(members, newOwner); },
+        }
+      });
+    },
+  });
+
 
   if (data) {
     const {
@@ -92,8 +114,17 @@ export default function PlanDetails({
             // only new owner is changed
             transfer({ variables: { planId, newOwner } });
             break;
+          case (newQuantity === quantity && newOwner === user):
+            // no change
+            setEditAsOwner(false);
+            break;
           default:
             // both quantity and owner have been changed
+            transferAndEditQuant({
+              variables: {
+                planId, newOwner, subscriptionId, newQuantity
+              }
+            });
             break;
         }
       } else {
