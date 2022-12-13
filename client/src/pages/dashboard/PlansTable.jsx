@@ -1,8 +1,10 @@
-import * as React from 'react';
+import React, { useState } from 'react';
 import {
-  Icon, IconButton, Table, Tbody, Td, Th, Thead, Tr, Menu, MenuButton, MenuList, MenuItem, Button,
+  Icon, IconButton, Table, Tbody, Td, Th, Thead, Tr, Menu, MenuButton, MenuList, MenuItem,
+  useDisclosure,
 } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
+import ActionConfirmationModal from '../../components/ActionConfirmationModal.jsx';
 
 function MoreOptionsIcon() {
   return (
@@ -17,63 +19,99 @@ function MoreOptionsIcon() {
 
 export default function PlansTable({ plans, setPlanToView }) {
   const navigate = useNavigate();
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [planIdToDelete, setPlanIdToDelete] = useState(null);
+  const [planNameToDelete, setPlanNameToDelete] = useState(null);
+
   return (
-    <Table size={{ base: 'sm', md: 'md' }}>
-      <Thead bg="#F7FAFC">
-        <Tr>
-          <Th>Plan Name</Th>
-          <Th>Owner</Th>
-          <Th>Your Cost</Th>
-          <Th>Next Billing Date</Th>
-          <Th>Per Cycle Cost</Th>
-          <Th>Billing Cycle</Th>
-          <Th>Subscriptions</Th>
-          <Th />
-        </Tr>
-      </Thead>
-      <Tbody>
-        {plans.map((plan) => {
-          const {
-            planId, name, owner, isOwner, nextBillDate, cycleFrequency, perCycleCost, quantity,
-            selfCost,
-          } = plan;
-          const nbdAsArr = nextBillDate.split('-');
-          const fNbd = `${nbdAsArr[1]}/${nbdAsArr[2]}/${nbdAsArr[0]}`;
-          return (
-            <Tr key={planId}>
-              <Td>{name}</Td>
-              {isOwner && (<Td>You</Td>)}
-              {!isOwner && (<Td>{`${owner.firstName} ${owner.lastName[0]}.`}</Td>)}
-              <Td>{selfCost}</Td>
-              <Td>{fNbd}</Td>
-              <Td>{perCycleCost}</Td>
-              <Td>{cycleFrequency[0].concat(cycleFrequency.slice(1).toLowerCase())}</Td>
-              <Td>{quantity}</Td>
-              <Td>
-                <Menu>
-                  <MenuButton
-                    as={IconButton}
-                    aria-label="Options"
-                    icon={<MoreOptionsIcon fontSize="1.25rem" bg="white" />}
-                    variant="menuIcon"
-                  />
-                  <MenuList>
-                    <MenuItem>Share Plan</MenuItem>
-                    <MenuItem
-                      onClick={
-                        () => {
+    <>
+      <ActionConfirmationModal
+        onClose={onClose}
+        isOpen={isOpen}
+        action="delete"
+        planName={planNameToDelete}
+        planId={planIdToDelete}
+        subscriptionId={null}
+        members={null}
+        setPlanToView={setPlanToView}
+        inDashboard
+      />
+      <Table size={{ base: 'sm', md: 'md' }}>
+        <Thead bg="#F7FAFC">
+          <Tr>
+            <Th>Plan Name</Th>
+            <Th>Owner</Th>
+            <Th>Your Cost</Th>
+            <Th>Next Billing Date</Th>
+            <Th>Per Cycle Cost</Th>
+            <Th>Billing Cycle</Th>
+            <Th>Subscriptions</Th>
+            <Th />
+          </Tr>
+        </Thead>
+        <Tbody>
+          {plans.map((plan) => {
+            const {
+              planId, name, owner, isOwner, nextBillDate, cycleFrequency, perCycleCost, quantity,
+              selfCost,
+            } = plan;
+            const nbdAsArr = nextBillDate.split('-');
+            const fNbd = `${nbdAsArr[1]}/${nbdAsArr[2]}/${nbdAsArr[0]}`;
+            return (
+              <Tr key={planId}>
+                <Td>{name}</Td>
+                {isOwner && (<Td>You</Td>)}
+                {!isOwner && (<Td>{`${owner.firstName} ${owner.lastName[0]}.`}</Td>)}
+                <Td>{selfCost}</Td>
+                <Td>{fNbd}</Td>
+                <Td>{perCycleCost}</Td>
+                <Td>{cycleFrequency[0].concat(cycleFrequency.slice(1).toLowerCase())}</Td>
+                <Td>{quantity}</Td>
+                <Td>
+                  <Menu>
+                    <MenuButton
+                      as={IconButton}
+                      aria-label="Options"
+                      icon={<MoreOptionsIcon fontSize="1.25rem" bg="white" />}
+                      variant="menuIcon"
+                    />
+                    <MenuList>
+                      <MenuItem>Share Plan</MenuItem>
+                      <MenuItem
+                        onClick={() => {
                           setPlanToView(planId);
                           navigate('/view');
-                        }
-                      }
-                    >View Details</MenuItem>
-                  </MenuList>
-                </Menu>
-              </Td>
-            </Tr>
-          );
-        })}
-      </Tbody>
-    </Table>
+                        }}
+                      >
+                        View Details
+                      </MenuItem>
+                      {isOwner && (
+                        <>
+                          <MenuItem
+                            onClick={() => {
+                              setPlanToView(planId);
+                              navigate('/edit');
+                            }}
+                          >
+                            Manage Plan
+                          </MenuItem>
+                          <MenuItem onClick={() => {
+                            setPlanIdToDelete(planId);
+                            setPlanNameToDelete(name);
+                            onOpen();
+                          }}>
+                            Delete Plan
+                          </MenuItem>
+                        </>
+                      )}
+                    </MenuList>
+                  </Menu>
+                </Td>
+              </Tr>
+            );
+          })}
+        </Tbody>
+      </Table>
+    </>
   );
 }

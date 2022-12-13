@@ -9,18 +9,18 @@ import {
   Unsubscribe as UNSUBSCRIBE,
   UnsubscribeAsPlanOwner as UNSUBSCRIBE_AS_OWNER,
   DeletePlan as DELETE_PLAN,
-} from '../../graphql/mutations.gql';
+} from '../graphql/mutations.gql';
 
 export default function ActionConfirmationModal({
-  action, isOpen, onClose, subscriptionId, planId, planName, members, setPlanToView,
+  action, isOpen, onClose, subscriptionId, planId, planName, members, setPlanToView, inDashboard,
 }) {
-  const [newOwner, setNewOwner] = useState(members[0].username);
+  const [newOwner, setNewOwner] = useState(members === null ? null : members[0].username);
   const [selectError, setSelectError] = useState('');
   const navigate = useNavigate();
   const requestCompleted = () => {
     setPlanToView(null);
     onClose();
-    navigate('/dashboard');
+    if (!inDashboard) navigate('/dashboard');
   };
 
   const [confirmUnsubscribe, { data, loading, error }] = useMutation(UNSUBSCRIBE, {
@@ -43,7 +43,9 @@ export default function ActionConfirmationModal({
   const handleConfirmation = () => {
     switch (action) {
       case 'delete':
-        confirmDelete({ variables: { planId } });
+        console.log('success');
+        onClose();
+        // confirmDelete({ variables: { planId } });
         break;
       case 'cancel':
         confirmUnsubscribe({ variables: { subscriptionId } });
@@ -98,9 +100,11 @@ export default function ActionConfirmationModal({
                 {selectError && (<FormErrorMessage>{selectError}</FormErrorMessage>)}
               </FormControl>
             )}
-            <Text textStyle="note">
-              Once your request has been successfully processed, you will be redirected to the Dashboard.
-            </Text>
+            {!inDashboard && (
+              <Text textStyle="note">
+                Once your request has been successfully processed, you will be redirected to the Dashboard.
+              </Text>
+            )}
           </VStack>
         </ModalBody>
         <ModalFooter>

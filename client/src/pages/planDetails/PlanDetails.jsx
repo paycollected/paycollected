@@ -11,7 +11,7 @@ import {
   TransferPlanOwnership as TRANSFER,
   EditSubsQuantAndTransferOwnership as EDIT_QUANT_AND_TRANSFER,
 } from '../../graphql/mutations.gql';
-import ActionConfirmationModal from './ActionConfirmationModal.jsx';
+import ActionConfirmationModal from '../../components/ActionConfirmationModal.jsx';
 import NavBar from '../../components/NavBar.jsx';
 import EditableGrid from './EditableGrid.jsx';
 import { modifyQuantCacheUpdate, transferOwnershipCacheUpdate, modifyQuantTransferCacheUpdate } from './cacheUpdatingFns.js';
@@ -96,12 +96,10 @@ export default function PlanDetails({
             });
             break;
         }
+      } else if (newQuantity !== quantity) {
+        changeQuant({ variables: { subscriptionId, newQuantity } });
       } else {
-        if (newQuantity !== quantity) {
-          changeQuant({ variables: { subscriptionId, newQuantity } });
-        } else {
-          setEditAsMember(false);
-        }
+        setEditAsMember(false);
       }
     };
 
@@ -122,6 +120,7 @@ export default function PlanDetails({
           subscriptionId={subscriptionId}
           members={activeMembers}
           setPlanToView={setPlanToView}
+          inDashboard={false}
         />
         <VStack w="93%" justify="left" spacing={{ base: 6, md: 10 }} mb={{ base: 6, md: 10 }}>
           <Flex w="100%" align="center">
