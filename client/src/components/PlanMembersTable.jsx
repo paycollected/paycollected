@@ -16,24 +16,22 @@ export default function PlanMembersTable({ members }) {
             </Tr>
           </Thead>
           <Tbody bg="gray.50">
-            {members.map((member, i) => {
-              const dateAsArr = member.joinedDate.split('-');
-              const fDate = `${dateAsArr[1]}/${dateAsArr[2]}/${dateAsArr[0]}`;
-              return (
-                <Tr key={member.username}>
-                  <Td pt={i === 0 ? 4 : 2} pb={i === members.length - 1 ? 4 : 2}>
-                    {`${member.firstName} ${member.lastName}`}
-                    {member.isOwner && (
-                      <Badge ml={1} variant="subtle" colorScheme="green" fontSize="0.5rem">owner</Badge>
-                    )}
-                  </Td>
-                  <Td pt={i === 0 ? 4 : 2} pb={i === members.length - 1 ? 4 : 2}>
-                    {member.quantity}
-                  </Td>
-                  <Td pt={i === 0 ? 4 : 2} pb={i === members.length - 1 ? 4 : 2}>{fDate}</Td>
-                </Tr>
-              );
-            })}
+            {members.map((member, i) => (
+              <Tr key={member.username}>
+                <Td pt={i === 0 ? 4 : 2} pb={i === members.length - 1 ? 4 : 2}>
+                  {member.fullName}
+                  {member.isOwner && (
+                    <Badge ml={1} variant="subtle" colorScheme="green" fontSize="0.5rem">owner</Badge>
+                  )}
+                </Td>
+                <Td pt={i === 0 ? 4 : 2} pb={i === members.length - 1 ? 4 : 2}>
+                  {member.quantity}
+                </Td>
+                <Td pt={i === 0 ? 4 : 2} pb={i === members.length - 1 ? 4 : 2}>
+                  {member.joinedDate}
+                </Td>
+              </Tr>
+            ))}
           </Tbody>
         </Table>
       </Box>

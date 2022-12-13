@@ -105,7 +105,7 @@ export default function ActionConfirmationModal({
                 <FormLabel>Change plan&apos;s owner:</FormLabel>
                 <Select value={newOwner} onChange={(e) => setNewOwner(e.target.value)}>
                   {members.map((member) => (
-                    <option key={member.username} value={member.username}>{`${member.firstName} ${member.lastName}`}</option>
+                    <option key={member.username} value={member.username}>{member.fullName}</option>
                   ))}
                 </Select>
                 {selectError && (<FormErrorMessage>{selectError}</FormErrorMessage>)}

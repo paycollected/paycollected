@@ -67,9 +67,6 @@ export default function PlanDetails({
       }
     } = data;
 
-    const startDateAsArr = startDate.split('-');
-    const fStartDate = `${startDateAsArr[1]}/${startDateAsArr[2]}/${startDateAsArr[0]}`;
-
     const handleFormSubmit = (inputData) => {
       const { newQuantity } = inputData;
       if (isOwner) {
@@ -152,7 +149,7 @@ export default function PlanDetails({
                   <CardBody mx={6} mb={8} mt={0}>
                     <EditableGrid
                       name={name}
-                      fStartDate={fStartDate}
+                      startDate={startDate}
                       isOwner={isOwner}
                       owner={owner}
                       cycleFrequency={cycleFrequency}
@@ -206,7 +203,7 @@ export default function PlanDetails({
                   <CardBody mx={6} mb={8} mt={0}>
                     <EditableGrid
                       name={name}
-                      fStartDate={fStartDate}
+                      startDate={startDate}
                       isOwner={isOwner}
                       owner={owner}
                       cycleFrequency={cycleFrequency}

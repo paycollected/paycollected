@@ -63,17 +63,16 @@ export default function PlansTable({ plans, setPlanToView }) {
               planId, name, owner, isOwner, nextBillDate, cycleFrequency, perCycleCost, quantity,
               selfCost,
             } = plan;
-            const nbdAsArr = nextBillDate.split('-');
-            const fNbd = `${nbdAsArr[1]}/${nbdAsArr[2]}/${nbdAsArr[0]}`;
+
             return (
               <Tr key={planId}>
                 <Td>{name}</Td>
                 {isOwner && (<Td>You</Td>)}
-                {!isOwner && (<Td>{`${owner.firstName} ${owner.lastName[0]}.`}</Td>)}
+                {!isOwner && (<Td>{owner.formattedName}</Td>)}
                 <Td>{selfCost}</Td>
-                <Td>{fNbd}</Td>
+                <Td>{nextBillDate}</Td>
                 <Td>{perCycleCost}</Td>
-                <Td>{cycleFrequency[0].concat(cycleFrequency.slice(1).toLowerCase())}</Td>
+                <Td>{cycleFrequency}</Td>
                 <Td>{quantity}</Td>
                 <Td>
                   <Menu>

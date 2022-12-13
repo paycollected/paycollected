@@ -25,10 +25,39 @@ const authLink = setContext((_, { headers }) => {
   };
 });
 
+const formatDate = (date) => {
+  const dateSplit = date.split('-');
+  return `${dateSplit[1]}/${dateSplit[2]}/${dateSplit[0]}`;
+};
+
 const cache = new InMemoryCache({
   typePolicies: {
-    PlanDetail: { keyFields: ['planId'] },
-    PlanSummary: { keyFields: ['planId'] },
+    PlanDetail: {
+      keyFields: ['planId'],
+      fields: {
+        startDate(date) { return formatDate(date); },
+        cycleFrequency(cf) { return cf[0].concat(cf.slice(1).toLowerCase()); },
+      },
+    },
+    PlanSummary: {
+      keyFields: ['planId'],
+      fields: {
+        nextBillDate(date) { return formatDate(date); },
+        cycleFrequency(cf) { return cf[0].concat(cf.slice(1).toLowerCase()); },
+      },
+    },
+    PlanMember: {
+      fields: {
+        joinedDate(date) { return formatDate(date); },
+        fullName(_, { readField }) { return `${readField('firstName')} ${readField('lastName')}`; }
+      },
+    },
+    PlanOwner: {
+      fields: {
+        fullName(_, { readField }) { return `${readField('firstName')} ${readField('lastName')}`; },
+        formattedName(_, { readField }) { return `${readField('firstName')} ${readField('lastName')[0]}.`; }
+      }
+    }
   },
 });
 

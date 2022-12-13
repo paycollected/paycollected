@@ -32,6 +32,7 @@ query PlanDetails ($planId: PlanID!) {
       firstName
       lastName
       username
+      fullName @client
     }
     isOwner
     quantity
@@ -46,6 +47,7 @@ query PlanDetails ($planId: PlanID!) {
       joinedDate
       isOwner
       username
+      fullName @client
     }
   }
 }
@@ -60,6 +62,7 @@ query ViewAllPlans {
       owner {
         firstName
         lastName
+        formattedName @client
       }
       isOwner
       nextBillDate

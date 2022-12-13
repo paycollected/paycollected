@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-  Button, FormControl, Input, VStack, Grid, GridItem, Text, HStack, NumberInput, Select,
+  Button, VStack, Grid, GridItem, Text, HStack, NumberInput, Select,
   NumberInputField, NumberInputStepper, NumberIncrementStepper, NumberDecrementStepper, Flex,
 } from '@chakra-ui/react';
 import { EditIcon } from '@chakra-ui/icons';
@@ -8,7 +8,7 @@ import PlanMembersTable from '../../components/PlanMembersTable.jsx';
 
 
 export default function EditableGrid({
-  name, fStartDate, isOwner, owner, cycleFrequency, perCycleCost, quantity, selfCost, totalMembers,
+  name, startDate, isOwner, owner, cycleFrequency, perCycleCost, quantity, selfCost, totalMembers,
   totalQuantity, activeMembers, register, handleFormSubmit, handleSubmit, editAsMember,
   setEditAsMember, editAsOwner, user,
 }) {
@@ -28,7 +28,7 @@ export default function EditableGrid({
       <GridItem>
         <VStack justify="left" spacing={{ base: 1, md: 2 }}>
           <Text w="100%" textStyle="formLabel">Start Date</Text>
-          <Text w="100%" textStyle="formSavedInput">{fStartDate}</Text>
+          <Text w="100%" textStyle="formSavedInput">{startDate}</Text>
         </VStack>
       </GridItem>
       <GridItem colSpan={{ base: 1, md: 2 }}>
@@ -53,7 +53,7 @@ export default function EditableGrid({
                 </Flex>
               )}
               {!(isOwner && editAsOwner) && (
-                <Text w="100%" textStyle="formSavedInput">{isOwner ? 'You' : `${owner.firstName} ${owner.lastName}`}</Text>
+                <Text w="100%" textStyle="formSavedInput">{isOwner ? 'You' : owner.fullName}</Text>
               )}
             </VStack>
           </GridItem>
@@ -63,7 +63,7 @@ export default function EditableGrid({
       <GridItem>
         <VStack justify="left" spacing={{ base: 1, md: 2 }}>
           <Text w="100%" textStyle="formLabel">Billing Frequency</Text>
-          <Text w="100%" textStyle="formSavedInput">{cycleFrequency[0].concat(cycleFrequency.slice(1).toLowerCase())}</Text>
+          <Text w="100%" textStyle="formSavedInput">{cycleFrequency}</Text>
         </VStack>
       </GridItem>
       <GridItem>
