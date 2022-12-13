@@ -113,7 +113,7 @@ const menuTheme = defineMultiStyleConfigMenu({
 const modalTheme = defineMultiStyleConfigModal({
   baseStyle: definePartsStyleModal({
     header: { pt: '10', px: '12' },
-    body: { px: '12' },
+    body: { px: '12', pb: '6', pt: '4' },
     footer: { pb: '10', px: '12' },
     closeButton: { top: '6', right: '6' },
   }),
