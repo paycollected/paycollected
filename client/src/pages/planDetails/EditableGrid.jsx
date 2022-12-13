@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
   Button, FormControl, FormLabel, Input, VStack, Grid, GridItem, Text, HStack, NumberInput,
-  NumberInputField, NumberInputStepper, NumberIncrementStepper, NumberDecrementStepper,
+  NumberInputField, NumberInputStepper, NumberIncrementStepper, NumberDecrementStepper, Flex,
 } from '@chakra-ui/react';
 import { EditIcon } from '@chakra-ui/icons';
 import PlanMembersTable from '../../components/PlanMembersTable.jsx';
@@ -12,6 +12,8 @@ export default function EditableGrid({
   totalQuantity, activeMembers, register, handleFormSubmit, handleSubmit, editAsMember,
   setEditAsMember,
 }) {
+  const [newQuant, setNewQuant] = useState(quantity);
+
   return (
     <Grid
       templateColumns={{ base: '1fr', md: 'repeat(2, 1fr)' }}
@@ -65,13 +67,13 @@ export default function EditableGrid({
               </Button>
             </HStack>
           )}
-          {isOwner && (
+          {(isOwner || (!isOwner && !editAsMember)) && (
             <Text w="100%" textStyle="formSavedInput">{quantity}</Text>
           )}
           {!isOwner && (
-            <form width="100%" onSubmit={handleSubmit(handleFormSubmit)}>
+            <form width="100%" style={{ margin: 0, padding: 0 }} onSubmit={handleSubmit(handleFormSubmit)}>
               {editAsMember && (
-                <HStack id="hstack" w="100%" spacing={6}>
+                <HStack w="100%" spacing={6}>
                   <NumberInput>
                     <NumberInputField
                       min={1}
@@ -79,7 +81,6 @@ export default function EditableGrid({
                         min: 1,
                         value: quantity,
                         valueAsNumber: true,
-                        validate: (v) => v >= 1 && v !== quantity,
                       })}
                     />
                     <NumberInputStepper>
@@ -90,7 +91,6 @@ export default function EditableGrid({
                   <Button type="submit" size="sm">Save</Button>
                 </HStack>
               )}
-              {!editAsMember && (<Text w="100%" textStyle="formSavedInput">{quantity}</Text>)}
             </form>
           )}
         </VStack>

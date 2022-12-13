@@ -27,11 +27,8 @@ const authLink = setContext((_, { headers }) => {
 
 const cache = new InMemoryCache({
   typePolicies: {
-    Plan: {
+    PlanDetail: {
       keyFields: ['planId'],
-      activeMembers: {
-        merge: (existing = [], incoming = []) => incoming,
-      }
     },
     // Query: {
     //   fields: {

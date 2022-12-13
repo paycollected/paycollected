@@ -19,6 +19,8 @@ export default function PlanDetails({
   const [action, setAction] = useState(null);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const navigate = useNavigate();
+  // const [quantity, setQuantity] = useState(0);
+  // const [totalQuantity, setTotalQuantity] = useState(0);
   const { loading, data, error } = useQuery(GET_PLAN, {
     variables: { planId: planToView },
     fetchPolicy: 'cache-and-network',
@@ -26,13 +28,22 @@ export default function PlanDetails({
   });
 
   const [changeQuant, {
-    data: changeQuantData,
     loading: changeQuantLoading,
     error: changeQuantError
   }] = useMutation(EDIT_QUANTITY, {
-    onCompleted: () => {
+    onCompleted: ({ editQuantity: { quantity: newQuant } }) => {
       setEditAsMember(false);
       setEditAsOwner(false);
+    },
+    update: (cache, { data: { editQuantity } }) => {
+      const { planId, quantity: resultQuant } = editQuantity;
+      console.log('I was called');
+      cache.modify({
+        id: `PlanDetail:{"planId":"${planId}"}`,
+        fields: {
+          quantity() { return resultQuant; },
+        }
+      });
     },
   });
 
@@ -41,10 +52,11 @@ export default function PlanDetails({
   if (data) {
     const {
       viewOnePlan: {
-        planId, name, cycleFrequency, perCycleCost, startDate, owner, isOwner, quantity, selfCost,
-        totalMembers, totalQuantity, subscriptionId, activeMembers,
+        planId, name, cycleFrequency, perCycleCost, startDate, owner, isOwner, selfCost,
+        totalMembers, subscriptionId, activeMembers, quantity, totalQuantity,
       }
     } = data;
+
     const startDateAsArr = startDate.split('-');
     const fStartDate = `${startDateAsArr[1]}/${startDateAsArr[2]}/${startDateAsArr[0]}`;
     const handleFormSubmit = (inputData) => {
@@ -52,7 +64,12 @@ export default function PlanDetails({
         console.log(inputData);
         // setEditAsOwner(false);
       } else {
-        changeQuant({ variables: { subscriptionId, newQuantity: inputData.newQuantity } });
+        const { newQuantity } = inputData;
+        if (newQuantity !== quantity) {
+          changeQuant({ variables: { subscriptionId, newQuantity } });
+        } else {
+          setEditAsMember(false);
+        }
       }
     };
 

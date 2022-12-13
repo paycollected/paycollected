@@ -75,11 +75,16 @@ export const buttonTheme = defineStyleConfig({
     smEdit: {
       bg: 'transparent',
       border: 'none',
+      height: 'max-content',
       fontWeight: 500,
       padding: 0,
       _hover: {
         opacity: 0.3,
       }
+    },
+    invisible: {
+      display: 'none',
+      fontSize: 'sm',
     }
   },
   defaultProps: {
