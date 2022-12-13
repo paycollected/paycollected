@@ -4,6 +4,7 @@ import {
 } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@apollo/client';
+import { useForm } from "react-hook-form";
 import { PlanDetails as GET_PLAN } from '../../graphql/queries.gql';
 import ActionConfirmationModal from './ActionConfirmationModal.jsx';
 import NavBar from '../../components/NavBar.jsx';
@@ -21,6 +22,7 @@ export default function PlanDetails({
     fetchPolicy: 'cache-and-network',
     nextFetchPolicy: 'cache-only',
   });
+  const { register, handleSubmit } = useForm();
 
   if (data) {
     const {
@@ -31,6 +33,8 @@ export default function PlanDetails({
     } = data;
     const startDateAsArr = startDate.split('-');
     const fStartDate = `${startDateAsArr[1]}/${startDateAsArr[2]}/${startDateAsArr[0]}`;
+    const handleFormSubmit = () => {};
+
     return (
       <>
         <NavBar
@@ -68,57 +72,104 @@ export default function PlanDetails({
               <Button>Share Plan</Button>
             </Flex>
             <Card w={{ base: '95%', lg: '80%' }}>
-              <CardHeader mx={6} mt={8} pb={0}>
-                {!isOwner && (
-                  <Heading as="h2" variant="nuanced">
-                    Plan Details
-                  </Heading>
-                )}
-                {isOwner && (
-                  <Flex justify="space-between">
+              {!isOwner && (
+                <>
+                  <CardHeader mx={6} mt={8} pb={0}>
                     <Heading as="h2" variant="nuanced">
                       Plan Details
                     </Heading>
-                    {!editAsOwner && (
-                      <Button size="sm" onClick={() => setEditAsOwner(true)}>Edit Plan</Button>
-                    )}
-                    {editAsOwner && (
-                      <HStack>
-                        <Button size="sm" variant="outlineNuanced" onClick={() => setEditAsOwner(false)}>Cancel</Button>
-                        <Button size="sm" onClick={() => setEditAsOwner(false)}>Save</Button>
-                      </HStack>
-                    )}
-                  </Flex>
-                )}
-              </CardHeader>
-              <CardBody mx={6} mb={8} mt={0}>
-                <EditableGrid
-                  name={name}
-                  fStartDate={fStartDate}
-                  isOwner={isOwner}
-                  owner={owner}
-                  cycleFrequency={cycleFrequency}
-                  perCycleCost={perCycleCost}
-                  quantity={quantity}
-                  selfCost={selfCost}
-                  totalMembers={totalMembers}
-                  totalQuantity={totalQuantity}
-                  activeMembers={activeMembers}
-                />
-                {isOwner && totalMembers > 1 && (
-                  <VStack justify="left">
+                  </CardHeader>
+                  <CardBody mx={6} mb={8} mt={0}>
+                    <EditableGrid
+                      name={name}
+                      fStartDate={fStartDate}
+                      isOwner={isOwner}
+                      owner={owner}
+                      cycleFrequency={cycleFrequency}
+                      perCycleCost={perCycleCost}
+                      quantity={quantity}
+                      selfCost={selfCost}
+                      totalMembers={totalMembers}
+                      totalQuantity={totalQuantity}
+                      activeMembers={activeMembers}
+                      register={register}
+                      handleFormSubmit={handleFormSubmit}
+                    />
                     <Box w="100%">
                       <Button
                         variant="navActionBtn"
                         onClick={() => {
-                          setAction('cancelAsOwner');
+                          setAction('cancel');
                           onOpen();
                         }}
                       >
                         Cancel your subscription
                       </Button>
                     </Box>
-                    <Box w="100%">
+                  </CardBody>
+                </>
+              )}
+              {isOwner && (
+                <form onSubmit={handleSubmit(handleFormSubmit)}>
+                  <CardHeader mx={6} mt={8} pb={0}>
+                    <Flex justify="space-between">
+                      <Heading as="h2" variant="nuanced">
+                        Plan Details
+                      </Heading>
+                      {!editAsOwner && (
+                        <Button size="sm" onClick={() => setEditAsOwner(true)}>Edit Plan</Button>
+                      )}
+                      {editAsOwner && (
+                        <HStack>
+                          <Button size="sm" variant="outlineNuanced" onClick={() => setEditAsOwner(false)}>Cancel</Button>
+                          <Button size="sm" onClick={() => setEditAsOwner(false)}>Save</Button>
+                        </HStack>
+                      )}
+                    </Flex>
+                  </CardHeader>
+                  <CardBody mx={6} mb={8} mt={0}>
+                    <EditableGrid
+                      name={name}
+                      fStartDate={fStartDate}
+                      isOwner={isOwner}
+                      owner={owner}
+                      cycleFrequency={cycleFrequency}
+                      perCycleCost={perCycleCost}
+                      quantity={quantity}
+                      selfCost={selfCost}
+                      totalMembers={totalMembers}
+                      totalQuantity={totalQuantity}
+                      activeMembers={activeMembers}
+                      register={register}
+                      handleFormSubmit={handleFormSubmit}
+                    />
+                    {totalMembers > 1 && (
+                      <VStack justify="left">
+                        <Box w="100%">
+                          <Button
+                            variant="navActionBtn"
+                            onClick={() => {
+                              setAction('cancelAsOwner');
+                              onOpen();
+                            }}
+                          >
+                            Cancel your subscription
+                          </Button>
+                        </Box>
+                        <Box w="100%">
+                          <Button
+                            variant="navActionBtn"
+                            onClick={() => {
+                              setAction('delete');
+                              onOpen();
+                            }}
+                          >
+                            Delete this plan
+                          </Button>
+                        </Box>
+                      </VStack>
+                    )}
+                    {totalMembers === 1 && (
                       <Button
                         variant="navActionBtn"
                         onClick={() => {
@@ -128,34 +179,10 @@ export default function PlanDetails({
                       >
                         Delete this plan
                       </Button>
-                    </Box>
-                  </VStack>
-                )}
-                {isOwner && totalMembers === 1 && (
-                  <Button
-                    variant="navActionBtn"
-                    onClick={() => {
-                      setAction('delete');
-                      onOpen();
-                    }}
-                  >
-                    Delete this plan
-                  </Button>
-                )}
-                {!isOwner && (
-                  <Box w="100%">
-                    <Button
-                      variant="navActionBtn"
-                      onClick={() => {
-                        setAction('cancel');
-                        onOpen();
-                      }}
-                    >
-                      Cancel your subscription
-                    </Button>
-                  </Box>
-                )}
-              </CardBody>
+                    )}
+                  </CardBody>
+                </form>
+              )}
             </Card>
           </Box>
         </VStack>

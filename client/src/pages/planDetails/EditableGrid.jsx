@@ -8,7 +8,7 @@ import PlanMembersTable from '../../components/PlanMembersTable.jsx';
 
 export default function EditableGrid({
   name, fStartDate, isOwner, owner, cycleFrequency, perCycleCost, quantity, selfCost, totalMembers,
-  totalQuantity, activeMembers,
+  totalQuantity, activeMembers, register, handleFormSubmit,
 }) {
   const [editAsMember, setEditAsMember] = useState(false);
 
