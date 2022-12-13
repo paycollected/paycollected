@@ -82,6 +82,21 @@ export const buttonTheme = defineStyleConfig({
         opacity: 0.3,
       }
     },
+    copyBtn: {
+      bg: 'transparent',
+      display: 'block',
+      boxSizing: 'border-box',
+      border: 'none',
+      height: '100%',
+      width: '100%',
+      py: 0,
+      px: '6',
+      fontSize: '14px',
+      fontWeight: 400,
+      _hover: {
+        opacity: 0.3,
+      }
+    }
   },
   defaultProps: {
     variant: 'solid',
@@ -118,6 +133,14 @@ const modalTheme = defineMultiStyleConfigModal({
     closeButton: { top: '6', right: '6' },
   }),
   defaultProps: { size: 'lg' },
+  sizes: {
+    xl: {
+      header: { pt: '14', px: '14' },
+      body: { px: '14', pb: '8', pt: '6' },
+      footer: { pb: '14', px: '14' },
+      closeButton: { top: '6', right: '10' },
+    }
+  }
 });
 
 const headingTheme = defineStyleConfig({
