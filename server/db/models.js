@@ -153,7 +153,8 @@ export function planDetail(planId, username) {
         JSON_BUILD_OBJECT
         (
           'firstName', u.first_name,
-          'lastName', u.last_name
+          'lastName', u.last_name,
+          'username', u.username
         )
       FROM users u
       JOIN user_plan up
@@ -209,7 +210,11 @@ export function plansSummary(username) {
     ), c3 AS (
       SELECT
         c2.*,
-        JSON_BUILD_OBJECT('firstName', u.first_name, 'lastName', u.last_name) AS owner
+        JSON_BUILD_OBJECT(
+          'firstName', u.first_name,
+          'lastName', u.last_name,
+          'username', u.username
+        ) AS owner
       FROM c2
         JOIN user_plan up
         ON "planId" = up.plan_id
@@ -1139,19 +1144,29 @@ export function updatePlanOwner(newOwner, formerOwner, planId) {
             || ' to you.'
           )
         )
+    ), update_members_notifications AS (
+      INSERT INTO notifications (username, message)
+      SELECT
+        username,
+        (
+          (SELECT first_name FROM users WHERE username = $2)
+          || ' has transferred the ownership for plan '
+          || (SELECT plan_name FROM plans WHERE plan_id = $3)
+          || ' to '
+          || (SELECT first_name FROM users WHERE username = $1)
+          || '.'
+        )
+      FROM user_plan WHERE plan_id = $3 AND username NOT IN ($1, $2) AND active = True
     )
-    INSERT INTO notifications (username, message)
     SELECT
-      username,
+      JSON_BUILD_OBJECT
       (
-        (SELECT first_name FROM users WHERE username = $2)
-        || ' has transferred the ownership for plan '
-        || (SELECT plan_name FROM plans WHERE plan_id = $3)
-        || ' to '
-        || (SELECT first_name FROM users WHERE username = $1)
-        || '.'
-      )
-    FROM user_plan WHERE plan_id = $3 AND username NOT IN ($1, $2) AND active = True
+        'firstName', u.first_name,
+        'lastName', u.last_name,
+        'username', u.username
+      ) AS "newOwner"
+      FROM users u
+      WHERE username = $1
   `;
   return pool.query(query, [newOwner, formerOwner, planId]);
 }

@@ -103,3 +103,14 @@ mutation ChangePassword($currentPassword: String!, $newPassword: String!) {
 mutation DeleteNotification($notificationId: ID!) {
   deleteNotification(notificationId: $notificationId)
 }
+
+mutation TransferPlanOwnership($planId: PlanID!, $newOwner: String!) {
+  transferOwnership(planId: $planId, newOwner: $newOwner) {
+    planId
+    newOwner {
+      username
+      firstName
+      lastName
+    }
+  }
+}

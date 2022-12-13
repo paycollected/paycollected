@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation } from '@apollo/client';
 import { useForm } from 'react-hook-form';
 import { PlanDetails as GET_PLAN } from '../../graphql/queries.gql';
-import { EditQuantity as EDIT_QUANTITY } from '../../graphql/mutations.gql';
+import { EditQuantity as EDIT_QUANTITY, TransferPlanOwnership as TRANSFER } from '../../graphql/mutations.gql';
 import ActionConfirmationModal from './ActionConfirmationModal.jsx';
 import NavBar from '../../components/NavBar.jsx';
 import EditableGrid from './EditableGrid.jsx';
@@ -27,8 +27,7 @@ export default function PlanDetails({
   });
 
   const [changeQuant, {
-    loading: changeQuantLoading,
-    error: changeQuantError
+    loading: changeQuantLoading, error: changeQuantError
   }] = useMutation(EDIT_QUANTITY, {
     onCompleted: () => {
       setEditAsMember(false);
@@ -40,6 +39,28 @@ export default function PlanDetails({
         id: `PlanDetail:{"planId":"${planId}"}`,
         fields: {
           quantity() { return resultQuant; },
+        }
+      });
+    },
+  });
+
+  const [transfer, { loading: transferLoading, error: transferError }] = useMutation(TRANSFER, {
+    onCompleted: () => {
+      setEditAsOwner(false);
+    },
+    update: (cache, { data: { transferOwnership: { planId, newOwner } } }) => {
+      cache.modify({
+        id: `PlanDetail:{"planId":"${planId}"}`,
+        fields: {
+          isOwner() { return false; },
+          activeMembers(members) {
+            const modifiedMembers = members.slice();
+            modifiedMembers.forEach((member) => {
+              if (member.username === newOwner.username) member.isOwner = true;
+            });
+            return modifiedMembers;
+          },
+          owner() { return newOwner; },
         }
       });
     },
@@ -59,11 +80,23 @@ export default function PlanDetails({
     const fStartDate = `${startDateAsArr[1]}/${startDateAsArr[2]}/${startDateAsArr[0]}`;
 
     const handleFormSubmit = (inputData) => {
+      const { newQuantity } = inputData;
       if (isOwner) {
-        console.log(inputData);
-        // setEditAsOwner(false);
+        const { newOwner } = inputData;
+        switch (true) {
+          case (newQuantity !== quantity && newOwner === user):
+            // only quantity is changed
+            changeQuant({ variables: { subscriptionId, newQuantity } });
+            break;
+          case (newQuantity === quantity && newOwner !== user):
+            // only new owner is changed
+            transfer({ variables: { planId, newOwner } });
+            break;
+          default:
+            // both quantity and owner have been changed
+            break;
+        }
       } else {
-        const { newQuantity } = inputData;
         if (newQuantity !== quantity) {
           changeQuant({ variables: { subscriptionId, newQuantity } });
         } else {

@@ -38,19 +38,19 @@ export default function EditableGrid({
               <Text w="100%" textStyle="formLabel">Owner</Text>
               {isOwner && editAsOwner && (
                 <Flex w="100%" justify="start">
-                <Select
-                  w="80%"
-                  justifySelf="left"
-                  {...register('newOwner', {
-                    validate: (username) => (activeMembers.filter((member) => member.username === username).length === 1 || username === user) || 'Invalid new owner',
-                  })}
-                >
-                  <option key={user} value={user}>You</option>
-                  {activeMembers.map((member) => (
-                    <option key={member.username} value={member.username}>{`${member.firstName} ${member.lastName}`}</option>
-                  ))}
-                </Select>
-              </Flex>
+                  <Select
+                    w="80%"
+                    justifySelf="left"
+                    {...register('newOwner', {
+                      validate: (username) => (activeMembers.filter((member) => member.username === username).length === 1 || username === user) || 'Invalid new owner',
+                    })}
+                  >
+                    <option key={user} value={user}>You</option>
+                    {activeMembers.map((member) => (
+                      <option key={member.username} value={member.username}>{`${member.firstName} ${member.lastName}`}</option>
+                    ))}
+                  </Select>
+                </Flex>
               )}
               {!(isOwner && editAsOwner) && (
                 <Text w="100%" textStyle="formSavedInput">{isOwner ? 'You' : `${owner.firstName} ${owner.lastName}`}</Text>
@@ -88,8 +88,26 @@ export default function EditableGrid({
               </Button>
             </HStack>
           )}
-          {(isOwner || (!isOwner && !editAsMember)) && (
+          {((isOwner && !editAsOwner) || (!isOwner && !editAsMember)) && (
             <Text w="100%" textStyle="formSavedInput">{quantity}</Text>
+          )}
+          {isOwner && editAsOwner && (
+            <Flex w="100%" justify="start">
+              <NumberInput w={{ base: '40%', md: '85%' }}>
+                <NumberInputField
+                  min={1}
+                  {...register('newQuantity', {
+                    min: 1,
+                    value: quantity,
+                    valueAsNumber: true,
+                  })}
+                />
+                <NumberInputStepper>
+                  <NumberIncrementStepper />
+                  <NumberDecrementStepper />
+                </NumberInputStepper>
+              </NumberInput>
+            </Flex>
           )}
           {!isOwner && (
             <form style={{ width: '100%' }} onSubmit={handleSubmit(handleFormSubmit)}>

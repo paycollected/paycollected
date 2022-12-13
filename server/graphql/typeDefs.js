@@ -51,6 +51,11 @@ export default `#graphql
     quantity: Int!
   }
 
+  type TransferOwnershipResponse {
+    planId: PlanID!
+    newOwner: PlanOwner! #username
+  }
+
   enum CycleFrequency {
     WEEKLY
     MONTHLY
@@ -83,6 +88,7 @@ export default `#graphql
   type PlanOwner {
     firstName: String!
     lastName: String!
+    username: ID!
   }
 
   type PlanMember {
@@ -91,9 +97,8 @@ export default `#graphql
     quantity: Int!
     joinedDate: Date!
     isOwner: Boolean!
-    username: String!
+    username: ID!
   }
-
 
   type PlanDetail {
     planId: PlanID!
@@ -186,6 +191,6 @@ export default `#graphql
 
     deleteNotification(notificationId: ID!): ID!
 
-    transferOwnership(planId: PlanID!, newOwner: String!): PlanID!
+    transferOwnership(planId: PlanID!, newOwner: String!): TransferOwnershipResponse!
   }
 `;

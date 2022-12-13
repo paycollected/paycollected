@@ -32,10 +32,10 @@ export default async function transferOwnershipResolver(planId, newOwner, former
   }
 
   try {
-    await updatePlanOwner(newOwner, formerOwner, planId);
+    const { rows: rowsUpdate } = await updatePlanOwner(newOwner, formerOwner, planId);
+    return { planId, newOwner: rowsUpdate[0].newOwner };
   } catch (e) {
     console.log(e);
     throw new GraphQLError('Unable to transfer plan ownership', { extensions: { code: 'INTERNAL_SERVER_ERROR' } });
   }
-  return planId;
 }
