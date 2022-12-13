@@ -18,7 +18,7 @@ export default function EditableGrid({
     <Grid
       templateColumns={{ base: '1fr', md: 'repeat(2, 1fr)' }}
       templateRows={{ base: 'repeat(10, max-content)', md: 'repeat(6, max-content)' }}
-      gap={4}
+      gap={8}
       mb={{ base: 6, md: 8 }}
     >
       <GridItem>
@@ -71,7 +71,7 @@ export default function EditableGrid({
             <Text w="100%" textStyle="formSavedInput">{quantity}</Text>
           )}
           {!isOwner && (
-            <form width="100%" style={{ margin: 0, padding: 0 }} onSubmit={handleSubmit(handleFormSubmit)}>
+            <form style={{ width: '100%' }} onSubmit={handleSubmit(handleFormSubmit)}>
               {editAsMember && (
                 <HStack w="100%" spacing={6}>
                   <NumberInput>

@@ -82,10 +82,6 @@ export const buttonTheme = defineStyleConfig({
         opacity: 0.3,
       }
     },
-    invisible: {
-      display: 'none',
-      fontSize: 'sm',
-    }
   },
   defaultProps: {
     variant: 'solid',
