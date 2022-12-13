@@ -38,7 +38,6 @@ const client = new ApolloClient({
 });
 
 
-
 const root = createRoot(document.getElementById('root'));
 root.render(
   <ApolloProvider client={client}>

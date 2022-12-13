@@ -14,7 +14,7 @@ import {
 import ActionConfirmationModal from './ActionConfirmationModal.jsx';
 import NavBar from '../../components/NavBar.jsx';
 import EditableGrid from './EditableGrid.jsx';
-import updateActiveMembersInCache from './cacheUpdatingFns.js';
+import { modifyQuantCacheUpdate, transferOwnershipCacheUpdate, modifyQuantTransferCacheUpdate } from './cacheUpdatingFns.js';
 
 export default function PlanDetails({
   user, setUser, setPlanToJoin, planToView, setPlanToView, edit,
@@ -39,30 +39,14 @@ export default function PlanDetails({
       setEditAsMember(false);
       setEditAsOwner(false);
     },
-    update: (cache, { data: { editQuantity: { planId, quantity: resultQuant} } }) => {
-      cache.modify({
-        id: `PlanDetail:{"planId":"${planId}"}`,
-        fields: {
-          quantity() { return resultQuant; },
-        }
-      });
-    },
+    update: modifyQuantCacheUpdate,
   });
 
   const [transfer, { loading: transferLoading, error: transferError }] = useMutation(TRANSFER, {
     onCompleted: () => {
       setEditAsOwner(false);
     },
-    update: (cache, { data: { transferOwnership: { planId, newOwner } } }) => {
-      cache.modify({
-        id: `PlanDetail:{"planId":"${planId}"}`,
-        fields: {
-          isOwner() { return false; },
-          activeMembers(members) { return updateActiveMembersInCache(members, newOwner); },
-          owner() { return newOwner; },
-        }
-      });
-    },
+    update: transferOwnershipCacheUpdate,
   });
 
   const [transferAndEditQuant, {
@@ -71,22 +55,7 @@ export default function PlanDetails({
     onCompleted: () => {
       setEditAsOwner(false);
     },
-    update: (cache, {
-      data: {
-        transferOwnership: { newOwner },
-        editQuantity: { planId, quantity: resultQuant },
-      }
-    }) => {
-      cache.modify({
-        id: `PlanDetail:{"planId":"${planId}"}`,
-        fields: {
-          quantity() { return resultQuant; },
-          isOwner() { return false; },
-          owner() { return newOwner; },
-          activeMembers(members) { return updateActiveMembersInCache(members, newOwner); },
-        }
-      });
-    },
+    update: modifyQuantTransferCacheUpdate,
   });
 
 

@@ -8,9 +8,6 @@ import {
 import { CopyIcon } from '@chakra-ui/icons';
 import PlansTable from './PlansTable.jsx';
 import { ViewAllPlans as GET_ALL_PLANS } from '../../graphql/queries.gql';
-import ConfirmCancel from '../planDetails/ConfirmCancel.jsx';
-import ModifyQuantity from '../planDetails/ModifyQuantity.jsx';
-import ConfirmDeletePlan from '../planDetails/ConfirmDeletePlan.jsx';
 
 export default function PlansTableLayout({ total, plans, setPlanToView }) {
   // const [planToCopy, setPlanToCopy] = useState(null);
