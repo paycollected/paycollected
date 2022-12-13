@@ -28,6 +28,7 @@ const authLink = setContext((_, { headers }) => {
 const cache = new InMemoryCache({
   typePolicies: {
     PlanDetail: { keyFields: ['planId'] },
+    PlanSummary: { keyFields: ['planId'] },
   },
 });
 

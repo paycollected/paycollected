@@ -36,6 +36,7 @@ export default function PlansTable({ plans, setPlanToView }) {
         setPlanToView={setPlanToView}
         inDashboard
       />
+      {console.log(planIdToDelete)}
       <Table size={{ base: 'sm', md: 'md' }}>
         <Thead bg="#F7FAFC">
           <Tr>

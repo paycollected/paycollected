@@ -32,8 +32,9 @@ export default async function deletePlanResolver(planId, username) {
     let promises = [
       stripe.prices.update(prevPriceId, { active: false }),
       stripe.products.update(planId, { active: false }),
-      stripe.subscriptions.del(subscriptionId),
     ];
+
+    if (subscriptionId !== null) promises.push(stripe.subscriptions.del(subscriptionId));
     if (members !== null) {
       promises = promises.concat(members.map((member) => stripe.subscriptions.del(
         member.subscriptionId

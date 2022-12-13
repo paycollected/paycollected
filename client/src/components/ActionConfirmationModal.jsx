@@ -38,14 +38,25 @@ export default function ActionConfirmationModal({
     data: deleteData, loading: deleteLoading, error: deleteError
   }] = useMutation(DELETE_PLAN, {
     onCompleted: requestCompleted,
+    update: (cache, { data: { deletePlan: { planId: resultPlanId } } }) => {
+      cache.modify({
+        fields: {
+          viewAllPlans(cached, { readField }) {
+            const { total, plans } = cached;
+            return {
+              total: total - 1,
+              plans: plans.filter((planRef) => readField('planId', planRef) !== resultPlanId),
+            };
+          }
+        }
+      });
+    },
   });
 
   const handleConfirmation = () => {
     switch (action) {
       case 'delete':
-        console.log('success');
-        onClose();
-        // confirmDelete({ variables: { planId } });
+        confirmDelete({ variables: { planId } });
         break;
       case 'cancel':
         confirmUnsubscribe({ variables: { subscriptionId } });
