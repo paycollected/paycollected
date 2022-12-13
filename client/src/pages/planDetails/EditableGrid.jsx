@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import {
-  Button, FormControl, FormLabel, Input, VStack, Grid, GridItem, Text, HStack,
+  Button, FormControl, FormLabel, Input, VStack, Grid, GridItem, Text, HStack, NumberInput,
+  NumberInputField, NumberInputStepper, NumberIncrementStepper, NumberDecrementStepper,
 } from '@chakra-ui/react';
 import { EditIcon } from '@chakra-ui/icons';
 import PlanMembersTable from '../../components/PlanMembersTable.jsx';
@@ -8,10 +9,9 @@ import PlanMembersTable from '../../components/PlanMembersTable.jsx';
 
 export default function EditableGrid({
   name, fStartDate, isOwner, owner, cycleFrequency, perCycleCost, quantity, selfCost, totalMembers,
-  totalQuantity, activeMembers, register, handleFormSubmit,
+  totalQuantity, activeMembers, register, handleFormSubmit, handleSubmit, editAsMember,
+  setEditAsMember,
 }) {
-  const [editAsMember, setEditAsMember] = useState(false);
-
   return (
     <Grid
       templateColumns={{ base: '1fr', md: 'repeat(2, 1fr)' }}
@@ -57,7 +57,7 @@ export default function EditableGrid({
           {!isOwner && !editAsMember && (
             <HStack w="100%">
               <Text textStyle="formLabel">Your Subscriptions</Text>
-              <Button variant="smEdit" onClick={() => setEditAsMember(true)}>
+              <Button type="button" variant="smEdit" onClick={() => setEditAsMember(true)}>
                 <HStack color="blue.500">
                   <Text color="blue.500" fontSize="sm">Edit</Text>
                   <EditIcon boxSize={3} />
@@ -65,14 +65,33 @@ export default function EditableGrid({
               </Button>
             </HStack>
           )}
-          {(isOwner || (!isOwner && !editAsMember)) && (
+          {isOwner && (
             <Text w="100%" textStyle="formSavedInput">{quantity}</Text>
           )}
-          {!isOwner && editAsMember && (
-            <HStack w="100%">
-              <Text textStyle="formSavedInput">{quantity}</Text>
-              <Button size="sm" onClick={() => setEditAsMember(false)}>Save</Button>
-            </HStack>
+          {!isOwner && (
+            <form width="100%" onSubmit={handleSubmit(handleFormSubmit)}>
+              {editAsMember && (
+                <HStack id="hstack" w="100%" spacing={6}>
+                  <NumberInput>
+                    <NumberInputField
+                      min={1}
+                      {...register('newQuantity', {
+                        min: 1,
+                        value: quantity,
+                        valueAsNumber: true,
+                        validate: (v) => v >= 1 && v !== quantity,
+                      })}
+                    />
+                    <NumberInputStepper>
+                      <NumberIncrementStepper />
+                      <NumberDecrementStepper />
+                    </NumberInputStepper>
+                  </NumberInput>
+                  <Button type="submit" size="sm">Save</Button>
+                </HStack>
+              )}
+              {!editAsMember && (<Text w="100%" textStyle="formSavedInput">{quantity}</Text>)}
+            </form>
           )}
         </VStack>
       </GridItem>

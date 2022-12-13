@@ -3,9 +3,10 @@ import {
   Button, Heading, VStack, Box, Flex, Card, CardHeader, CardBody, HStack, useDisclosure,
 } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
-import { useQuery } from '@apollo/client';
-import { useForm } from "react-hook-form";
+import { useQuery, useMutation } from '@apollo/client';
+import { useForm } from 'react-hook-form';
 import { PlanDetails as GET_PLAN } from '../../graphql/queries.gql';
+import { EditQuantity as EDIT_QUANTITY } from '../../graphql/mutations.gql';
 import ActionConfirmationModal from './ActionConfirmationModal.jsx';
 import NavBar from '../../components/NavBar.jsx';
 import EditableGrid from './EditableGrid.jsx';
@@ -14,6 +15,7 @@ export default function PlanDetails({
   user, setUser, setPlanToJoin, planToView, setPlanToView, edit,
 }) {
   const [editAsOwner, setEditAsOwner] = useState(edit);
+  const [editAsMember, setEditAsMember] = useState(false);
   const [action, setAction] = useState(null);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const navigate = useNavigate();
@@ -22,6 +24,18 @@ export default function PlanDetails({
     fetchPolicy: 'cache-and-network',
     nextFetchPolicy: 'cache-only',
   });
+
+  const [changeQuant, {
+    data: changeQuantData,
+    loading: changeQuantLoading,
+    error: changeQuantError
+  }] = useMutation(EDIT_QUANTITY, {
+    onCompleted: () => {
+      setEditAsMember(false);
+      setEditAsOwner(false);
+    },
+  });
+
   const { register, handleSubmit } = useForm();
 
   if (data) {
@@ -33,7 +47,14 @@ export default function PlanDetails({
     } = data;
     const startDateAsArr = startDate.split('-');
     const fStartDate = `${startDateAsArr[1]}/${startDateAsArr[2]}/${startDateAsArr[0]}`;
-    const handleFormSubmit = () => {};
+    const handleFormSubmit = (inputData) => {
+      if (isOwner) {
+        console.log(inputData);
+        // setEditAsOwner(false);
+      } else {
+        changeQuant({ variables: { subscriptionId, newQuantity: inputData.newQuantity } });
+      }
+    };
 
     return (
       <>
@@ -56,6 +77,7 @@ export default function PlanDetails({
         <VStack w="93%" justify="left" spacing={{ base: 4, md: 6 }} mb={{ base: 4, md: 6 }}>
           <Flex w="100%" align="center">
             <Button
+              type="button"
               variant="navActionBtn"
               onClick={() => {
                 setPlanToView(null);
@@ -69,7 +91,7 @@ export default function PlanDetails({
           <Box w="100%">
             <Flex w={{ base: '95%', lg: '80%' }} align="center" justify="space-between" mb={6}>
               <Heading as="h1" variant="accented" pb={0}>{name}</Heading>
-              <Button>Share Plan</Button>
+              <Button type="button">Share Plan</Button>
             </Flex>
             <Card w={{ base: '95%', lg: '80%' }}>
               {!isOwner && (
@@ -93,10 +115,14 @@ export default function PlanDetails({
                       totalQuantity={totalQuantity}
                       activeMembers={activeMembers}
                       register={register}
+                      handleSubmit={handleSubmit}
                       handleFormSubmit={handleFormSubmit}
+                      editAsMember={editAsMember}
+                      setEditAsMember={setEditAsMember}
                     />
                     <Box w="100%">
                       <Button
+                        type="button"
                         variant="navActionBtn"
                         onClick={() => {
                           setAction('cancel');
@@ -117,12 +143,12 @@ export default function PlanDetails({
                         Plan Details
                       </Heading>
                       {!editAsOwner && (
-                        <Button size="sm" onClick={() => setEditAsOwner(true)}>Edit Plan</Button>
+                        <Button type="button" size="sm" onClick={() => setEditAsOwner(true)}>Edit Plan</Button>
                       )}
                       {editAsOwner && (
                         <HStack>
-                          <Button size="sm" variant="outlineNuanced" onClick={() => setEditAsOwner(false)}>Cancel</Button>
-                          <Button size="sm" onClick={() => setEditAsOwner(false)}>Save</Button>
+                          <Button type="button" size="sm" variant="outlineNuanced" onClick={() => setEditAsOwner(false)}>Cancel</Button>
+                          <Button type="submit" size="sm">Save</Button>
                         </HStack>
                       )}
                     </Flex>
@@ -141,12 +167,16 @@ export default function PlanDetails({
                       totalQuantity={totalQuantity}
                       activeMembers={activeMembers}
                       register={register}
+                      handleSubmit={handleSubmit}
                       handleFormSubmit={handleFormSubmit}
+                      editAsMember={editAsMember}
+                      setEditAsMember={setEditAsMember}
                     />
                     {totalMembers > 1 && (
                       <VStack justify="left">
                         <Box w="100%">
                           <Button
+                            type="button"
                             variant="navActionBtn"
                             onClick={() => {
                               setAction('cancelAsOwner');
@@ -158,6 +188,7 @@ export default function PlanDetails({
                         </Box>
                         <Box w="100%">
                           <Button
+                            type="button"
                             variant="navActionBtn"
                             onClick={() => {
                               setAction('delete');
@@ -171,6 +202,7 @@ export default function PlanDetails({
                     )}
                     {totalMembers === 1 && (
                       <Button
+                        type="button"
                         variant="navActionBtn"
                         onClick={() => {
                           setAction('delete');

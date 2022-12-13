@@ -83,6 +83,7 @@ export default async function editQuantityResolver(
     }
     return { planId: product, quantity: newQuantity };
   } catch (e) {
+    console.log(e);
     throw new GraphQLError('Cannot update quantity', { extensions: { code: 'INTERNAL_SERVER_ERROR' } });
   }
 }

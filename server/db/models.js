@@ -501,8 +501,8 @@ export function startSubsPriceUpdateReturningPlan(
           || (SELECT plan_name FROM plans WHERE plan_id = $4)
           || '. The new unit cost for this plan is $'
           || (SELECT
-                ROUND (CEIL ((SELECT per_cycle_cost::NUMERIC FROM plans WHERE plan_id = $4) /
-                (SELECT SUM(quantity)::INTEGER + $1 FROM user_plan WHERE plan_id = $4 AND username != $5)) / 100, 2)
+                ROUND ((CEIL ((SELECT per_cycle_cost::NUMERIC FROM plans WHERE plan_id = $4) /
+                (SELECT SUM(quantity)::INTEGER + $1 FROM user_plan WHERE plan_id = $4 AND username != $5)) / 100)::NUMERIC, 2)
               )
           || '/'
           || (SELECT cycle_frequency FROM plans WHERE plan_id = $4)
@@ -573,8 +573,8 @@ export function startSubscription(
             || (SELECT plan_name FROM plans WHERE plan_id = $4)
             || '. The new unit cost for this plan is $'
             || (SELECT
-                  ROUND (CEIL ((SELECT per_cycle_cost::NUMERIC FROM plans WHERE plan_id = $4) /
-                  (SELECT SUM(quantity)::INTEGER + $1 FROM user_plan WHERE plan_id = $4 AND username != (SELECT username FROM users WHERE s_cus_id = $5))) / 100, 2)
+                  ROUND ((CEIL ((SELECT per_cycle_cost::NUMERIC FROM plans WHERE plan_id = $4) /
+                  (SELECT SUM(quantity)::INTEGER + $1 FROM user_plan WHERE plan_id = $4 AND username != (SELECT username FROM users WHERE s_cus_id = $5))) / 100)::NUMERIC, 2)
                 )
             || '/'
             || (SELECT cycle_frequency FROM plans WHERE plan_id = $4)
@@ -610,8 +610,8 @@ export function updatePriceIdDelSubs(newPriceId, productId, username) {
           || (SELECT plan_name FROM plans WHERE plan_id = $2)
           || '. The new unit cost for this plan is $'
           || (SELECT
-                ROUND (CEIL ((SELECT per_cycle_cost::NUMERIC FROM plans WHERE plan_id = $2) /
-                (SELECT SUM(quantity)::INTEGER FROM user_plan WHERE plan_id = $2 AND username != $3)) / 100, 2)
+                ROUND ((CEIL ((SELECT per_cycle_cost::NUMERIC FROM plans WHERE plan_id = $2) /
+                (SELECT SUM(quantity)::INTEGER FROM user_plan WHERE plan_id = $2 AND username != $3)) / 100)::NUMERIC, 2)
               )
           || '/'
           || (SELECT cycle_frequency FROM plans WHERE plan_id = $2)
@@ -645,8 +645,8 @@ export function updatePriceIdArchiveSubs(newPriceId, productId, username) {
           || (SELECT plan_name FROM plans WHERE plan_id = $2)
           || '. The new unit cost for this plan is $'
           || (SELECT
-                ROUND (CEIL ((SELECT per_cycle_cost::NUMERIC FROM plans WHERE plan_id = $2) /
-                (SELECT SUM(quantity)::INTEGER FROM user_plan WHERE plan_id = $2 AND username != $3)) / 100, 2)
+                ROUND ((CEIL ((SELECT per_cycle_cost::NUMERIC FROM plans WHERE plan_id = $2) /
+                (SELECT SUM(quantity)::INTEGER FROM user_plan WHERE plan_id = $2 AND username != $3)) / 100)::NUMERIC, 2)
               )
           || '/'
           || (SELECT cycle_frequency FROM plans WHERE plan_id = $2)
@@ -685,8 +685,8 @@ export function updatePriceOwnerArchiveSubs(newPriceId, productId, formerOwner, 
               || (SELECT plan_name FROM plans WHERE plan_id = $2)
               || ', and elected you as the new owner. The new unit cost for this plan is $'
               || (SELECT
-                    ROUND (CEIL ((SELECT per_cycle_cost::NUMERIC FROM plans WHERE plan_id = $2) /
-                    (SELECT SUM(quantity)::INTEGER FROM user_plan WHERE plan_id = $2 AND username != $3)) / 100, 2)
+                    ROUND ((CEIL ((SELECT per_cycle_cost::NUMERIC FROM plans WHERE plan_id = $2) /
+                    (SELECT SUM(quantity)::INTEGER FROM user_plan WHERE plan_id = $2 AND username != $3)) / 100)::NUMERIC, 2)
                   )
               || '/'
               || (SELECT cycle_frequency FROM plans WHERE plan_id = $2)
@@ -705,8 +705,8 @@ export function updatePriceOwnerArchiveSubs(newPriceId, productId, formerOwner, 
         || (SELECT first_name FROM users WHERE username =$4)
         || ' is now the new plan owner, and the new unit cost is $'
         || (SELECT
-              ROUND (CEIL ((SELECT per_cycle_cost::NUMERIC FROM plans WHERE plan_id = $2) /
-              (SELECT SUM(quantity)::INTEGER FROM user_plan WHERE plan_id = $2 AND username != $3)) / 100, 2)
+              ROUND ((CEIL ((SELECT per_cycle_cost::NUMERIC FROM plans WHERE plan_id = $2) /
+              (SELECT SUM(quantity)::INTEGER FROM user_plan WHERE plan_id = $2 AND username != $3)) / 100)::NUMERIC, 2)
             )
         || '/'
         || (SELECT cycle_frequency FROM plans WHERE plan_id = $2)
@@ -737,8 +737,8 @@ export function updatePriceOwnerDelSubs(newPriceId, planId, formerOwner, newOwne
             || (SELECT plan_name FROM plans WHERE plan_id = $2)
             || ', and elected you as the new owner. The new unit cost for this plan is $'
             || (SELECT
-                  ROUND (CEIL ((SELECT per_cycle_cost::NUMERIC FROM plans WHERE plan_id = $2) /
-                  (SELECT SUM(quantity)::INTEGER FROM user_plan WHERE plan_id = $2 AND username != $3)) / 100, 2)
+                  ROUND ((CEIL ((SELECT per_cycle_cost::NUMERIC FROM plans WHERE plan_id = $2) /
+                  (SELECT SUM(quantity)::INTEGER FROM user_plan WHERE plan_id = $2 AND username != $3)) / 100)::NUMERIC, 2)
                 )
             || '/'
             || (SELECT cycle_frequency FROM plans WHERE plan_id = $2)
@@ -757,8 +757,8 @@ export function updatePriceOwnerDelSubs(newPriceId, planId, formerOwner, newOwne
         || (SELECT first_name FROM users WHERE username =$4)
         || ' is now the new plan owner, and the new unit cost is $'
         || (SELECT
-              ROUND (CEIL ((SELECT per_cycle_cost::NUMERIC FROM plans WHERE plan_id = $2) /
-              (SELECT SUM(quantity)::INTEGER FROM user_plan WHERE plan_id = $2 AND username != $3)) / 100, 2)
+              ROUND ((CEIL ((SELECT per_cycle_cost::NUMERIC FROM plans WHERE plan_id = $2) /
+              (SELECT SUM(quantity)::INTEGER FROM user_plan WHERE plan_id = $2 AND username != $3)) / 100)::NUMERIC, 2)
             )
         || '/'
         || (SELECT cycle_frequency FROM plans WHERE plan_id = $2)
@@ -982,8 +982,8 @@ export function updatePriceQuant(planId, newQuantity, newPriceId, username) {
           || (SELECT $2)
           || '. The new unit cost for this plan is $'
           || (SELECT
-                ROUND (CEIL ((SELECT per_cycle_cost FROM plans WHERE plan_id = $1) /
-                (SELECT SUM(quantity)::INTEGER + $2 FROM user_plan WHERE plan_id = $1 AND username != $4)) / 100, 2)
+                ROUND ((CEIL ((SELECT per_cycle_cost FROM plans WHERE plan_id = $1) /
+                (SELECT SUM(quantity)::INTEGER + $2 FROM user_plan WHERE plan_id = $1 AND username != $4)) / 100)::NUMERIC, 2)
               )
           || '/'
           || (SELECT cycle_frequency FROM plans WHERE plan_id = $1)
