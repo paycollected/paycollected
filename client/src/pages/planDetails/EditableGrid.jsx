@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
-  Button, FormControl, FormLabel, Input, VStack, Grid, GridItem, Text, HStack, NumberInput,
+  Button, FormControl, Input, VStack, Grid, GridItem, Text, HStack, NumberInput, Select,
   NumberInputField, NumberInputStepper, NumberIncrementStepper, NumberDecrementStepper, Flex,
 } from '@chakra-ui/react';
 import { EditIcon } from '@chakra-ui/icons';
@@ -10,10 +10,8 @@ import PlanMembersTable from '../../components/PlanMembersTable.jsx';
 export default function EditableGrid({
   name, fStartDate, isOwner, owner, cycleFrequency, perCycleCost, quantity, selfCost, totalMembers,
   totalQuantity, activeMembers, register, handleFormSubmit, handleSubmit, editAsMember,
-  setEditAsMember,
+  setEditAsMember, editAsOwner, user,
 }) {
-  const [newQuant, setNewQuant] = useState(quantity);
-
   return (
     <Grid
       templateColumns={{ base: '1fr', md: 'repeat(2, 1fr)' }}
@@ -34,10 +32,33 @@ export default function EditableGrid({
         </VStack>
       </GridItem>
       <GridItem colSpan={{ base: 1, md: 2 }}>
-        <VStack justify="left" spacing={{ base: 1, md: 2 }}>
-          <Text w="100%" textStyle="formLabel">Owner</Text>
-          <Text w="100%" textStyle="formSavedInput">{isOwner ? 'You' : `${owner.firstName} ${owner.lastName}`}</Text>
-        </VStack>
+        <Grid templateColumns="repeat(2, 1fr)">
+          <GridItem>
+            <VStack w="100%" spacing={{ base: 1, md: 2 }}>
+              <Text w="100%" textStyle="formLabel">Owner</Text>
+              {isOwner && editAsOwner && (
+                <Flex w="100%" justify="start">
+                <Select
+                  w="80%"
+                  justifySelf="left"
+                  {...register('newOwner', {
+                    validate: (username) => (activeMembers.filter((member) => member.username === username).length === 1 || username === user) || 'Invalid new owner',
+                  })}
+                >
+                  <option key={user} value={user}>You</option>
+                  {activeMembers.map((member) => (
+                    <option key={member.username} value={member.username}>{`${member.firstName} ${member.lastName}`}</option>
+                  ))}
+                </Select>
+              </Flex>
+              )}
+              {!(isOwner && editAsOwner) && (
+                <Text w="100%" textStyle="formSavedInput">{isOwner ? 'You' : `${owner.firstName} ${owner.lastName}`}</Text>
+              )}
+            </VStack>
+          </GridItem>
+          <GridItem />
+        </Grid>
       </GridItem>
       <GridItem>
         <VStack justify="left" spacing={{ base: 1, md: 2 }}>

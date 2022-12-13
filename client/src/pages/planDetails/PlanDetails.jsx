@@ -19,8 +19,7 @@ export default function PlanDetails({
   const [action, setAction] = useState(null);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const navigate = useNavigate();
-  // const [quantity, setQuantity] = useState(0);
-  // const [totalQuantity, setTotalQuantity] = useState(0);
+
   const { loading, data, error } = useQuery(GET_PLAN, {
     variables: { planId: planToView },
     fetchPolicy: 'cache-and-network',
@@ -31,13 +30,12 @@ export default function PlanDetails({
     loading: changeQuantLoading,
     error: changeQuantError
   }] = useMutation(EDIT_QUANTITY, {
-    onCompleted: ({ editQuantity: { quantity: newQuant } }) => {
+    onCompleted: () => {
       setEditAsMember(false);
       setEditAsOwner(false);
     },
     update: (cache, { data: { editQuantity } }) => {
       const { planId, quantity: resultQuant } = editQuantity;
-      console.log('I was called');
       cache.modify({
         id: `PlanDetail:{"planId":"${planId}"}`,
         fields: {
@@ -59,6 +57,7 @@ export default function PlanDetails({
 
     const startDateAsArr = startDate.split('-');
     const fStartDate = `${startDateAsArr[1]}/${startDateAsArr[2]}/${startDateAsArr[0]}`;
+
     const handleFormSubmit = (inputData) => {
       if (isOwner) {
         console.log(inputData);
@@ -91,7 +90,7 @@ export default function PlanDetails({
           members={activeMembers}
           setPlanToView={setPlanToView}
         />
-        <VStack w="93%" justify="left" spacing={{ base: 4, md: 6 }} mb={{ base: 4, md: 6 }}>
+        <VStack w="93%" justify="left" spacing={{ base: 6, md: 10 }} mb={{ base: 6, md: 10 }}>
           <Flex w="100%" align="center">
             <Button
               type="button"
@@ -106,7 +105,7 @@ export default function PlanDetails({
             </Button>
           </Flex>
           <Box w="100%">
-            <Flex w={{ base: '95%', lg: '80%' }} align="center" justify="space-between" mb={6}>
+            <Flex w={{ base: '95%', lg: '80%' }} align="center" justify="space-between" mb={10}>
               <Heading as="h1" variant="accented" pb={0}>{name}</Heading>
               <Button type="button">Share Plan</Button>
             </Flex>
@@ -136,6 +135,8 @@ export default function PlanDetails({
                       handleFormSubmit={handleFormSubmit}
                       editAsMember={editAsMember}
                       setEditAsMember={setEditAsMember}
+                      editAsOwner={editAsOwner}
+                      user={user}
                     />
                     <Box w="100%">
                       <Button
@@ -188,6 +189,8 @@ export default function PlanDetails({
                       handleFormSubmit={handleFormSubmit}
                       editAsMember={editAsMember}
                       setEditAsMember={setEditAsMember}
+                      editAsOwner={editAsOwner}
+                      user={user}
                     />
                     {totalMembers > 1 && (
                       <VStack justify="left">

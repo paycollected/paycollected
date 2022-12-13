@@ -76,7 +76,7 @@ export default function Dashboard({ user, setUser, setPlanToJoin, setPlanToView 
         <VStack w="93%" justify="left" spacing={{ base: '6', md: '10' }} mb="10">
           <Wrap w="100%" spacingX={{ base: '4', md: '8' }} align="end">
             <WrapItem>
-              <Heading as="h1" fontSize="2xl">
+              <Heading as="h1" fontSize="3xl">
                 {`${data.viewAllPlans.total} Active Plans`}
               </Heading>
             </WrapItem>

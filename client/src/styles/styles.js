@@ -99,8 +99,9 @@ const {
   definePartsStyle: definePartsStyleMenu, defineMultiStyleConfig: defineMultiStyleConfigMenu
 } = createMultiStyleConfigHelpers(menuAnatomy.keys);
 
-const { definePartsStyle: definePartsStyleModal, defineMultiStyleConfig: defineMultiStyleConfigModal } =
-  createMultiStyleConfigHelpers(modalAnatomy.keys);
+const {
+  definePartsStyle: definePartsStyleModal, defineMultiStyleConfig: defineMultiStyleConfigModal
+} = createMultiStyleConfigHelpers(modalAnatomy.keys);
 
 
 const menuTheme = defineMultiStyleConfigMenu({
@@ -124,7 +125,7 @@ const headingTheme = defineStyleConfig({
   variants: {
     accented: {
       color: '#272088',
-      fontSize: '2xl',
+      fontSize: '3xl',
       fontWeight: 700,
     },
     nuanced: {
