@@ -38,7 +38,7 @@ export default function MagicLink({
               <Flex w="75%" direction="column">
                 <Text as="h5" textStyle="formLabel" fontSize="md" mb={4}>Share Plan Code</Text>
                 <InputGroup>
-                  <Input type="url" readOnly value={planId} fontSize="14px" color="blackAlpha.800" />
+                  <Input type="text" readOnly value={planId} fontSize="14px" color="blackAlpha.800" />
                   <InputRightAddon
                     p={0}
                     children={<Button type="button" onClick={onCopyCode} variant="copyBtn">copy</Button>}

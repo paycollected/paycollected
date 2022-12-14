@@ -1,18 +1,17 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate, Link as ReactLink } from 'react-router-dom';
 import { useMutation } from '@apollo/client';
 import {
   Flex, Box, Text, Stack, Link, Image, Avatar, Menu, MenuButton, MenuList, MenuItem, Button,
 } from '@chakra-ui/react';
-import { CloseIcon, HamburgerIcon } from '@chakra-ui/icons';
 import Logo from '../public/Pay_Collected_Logo.png';
 import { EditPayment as EDIT_PAYMENT } from '../graphql/mutations.gql';
 import UnauthenticatedNavBar from './UnauthenticatedNavBar.jsx';
-import { NavBarBtn } from '../styles/styles.js';
 
-export default function NavBar({ user, setUser, setPlanToJoin, setPlanToView }) {
+export default function NavBar({
+  user, setUser, setPlanToJoin, setPlanToView
+}) {
   const navigate = useNavigate();
-  const [toggleMenu, setToggleMenu] = useState(false);
 
   const logUserOut = () => {
     localStorage.clear();

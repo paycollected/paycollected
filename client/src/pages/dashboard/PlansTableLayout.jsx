@@ -1,25 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { useQuery } from '@apollo/client';
+import React from 'react';
 import {
-  Flex, Box, Grid, GridItem, Heading, Button, useClipboard, UnorderedList, ListItem, Tooltip,
-  ButtonGroup, Container, HStack, Icon, Input, InputGroup, InputLeftElement, Stack, Text,
-  useBreakpointValue, useColorModeValue,
+  Box, Button, ButtonGroup, Container, HStack, Stack, Text, useBreakpointValue, useColorModeValue,
 } from '@chakra-ui/react';
-import { CopyIcon } from '@chakra-ui/icons';
 import PlansTable from './PlansTable.jsx';
-import { ViewAllPlans as GET_ALL_PLANS } from '../../graphql/queries.gql';
+
 
 export default function PlansTableLayout({ total, plans, setPlanToView }) {
-  // const [planToCopy, setPlanToCopy] = useState(null);
-  // const { hasCopied, onCopy, setValue } = useClipboard('');
   const isMobile = useBreakpointValue({ base: true, md: false });
-
-  // useEffect(() => { setValue(`${process.env.HOST}/join/${planToCopy}`); }, [planToCopy, setValue]);
-
-  // const { loading, data, error } = useQuery(GET_ALL_PLANS, {
-  //   fetchPolicy: 'cache-and-network',
-  //   nextFetchPolicy: 'cache-only',
-  // });
 
   return (
     <Container pl="0" pr="8%" minWidth="100%">

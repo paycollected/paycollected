@@ -1,7 +1,7 @@
 import React from 'react';
 import {
-  Button, VStack, Grid, GridItem, Text, HStack, NumberInput, Select,
-  NumberInputField, NumberInputStepper, NumberIncrementStepper, NumberDecrementStepper, Flex,
+  Button, VStack, Grid, GridItem, Text, HStack, NumberInput, Select, NumberInputField,
+  NumberInputStepper, NumberIncrementStepper, NumberDecrementStepper, Flex,
 } from '@chakra-ui/react';
 import { EditIcon } from '@chakra-ui/icons';
 import PlanMembersTable from '../../components/PlanMembersTable.jsx';

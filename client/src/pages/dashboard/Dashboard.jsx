@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useQuery, useMutation } from '@apollo/client';
+import { useQuery } from '@apollo/client';
 import {
   Button, FormControl, FormLabel, Input, Heading, VStack, WrapItem, Wrap,
 } from '@chakra-ui/react';

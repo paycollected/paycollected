@@ -7,7 +7,6 @@ import {
 import { useMutation } from '@apollo/client';
 import { ResendVerificationEmail as REVERIFY } from '../../graphql/mutations.gql';
 
-
 export default function EmailSentModal({ isOpen, onClose, email }) {
   const navigate = useNavigate();
   const [verificationError, setVerificationError] = useState('');
