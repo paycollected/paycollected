@@ -25,10 +25,10 @@ export const buttonTheme = defineStyleConfig({
       borderColor: 'blue.600',
       // TODO: Hover styling
       _hover: {
-        bg: '##2B6CB0',
-        color: '#A6E1FA',
+        bg: '#2B6CB0',
+        color: 'white',
         border: '2px solid',
-        borderColor: 'white'
+        borderColor: 'black'
       }
     },
     solid: {
@@ -37,9 +37,10 @@ export const buttonTheme = defineStyleConfig({
       border: '2px solid transparent',
       // TODO: Hover styling
       _hover: {
-        bg: '#A6E1FA',
-        color: '##2B6CB0',
-        border: '2px solid'
+        bg: 'white',
+        color: '#2B6CB0',
+        border: '2px solid',
+        borderColor: '#2B6CB0'
       }
     },
     menuIcon: { bg: 'transparent' },
