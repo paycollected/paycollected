@@ -24,7 +24,9 @@ if (queryStr.length > 0) {
   redirectStatus = urlParams.get('redirect_status');
 }
 
-export default function Dashboard({ user, setUser, setPlanToJoin, setPlanToView }) {
+export default function Dashboard({
+  user, setUser, setPlanToJoin, setPlanToView
+}) {
   const navigate = useNavigate();
   const [code, setCode] = useState('');
   // const [showNotifications, setShowNotifications] = useState(false);
@@ -70,6 +72,7 @@ export default function Dashboard({ user, setUser, setPlanToJoin, setPlanToView 
   };
 
   if (data) {
+    console.log('data: ', data);
     return (
       <>
         <NavBar user={user} setUser={setUser} setPlanToJoin={setPlanToJoin} setPlanToView={setPlanToView} />
