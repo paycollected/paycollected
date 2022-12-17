@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@apollo/client';
 import {
-  Button, FormControl, FormLabel, Input, Heading, VStack, WrapItem, Wrap,
+  Button, FormControl, FormLabel, Input, Heading, VStack, WrapItem, Wrap, useDisclosure
 } from '@chakra-ui/react';
 import {
   // RetrieveNotifications as GET_NOTIFICATIONS,
@@ -11,6 +11,8 @@ import {
 import { DeleteNotification as DELETE_NOTI } from '../../graphql/mutations.gql';
 import NavBar from '../../components/NavBar.jsx';
 import PlansTableLayout from './PlansTableLayout.jsx';
+import CreatePlanDrawer from './createPlan/CreatePlanDrawer.jsx';
+import CreatePlanSuccessDrawer from './createPlan/CreatePlanSuccessDrawer.jsx';
 
 // actual redirect URL string 'http://localhost:5647/dashboard/?setup_intent=seti_1Lq9rqAJ5Ik974ueIdg7WHn9&setup_intent_client_secret=seti_1Lq9rqAJ5Ik974ueIdg7WHn9_secret_MZISJyXsMF6na4pA6ryaqOfvt8JbeGa&redirect_status=succeeded'
 const queryStr = window.location.search;
@@ -25,11 +27,19 @@ if (queryStr.length > 0) {
 }
 
 export default function Dashboard({
-  user, setUser, setPlanToJoin, setPlanToView
+  user, setUser, planToJoin, setPlanToJoin, setPlanToView
 }) {
   const navigate = useNavigate();
   const [code, setCode] = useState('');
   // const [showNotifications, setShowNotifications] = useState(false);
+  const {
+    isOpen: isOpenCreatePlan, onOpen: onOpenCreatePlan, onClose: onCloseCreatePlan
+  } = useDisclosure();
+  const {
+    isOpen: isOpenCreatePlanSuccess,
+    onOpen: onOpenCreatePlanSuccess,
+    onClose: onCloseCreatePlanSuccess
+  } = useDisclosure();
 
   useEffect(() => {
     if (user === null && !!username && !!token) {
@@ -72,10 +82,14 @@ export default function Dashboard({
   };
 
   if (data) {
-    console.log('data: ', data);
     return (
       <>
-        <NavBar user={user} setUser={setUser} setPlanToJoin={setPlanToJoin} setPlanToView={setPlanToView} />
+        <NavBar
+          user={user}
+          setUser={setUser}
+          setPlanToJoin={setPlanToJoin}
+          setPlanToView={setPlanToView}
+        />
         <VStack w="93%" justify="left" spacing={{ base: '6', md: '10' }} mb="10">
           <Wrap w="100%" spacingX={{ base: '4', md: '8' }} align="end">
             <WrapItem>
@@ -84,7 +98,7 @@ export default function Dashboard({
               </Heading>
             </WrapItem>
             <WrapItem>
-              <Button onClick={() => { navigate('/plan/create'); }}>Create Plan</Button>
+              <Button onClick={onOpenCreatePlan}>Create Plan</Button>
             </WrapItem>
           </Wrap>
           <PlansTableLayout
@@ -114,7 +128,17 @@ export default function Dashboard({
             </WrapItem>
           </Wrap>
         </VStack>
-
+        <CreatePlanDrawer
+          setPlanToJoin={setPlanToJoin}
+          isOpen={isOpenCreatePlan}
+          onClose={onCloseCreatePlan}
+          onOpenCreatePlanSuccess={onOpenCreatePlanSuccess}
+        />
+        <CreatePlanSuccessDrawer
+          isOpen={isOpenCreatePlanSuccess}
+          onClose={onCloseCreatePlanSuccess}
+          planToJoin={planToJoin}
+        />
         {/* {data && data.retrieveNotifications.count > 0 && (
           <div>
             <div>
