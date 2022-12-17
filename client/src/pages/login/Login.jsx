@@ -3,7 +3,7 @@ import { useNavigate, Link as ReactLink } from 'react-router-dom';
 import { useMutation } from '@apollo/client';
 import { useForm } from 'react-hook-form';
 import {
-  Button, Input, InputGroup, InputRightElement, Image, Link, Center,
+  Button, Input, InputGroup, InputRightElement, Image, Link,
   FormControl, FormLabel, FormErrorMessage, IconButton,
   Container, Box, Stack, HStack, Text, Heading, useDisclosure, useBreakpointValue, useColorModeValue
 } from '@chakra-ui/react';
@@ -115,6 +115,7 @@ export default function Login({ setUser, planToJoin }) {
                     <Input
                       name="usernameOrEmail"
                       type="text"
+                      autoFocus="true"
                       {...register('usernameOrEmail', { required: 'Username or email required' })}
                     />
                     {errors.usernameOrEmail ? (
