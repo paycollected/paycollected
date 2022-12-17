@@ -51,7 +51,15 @@ function App() {
       />
       <Route
         path="/dashboard"
-        element={<Dashboard user={user} setUser={setUser} setPlanToJoin={setPlanToJoin} setPlanToView={setPlanToView} />}
+        element={(
+          <Dashboard
+            user={user}
+            setUser={setUser}
+            setPlanToJoin={setPlanToJoin}
+            setPlanToView={setPlanToView}
+            planToJoin={planToJoin}
+          />
+        )}
       />
       <Route
         path="/join/:planId"
@@ -127,7 +135,7 @@ function App() {
           <Route path="/edit" element={<Navigate to="/404" />} />
         </>
       )}
-      {/* <Route path="/create" element={user ? (<CreatePlan setPlanToJoin={setPlanToJoin} />) : (<Navigate to="/404" />)} /> */}
+      {/* <Route path="/create" element={user ? (<CreatePlan setPlanToJoin={setPlanToJoin} />) : (<Navigate to="/" />)} /> */}
       <Route path="/manage-account" element={user ? <ManageAccount user={user} setUser={setUser} /> : <Navigate to="/" />} />
       <Route path="/password-reset" element={<PwdReset setUser={setUser} />} />
       <Route path="/404" element={<FourOhFour />} />
