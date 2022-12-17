@@ -18,7 +18,7 @@ export default function MagicLink({
     <Modal isOpen={isOpen} onClose={onClose} size="xl">
       <ModalOverlay />
       <ModalContent>
-        <ModalHeader><Heading as="h2">{`Invite Your Friends To Join ${planName}`}</Heading></ModalHeader>
+        <ModalHeader><Heading as="h2">{`Invite your friends to join ${planName}`}</Heading></ModalHeader>
         <ModalCloseButton />
         <ModalBody>
           <VStack w="100%" spacing={8}>
