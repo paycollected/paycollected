@@ -11,7 +11,6 @@ import FourOhFour from './pages/404.jsx';
 import PwdReset from './pages/PwdReset.jsx';
 import ManageAccount from './pages/ManageAccount.jsx';
 import PlanDetails from './pages/planDetails/PlanDetails.jsx';
-// import CreatePlan from './pages/dashboard/createPlan/CreatePlan.jsx';
 
 // check that token is still valid before displaying logged-in state
 let token = localStorage.getItem('token');
@@ -135,7 +134,6 @@ function App() {
           <Route path="/edit" element={<Navigate to="/404" />} />
         </>
       )}
-      {/* <Route path="/create" element={user ? (<CreatePlan setPlanToJoin={setPlanToJoin} />) : (<Navigate to="/" />)} /> */}
       <Route path="/manage-account" element={user ? <ManageAccount user={user} setUser={setUser} /> : <Navigate to="/" />} />
       <Route path="/password-reset" element={<PwdReset setUser={setUser} />} />
       <Route path="/404" element={<FourOhFour />} />
