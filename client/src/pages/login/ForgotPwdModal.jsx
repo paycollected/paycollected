@@ -39,7 +39,7 @@ export default function ForgotPwdModal({ isOpen, onClose }) {
     <Modal isOpen={isOpen} onClose={onClose}>
       <ModalOverlay />
       <ModalContent>
-        <ModalHeader>Reset Your Password</ModalHeader>
+        <ModalHeader fontSize="2xl" color="#2B6CB0">Reset Your Password</ModalHeader>
         <ModalCloseButton
           onClick={() => {
             setResetEmailSent(false);
@@ -66,6 +66,7 @@ export default function ForgotPwdModal({ isOpen, onClose }) {
                 />
               </FormControl>
               <Button
+                mt={5}
                 type="submit"
                 isLoading={loading}
                 disabled={loading}

@@ -41,7 +41,7 @@ export default function ReverifyEmailModal({ isOpen, onClose }) {
     <Modal isOpen={isOpen} onClose={onClose}>
       <ModalOverlay />
       <ModalContent>
-        <ModalHeader>Verify Your Email</ModalHeader>
+        <ModalHeader fontSize="2xl" color="#2B6CB0">Verify Your Email</ModalHeader>
         <ModalCloseButton
           onClick={() => {
             setVerificationEmailSent(false);
@@ -68,7 +68,7 @@ export default function ReverifyEmailModal({ isOpen, onClose }) {
                   type="email"
                 />
               </FormControl>
-              <Button type="submit">Submit</Button>
+              <Button mt={5} type="submit">Submit</Button>
             </form>
           )}
           {verificationEmailSent && (
