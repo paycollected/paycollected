@@ -12,7 +12,6 @@ import { DeleteNotification as DELETE_NOTI } from '../../graphql/mutations.gql';
 import NavBar from '../../components/NavBar.jsx';
 import PlansTableLayout from './PlansTableLayout.jsx';
 import CreatePlanDrawer from './createPlan/CreatePlanDrawer.jsx';
-import CreatePlanSuccessDrawer from './createPlan/CreatePlanSuccessDrawer.jsx';
 
 // actual redirect URL string 'http://localhost:5647/dashboard/?setup_intent=seti_1Lq9rqAJ5Ik974ueIdg7WHn9&setup_intent_client_secret=seti_1Lq9rqAJ5Ik974ueIdg7WHn9_secret_MZISJyXsMF6na4pA6ryaqOfvt8JbeGa&redirect_status=succeeded'
 const queryStr = window.location.search;
@@ -34,11 +33,6 @@ export default function Dashboard({
   // const [showNotifications, setShowNotifications] = useState(false);
   const {
     isOpen: isOpenCreatePlan, onOpen: onOpenCreatePlan, onClose: onCloseCreatePlan
-  } = useDisclosure();
-  const {
-    isOpen: isOpenCreatePlanSuccess,
-    onOpen: onOpenCreatePlanSuccess,
-    onClose: onCloseCreatePlanSuccess
   } = useDisclosure();
 
   useEffect(() => {
@@ -132,12 +126,6 @@ export default function Dashboard({
           setPlanToJoin={setPlanToJoin}
           isOpen={isOpenCreatePlan}
           onClose={onCloseCreatePlan}
-          onOpenCreatePlanSuccess={onOpenCreatePlanSuccess}
-        />
-        <CreatePlanSuccessDrawer
-          isOpen={isOpenCreatePlanSuccess}
-          onClose={onCloseCreatePlanSuccess}
-          planToJoin={planToJoin}
         />
         {/* {data && data.retrieveNotifications.count > 0 && (
           <div>
