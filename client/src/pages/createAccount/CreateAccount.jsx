@@ -109,7 +109,7 @@ export default function CreateAccount({ setUser }) {
                   <Input
                     name="fullName"
                     type="text"
-                    autoFocus="true"
+                    autoFocus
                     {...register('fullName', { required: 'First and last name required' })}
                   />
                   {errors.fullName && (
