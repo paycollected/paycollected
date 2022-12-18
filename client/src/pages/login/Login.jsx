@@ -115,7 +115,7 @@ export default function Login({ setUser, planToJoin }) {
                     <Input
                       name="usernameOrEmail"
                       type="text"
-                      autoFocus="true"
+                      autoFocus
                       {...register('usernameOrEmail', { required: 'Username or email required' })}
                     />
                     {errors.usernameOrEmail ? (
