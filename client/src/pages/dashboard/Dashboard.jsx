@@ -123,9 +123,9 @@ export default function Dashboard({
           </Wrap>
         </VStack>
         <CreatePlanDrawer
-          setPlanToJoin={setPlanToJoin}
           isOpen={isOpenCreatePlan}
           onClose={onCloseCreatePlan}
+          setPlanToJoin={setPlanToJoin}
         />
         {/* {data && data.retrieveNotifications.count > 0 && (
           <div>
