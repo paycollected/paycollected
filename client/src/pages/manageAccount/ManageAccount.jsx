@@ -86,7 +86,7 @@ export default function ManageAccount({
             <Tbody>
               <Tr>
                 <Td fontWeight="bold">Username</Td>
-                <Td>{getEmailData ? username : <Button isLoading variant="outline" size="sm" />}</Td>
+                <Td>{getEmailData ? username : <Button isLoading variant="outlineNuanced" size="sm" />}</Td>
                 <Td>
                   {isMobile
                     ? <IconButton variant="outline" size="sm" icon={<EditIcon />} onClick={onOpenUsername} />
@@ -99,7 +99,7 @@ export default function ManageAccount({
               </Tr>
               <Tr>
                 <Td fontWeight="bold">Email</Td>
-                <Td>{getEmailData ? email : <Button isLoading variant="outline" size="sm" />}</Td>
+                <Td>{getEmailData ? email : <Button isLoading variant="outlineNuanced" size="sm" />}</Td>
                 <Td>
                   {isMobile
                     ? <IconButton variant="outline" size="sm" icon={<EditIcon />} onClick={onOpenEmail} />
