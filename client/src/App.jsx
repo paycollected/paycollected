@@ -56,7 +56,6 @@ function App() {
             setUser={setUser}
             setPlanToJoin={setPlanToJoin}
             setPlanToView={setPlanToView}
-            planToJoin={planToJoin}
           />
         )}
       />
@@ -134,7 +133,20 @@ function App() {
           <Route path="/edit" element={<Navigate to="/404" />} />
         </>
       )}
-      <Route path="/manage-account" element={user ? <ManageAccount user={user} setUser={setUser} /> : <Navigate to="/" />} />
+      <Route
+        path="/manage-account"
+        element={
+        user
+          ? (
+            <ManageAccount
+              user={user}
+              setUser={setUser}
+              setPlanToJoin={setPlanToJoin}
+              setPlanToView={setPlanToView}
+            />
+          ) : (<Navigate to="/" />)
+        }
+      />
       <Route path="/password-reset" element={<PwdReset setUser={setUser} />} />
       <Route path="/404" element={<FourOhFour />} />
       <Route path="*" element={<FourOhFour />} />
