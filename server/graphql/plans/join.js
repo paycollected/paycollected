@@ -1,6 +1,6 @@
 import stripeSDK from 'stripe';
-import { ApolloError, ForbiddenError, UserInputError } from 'apollo-server-core';
-import { joinPlan } from '../../db/models.js';
+import { GraphQLError } from 'graphql';
+import { joinPlan } from '../../db/models';
 
 const stripe = stripeSDK(process.env.STRIPE_SECRET_KEY);
 
@@ -8,42 +8,37 @@ export default async function joinPlanResolver(planId, newQuantity, username) {
   // create
   let errMsg;
   if (newQuantity <= 0) {
-    errMsg = 'Invalid input';
+    errMsg = 'Invalid quantity';
     throw new Error();
   }
 
   try {
-    // check that user is NOT already subscribed to plan
-    // minimum info needed at webhook: planID, newQuantity, username
-
-    // db hit will need to grab: quantity for this user on this plan, stripe cus ID, default pmt ID
-
     const { rows } = await joinPlan(username, planId);
-    const {
-      quantity, stripeCusId, defaultPaymentId
-    } = rows[0];
-    if (quantity > 0) {
-      // front end will need to display a msg telling user
-      // to use 'adjust quantity' in dashboard instead
-      errMsg = 'User is already subscribed to this plan';
+    // What abt case when user used to be active on plan, but not anymore?
+    // with this current setup, they can rejoin by calling this mutation!
+    // (but only as long as the plan itself is still active)
+    const { quantity, stripeCusId, active } = rows[0];
+    if (!active) {
+      errMsg = 'This plan has already been archived';
+      throw new Error();
+    } else if (quantity > 0) {
+      errMsg = 'User already subscribed';
       throw new Error();
     }
 
     // create a Stripe setup intent and get all user payment methods
     const [
       { id: setupIntentId, client_secret: clientSecret },
-      { data: paymentMethodsData }
+      { data: paymentMethodsData },
+      { invoice_settings: { default_payment_method: defaultPaymentId } }
     ] = await Promise.all([
       stripe.setupIntents.create({
         payment_method_types: ['card'],
         customer: stripeCusId,
-        metadata: {
-          planId,
-          quantity: newQuantity,
-          username,
-        }
+        metadata: { planId, quantity: newQuantity }
       }),
-      stripe.customers.listPaymentMethods(stripeCusId, { type: 'card' })
+      stripe.customers.listPaymentMethods(stripeCusId, { type: 'card' }),
+      stripe.customers.retrieve(stripeCusId),
     ]);
 
 
@@ -58,12 +53,12 @@ export default async function joinPlanResolver(planId, newQuantity, username) {
 
     return { clientSecret, setupIntentId, paymentMethods };
   } catch (asyncError) {
-    if (errMsg === 'User is already subscribed to this plan') {
-      throw new ForbiddenError(errMsg);
-    } else if (errMsg === 'Invalid input') {
-      throw new UserInputError(errMsg);
+    if (errMsg === 'User already subscribed' || errMsg === 'This plan has already been archived') {
+      throw new GraphQLError(errMsg, { extensions: { code: 'FORBIDDEN' } });
+    } else if (errMsg === 'Invalid quantity') {
+      throw new GraphQLError(errMsg, { extensions: { code: 'BAD_USER_INPUT' } });
     }
     console.log(asyncError);
-    throw new ApolloError('Unable to create subscription');
+    throw new GraphQLError('Unable to create subscription', { extensions: { code: 'INTERNAL_SERVER_ERROR' } });
   }
 }

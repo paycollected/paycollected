@@ -4,20 +4,21 @@ import {
 } from '@stripe/react-stripe-js';
 import { useMutation } from '@apollo/client';
 import { useNavigate } from 'react-router-dom';
-import {
-  Flex, Box, FormControl, FormLabel, FormErrorMessage, Button, Input
-} from '@chakra-ui/react';
+import { Button } from '@chakra-ui/react';
 import { loadStripe } from '@stripe/stripe-js';
-import { CancelTransaction as CANCEL_TRANSC, SubscribeWithSavedCard as SUBSCRIBE } from '../graphql/mutations.gql';
+import { ViewAllPlans as viewAllPlansQuery } from '../../graphql/queries.gql';
+import { CancelTransaction as CANCEL_TRANSC, SubscribeWithSavedCard as SUBSCRIBE } from '../../graphql/mutations.gql';
 import SavedCards from './SavedCards.jsx';
 
 const stripePromise = loadStripe(process.env.STRIPE_PUBLISHABLE_KEY);
-
-function CheckoutForm({ setupIntentId, paymentMethods }) {
+function CheckoutForm({ setupIntentId, paymentMethods, planId }) {
+  const [password, setPassword] = useState('');
   const navigate = useNavigate();
+  // CACHE IS UPDATING CORRECTLY
+  // BUT UI IN PlansTable is not rendering from cache??
   const [cancel, { loading }] = useMutation(CANCEL_TRANSC, {
     onCompleted: () => {
-      navigate('/dashboard');
+      navigate('/plan/all');
     },
     onError: ({ message }) => {
       console.log(message);
@@ -26,12 +27,21 @@ function CheckoutForm({ setupIntentId, paymentMethods }) {
 
   const [submitPayment, { data, loading: subscribeLoading, error }] = useMutation(SUBSCRIBE, {
     onCompleted: () => {
-      navigate('/dashboard');
+      // navigate('/dashboard');
+      navigate('/plan/all');
     },
     onError: ({ message }) => {
       console.log('error subscribing using a saved card: ', message);
     },
+    // update: (cache, { data: { subscribeWithSavedCard } }) => {
+    //   console.log('------> cache & subscribeWithSavedCard', cache, subscribeWithSavedCard);
+    //   const { planId, quantity } = subscribeWithSavedCard;
+    //   cache.updateQuery({
+    //     query: viewAllPlansQuery,
+    //   }, ({ viewAllPlans }) => ({ viewAllPlans: [...viewAllPlans, subscribeWithSavedCard] }));
+    // }
   });
+
   const stripe = useStripe();
   const elements = useElements();
   const [selectedCard, setSelectedCard] = useState(
@@ -53,7 +63,7 @@ function CheckoutForm({ setupIntentId, paymentMethods }) {
           // Elements` instance that was used to create the Payment Element
           elements,
           confirmParams: {
-            return_url: 'http://localhost:5647/dashboard/',
+            return_url: `${process.env.HOST}/dashboard/`,
             // actual redirect URL string 'http://localhost:5647/dashboard/?setup_intent=seti_1Lq9rqAJ5Ik974ueIdg7WHn9&setup_intent_client_secret=seti_1Lq9rqAJ5Ik974ueIdg7WHn9_secret_MZISJyXsMF6na4pA6ryaqOfvt8JbeGa&redirect_status=succeeded'
             // correctly redirected to Successful Payment component!
             // Do we need query parameters in the redirection link?
@@ -71,7 +81,9 @@ function CheckoutForm({ setupIntentId, paymentMethods }) {
       submitPayment({
         variables: {
           paymentMethodId: selectedCard,
-          setupIntentId
+          setupIntentId,
+          planId,
+          password
         }
       });
     }
@@ -104,6 +116,15 @@ function CheckoutForm({ setupIntentId, paymentMethods }) {
           <div hidden={selectedCard !== 'newCard'}>
             <PaymentElement />
           </div>
+          <div hidden={selectedCard === 'newCard'}>
+            To use a saved card, please retype your password to confirm identity:
+            <input
+              type="password"
+              value={password}
+              required={selectedCard !== 'newCard'}
+              onChange={(e) => { setPassword(e.target.value); }}
+            />
+          </div>
         </div>
         <Button type="submit" disabled={!stripe}>Make payment</Button>
         <Button onClick={handleCancel}>Cancel</Button>
@@ -112,17 +133,9 @@ function CheckoutForm({ setupIntentId, paymentMethods }) {
   );
 }
 
-/*
-after clicking pay but not completing the checkout process,
-when coming back to the checkout page the client secret is lost if not saved somewhere
-
-on another note, subscription will expire if not followed up with payment
---> will prob need to set up webhooks
-how does this affect what we store in db?
-*/
 
 export default function Checkout({
-  stripeClientSecret, setupIntentId, paymentMethods,
+  stripeClientSecret, setupIntentId, paymentMethods, planId
 }) {
   const options = {
     clientSecret: stripeClientSecret
@@ -137,6 +150,7 @@ export default function Checkout({
           <CheckoutForm
             setupIntentId={setupIntentId}
             paymentMethods={paymentMethods}
+            planId={planId}
           />
         </Elements>
       </div>

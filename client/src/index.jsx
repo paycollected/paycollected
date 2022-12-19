@@ -5,9 +5,10 @@ import {
 } from '@apollo/client';
 import { setContext } from '@apollo/client/link/context';
 import { BrowserRouter } from 'react-router-dom';
-import { ChakraProvider, extendTheme, Box } from '@chakra-ui/react';
-import App from './components/App.jsx';
-import { buttonTheme, inputTheme } from './styles/styles.js';
+import { ChakraProvider, Box, Flex } from '@chakra-ui/react';
+import App from './App.jsx';
+import { globalTheme } from './styles/styles.js';
+
 
 const httpLink = createHttpLink({
   // TODO: will need to find out how to 'hide' server URI when deployed
@@ -24,11 +25,39 @@ const authLink = setContext((_, { headers }) => {
   };
 });
 
+const formatDate = (date) => {
+  const dateSplit = date.split('-');
+  return `${dateSplit[1]}/${dateSplit[2]}/${dateSplit[0]}`;
+};
+
 const cache = new InMemoryCache({
   typePolicies: {
-    Plan: {
+    PlanDetail: {
       keyFields: ['planId'],
+      fields: {
+        startDate(date) { return formatDate(date); },
+        cycleFrequency(cf) { return cf[0].concat(cf.slice(1).toLowerCase()); },
+      },
     },
+    PlanSummary: {
+      keyFields: ['planId'],
+      fields: {
+        nextBillDate(date) { return formatDate(date); },
+        cycleFrequency(cf) { return cf[0].concat(cf.slice(1).toLowerCase()); },
+      },
+    },
+    PlanMember: {
+      fields: {
+        joinedDate(date) { return formatDate(date); },
+        fullName(_, { readField }) { return `${readField('firstName')} ${readField('lastName')}`; }
+      },
+    },
+    PlanOwner: {
+      fields: {
+        fullName(_, { readField }) { return `${readField('firstName')} ${readField('lastName')}`; },
+        formattedName(_, { readField }) { return `${readField('firstName')} ${readField('lastName')[0]}.`; }
+      }
+    }
   },
 });
 
@@ -38,25 +67,21 @@ const client = new ApolloClient({
   connectToDevTools: true,
 });
 
-const theme = extendTheme({
-  components: {
-    Button: buttonTheme,
-    Input: inputTheme
-  }
-});
 
 const root = createRoot(document.getElementById('root'));
 root.render(
   <ApolloProvider client={client}>
     <BrowserRouter>
-      <ChakraProvider theme={theme}>
-        <Box
+      <ChakraProvider theme={globalTheme}>
+        <Flex
           w="100%"
-          h="100vh"
-          bg="#A6E1FA"
+          h="max-content"
+          bg="white"
+          direction="column"
+          align="center"
         >
           <App />
-        </Box>
+        </Flex>
       </ChakraProvider>
     </BrowserRouter>
   </ApolloProvider>

@@ -1,26 +1,34 @@
 import stripeSDK from 'stripe';
-import { ApolloError } from 'apollo-server-core';
+import { GraphQLError } from 'graphql';
+import { DateTimeResolver, DateResolver, USCurrencyResolver } from 'graphql-scalars';
 import authResolverWrapper from './authResolverWrapper';
 import {
   planIdScalar, subscriptionIdScalar, emailScalar, usernameScalar, paymentMethodIdScalar,
-  setupIntentIdScalar
+  setupIntentIdScalar, testClockScalar,
 } from './customScalarTypes';
 import createAccount from './users/createAccount';
 import loginResolver from './users/login';
+import resetPasswordResolver from './users/resetPassword';
+import resetPwdFromTokenResolver from './users/resetPwdFromToken';
+import resendVerificationEmailResolver from './users/resendVerificationEmail';
+import changeEmailResolver from './users/changeEmail';
+import changeUsernameResolver from './users/changeUsername';
+import changePasswordResolver from './users/changePassword';
 import joinPlanResolver from './plans/join';
-import {
-  unsubscribe as unsubscribeResolver, unsubscribeAsOwner as unsubscribeAsOwnerResolver
-} from './subscriptions/unsubscribe.js';
+import unsubscribeResolver from './subscriptions/unsubscribe.js';
+import unsubscribeAsOwnerResolver from './subscriptions/unsubscribeAsOwner';
 import editQuantityResolver from './subscriptions/editQuantity';
 import subscribeWithSavedCardResolver from './subscriptions/subscribeWithSavedCard';
 import {
   viewOnePlan as viewOnePlanResolver,
   viewAllPlans as viewAllPlansResolver,
-  activeMembers as activeMembersResolver,
 } from './plans/view.js';
 import createPlanResolver from './plans/create.js';
 import deletePlanResolver from './plans/delete.js';
 import cancelTransactionResolver from './payment/cancelTransaction';
+import { retrieveNotificationsResolver, deleteNotificationResolver } from './users/notifications';
+import transferOwnershipResolver from './plans/transferOwnership';
+import getEmailResolver from './users/getEmail';
 
 const stripe = stripeSDK(process.env.STRIPE_SECRET_KEY);
 
@@ -30,6 +38,7 @@ const recurringInterval = {
   yearly: 'year'
 };
 
+const saltRounds = 10;
 
 export default {
   Username: usernameScalar,
@@ -44,6 +53,14 @@ export default {
 
   PaymentMethodID: paymentMethodIdScalar,
 
+  TestClockID: testClockScalar,
+
+  DateTime: DateTimeResolver,
+
+  Date: DateResolver,
+
+  USCurrency: USCurrencyResolver,
+
   Query: {
     viewOnePlan: authResolverWrapper((_, { planId }, { user: { username } }) => (
       viewOnePlanResolver(planId, username)
@@ -52,32 +69,58 @@ export default {
     viewAllPlans: authResolverWrapper((_, __, { user: { username } }) => (
       viewAllPlansResolver(username)
     )),
+
+    retrieveNotifications: authResolverWrapper((_, __, { user: { username } }) => (
+      retrieveNotificationsResolver(username)
+    )),
+
+    getEmail: authResolverWrapper((_, __, { user: { username } }) => (
+      getEmailResolver(username)
+    ))
   },
 
-  Plan: {
-    activeMembers: authResolverWrapper(({ planId }, _, { user: { username } }) => (
-      activeMembersResolver(planId, username)
-    )),
-  },
 
   Mutation: {
     createUser: (_, {
-      firstName, lastName, username, password, email
+      firstName, lastName, username, password, email, testClockId,
     }) => (
-      createAccount(firstName, lastName, username, password, email)
+      createAccount(firstName, lastName, username, password, email, saltRounds, testClockId)
     ),
 
-    login: (_, { username, password }) => (loginResolver(username, password)),
+    login: (_, { usernameOrEmail, password }) => (loginResolver(usernameOrEmail, password)),
+
+    resetPassword: (_, { usernameOrEmail }) => (resetPasswordResolver(usernameOrEmail)),
+
+    resetPasswordFromToken: (_, { token, newPassword }) => (
+      resetPwdFromTokenResolver(token, newPassword, saltRounds)
+    ),
+
+    resendVerificationEmail: (_, { email, testClockId }) => (
+      resendVerificationEmailResolver(email, testClockId)
+    ),
+
+    changeEmail: authResolverWrapper((_, { newEmail, password }, { user: { username } }) => (
+      changeEmailResolver(username, password, newEmail)
+    )),
+
+    changeUsername: authResolverWrapper((_, { newUsername, password }, { user: { username } }) => (
+      changeUsernameResolver(username, password, newUsername)
+    )),
+
+    changePassword: authResolverWrapper(
+      (_, { newPassword, currentPassword }, { user: { username } }) => (
+        changePasswordResolver(username, currentPassword, newPassword, saltRounds)
+      )
+    ),
 
     createPlan: authResolverWrapper((_, {
-      planName, cycleFrequency, perCycleCost, startDate, timeZone
+      planName, cycleFrequency, perCycleCost, startDate,
     }, { user: { username } }) => (
       createPlanResolver(
         planName,
         cycleFrequency,
         perCycleCost,
         startDate,
-        timeZone,
         username,
         recurringInterval
       )
@@ -88,23 +131,18 @@ export default {
     )),
 
     editPayment: authResolverWrapper(async (_, __, { user }) => {
-      const { username, stripeCusId: customer } = user;
+      const { stripeCusId } = user;
       try {
-        /* still debating whether we should store stripeCusId in JWT since it's public */
-        // const { rows } = await models.getUserInfo(username);
-        // const { stripeCusId: customer } = rows[0];
-        /*
-        Note that we're skipping programmatically configure the session here
-        and did that manually in Stripe dev portal.
-        */
         const { url } = await stripe.billingPortal.sessions.create({
-          customer,
-          return_url: 'http://localhost:5647/dashboard/',
+          customer: stripeCusId,
+          return_url: `${process.env.HOST}/dashboard/`,
         });
         return { portalSessionURL: url };
       } catch (asyncError) {
         console.log(asyncError);
-        throw new ApolloError('Unable to get customer portal link');
+        throw new GraphQLError('Unable to get customer portal link', {
+          extensions: { code: 'INTERNAL_SERVER_ERROR' }
+        });
       }
     }),
 
@@ -113,14 +151,14 @@ export default {
     )),
 
     unsubscribeAsOwner: authResolverWrapper(
-      (_, { subscriptionId, planId, newOwner }, { user: { username } }) => (
-        unsubscribeAsOwnerResolver(subscriptionId, planId, username, newOwner)
+      (_, { subscriptionId, newOwner }, { user: { username } }) => (
+        unsubscribeAsOwnerResolver(subscriptionId, username, newOwner)
       )
     ),
 
     editQuantity: authResolverWrapper(
       (_, { subscriptionId, newQuantity }, { user: { username } }) => (
-        editQuantityResolver(subscriptionId, newQuantity, username, recurringInterval)
+        editQuantityResolver(subscriptionId, newQuantity, username)
       )
     ),
 
@@ -137,9 +175,19 @@ export default {
     ),
 
     subscribeWithSavedCard: authResolverWrapper(
-      (_, { paymentMethodId, setupIntentId }, { user: { username } }) => (
-        subscribeWithSavedCardResolver(paymentMethodId, setupIntentId, username)
+      (_, {
+        paymentMethodId, setupIntentId, password, planId
+      }, { user: { username } }) => (
+        subscribeWithSavedCardResolver(paymentMethodId, setupIntentId, password, planId, username)
       )
     ),
+
+    deleteNotification: authResolverWrapper((_, { notificationId }, { user: { username } }) => (
+      deleteNotificationResolver(notificationId, username)
+    )),
+
+    transferOwnership: authResolverWrapper((_, { planId, newOwner }, { user: { username }}) => (
+      transferOwnershipResolver(planId, newOwner, username)
+    )),
   }
 };

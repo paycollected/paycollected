@@ -1,65 +1,97 @@
 import stripeSDK from 'stripe';
+import { GraphQLError } from 'graphql';
+import { updateStripePrice } from '../../utils';
 import {
-  ApolloError, UserInputError, ForbiddenError
-} from 'apollo-server-core';
-import {
-  checkPlanOwnerUsingSubsId, checkPlanOwnerForCancel
-} from '../../db/models.js';
+  getProductInfoAndInvoice,
+  updatePriceIdDelSubs,
+  updatePriceIdArchiveSubs,
+  deleteSubscription,
+  archiveSubs,
+} from '../../db/models';
 
 const stripe = stripeSDK(process.env.STRIPE_SECRET_KEY);
 
-export async function unsubscribe(subscriptionId, username) {
-  // check that user calling this function is actually subscription owner
-  // also check whether this user is planOwner
+
+export default async function unsubscribeResolver(subscriptionId, username) {
   let rows;
   try {
-    ({ rows } = await checkPlanOwnerUsingSubsId(subscriptionId, username));
+    ({ rows } = await getProductInfoAndInvoice(subscriptionId, username));
   } catch (e) {
     console.log(e);
-    throw new ApolloError('Cannot unsubscribe');
+    throw new GraphQLError('Cannot unsubscribe', { extensions: { code: 'INTERNAL_SERVER_ERROR' } });
   }
 
   if (rows.length === 0) {
-    throw new ForbiddenError('User not authorized to perform this action');
+    throw new GraphQLError("Subscription doesn't belong to user", { extensions: { code: 'FORBIDDEN' } });
   }
 
+  const {
+    product, invoiceId, interval, perCycleCost, count, quantity, prevPriceId, members,
+    planActive, subsActive, planOwner
+  } = rows[0];
+  if (planOwner) {
+    throw new GraphQLError('Plan owner cannot call this mutation', { extensions: { code: 'FORBIDDEN' } });
+  } else if (!planActive) {
+    throw new GraphQLError('Plan has already been archived', { extensions: { code: 'FORBIDDEN' } });
+  } else if (!subsActive) {
+    throw new GraphQLError('Subscription has already been archived', { extensions: { code: 'FORBIDDEN' } });
+  }
+
+  const productTotalQuantity = count - quantity;
   try {
-    await stripe.subscriptions.update(subscriptionId, { metadata: { cancelSubs: true } });
-    const { planId } = rows[0];
-    return { planId };
+    let status;
+    if (productTotalQuantity > 0) {
+      // there are still active members on the plan
+      const [{ id: price }] = await Promise.all([
+        stripe.prices.create({
+          currency: 'usd',
+          product,
+          unit_amount: Math.round((Math.ceil(perCycleCost / productTotalQuantity)) * 1.05),
+          recurring: { interval },
+        }),
+        stripe.prices.update(prevPriceId, { active: false }),
+        stripe.subscriptions.del(subscriptionId),
+      ]);
+
+      if (invoiceId !== null) {
+        status = 'ARCHIVED';
+        // if there has been at least 1 active billing cycle for this subscription
+        // archive in db
+        await Promise.all([
+          updatePriceIdArchiveSubs(price, product, username),
+          ...members.map((member) => updateStripePrice(member, price)),
+        ]);
+      } else {
+        status = 'DELETED';
+        // subscription never active
+        // delete from db
+        await Promise.all([
+          updatePriceIdDelSubs(price, product, username),
+          ...members.map((member) => updateStripePrice(member, price)),
+        ]);
+      }
+    } else if (productTotalQuantity === 0 && invoiceId === null) {
+      status = 'DELETED';
+      // this person is the last active member on plan
+      // & subs has never been active
+      // will NOT create a new price ID and does not have to update anybody else
+      await Promise.all([
+        stripe.subscriptions.del(subscriptionId),
+        deleteSubscription(username, product),
+      ]);
+    } else {
+      status = 'ARCHIVED';
+      // this person is the last active member on plan
+      // & subs has had at least 1 active billing cycle
+      await Promise.all([
+        stripe.subscriptions.del(subscriptionId),
+        archiveSubs(username, product),
+      ]);
+    }
+
+    return { planId: product, status };
   } catch (e) {
     console.log(e);
-    throw new ApolloError('Cannot unsubscribe');
-  }
-};
-
-
-export async function unsubscribeAsOwner(subscriptionId, planId, username, newOwner) {
-  if (username === newOwner) {
-    // check that this user is not trying to transfer plan ownership to him/herself
-    throw new UserInputError('User not authorized to perform this action');
-  }
-
-  let rows;
-  try {
-    ({ rows } = await checkPlanOwnerForCancel(username, planId, subscriptionId, newOwner));
-    // checking that all inputs are valid combinations
-  } catch (e) {
-    console.log('Failure to perform check', e);
-    throw new ApolloError('Cannot unsubscribe');
-  }
-  if (rows.length !== 2) {
-    throw new ForbiddenError('User not authorized to perform this action');
-  }
-
-  try {
-    await Promise.all([
-      stripe.subscriptions.update(subscriptionId, { metadata: { cancelSubs: true, newOwner } })
-      // mark this subscription for deletion by webhook
-    ]);
-    return { planId };
-  } catch (e) {
-    console.log(e);
-    throw new ApolloError('Cannot unsubscribe');
+    throw new GraphQLError('Cannot unsubscribe', { extensions: { code: 'INTERNAL_SERVER_ERROR' } });
   }
 }

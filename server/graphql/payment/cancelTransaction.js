@@ -1,5 +1,5 @@
 import stripeSDK from 'stripe';
-import { ApolloError, ForbiddenError } from 'apollo-server-core';
+import { GraphQLError } from 'graphql';
 import { getUserInfo } from '../../db/models.js';
 
 const stripe = stripeSDK(process.env.STRIPE_SECRET_KEY);
@@ -14,11 +14,11 @@ export default async function cancelTransactionResolver(setupIntentId, username)
     ]);
   } catch (e) {
     console.log(e);
-    throw new ApolloError('Cannot cancel transaction');
+    throw new GraphQLError('Cannot cancel transaction', { extensions: { code: 'INTERNAL_SERVER_ERROR' } });
   }
 
   if (rows[0].stripeCusId !== stripeCusId) {
-    throw new ForbiddenError('User does not own this setupIntent');
+    throw new GraphQLError('SetupIntent does not belong to user', { extensions: { code: 'FORBIDDEN' } });
   }
 
   try {
@@ -26,6 +26,6 @@ export default async function cancelTransactionResolver(setupIntentId, username)
     return true;
   } catch (e) {
     console.log(e);
-    throw new ApolloError('Cannot cancel transaction');
+    throw new GraphQLError('Cannot cancel transaction', { extensions: { code: 'INTERNAL_SERVER_ERROR' } });
   }
 }

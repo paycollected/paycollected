@@ -1,26 +1,20 @@
 mutation CreateUser ($firstName: String!, $lastName: String!, $username: String!, $password: String!, $email: Email!) {
-  createUser(firstName: $firstName, lastName: $lastName, username: $username, password: $password, email: $email) {
+  createUser(firstName: $firstName, lastName: $lastName, username: $username, password: $password, email: $email)
+}
+
+mutation LogIn ($usernameOrEmail: String!, $password: String!) {
+  login(usernameOrEmail: $usernameOrEmail, password: $password) {
     username
     token
   }
 }
-
-
-mutation LogIn ($username: String!, $password: String!) {
-  login(username: $username, password: $password) {
-    username
-    token
-  }
-}
-
 
 mutation CreatePlanMutation (
-  $planName: String!, $cycleFrequency: CycleFrequency!, $perCycleCost: Float!, $startDate: String!, $timeZone: TimeZone!) {
-  createPlan(planName: $planName, cycleFrequency: $cycleFrequency, perCycleCost: $perCycleCost, startDate: $startDate, timeZone: $timeZone) {
+  $planName: String!, $cycleFrequency: CycleFrequency!, $perCycleCost: Float!, $startDate: Date!) {
+  createPlan(planName: $planName, cycleFrequency: $cycleFrequency, perCycleCost: $perCycleCost, startDate: $startDate) {
     planId
   }
 }
-
 
 mutation JoinPlan ($planId: PlanID!, $quantity: Int!) {
   joinPlan(planId: $planId, quantity: $quantity) {
@@ -37,13 +31,11 @@ mutation JoinPlan ($planId: PlanID!, $quantity: Int!) {
   }
 }
 
-
 mutation EditPayment {
   editPayment {
     portalSessionURL
   }
 }
-
 
 mutation Unsubscribe ($subscriptionId: SubscriptionID!) {
   unsubscribe(subscriptionId: $subscriptionId) {
@@ -51,13 +43,11 @@ mutation Unsubscribe ($subscriptionId: SubscriptionID!) {
   }
 }
 
-
-mutation UnsubscribeAsPlanOwner($subscriptionId: SubscriptionID!, $planId: PlanID!, $newOwner: String!) {
-  unsubscribeAsOwner(subscriptionId: $subscriptionId, planId: $planId, newOwner: $newOwner) {
+mutation UnsubscribeAsPlanOwner($subscriptionId: SubscriptionID!, $newOwner: String!) {
+  unsubscribeAsOwner(subscriptionId: $subscriptionId, newOwner: $newOwner) {
     planId
   }
 }
-
 
 mutation EditQuantity($subscriptionId: SubscriptionID!, $newQuantity: Int!) {
   editQuantity(subscriptionId: $subscriptionId, newQuantity: $newQuantity) {
@@ -66,18 +56,76 @@ mutation EditQuantity($subscriptionId: SubscriptionID!, $newQuantity: Int!) {
   }
 }
 
-
 mutation DeletePlan($planId: PlanID!) {
   deletePlan(planId: $planId) {
     planId
   }
 }
 
-
 mutation CancelTransaction($setupIntentId: SetupIntentID!) {
   cancelTransaction(setupIntentId: $setupIntentId)
 }
 
-mutation SubscribeWithSavedCard($paymentMethodId: PaymentMethodID!, $setupIntentId: SetupIntentID!) {
-  subscribeWithSavedCard(paymentMethodId: $paymentMethodId, setupIntentId: $setupIntentId)
+mutation SubscribeWithSavedCard($paymentMethodId: PaymentMethodID!, $setupIntentId: SetupIntentID!, $planId: PlanID!, $password: String!) {
+  subscribeWithSavedCard(paymentMethodId: $paymentMethodId, setupIntentId: $setupIntentId, planId: $planId, password: $password)
+}
+
+mutation ResendVerificationEmail($email: Email!) {
+  resendVerificationEmail(email: $email)
+}
+
+mutation ResetPassword($usernameOrEmail: String!) {
+  resetPassword(usernameOrEmail: $usernameOrEmail)
+}
+
+mutation ResetPasswordFromToken($token: String!, $newPassword: String!) {
+  resetPasswordFromToken(token: $token, newPassword: $newPassword) {
+    username
+    token
+  }
+}
+
+mutation ChangeEmail($newEmail: Email!, $password: String!) {
+  changeEmail(newEmail: $newEmail, password: $password)
+}
+
+mutation ChangeUsername($newUsername: String!, $password: String!) {
+  changeUsername(newUsername: $newUsername, password: $password) {
+    username
+    token
+  }
+}
+
+mutation ChangePassword($currentPassword: String!, $newPassword: String!) {
+  changePassword(currentPassword: $currentPassword, newPassword: $newPassword)
+}
+
+mutation DeleteNotification($notificationId: ID!) {
+  deleteNotification(notificationId: $notificationId)
+}
+
+mutation TransferPlanOwnership($planId: PlanID!, $newOwner: String!) {
+  transferOwnership(planId: $planId, newOwner: $newOwner) {
+    planId
+    newOwner {
+      username
+      firstName
+      lastName
+    }
+  }
+}
+
+mutation EditSubsQuantAndTransferOwnership($planId: PlanID!, $newOwner: String!, $subscriptionId: SubscriptionID!, $newQuantity: Int!) {
+  editQuantity(subscriptionId: $subscriptionId, newQuantity: $newQuantity) {
+    planId
+    quantity
+  }
+
+  transferOwnership(planId: $planId, newOwner: $newOwner) {
+    newOwner {
+      username
+      firstName
+      lastName
+    }
+  }
 }

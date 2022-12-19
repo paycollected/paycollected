@@ -1,20 +1,28 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { ApolloError, UserInputError } from 'apollo-server-core';
-import { getUserInfo } from '../../db/models.js';
+import { GraphQLError } from 'graphql';
+import { getUserInfoEitherUsernameOrEmail } from '../../db/models';
 
-export default async function loginResolver(username, password) {
+export default async function loginResolver(usernameOrEmailInput, password) {
   let errMsg;
-  username = username.trim().toLowerCase();
+  const usernameOrEmail = usernameOrEmailInput.trim().toLowerCase();
   try {
-    const { rows } = await getUserInfo(username);
+    const { rows } = await getUserInfoEitherUsernameOrEmail(usernameOrEmail);
     // if username does not exist, throw error
     if (rows.length === 0) {
-      errMsg = 'This username does not exist';
+      errMsg = 'This account does not exist';
+      throw new Error();
+    }
+
+    const {
+      savedPass, stripeCusId, verified, username,
+    } = rows[0];
+    // if unverified account, do not allow to log in
+    if (!verified) {
+      errMsg = 'The email associated with this account has not been verified yet.';
       throw new Error();
     }
     // if username exists but password doesn't match, return null
-    const { password: savedPass, stripeCusId, email } = rows[0];
     const result = await bcrypt.compare(password, savedPass);
     if (!result) {
       return null;
@@ -28,17 +36,17 @@ export default async function loginResolver(username, password) {
         username,
         stripeCusId,
       }
-    }, process.env.SECRET_KEY);
+    }, process.env.SIGNIN_SECRET_KEY);
 
     return { username, token };
   } catch (asyncError) {
     if (errMsg) {
       // if anticipated bad input error
-      throw new UserInputError(errMsg);
+      throw new GraphQLError(errMsg, { extensions: { code: 'BAD_USER_INPUT' } });
     } else {
       // catch all from rest of async
       console.log(asyncError);
-      throw new ApolloError('Unable to log in');
+      throw new GraphQLError('Unable to log in', { extensions: { code: 'INTERNAL_SERVER_ERROR' } });
     }
   }
 }

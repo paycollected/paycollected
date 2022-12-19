@@ -1,43 +1,93 @@
-query ViewOnePlan ($planId: PlanID!) {
+query PreJoinPlan ($planId: PlanID!) {
   viewOnePlan(planId: $planId) {
     planId
     name
+    cycleFrequency
+    perCycleCost
+    startDate
+    activeMembers {
+      firstName
+      lastName
+      quantity
+      joinedDate
+      isOwner
+    }
+    quantity
+    owner {
+      firstName
+      lastName
+    }
+  }
+}
+
+
+query PlanDetails ($planId: PlanID!) {
+  viewOnePlan(planId: $planId) {
+    planId
+    name
+    cycleFrequency
+    perCycleCost
+    startDate
     owner {
       firstName
       lastName
       username
-    },
-    cycleFrequency
-    perCycleCost
+      fullName @client
+    }
+    isOwner
+    quantity
+    selfCost
+    totalMembers
+    totalQuantity
+    subscriptionId
     activeMembers {
       firstName
       lastName
-      username
       quantity
+      joinedDate
+      isOwner
+      username
+      fullName @client
     }
-    quantity
   }
 }
 
 
 query ViewAllPlans {
   viewAllPlans {
-    planId
-    name
-    owner {
-      firstName
-      lastName
-      username
-    }
-    cycleFrequency
-    perCycleCost
-    activeMembers {
-      firstName
-      lastName
-      username
+    total
+    plans {
+      planId
+      name
+      owner {
+        firstName
+        lastName
+        formattedName @client
+      }
+      isOwner
+      nextBillDate
+      cycleFrequency
+      perCycleCost
       quantity
+      selfCost
     }
-    quantity
-    subscriptionId
+  }
+}
+
+query RetrieveNotifications {
+  retrieveNotifications {
+    count
+    notifications {
+      id
+      content
+      createdAt
+    }
+  }
+}
+
+query GetEmail {
+  getEmail {
+    username
+    email
   }
 }

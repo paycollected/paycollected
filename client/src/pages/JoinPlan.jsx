@@ -5,10 +5,10 @@ import {
   Flex, Box, FormControl, FormLabel, Heading, Button, Input, UnorderedList, ListItem
 } from '@chakra-ui/react';
 import { JoinPlan as JOIN_PLAN } from '../graphql/mutations.gql';
-import { ViewOnePlan as GET_PLAN } from '../graphql/queries.gql';
+import { PreJoinPlan as GET_PLAN } from '../graphql/queries.gql';
 
 export default function JoinPlan({
-  setPlanToJoin, setStripeClientSecret, setSetupIntentId, setPaymentMethods
+  setPlanToJoin, setStripeClientSecret, setSetupIntentId, setPaymentMethods,
 }) {
   const navigate = useNavigate();
   const { planId } = useParams();
@@ -16,7 +16,7 @@ export default function JoinPlan({
 
   const { loading: getPlanLoading, data: getPlanData, error: getPlanError } = useQuery(GET_PLAN, {
     variables: { planId: planId.toString().trim() },
-    fetchPolicy: 'network-only',
+    fetchPolicy: 'cache-and-network',
     nextFetchPolicy: 'cache-only',
   });
 
@@ -59,7 +59,7 @@ export default function JoinPlan({
 
   if (getPlanData) {
     const {
-      name, owner, cycleFrequency, perCycleCost, activeMembers, quantity
+      name, owner, cycleFrequency, perCycleCost, activeMembers, quantity: planQuant,
     } = getPlanData.viewOnePlan;
 
     return (
@@ -74,22 +74,22 @@ export default function JoinPlan({
               Owned by:&nbsp;
               {owner.firstName.concat(' ', owner.lastName)}
             </div>
-            <div>{`Total Plan Cost: $${perCycleCost} ${cycleFrequency.toLowerCase()}`}</div>
+            <div>{`Total Plan Cost: ${perCycleCost} ${cycleFrequency.toLowerCase()}`}</div>
             {activeMembers.length > 0 && (
               <>
                 <div>Others on this plan:</div>
                 <UnorderedList>
                   {activeMembers.map((member) => (
-                    <ListItem key={member.username}>{`${member.firstName} ${member.lastName} x ${member.quantity}`}</ListItem>
+                    <ListItem key={member.lastname}>{`${member.firstName} ${member.lastName} x ${member.quantity}`}</ListItem>
                   ))}
                 </UnorderedList>
               </>
             )}
             {activeMembers.length === 0
               && (<div>There are currently no members on this plan.</div>)}
-            {quantity > 0 ? (
+            {planQuant > 0 ? (
               <div>
-                <p>{`Your quantity on this plan: ${quantity}`}</p>
+                <p>{`Your quantity on this plan: ${planQuant}`}</p>
                 <p>
                   You cannot join this plan again.
                   Please use the dashboard to adjust your membership on this plan.
@@ -97,9 +97,7 @@ export default function JoinPlan({
               </div>
             ) : (
               <form onSubmit={onSubmit}>
-                <FormControl
-                  isRequired
-                >
+                <FormControl isRequired>
                   <FormLabel>Quantity</FormLabel>
                   <Input
                     type="number"
@@ -109,7 +107,7 @@ export default function JoinPlan({
                     onChange={(e) => { setQuantity(Number(e.target.value)); }}
                   />
                 </FormControl>
-                <Button type="submit" disabled={!!quantity} isLoading={payLoading}>Join</Button>
+                <Button type="submit" disabled={!!planQuant || payLoading} isLoading={payLoading}>Join</Button>
               </form>
             )}
             <Button onClick={() => { navigate('/dashboard'); }}>Cancel</Button>

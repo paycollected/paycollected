@@ -1,21 +1,40 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate, Link as ReactLink } from 'react-router-dom';
+import { useMutation } from '@apollo/client';
 import {
-  Flex, Box, Text, Stack, StackDivider, Link, Button,
+  Flex, Box, Text, Stack, Link, Image, Avatar, Menu, MenuButton, MenuList, MenuItem, Button,
 } from '@chakra-ui/react';
-import { CloseIcon, HamburgerIcon } from '@chakra-ui/icons';
+import Logo from '../public/Pay_Collected_Logo.png';
+import { EditPayment as EDIT_PAYMENT } from '../graphql/mutations.gql';
+import UnauthenticatedNavBar from './UnauthenticatedNavBar.jsx';
 
-export default function NavBar({ user, setUser, setPlanToJoin }) {
+export default function NavBar({
+  user, setUser, setPlanToJoin, setPlanToView
+}) {
   const navigate = useNavigate();
-  const [toggleMenu, setToggleMenu] = useState(false);
 
   const logUserOut = () => {
     localStorage.clear();
     setUser(null);
     setPlanToJoin(null);
+    setPlanToView(null);
     navigate('/');
   };
 
+  const [
+    submitEditPayment,
+    { loading: editPaymentLoading, error: editPaymentError, data: editPaymentData }
+  ] = useMutation(EDIT_PAYMENT, {
+    onCompleted: ({ editPayment }) => {
+      const { portalSessionURL } = editPayment;
+      window.location.replace(portalSessionURL);
+    },
+    onError: ({ message }) => { console.log(message); }
+  });
+
+  if (!user) {
+    return (<UnauthenticatedNavBar />);
+  }
   return (
     <Flex
       align="center"
@@ -23,61 +42,57 @@ export default function NavBar({ user, setUser, setPlanToJoin }) {
       wrap="wrap"
       w="100%"
       mb={8}
-      p={8}
-      bg={['blue.600']}
-      color={['white']}
+      p={4}
+      bg={['white']}
+      color={['gray.600']}
+      borderBottomWidth="1px"
+      borderColor="gray.200"
     >
-      <Box>
-        <Text fontSize="lg" fontWeight="bold">
-          Logo
-        </Text>
-      </Box>
-      <Box display={{ base: 'block', md: 'none' }} onClick={() => setToggleMenu(!toggleMenu)}>
-        {toggleMenu ? <CloseIcon /> : <HamburgerIcon />}
-      </Box>
-      <Box
-        display={{ base: toggleMenu ? 'block' : 'none', md: 'block' }}
-        flexBasis={{ base: '100%', md: 'auto' }}
-      >
+      <Box display="flex">
+        <Box display="flex">
+          <Link as={ReactLink} to="/">
+            <Box w={[180, 300]}>
+              <Image
+                src={Logo}
+                alt="PayCollected Logo"
+                fit="cover"
+                loading="eager"
+              />
+            </Box>
+          </Link>
+        </Box>
         <Stack
           spacing={8}
           align="center"
-          justify={['center', 'space-between', 'flex-end', 'flex-end']}
-          direction={['column', 'row', 'row', 'row']}
-          pt={[4, 4, 0, 0]}
-          divider={<StackDivider borderColor="gray.200" />}
+          justify="flex-end"
+          direction="row"
+          pt="0"
+          pl="4"
         >
-          <Link href="/">
+          <Link as={ReactLink} to="/dashboard">
             <Text display="block">
-              How to use
+              Dashboard
             </Text>
           </Link>
+          <Button type="button" onClick={submitEditPayment} variant="navBarBtn">Payments</Button>
           <Link href="/">
             <Text display="block">
-              FAQs
+              Statements
             </Text>
           </Link>
-          {user ? (
-            <Link as={ReactLink} to="/dashboard">
-              <Text display="block">
-                Dashboard
-              </Text>
-            </Link>
-          ) : (
-            <Button onClick={() => { navigate('/login'); }}>
-              Login
-            </Button>
-          )}
-          {user ? (
-            <Button onClick={logUserOut}>
-              Log Out
-            </Button>
-          ) : (
-            <Button onClick={() => { navigate('/signup'); }}>
-              Sign Up
-            </Button>
-          )}
         </Stack>
+      </Box>
+      <Box>
+        <Menu>
+          <MenuButton>
+            {/* TO-DO: Add Avatar Icon */}
+            <Avatar src="insert-url" />
+          </MenuButton>
+          <MenuList>
+            <MenuItem onClick={() => navigate('/manage-account')}>Profile</MenuItem>
+            <MenuItem onClick={() => logUserOut()}>Log Out</MenuItem>
+          </MenuList>
+        </Menu>
       </Box>
     </Flex>
   );

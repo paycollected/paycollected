@@ -1,53 +1,32 @@
-import { ApolloError } from 'apollo-server-core';
-import {
-  viewOnePlan as viewOnePlanModel,
-  viewAllPlans as viewAllPlansModel,
-  membersOnOnePlan
-} from '../../db/models.js';
+import { GraphQLError } from 'graphql';
+import { planDetail, plansSummary } from '../../db/models.js';
 
 
 export async function viewOnePlan(planId, username) {
   let errMsg;
 
   try {
-    const { rows } = await viewOnePlanModel(planId, username);
+    const { rows } = await planDetail(planId, username);
     if (rows.length === 0) { // no match
-      errMsg = 'No plan matched search';
+      errMsg = 'No plan matched search or plan has been archived';
       throw new Error();
     }
-    const result = { ...rows[0], planId };
-    result.perCycleCost /= 100;
-    return result;
+    return rows[0];
   } catch (asyncError) {
     if (errMsg) {
-      throw new ApolloError(errMsg);
-      // will need to handle this error in front end
-      // where the join page will send this query request
+      throw new GraphQLError(errMsg, { extensions: { code: 'BAD_REQUEST' } });
     }
     console.log(asyncError);
-    throw new ApolloError('Unable to retrieve plan information');
+    throw new GraphQLError('Unable to retrieve plan information', { extensions: { code: 'INTERNAL_SERVER_ERROR' } });
   }
 }
 
 export async function viewAllPlans(username) {
   try {
-    const { rows } = await viewAllPlansModel(username);
-    rows.forEach((row) => {
-      row.perCycleCost /= 100;
-    });
-    return rows;
+    const { rows } = await plansSummary(username);
+    return rows[0];
   } catch (asyncError) {
     console.log(asyncError);
-    throw new ApolloError('Unable to retrieve plans information');
-  }
-}
-
-export async function activeMembers(planId, username) {
-  try {
-    const { rows } = await membersOnOnePlan(planId, username);
-    return rows;
-  } catch (asyncError) {
-    console.log(asyncError);
-    throw new ApolloError('Unable to retrieve plan information');
+    throw new GraphQLError('Unable to retrieve plans information', { extensions: { code: 'INTERNAL_SERVER_ERROR' } });
   }
 }

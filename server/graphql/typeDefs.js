@@ -1,24 +1,25 @@
-import { gql } from 'apollo-server-core';
-
-export default gql`
+export default `#graphql
   scalar PlanID
   scalar SubscriptionID
   scalar Username
   scalar Email
   scalar SetupIntentID
   scalar PaymentMethodID
+  scalar TestClockID
+  scalar DateTime
+  scalar Date
+  scalar USCurrency
 
   type Query {
-    viewOnePlan (planId: PlanID!): Plan!
-    viewAllPlans: [Plan]!
+    viewOnePlan (planId: PlanID!): PlanDetail!
+    viewAllPlans: AllPlansSummary!
+    retrieveNotifications: RetrieveNotifications! # offset pagination?
+    getEmail: UserInfo!
   }
 
-  type PlanMember {
-    firstName: String!
-    lastName: String!
-    username: ID!
-    # username: Username
-    quantity: Int # 0 means not paying # nullable because quantity for owner field is null
+  type UserInfo {
+    username: String!
+    email: String!
   }
 
   type LoginInfo {
@@ -44,6 +45,7 @@ export default gql`
 
   type PlanIdResponse {
     planId: PlanID!
+    status: UpdateStatus!
   }
 
   type PortalSession {
@@ -55,30 +57,80 @@ export default gql`
     quantity: Int!
   }
 
+  type TransferOwnershipResponse {
+    planId: PlanID!
+    newOwner: PlanOwner! #username
+  }
+
   enum CycleFrequency {
     WEEKLY
     MONTHLY
     YEARLY
   }
 
-  enum TimeZone {
-    EASTERN
-    CENTRAL
-    MOUNTAIN
-    PACIFIC
+  enum UpdateStatus {
+    DELETED
+    ARCHIVED
+    CREATED
   }
 
-  type Plan {
+  type AllPlansSummary {
+    total: Int!,
+    plans: [PlanSummary]!
+  }
+
+  type PlanSummary {
+    planId: PlanID!
+    name : String!
+    quantity: Int!
+    selfCost: USCurrency!
+    cycleFrequency: CycleFrequency!
+    perCycleCost: USCurrency!
+    nextBillDate: Date!
+    isOwner: Boolean!
+    owner: PlanOwner!
+  }
+
+  type PlanOwner {
+    firstName: String!
+    lastName: String!
+    username: ID!
+  }
+
+  type PlanMember {
+    firstName: String!
+    lastName: String!
+    quantity: Int!
+    joinedDate: Date!
+    isOwner: Boolean!
+    username: ID!
+  }
+
+  type PlanDetail {
     planId: PlanID!
     name: String!
-    owner: PlanMember!
+    quantity: Int!
+    selfCost: USCurrency!
     cycleFrequency: CycleFrequency!
-    perCycleCost: Float!
-    activeMembers: [PlanMember]!
-    # can include owner, will only include members whose quantity > 0
-    # does not include user requesting this info
+    perCycleCost: USCurrency!
+    startDate: Date!
+    totalMembers: Int! # including self
+    totalQuantity: Int! # including self
     subscriptionId: SubscriptionID
-    quantity: Int! # unit quant of this plan for current user
+    activeMembers: [PlanMember]! # also include owner, does NOT include self
+    isOwner: Boolean!
+    owner: PlanOwner!
+  }
+
+  type Notification {
+    id: ID!
+    content: String!
+    createdAt: DateTime!
+  }
+
+  type RetrieveNotifications {
+    count: Int!
+    notifications: [Notification]!
   }
 
   type Mutation {
@@ -89,57 +141,62 @@ export default gql`
       # username: Username!
       password: String!
       email: Email!
-    ): LoginInfo!
+      testClockId: TestClockID # for testing purposes, not for production
+    ): Boolean!
 
     login(
-      username: String!
+      usernameOrEmail: String!
       # username: Username!
       password: String!
     ): LoginInfo
+
+    resetPassword(usernameOrEmail: String!): Boolean!
+
+    resetPasswordFromToken(token: String!, newPassword: String!): LoginInfo!
+
+    resendVerificationEmail(email: Email!, testClockId: TestClockID): Boolean!
+
+    changeEmail(newEmail: Email!, password: String!): Boolean!
+
+    changeUsername(newUsername: String!, password: String!): LoginInfo!
+
+    changePassword(currentPassword: String!, newPassword: String!): Boolean!
 
     createPlan(
       planName: String!
       cycleFrequency: CycleFrequency!
       perCycleCost: Float!
-      startDate: String! # datestring
-      timeZone: TimeZone!
+      startDate: Date!
     ): PlanIdResponse!
-    # returning stripe product ID here, which will be used as code
 
     editPayment: PortalSession!
 
-    unsubscribe(
-      subscriptionId: SubscriptionID!
-    ): PlanIdResponse!
+    unsubscribe(subscriptionId: SubscriptionID!): PlanIdResponse!
 
     unsubscribeAsOwner(
       subscriptionId: SubscriptionID!
-      planId: PlanID!
       newOwner: String!
       # newOwner: Username!
     ): PlanIdResponse!
 
-    editQuantity(
-      subscriptionId: SubscriptionID!
-      newQuantity: Int!
-    ): EditQuantResponse!
+    editQuantity(subscriptionId: SubscriptionID!, newQuantity: Int!): EditQuantResponse!
 
-    deletePlan(
-      planId: PlanID!
-    ): PlanIdResponse!
+    deletePlan(planId: PlanID!): PlanIdResponse!
 
-    cancelTransaction(
-      setupIntentId: SetupIntentID!
-    ): Boolean!
+    cancelTransaction(setupIntentId: SetupIntentID!): Boolean!
 
+    # need to change response type
     subscribeWithSavedCard(
       paymentMethodId: PaymentMethodID!
       setupIntentId: SetupIntentID!
-    ): Boolean!
-
-    joinPlan(
+      password: String!
       planId: PlanID!
-      quantity: Int!
-    ): PaymentIntentAndPaymentMethods! # returning client secret
+    ): Boolean
+
+    joinPlan(planId: PlanID!, quantity: Int!): PaymentIntentAndPaymentMethods! # returning client secret
+
+    deleteNotification(notificationId: ID!): ID!
+
+    transferOwnership(planId: PlanID!, newOwner: String!): TransferOwnershipResponse!
   }
 `;
