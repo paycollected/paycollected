@@ -26,7 +26,7 @@ if (queryStr.length > 0) {
 }
 
 export default function Dashboard({
-  user, setUser, planToJoin, setPlanToJoin, setPlanToView
+  user, setUser, setPlanToJoin, setPlanToView
 }) {
   const navigate = useNavigate();
   const [code, setCode] = useState('');
@@ -148,7 +148,6 @@ export default function Dashboard({
             )}
           </div>
         )} */}
-      {/* </Container> */}
       </>
     );
   }
