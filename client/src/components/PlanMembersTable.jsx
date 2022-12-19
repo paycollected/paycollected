@@ -16,6 +16,9 @@ export default function PlanMembersTable({ members }) {
             </Tr>
           </Thead>
           <Tbody bg="gray.50">
+            {members.length === 0 && (
+              <Tr><Td colSpan={3} textAlign="center">There are currently no other members on this plan.</Td></Tr>
+            )}
             {members.map((member, i) => (
               <Tr key={member.username}>
                 <Td pt={i === 0 ? 4 : 2} pb={i === members.length - 1 ? 4 : 2}>

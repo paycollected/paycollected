@@ -14,7 +14,10 @@ import {
 export default function ActionConfirmationModal({
   action, isOpen, onClose, subscriptionId, planId, planName, members, setPlanToView, inDashboard,
 }) {
-  const [newOwner, setNewOwner] = useState(members === null ? null : members[0].username);
+  const [newOwner, setNewOwner] = useState(
+    (members === null || members.length === 0)
+      ? null : members[0].username
+  );
   const [selectError, setSelectError] = useState('');
   const navigate = useNavigate();
   const requestCompleted = () => {
@@ -100,7 +103,7 @@ export default function ActionConfirmationModal({
                 </Text>
               </>
             )}
-            {action === 'cancelAsOwner' && (
+            {action === 'cancelAsOwner' && members.length > 0 && (
               <FormControl isRequired>
                 <FormLabel>Change plan&apos;s owner:</FormLabel>
                 <Select value={newOwner} onChange={(e) => setNewOwner(e.target.value)}>
