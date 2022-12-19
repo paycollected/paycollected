@@ -9,7 +9,7 @@ import JoinPlan from './pages/JoinPlan.jsx';
 import Checkout from './pages/checkout/Checkout.jsx';
 import FourOhFour from './pages/404.jsx';
 import PwdReset from './pages/PwdReset.jsx';
-import ManageAccount from './pages/ManageAccount.jsx';
+import ManageAccount from './pages/manageAccount/ManageAccount.jsx';
 import PlanDetails from './pages/planDetails/PlanDetails.jsx';
 
 // check that token is still valid before displaying logged-in state
