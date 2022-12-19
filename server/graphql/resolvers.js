@@ -22,13 +22,13 @@ import subscribeWithSavedCardResolver from './subscriptions/subscribeWithSavedCa
 import {
   viewOnePlan as viewOnePlanResolver,
   viewAllPlans as viewAllPlansResolver,
-  activeMembers as activeMembersResolver,
 } from './plans/view.js';
 import createPlanResolver from './plans/create.js';
 import deletePlanResolver from './plans/delete.js';
 import cancelTransactionResolver from './payment/cancelTransaction';
 import { retrieveNotificationsResolver, deleteNotificationResolver } from './users/notifications';
 import transferOwnershipResolver from './plans/transferOwnership';
+import getEmailResolver from './users/getEmail';
 
 const stripe = stripeSDK(process.env.STRIPE_SECRET_KEY);
 
@@ -73,6 +73,10 @@ export default {
     retrieveNotifications: authResolverWrapper((_, __, { user: { username } }) => (
       retrieveNotificationsResolver(username)
     )),
+
+    getEmail: authResolverWrapper((_, __, { user: { username } }) => (
+      getEmailResolver(username)
+    ))
   },
 
 

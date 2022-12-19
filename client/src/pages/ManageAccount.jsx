@@ -1,26 +1,38 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useMutation } from '@apollo/client';
+import { useMutation, useQuery } from '@apollo/client';
 import { useForm } from 'react-hook-form';
 import {
-  FormControl, FormLabel, Input, Button, FormErrorMessage, Flex, Box,
+  FormControl, FormLabel, Input, Button, FormErrorMessage, Flex, Box, IconButton,
+  VStack, Heading, TableContainer, Table, Tbody, Tr, Td, useBreakpointValue
 } from '@chakra-ui/react';
+import { EditIcon } from '@chakra-ui/icons';
 import {
   ChangePassword as CHANGE_PASSWORD,
   ChangeUsername as CHANGE_USERNAME,
   ChangeEmail as CHANGE_EMAIL,
   ResendVerificationEmail as REVERIFY,
 } from '../graphql/mutations.gql';
+import { GetEmail as GET_EMAIL } from '../graphql/queries.gql';
+import NavBar from '../components/NavBar.jsx';
 
-export default function ManageAccount({ user, setUser }) {
+export default function ManageAccount({
+  user, setUser, setPlanToJoin, setPlanToView
+}) {
+  const isMobile = useBreakpointValue({ base: true, md: false });
   const [action, setAction] = useState('password');
   const [status, setStatus] = useState('');
   const [errMsg, setErrMsg] = useState('');
   const [email, setEmail] = useState('');
-  const navigate = useNavigate();
   const {
     register, handleSubmit, formState: { errors }, getValues
   } = useForm({ reValidateMode: 'onBlur' });
+
+  const {
+    loading: getEmailLoading, data: getEmailData, error: getEmailError
+  } = useQuery(GET_EMAIL, {
+    fetchPolicy: 'cache-and-network',
+    nextFetchPolicy: 'cache-only',
+  });
   const [changeUsername, { loading: usernameLoading }] = useMutation(CHANGE_USERNAME, {
     onCompleted: ({ changeUsername: { username, token } }) => {
       setUser(username);
@@ -81,7 +93,38 @@ export default function ManageAccount({ user, setUser }) {
 
   return (
     <>
-      <h3>This is the manage account page</h3>
+      <NavBar
+        user={user}
+        setUser={setUser}
+        setPlanToJoin={setPlanToJoin}
+        setPlanToView={setPlanToView}
+      />
+      <VStack w="93%" align="left" spacing={{ base: '6', md: '10' }} mb="10">
+        <Heading as="h1" fontSize="3xl">Profile</Heading>
+        <TableContainer width="75%">
+          <Table variant="unstyled" size={isMobile ? 'sm' : 'md'}>
+            <Tbody>
+              <Tr>
+                <Td fontWeight="bold">Username</Td>
+                <Td>{getEmailData?.getEmail.username}</Td>
+                <Td>
+                  {isMobile
+                    ? <IconButton variant="outline" size="sm" icon={<EditIcon />} />
+                    : (
+                      <Button rightIcon={<EditIcon />} size="sm" variant="outline">
+                        Edit
+                      </Button>
+                    )}
+                </Td>
+              </Tr>
+              <Tr>
+                <Td fontWeight="bold">Email</Td>
+                <Td>{getEmailData?.getEmail.email}</Td>
+              </Tr>
+            </Tbody>
+          </Table>
+        </TableContainer>
+      </VStack>
       {status === 'error' && (<div>{errMsg}</div>)}
       {status === 'success' && action === 'email' && (
         <div>
@@ -185,7 +228,6 @@ export default function ManageAccount({ user, setUser }) {
           </FormControl>
           <Button type="submit">Submit</Button>
         </form>
-        <Button type="button" onClick={() => { navigate('/dashboard'); }}>Back to dashboard</Button>
       </Box>
     </>
   );

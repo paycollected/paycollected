@@ -84,3 +84,10 @@ query RetrieveNotifications {
     }
   }
 }
+
+query GetEmail {
+  getEmail {
+    username
+    email
+  }
+}

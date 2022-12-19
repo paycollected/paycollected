@@ -15,7 +15,7 @@ export default async function loginResolver(usernameOrEmailInput, password) {
     }
 
     const {
-      savedPass, stripeCusId, verified, username
+      savedPass, stripeCusId, verified, username,
     } = rows[0];
     // if unverified account, do not allow to log in
     if (!verified) {

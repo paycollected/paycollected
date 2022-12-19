@@ -14,6 +14,12 @@ export default `#graphql
     viewOnePlan (planId: PlanID!): PlanDetail!
     viewAllPlans: AllPlansSummary!
     retrieveNotifications: RetrieveNotifications! # offset pagination?
+    getEmail: UserInfo!
+  }
+
+  type UserInfo {
+    username: String!
+    email: String!
   }
 
   type LoginInfo {
