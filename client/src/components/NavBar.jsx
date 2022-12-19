@@ -89,8 +89,7 @@ export default function NavBar({
             <Avatar src="insert-url" />
           </MenuButton>
           <MenuList>
-            {/* TO-DO: Link to Edit Profile page */}
-            <MenuItem>Profile</MenuItem>
+            <MenuItem onClick={() => navigate('/manage-account')}>Profile</MenuItem>
             <MenuItem onClick={() => logUserOut()}>Log Out</MenuItem>
           </MenuList>
         </Menu>
