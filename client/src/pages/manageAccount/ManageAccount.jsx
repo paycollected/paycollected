@@ -1,31 +1,41 @@
-import React, { useState } from 'react';
-import { useMutation, useQuery } from '@apollo/client';
+import React, { useState, useEffect } from 'react';
+import { useQuery } from '@apollo/client';
 import { useForm } from 'react-hook-form';
 import {
   FormControl, FormLabel, Input, Button, FormErrorMessage, Flex, Box, IconButton,
-  VStack, Heading, TableContainer, Table, Tbody, Tr, Td, useBreakpointValue
+  VStack, Heading, TableContainer, Table, Tbody, Tr, Td, useBreakpointValue, useDisclosure
 } from '@chakra-ui/react';
 import { EditIcon } from '@chakra-ui/icons';
-import {
-  ChangePassword as CHANGE_PASSWORD,
-  ChangeUsername as CHANGE_USERNAME,
-  ChangeEmail as CHANGE_EMAIL,
-  ResendVerificationEmail as REVERIFY,
-} from '../graphql/mutations.gql';
-import { GetEmail as GET_EMAIL } from '../graphql/queries.gql';
-import NavBar from '../components/NavBar.jsx';
+import { GetEmail as GET_EMAIL } from '../../graphql/queries.gql';
+import NavBar from '../../components/NavBar.jsx';
+import ChangeEmailModal from './ChangeEmailModal.jsx';
+import ChangeUsernameModal from './ChangeUsernameModal.jsx';
+import ChangePasswordModal from './ChangePasswordModal.jsx';
 
 export default function ManageAccount({
   user, setUser, setPlanToJoin, setPlanToView
 }) {
   const isMobile = useBreakpointValue({ base: true, md: false });
+  const {
+    isOpen: isOpenUsername,
+    onOpen: onOpenUsername,
+    onClose: onCloseUsername
+  } = useDisclosure();
+  const {
+    isOpen: isOpenEmail,
+    onOpen: onOpenEmail,
+    onClose: onCloseEmail
+  } = useDisclosure();
+  const {
+    isOpen: isOpenPassword,
+    onOpen: onOpenPassword,
+    onClose: onClosePassword
+  } = useDisclosure();
   const [action, setAction] = useState('password');
   const [status, setStatus] = useState('');
   const [errMsg, setErrMsg] = useState('');
+  const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
-  const {
-    register, handleSubmit, formState: { errors }, getValues
-  } = useForm({ reValidateMode: 'onBlur' });
 
   const {
     loading: getEmailLoading, data: getEmailData, error: getEmailError
@@ -33,64 +43,34 @@ export default function ManageAccount({
     fetchPolicy: 'cache-and-network',
     nextFetchPolicy: 'cache-only',
   });
-  const [changeUsername, { loading: usernameLoading }] = useMutation(CHANGE_USERNAME, {
-    onCompleted: ({ changeUsername: { username, token } }) => {
-      setUser(username);
-      localStorage.setItem('token', token);
-      setStatus('success');
-    },
-    onError: ({ message }) => {
-      setErrMsg(message);
-      setStatus('error');
-    },
-  });
-  const [changeEmail, { loading: emailLoading }] = useMutation(CHANGE_EMAIL, {
-    onCompleted: () => setStatus('success'),
-    onError: ({ message }) => {
-      setErrMsg(message);
-      setStatus('error');
-    }
-  });
-  const [changePassword, { loading: passwordLoading }] = useMutation(CHANGE_PASSWORD, {
-    onCompleted: () => setStatus('success'),
-    onError: ({ message }) => {
-      setErrMsg(message);
-      setStatus('error');
-    }
-  });
-  const [resendVerificationEmail, { loading: reverifyLoading }] = useMutation(REVERIFY, {
-    onCompleted: () => setStatus('resent'),
-    onError: ({ message }) => {
-      setErrMsg(message);
-      setStatus('error');
-    }
-  });
 
-  const onSubmit = (data) => {
-    let newUsername;
-    let password;
-    let newEmail;
-    let newPassword;
-    let currentPassword;
-    switch (action) {
-      case 'username':
-        ({ newUsername, currentPassword: password } = data);
-        changeUsername({ variables: { newUsername, password } });
-        break;
-      case 'email':
-        ({ newEmail, currentPassword: password } = data);
-        setEmail(newEmail);
-        changeEmail({ variables: { newEmail, password } });
-        break;
-      default:
-        ({ newPassword, currentPassword } = data);
-        changePassword({ variables: { newPassword, currentPassword }});
-        break;
-    }
-  };
+  useEffect(() => {
+    setUsername(getEmailData?.getEmail.username);
+    setEmail(getEmailData?.getEmail.email);
+  }, [getEmailData]);
 
-  const reverify = () => { resendVerificationEmail({ variables: { email } }); };
-
+  // const onSubmit = (data) => {
+  //   let newUsername;
+  //   let password;
+  //   let newEmail;
+  //   let newPassword;
+  //   let currentPassword;
+  //   switch (action) {
+  //     case 'username':
+  //       ({ newUsername, currentPassword: password } = data);
+  //       changeUsername({ variables: { newUsername, password } });
+  //       break;
+  //     case 'email':
+  //       ({ newEmail, currentPassword: password } = data);
+  //       setEmail(newEmail);
+  //       changeEmail({ variables: { newEmail, password } });
+  //       break;
+  //     default:
+  //       ({ newPassword, currentPassword } = data);
+  //       changePassword({ variables: { newPassword, currentPassword }});
+  //       break;
+  //   }
+  // };
   return (
     <>
       <NavBar
@@ -106,12 +86,12 @@ export default function ManageAccount({
             <Tbody>
               <Tr>
                 <Td fontWeight="bold">Username</Td>
-                <Td>{getEmailData?.getEmail.username}</Td>
+                <Td>{getEmailData ? username : <Button isLoading variant="outline" size="sm" />}</Td>
                 <Td>
                   {isMobile
-                    ? <IconButton variant="outline" size="sm" icon={<EditIcon />} />
+                    ? <IconButton variant="outline" size="sm" icon={<EditIcon />} onClick={onOpenUsername} />
                     : (
-                      <Button rightIcon={<EditIcon />} size="sm" variant="outline">
+                      <Button rightIcon={<EditIcon />} size="sm" variant="outline" onClick={onOpenUsername}>
                         Edit
                       </Button>
                     )}
@@ -119,13 +99,44 @@ export default function ManageAccount({
               </Tr>
               <Tr>
                 <Td fontWeight="bold">Email</Td>
-                <Td>{getEmailData?.getEmail.email}</Td>
+                <Td>{getEmailData ? email : <Button isLoading variant="outline" size="sm" />}</Td>
+                <Td>
+                  {isMobile
+                    ? <IconButton variant="outline" size="sm" icon={<EditIcon />} onClick={onOpenEmail} />
+                    : (
+                      <Button rightIcon={<EditIcon />} size="sm" variant="outline" onClick={onOpenEmail}>
+                        Edit
+                      </Button>
+                    )}
+                </Td>
               </Tr>
             </Tbody>
           </Table>
         </TableContainer>
       </VStack>
-      {status === 'error' && (<div>{errMsg}</div>)}
+      <Button onClick={onOpenPassword}>Change password</Button>
+      {getEmailData
+        && (
+        <>
+          <ChangeUsernameModal
+            isOpen={isOpenUsername}
+            onClose={onCloseUsername}
+            username={username}
+            setUsername={setUsername}
+          />
+          <ChangeEmailModal
+            isOpen={isOpenEmail}
+            onClose={onCloseEmail}
+            email={email}
+            setEmail={setEmail}
+          />
+          <ChangePasswordModal
+            isOpen={isOpenPassword}
+            onClose={onClosePassword}
+          />
+        </>
+        )}
+      {/* {status === 'error' && (<div>{errMsg}</div>)}
       {status === 'success' && action === 'email' && (
         <div>
           <div>
@@ -228,7 +239,7 @@ export default function ManageAccount({
           </FormControl>
           <Button type="submit">Submit</Button>
         </form>
-      </Box>
+      </Box> */}
     </>
   );
 }
