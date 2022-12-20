@@ -158,7 +158,6 @@ export default function CreateAccount({ setUser }) {
                   <InputGroup>
                     <Input
                       name="password"
-                      placeholdexr="Enter Password"
                       type={showPassword1 ? 'text' : 'password'}
                       {...register('password', { required: 'Password required' })}
                     />

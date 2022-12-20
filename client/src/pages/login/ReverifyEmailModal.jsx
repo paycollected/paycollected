@@ -40,7 +40,7 @@ export default function ReverifyEmailModal({ isOpen, onClose }) {
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <ModalOverlay />
-      <ModalContent>
+      <ModalContent pb="6">
         <ModalHeader fontSize="2xl" color="#2B6CB0">Verify Your Email</ModalHeader>
         <ModalCloseButton
           onClick={() => {

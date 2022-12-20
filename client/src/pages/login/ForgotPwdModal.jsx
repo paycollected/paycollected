@@ -38,7 +38,7 @@ export default function ForgotPwdModal({ isOpen, onClose }) {
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <ModalOverlay />
-      <ModalContent>
+      <ModalContent pb="6">
         <ModalHeader fontSize="2xl" color="#2B6CB0">Reset Your Password</ModalHeader>
         <ModalCloseButton
           onClick={() => {
