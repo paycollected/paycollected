@@ -58,6 +58,9 @@ export default function PlansTable({ plans, setPlanToView }) {
           </Tr>
         </Thead>
         <Tbody>
+          {plans.length === 0 && (
+            <Tr><Td colSpan={7} textAlign="center">You are currently not enrolled in any plan.</Td></Tr>
+          )}
           {plans.map((plan) => {
             const {
               planId, name, owner, isOwner, nextBillDate, cycleFrequency, perCycleCost, quantity,
