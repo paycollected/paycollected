@@ -1,7 +1,9 @@
 import {
   extendTheme, defineStyleConfig, createMultiStyleConfigHelpers,
 } from '@chakra-ui/react';
-import { menuAnatomy, modalAnatomy } from '@chakra-ui/anatomy';
+import {
+  menuAnatomy, modalAnatomy, inputAnatomy, numberInputAnatomy
+} from '@chakra-ui/anatomy';
 
 export const buttonTheme = defineStyleConfig({
   baseStyle: {
@@ -106,12 +108,6 @@ export const buttonTheme = defineStyleConfig({
   }
 });
 
-export const inputTheme = defineStyleConfig({
-  baseStyle: {
-    width: '40%',
-  },
-});
-
 const {
   definePartsStyle: definePartsStyleMenu, defineMultiStyleConfig: defineMultiStyleConfigMenu
 } = createMultiStyleConfigHelpers(menuAnatomy.keys);
@@ -120,6 +116,14 @@ const {
   definePartsStyle: definePartsStyleModal, defineMultiStyleConfig: defineMultiStyleConfigModal
 } = createMultiStyleConfigHelpers(modalAnatomy.keys);
 
+const {
+  definePartsStyle: definePartsStyleInput, defineMultiStyleConfig: defineMultiStyleConfigInput
+} = createMultiStyleConfigHelpers(inputAnatomy.keys);
+
+const {
+  definePartsStyle: definePartsStyleNumberInput,
+  defineMultiStyleConfig: defineMultiStyleConfigNumberInput
+} = createMultiStyleConfigHelpers(numberInputAnatomy.keys);
 
 const menuTheme = defineMultiStyleConfigMenu({
   baseStyle: definePartsStyleMenu({
@@ -143,6 +147,22 @@ const modalTheme = defineMultiStyleConfigModal({
       closeButton: { top: '6', right: '10' },
     }
   }
+});
+
+const inputTheme = defineMultiStyleConfigInput({
+  baseStyle: definePartsStyleInput({
+    field: { color: 'gray.700' },
+  })
+});
+
+const numberInputTheme = defineMultiStyleConfigNumberInput({
+  baseStyle: definePartsStyleNumberInput({
+    field: {
+      color: 'blackAlpha.500',
+      border: '1px solid',
+      borderColor: 'gray.200',
+    },
+  }),
 });
 
 const headingTheme = defineStyleConfig({
@@ -171,6 +191,7 @@ export const globalTheme = extendTheme({
     Heading: headingTheme,
     Menu: menuTheme,
     Modal: modalTheme,
+    NumberInput: numberInputTheme,
   },
   fonts: {
     heading: "'Inter', sans-serif",

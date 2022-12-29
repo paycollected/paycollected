@@ -1,7 +1,7 @@
 import React from 'react';
 import {
   FormControl, FormLabel, FormHelperText, FormErrorMessage, NumberInput, NumberInputField,
-  NumberInputStepper, NumberIncrementStepper, NumberDecrementStepper,
+  NumberInputStepper, NumberIncrementStepper, NumberDecrementStepper, Box,
 } from '@chakra-ui/react';
 
 
@@ -9,10 +9,10 @@ export default function JoinPlanInput({
   register, errors, totalQuantity, perCycleCost, cycleFrequency,
 }) {
   return (
-    <>
+    <Box w="70%">
       <FormControl isRequired isInvalid={errors.quantity}>
         <FormLabel textStyle="gridTitle" htmlFor="quantity">Subscriptions:</FormLabel>
-        <NumberInput defaultValue={1} min={1}>
+        <NumberInput variant="placeholder" size="sm" defaultValue={1} min={1}>
           <NumberInputField
             id="quantity"
             {...register('quantity', {
@@ -30,6 +30,6 @@ export default function JoinPlanInput({
         <FormErrorMessage>{errors.quantity && errors.quantity.message}</FormErrorMessage>
       </FormControl>
       <h1>Random</h1>
-    </>
+    </Box>
   );
 }

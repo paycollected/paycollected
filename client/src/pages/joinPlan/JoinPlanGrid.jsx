@@ -1,5 +1,5 @@
 import React from 'react';
-import { Grid, GridItem } from '@chakra-ui/react';
+import { Grid, GridItem, Text, VStack } from '@chakra-ui/react';
 import PlanMembersTable from '../../components/PlanMembersTable.jsx';
 import JoinPlanInput from './JoinPlanInput.jsx';
 
@@ -24,9 +24,13 @@ export default function JoinPlanGrid({
       <GridItem>{cycleFrequency}</GridItem>
       <GridItem textStyle="gridTitle">Start Date:</GridItem>
       <GridItem>{startDate}</GridItem>
-      <GridItem colSpan={2} textStyle="gridTitle">Others on this plan:</GridItem>
       <GridItem colSpan={2}>
-        <PlanMembersTable members={members} width="100%" />
+        <VStack spacing={8} pb={6}>
+          <Text w="100%" textStyle="gridTitle">
+            Others on this plan:
+          </Text>
+          <PlanMembersTable members={members} width="100%" />
+        </VStack>
       </GridItem>
       <GridItem colSpan={2}>
         <JoinPlanInput

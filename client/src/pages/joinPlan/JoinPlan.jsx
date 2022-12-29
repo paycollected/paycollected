@@ -2,7 +2,8 @@ import React, { useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation } from '@apollo/client';
 import {
-  Flex, Box, Heading, Button, VStack, Card, CardHeader, CardBody, CardFooter, Text,
+  Flex, Box, Heading, Button, VStack, Card, CardHeader, CardBody, CardFooter, Text, Grid, GridItem,
+  Container,
 } from '@chakra-ui/react';
 import { useForm } from 'react-hook-form';
 import NavBar from '../../components/NavBar.jsx';
@@ -125,10 +126,19 @@ export default function JoinPlan({
                   />
                 </CardBody>
                 <CardFooter mx={6} mb={8} pt={4} w={{ base: '100%', md: '70%' }}>
-                  <Flex w="100%" justify="space-between">
-                    <Button type="button" variant="outline" w="45%">Cancel</Button>
-                    <Button type="submit" w="45%">Continue to payment</Button>
-                  </Flex>
+                  <Grid
+                    w="100%"
+                    templateRows={{ base: 'repeat(2, max-content)', md: 'max-content' }}
+                    templateColumns={{ base: '70%', md: 'repeat(2, 1fr)' }}
+                    gap={{ base: 4, md: 0 }}
+                  >
+                    <GridItem w="90%">
+                      <Button w="100%" type="button" variant="outline">Cancel</Button>
+                    </GridItem>
+                    <GridItem w="90%">
+                      <Button w="100%" type="submit">Continue to payment</Button>
+                    </GridItem>
+                  </Grid>
                 </CardFooter>
               </form>
             </Card>
