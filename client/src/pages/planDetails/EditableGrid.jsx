@@ -155,7 +155,7 @@ export default function EditableGrid({
       <GridItem colSpan={{ base: 1, md: 2 }}>
         <VStack justify="left" spacing={{ base: 4, md: 6 }}>
           <Text w="100%" textStyle="formLabel">Others on this plan</Text>
-          <PlanMembersTable members={activeMembers} />
+          <PlanMembersTable members={activeMembers} width="60%" />
         </VStack>
       </GridItem>
     </Grid>

@@ -3,10 +3,10 @@ import {
   Table, Tbody, Td, Th, Thead, Tr, Container, Box, Badge,
 } from '@chakra-ui/react';
 
-export default function PlanMembersTable({ members }) {
+export default function PlanMembersTable({ members, width }) {
   return (
     <Container minWidth="100%" padding={0}>
-      <Box overflowX="auto" w={{ base: '70vw', md: '60%' }}>
+      <Box overflowX="auto" w={{ base: '70vw', md: width }}>
         <Table size="sm" variant="unstyled">
           <Thead bg="gray.200" color="blackAlpha.700">
             <Tr>
@@ -24,7 +24,7 @@ export default function PlanMembersTable({ members }) {
                 <Td pt={i === 0 ? 4 : 2} pb={i === members.length - 1 ? 4 : 2}>
                   {member.fullName}
                   {member.isOwner && (
-                    <Badge ml={1} variant="subtle" colorScheme="green" fontSize="0.5rem">owner</Badge>
+                    <Badge ml={2} variant="subtle" colorScheme="green" fontSize="0.5rem">owner</Badge>
                   )}
                 </Td>
                 <Td pt={i === 0 ? 4 : 2} pb={i === members.length - 1 ? 4 : 2}>

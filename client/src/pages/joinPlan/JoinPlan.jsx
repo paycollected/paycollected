@@ -108,8 +108,18 @@ export default function JoinPlan({
                 <Heading as="h2" variant="nuanced" color="#272088">{name}</Heading>
               </CardHeader>
               <CardBody mx={6} mb={8} mt={0}>
-                <Box w="60%">
-                  <JoinPlanGrid />
+                <Box w={{ base: '100%', md: '70%' }}>
+                  <JoinPlanGrid
+                    name={name}
+                    isOwner={isOwner}
+                    owner={owner}
+                    cycleFrequency={cycleFrequency}
+                    perCycleCost={perCycleCost}
+                    startDate={startDate}
+                    members={activeMembers}
+                    currQuant={currQuant}
+                    totalQuantity={totalQuantity}
+                  />
                 </Box>
               </CardBody>
             </Card>
