@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation } from '@apollo/client';
 import {
-  Flex, Box, Heading, Button, VStack, Card, CardHeader, CardBody, Text,
+  Flex, Box, Heading, Button, VStack, Card, CardHeader, CardBody, CardFooter, Text,
 } from '@chakra-ui/react';
 import { useForm } from 'react-hook-form';
 import NavBar from '../../components/NavBar.jsx';
@@ -109,23 +109,27 @@ export default function JoinPlan({
                 <Heading as="h2" variant="nuanced" color="#272088">{name}</Heading>
               </CardHeader>
               <form onSubmit={handleSubmit(onSubmit)}>
-                <CardBody mx={6} mb={8} mt={0}>
-                  <Box w={{ base: '100%', md: '70%' }}>
-                    <JoinPlanGrid
-                      name={name}
-                      isOwner={isOwner}
-                      owner={owner}
-                      cycleFrequency={cycleFrequency}
-                      perCycleCost={perCycleCost}
-                      startDate={startDate}
-                      members={activeMembers}
-                      currQuant={currQuant}
-                      totalQuantity={totalQuantity}
-                      register={register}
-                      errors={errors}
-                    />
-                  </Box>
+                <CardBody mx={6} mb={0} mt={0} w={{ base: '100%', md: '70%' }}>
+                  <JoinPlanGrid
+                    name={name}
+                    isOwner={isOwner}
+                    owner={owner}
+                    cycleFrequency={cycleFrequency}
+                    perCycleCost={perCycleCost}
+                    startDate={startDate}
+                    members={activeMembers}
+                    currQuant={currQuant}
+                    totalQuantity={totalQuantity}
+                    register={register}
+                    errors={errors}
+                  />
                 </CardBody>
+                <CardFooter mx={6} mb={8} pt={4} w={{ base: '100%', md: '70%' }}>
+                  <Flex w="100%" justify="space-between">
+                    <Button type="button" variant="outline" w="45%">Cancel</Button>
+                    <Button type="submit" w="45%">Continue to payment</Button>
+                  </Flex>
+                </CardFooter>
               </form>
             </Card>
           </Box>
