@@ -1,13 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useQuery, useMutation } from '@apollo/client';
+import { useQuery } from '@apollo/client';
 import {
-  Flex, Box, FormControl, FormLabel, Heading, Button, Input,
-  VStack, Card, CardHeader, CardBody, Text, Container,
+  Flex, Box, Heading, Button, VStack, Card, CardHeader, CardBody, Text,
 } from '@chakra-ui/react';
 import NavBar from '../../components/NavBar.jsx';
 import JoinPlanGrid from './JoinPlanGrid.jsx';
-import { JoinPlan as JOIN_PLAN } from '../../graphql/mutations.gql';
 import { PreJoinPlan as GET_PLAN } from '../../graphql/queries.gql';
 
 export default function JoinPlan({
@@ -24,39 +22,19 @@ export default function JoinPlan({
   }, []);
 
   const { planId } = useParams();
-  const [quantity, setQuantity] = useState(0);
 
-  const { loading: getPlanLoading, data, error: getPlanError } = useQuery(GET_PLAN, {
+  const { loading, data, error } = useQuery(GET_PLAN, {
     variables: { planId: planId.toString().trim() },
     fetchPolicy: 'cache-and-network',
     nextFetchPolicy: 'cache-only',
   });
 
-  // will need to handle this payLoading state on client side so user knows what to expect
-  const [makePayment, { loading: payLoading, error: payError}] = useMutation(
-    JOIN_PLAN,
-    {
-      onCompleted: ({ joinPlan: { clientSecret, setupIntentId, paymentMethods } }) => {
-        setStripeClientSecret(clientSecret);
-        setSetupIntentId(setupIntentId);
-        setPaymentMethods(paymentMethods);
-        navigate('/checkout');
-      },
-      onError: ({ message }) => { console.log(message); },
-    }
-  );
-
   useEffect(() => {
     if (planId) setPlanToJoin(planId.toString().trim());
   }, []);
 
-  const onSubmit = (e) => {
-    e.preventDefault();
-    makePayment({ variables: { planId, quantity } });
-  };
-
-  if (getPlanError) {
-    const { message } = getPlanError;
+  if (error) {
+    const { message } = error;
     if (message === 'No plan matched search') {
       return message; // consider how UI should handle this
     }
@@ -65,7 +43,7 @@ export default function JoinPlan({
   if (data) {
     const {
       viewOnePlan: {
-        planId, name, cycleFrequency, perCycleCost, startDate, owner, isOwner,
+        planId: planIdFromQuery, name, cycleFrequency, perCycleCost, startDate, owner, isOwner,
         activeMembers, quantity: currQuant, totalQuantity,
       }
     } = data;
@@ -104,7 +82,7 @@ export default function JoinPlan({
               </Flex>
             </VStack>
             <Card w={{ base: '95%', md: '80%' }}>
-              <CardHeader mx={6} mt={8} pb={0}>
+              <CardHeader mx={6} mt={8} pb={4}>
                 <Heading as="h2" variant="nuanced" color="#272088">{name}</Heading>
               </CardHeader>
               <CardBody mx={6} mb={8} mt={0}>
@@ -119,6 +97,10 @@ export default function JoinPlan({
                     members={activeMembers}
                     currQuant={currQuant}
                     totalQuantity={totalQuantity}
+                    planId={planIdFromQuery}
+                    setStripeClientSecret={setStripeClientSecret}
+                    setSetupIntentId={setSetupIntentId}
+                    setPaymentMethods={setPaymentMethods}
                   />
                 </Box>
               </CardBody>

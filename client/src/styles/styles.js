@@ -178,5 +178,6 @@ export const globalTheme = extendTheme({
     note: { color: '#718096' },
     formLabel: { color: 'gray.700', fontWeight: 600, fontSize: 'sm' },
     formSavedInput: { color: 'blackAlpha.700', fontSize: 'md', fontWeight: 400 },
+    gridTitle: { color: 'blackAlpha.800', fontWeight: 500, fontSize: 'md' },
   },
 });
