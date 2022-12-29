@@ -42,7 +42,10 @@ export default function JoinPlanInput({
                 defaultValue={1}
                 min={1}
                 {...field}
-                onChange={(val) => { if (/^\d+$/.test(val)) field.onChange(Number(val)); }}
+                onChange={(val) => {
+                  if (/^\d+$/.test(val)) field.onChange(Number(val));
+                  else if (val === '') field.onChange(val);
+                }}
               >
                 <NumberInputField />
                 <NumberInputStepper>
