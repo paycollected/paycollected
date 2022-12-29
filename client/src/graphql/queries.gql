@@ -8,15 +8,20 @@ query PreJoinPlan ($planId: PlanID!) {
     activeMembers {
       firstName
       lastName
+      username
       quantity
       joinedDate
       isOwner
+      fullName @client
     }
     quantity
     owner {
       firstName
       lastName
+      fullName @client
     }
+    isOwner
+    totalQuantity
   }
 }
 

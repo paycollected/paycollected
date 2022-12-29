@@ -77,6 +77,9 @@ function App() {
                 setStripeClientSecret={setStripeClientSecret}
                 setSetupIntentId={setSetupIntentId}
                 setPaymentMethods={setPaymentMethods}
+                user={user}
+                setUser={setUser}
+                setPlanToView={setPlanToView}
               />
             )
           }

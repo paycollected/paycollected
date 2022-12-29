@@ -2,22 +2,23 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation } from '@apollo/client';
 import {
-  Flex, Box, FormControl, FormLabel, Heading, Button, Input, UnorderedList, ListItem
+  Flex, Box, FormControl, FormLabel, Heading, Button, Input,
+  VStack, Card, CardHeader, CardBody, Text, Container,
 } from '@chakra-ui/react';
+import NavBar from '../../components/NavBar.jsx';
+import JoinPlanGrid from './JoinPlanGrid.jsx';
 import { JoinPlan as JOIN_PLAN } from '../../graphql/mutations.gql';
 import { PreJoinPlan as GET_PLAN } from '../../graphql/queries.gql';
 
 export default function JoinPlan({
-  setPlanToJoin, setStripeClientSecret, setSetupIntentId, setPaymentMethods,
+  setPlanToJoin, setStripeClientSecret, setSetupIntentId, setPaymentMethods, user, setUser,
+  setPlanToView,
 }) {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const path = window.location.pathname;
-    const pathElements = path.split('/');
-    const planId = pathElements[2];
-    console.log(planId);
-    if (!planId || !/^prod_(?:[a-zA-Z0-9]){14}$/.test(planId)) {
+    const planId = window.location.pathname.split('/')[2];
+    if (!/^prod_(?:[a-zA-Z0-9]){14}$/.test(planId)) {
       navigate('/404');
     }
   }, []);
@@ -25,14 +26,14 @@ export default function JoinPlan({
   const { planId } = useParams();
   const [quantity, setQuantity] = useState(0);
 
-  const { loading: getPlanLoading, data: getPlanData, error: getPlanError } = useQuery(GET_PLAN, {
+  const { loading: getPlanLoading, data, error: getPlanError } = useQuery(GET_PLAN, {
     variables: { planId: planId.toString().trim() },
     fetchPolicy: 'cache-and-network',
     nextFetchPolicy: 'cache-only',
   });
 
   // will need to handle this payLoading state on client side so user knows what to expect
-  const [makePayment, { data: payData, loading: payLoading, error: payError}] = useMutation(
+  const [makePayment, { loading: payLoading, error: payError}] = useMutation(
     JOIN_PLAN,
     {
       onCompleted: ({ joinPlan: { clientSecret, setupIntentId, paymentMethods } }) => {
@@ -46,19 +47,12 @@ export default function JoinPlan({
   );
 
   useEffect(() => {
-    if (planId) {
-      setPlanToJoin(planId.toString().trim());
-    }
+    if (planId) setPlanToJoin(planId.toString().trim());
   }, []);
 
   const onSubmit = (e) => {
     e.preventDefault();
-    makePayment({
-      variables: {
-        planId,
-        quantity
-      }
-    });
+    makePayment({ variables: { planId, quantity } });
   };
 
   if (getPlanError) {
@@ -68,63 +62,60 @@ export default function JoinPlan({
     }
   }
 
-  if (getPlanData) {
+  if (data) {
     const {
-      name, owner, cycleFrequency, perCycleCost, activeMembers, quantity: planQuant,
-    } = getPlanData.viewOnePlan;
+      viewOnePlan: {
+        planId, name, cycleFrequency, perCycleCost, startDate, owner, isOwner,
+        activeMembers, quantity: currQuant, totalQuantity,
+      }
+    } = data;
 
     return (
-      <Flex width="full" align="center" justifyContent="center">
-        <Box p={2} my={8} width="40%" bg="white" borderRadius="15">
-          <Box textAlign="center">
-            <Heading>Join this Plan!</Heading>
-            <Heading size="xl">{name}</Heading>
+      <>
+        <NavBar
+          user={user}
+          setUser={setUser}
+          setPlanToJoin={setPlanToJoin}
+          setPlanToView={setPlanToView}
+        />
+        <VStack w="93%" justify="left" spacing={{ base: 6, md: 10 }} mb={{ base: 6, md: 10 }}>
+          <Flex w="100%" align="center">
+            <Button
+              type="button"
+              variant="navActionBtn"
+              onClick={() => {
+                setPlanToView(null);
+                navigate('/dashboard');
+              }}
+              h="max-content"
+            >
+              Back to Dashboard
+            </Button>
+          </Flex>
+          <Box w="100%">
+            <VStack w={{ base: '95%', md: '80%' }} mb={10} spacing={4}>
+              <Flex w="100%" id="flex" direction="column" justify="start">
+                <Heading as="h1" variant="accented" pb={0}>Join plan</Heading>
+              </Flex>
+              <Flex w="100%" direction="column" justify="start">
+                <Text w={{ base: '100%', md: '75%' }} lineHeight="taller">
+                  {`Confirm the number of subscriptions you would like to pay for and continue to payment to join plan.`}
+                </Text>
+              </Flex>
+            </VStack>
+            <Card w={{ base: '95%', md: '80%' }}>
+              <CardHeader mx={6} mt={8} pb={0}>
+                <Heading as="h2" variant="nuanced" color="#272088">{name}</Heading>
+              </CardHeader>
+              <CardBody mx={6} mb={8} mt={0}>
+                <Box w="60%">
+                  <JoinPlanGrid />
+                </Box>
+              </CardBody>
+            </Card>
           </Box>
-          <Box my={4} textAlign="left">
-            <div>
-              Owned by:&nbsp;
-              {owner.firstName.concat(' ', owner.lastName)}
-            </div>
-            <div>{`Total Plan Cost: ${perCycleCost} ${cycleFrequency.toLowerCase()}`}</div>
-            {activeMembers.length > 0 && (
-              <>
-                <div>Others on this plan:</div>
-                <UnorderedList>
-                  {activeMembers.map((member) => (
-                    <ListItem key={member.lastname}>{`${member.firstName} ${member.lastName} x ${member.quantity}`}</ListItem>
-                  ))}
-                </UnorderedList>
-              </>
-            )}
-            {activeMembers.length === 0
-              && (<div>There are currently no members on this plan.</div>)}
-            {planQuant > 0 ? (
-              <div>
-                <p>{`Your quantity on this plan: ${planQuant}`}</p>
-                <p>
-                  You cannot join this plan again.
-                  Please use the dashboard to adjust your membership on this plan.
-                </p>
-              </div>
-            ) : (
-              <form onSubmit={onSubmit}>
-                <FormControl isRequired>
-                  <FormLabel>Quantity</FormLabel>
-                  <Input
-                    type="number"
-                    name="quantity"
-                    placeholder="Quantity"
-                    min="1"
-                    onChange={(e) => { setQuantity(Number(e.target.value)); }}
-                  />
-                </FormControl>
-                <Button type="submit" disabled={!!planQuant || payLoading} isLoading={payLoading}>Join</Button>
-              </form>
-            )}
-            <Button onClick={() => { navigate('/dashboard'); }}>Cancel</Button>
-          </Box>
-        </Box>
-      </Flex>
+        </VStack>
+      </>
     );
   }
   return null;
