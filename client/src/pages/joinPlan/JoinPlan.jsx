@@ -3,7 +3,6 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation } from '@apollo/client';
 import {
   Flex, Box, Heading, Button, VStack, Card, CardHeader, CardBody, CardFooter, Text, Grid, GridItem,
-  Container,
 } from '@chakra-ui/react';
 import { useForm } from 'react-hook-form';
 import NavBar from '../../components/NavBar.jsx';
@@ -46,8 +45,10 @@ export default function JoinPlan({
     }
   );
 
-  const { register, handleSubmit, formState: { errors } } = useForm();
-
+  const {
+    register, handleSubmit, watch, formState: { errors }
+  } = useForm({ mode: 'onChange', defaultValues: { quantity: 1 } });
+  const watchQuantityInput = watch('quantity');
 
   useEffect(() => {
     if (planId) setPlanToJoin(planId.toString().trim());
@@ -123,6 +124,7 @@ export default function JoinPlan({
                     totalQuantity={totalQuantity}
                     register={register}
                     errors={errors}
+                    watchQuantityInput={watchQuantityInput}
                   />
                 </CardBody>
                 <CardFooter mx={6} mb={8} pt={4} w={{ base: '100%', md: '70%' }}>
