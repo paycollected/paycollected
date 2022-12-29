@@ -11,8 +11,7 @@ const calculateCost = (quantity, perCycleCost, totalQuantity) => {
 };
 
 export default function JoinPlanInput({
-  errors, totalQuantity, perCycleCost, cycleFrequency,
-  watchQuantityInput, control
+  errors, totalQuantity, perCycleCost, cycleFrequency, watchQuantityInput, control
 }) {
   const [cost, setCost] = useState(calculateCost(watchQuantityInput, perCycleCost, totalQuantity));
   useEffect(

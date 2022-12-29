@@ -46,7 +46,7 @@ export default function JoinPlan({
   );
 
   const {
-    register, handleSubmit, watch, formState: { errors }, control,
+    handleSubmit, watch, formState: { errors }, control,
   } = useForm({ defaultValues: { quantity: 1 } });
   const watchQuantityInput = watch('quantity');
 
@@ -122,7 +122,6 @@ export default function JoinPlan({
                     members={activeMembers}
                     currQuant={currQuant}
                     totalQuantity={totalQuantity}
-                    register={register}
                     errors={errors}
                     watchQuantityInput={watchQuantityInput}
                     control={control}

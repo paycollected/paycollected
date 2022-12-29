@@ -5,7 +5,7 @@ import JoinPlanInput from './JoinPlanInput.jsx';
 
 export default function JoinPlanGrid({
   name, isOwner, owner, cycleFrequency, perCycleCost, startDate, members, currQuant, totalQuantity,
-  register, errors, watchQuantityInput, control,
+  errors, watchQuantityInput, control,
 }) {
   return (
     <Grid
@@ -37,7 +37,6 @@ export default function JoinPlanGrid({
           totalQuantity={totalQuantity}
           perCycleCost={perCycleCost}
           cycleFrequency={cycleFrequency}
-          register={register}
           errors={errors}
           watchQuantityInput={watchQuantityInput}
           control={control}
