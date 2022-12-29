@@ -46,8 +46,8 @@ export default function JoinPlan({
   );
 
   const {
-    register, handleSubmit, watch, formState: { errors }
-  } = useForm({ mode: 'onChange', defaultValues: { quantity: 1 } });
+    register, handleSubmit, watch, formState: { errors }, control,
+  } = useForm({ defaultValues: { quantity: 1 } });
   const watchQuantityInput = watch('quantity');
 
   useEffect(() => {
@@ -70,7 +70,8 @@ export default function JoinPlan({
     } = data;
 
     const onSubmit = ({ quantity }) => {
-      makePayment({ variables: { planId: planIdFromQuery, quantity } });
+      console.log(quantity, typeof quantity, '<----------');
+      // makePayment({ variables: { planId: planIdFromQuery, quantity } });
     };
 
     return (
@@ -125,6 +126,7 @@ export default function JoinPlan({
                     register={register}
                     errors={errors}
                     watchQuantityInput={watchQuantityInput}
+                    control={control}
                   />
                 </CardBody>
                 <CardFooter mx={6} mb={8} pt={4} w={{ base: '100%', md: '70%' }}>
