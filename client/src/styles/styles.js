@@ -20,26 +20,28 @@ export const buttonTheme = defineStyleConfig({
   variants: {
     outline: {
       bg: 'white',
-      color: '#2B6CB0',
-      border: '2px solid',
+      color: 'blue.600',
+      border: '1px solid',
       borderColor: 'blue.600',
+      fontWeight: 500,
       // TODO: Hover styling
       _hover: {
-        bg: '#2B6CB0',
+        bg: 'blue.600',
         color: 'white',
-        border: '2px solid white',
+        border: '1px solid white',
       }
     },
     solid: {
-      bg: '#2B6CB0',
+      bg: 'blue.600',
       color: 'white',
-      border: '2px solid transparent',
+      border: '1px solid transparent',
+      fontWeight: 500,
       // TODO: Hover styling
       _hover: {
         bg: 'white',
-        color: '#2B6CB0',
-        border: '2px solid',
-        borderColor: '#2B6CB0'
+        color: 'blue.600',
+        border: '1px solid',
+        borderColor: 'blue.600'
       }
     },
     menuIcon: { bg: 'transparent' },

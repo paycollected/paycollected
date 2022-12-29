@@ -11,7 +11,7 @@ export default function JoinPlanInput({
   return (
     <>
       <FormControl isRequired isInvalid={errors.quantity}>
-        <FormLabel htmlFor="quantity">Subscriptions:</FormLabel>
+        <FormLabel textStyle="gridTitle" htmlFor="quantity">Subscriptions:</FormLabel>
         <NumberInput defaultValue={1} min={1}>
           <NumberInputField
             id="quantity"
