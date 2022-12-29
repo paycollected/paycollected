@@ -5,7 +5,7 @@ import Home from './pages/home/Home.jsx';
 import Login from './pages/login/Login.jsx';
 import CreateAccount from './pages/createAccount/CreateAccount.jsx';
 import Dashboard from './pages/dashboard/Dashboard.jsx';
-import JoinPlan from './pages/JoinPlan.jsx';
+import JoinPlan from './pages/joinPlan/JoinPlan.jsx';
 import Checkout from './pages/checkout/Checkout.jsx';
 import FourOhFour from './pages/404.jsx';
 import PwdReset from './pages/PwdReset.jsx';
@@ -63,7 +63,14 @@ function App() {
         path="/join/:planId"
         element={
           !user
-            ? <Home user={user} setUser={setUser} setPlanToJoin={setPlanToJoin} setPlanToView={setPlanToView} />
+            ? (
+              <Home
+                user={user}
+                setUser={setUser}
+                setPlanToJoin={setPlanToJoin}
+                setPlanToView={setPlanToView}
+              />
+            )
             : (
               <JoinPlan
                 setPlanToJoin={setPlanToJoin}

@@ -27,8 +27,7 @@ export const buttonTheme = defineStyleConfig({
       _hover: {
         bg: '#2B6CB0',
         color: 'white',
-        border: '2px solid',
-        borderColor: 'black'
+        border: '2px solid white',
       }
     },
     solid: {

@@ -4,13 +4,24 @@ import { useQuery, useMutation } from '@apollo/client';
 import {
   Flex, Box, FormControl, FormLabel, Heading, Button, Input, UnorderedList, ListItem
 } from '@chakra-ui/react';
-import { JoinPlan as JOIN_PLAN } from '../graphql/mutations.gql';
-import { PreJoinPlan as GET_PLAN } from '../graphql/queries.gql';
+import { JoinPlan as JOIN_PLAN } from '../../graphql/mutations.gql';
+import { PreJoinPlan as GET_PLAN } from '../../graphql/queries.gql';
 
 export default function JoinPlan({
   setPlanToJoin, setStripeClientSecret, setSetupIntentId, setPaymentMethods,
 }) {
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const path = window.location.pathname;
+    const pathElements = path.split('/');
+    const planId = pathElements[2];
+    console.log(planId);
+    if (!planId || !/^prod_(?:[a-zA-Z0-9]){14}$/.test(planId)) {
+      navigate('/404');
+    }
+  }, []);
+
   const { planId } = useParams();
   const [quantity, setQuantity] = useState(0);
 

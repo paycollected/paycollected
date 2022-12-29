@@ -70,7 +70,7 @@ export default function Dashboard({
 
   const codeInputSubmit = (e) => {
     e.preventDefault();
-    const formattedCode = code.toString().trim();
+    const formattedCode = code.trim();
     setCode(formattedCode);
     navigate(`/join/${formattedCode}`);
   };
