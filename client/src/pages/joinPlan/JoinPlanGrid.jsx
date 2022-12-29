@@ -5,7 +5,7 @@ import JoinPlanInput from './JoinPlanInput.jsx';
 
 export default function JoinPlanGrid({
   name, isOwner, owner, cycleFrequency, perCycleCost, startDate, members, currQuant, totalQuantity,
-  setStripeClientSecret, setSetupIntentId, setPaymentMethods, planId,
+  register, errors,
 }) {
   return (
     <Grid
@@ -30,13 +30,11 @@ export default function JoinPlanGrid({
       </GridItem>
       <GridItem colSpan={2}>
         <JoinPlanInput
-          setStripeClientSecret={setStripeClientSecret}
-          setSetupIntentId={setSetupIntentId}
-          setPaymentMethods={setPaymentMethods}
           totalQuantity={totalQuantity}
           perCycleCost={perCycleCost}
           cycleFrequency={cycleFrequency}
-          planId={planId}
+          register={register}
+          errors={errors}
         />
       </GridItem>
     </Grid>

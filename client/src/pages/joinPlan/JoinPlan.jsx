@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useQuery } from '@apollo/client';
+import { useQuery, useMutation } from '@apollo/client';
 import {
   Flex, Box, Heading, Button, VStack, Card, CardHeader, CardBody, Text,
 } from '@chakra-ui/react';
+import { useForm } from 'react-hook-form';
 import NavBar from '../../components/NavBar.jsx';
 import JoinPlanGrid from './JoinPlanGrid.jsx';
 import { PreJoinPlan as GET_PLAN } from '../../graphql/queries.gql';
+import { JoinPlan as JOIN_PLAN } from '../../graphql/mutations.gql';
 
 export default function JoinPlan({
   setPlanToJoin, setStripeClientSecret, setSetupIntentId, setPaymentMethods, user, setUser,
@@ -29,6 +31,23 @@ export default function JoinPlan({
     nextFetchPolicy: 'cache-only',
   });
 
+  // will need to handle this payLoading state on client side so user knows what to expect
+  const [makePayment, { loading: joinPlanLoading, error: joinPlanError }] = useMutation(
+    JOIN_PLAN,
+    {
+      onCompleted: ({ joinPlan: { clientSecret, setupIntentId, paymentMethods } }) => {
+        setStripeClientSecret(clientSecret);
+        setSetupIntentId(setupIntentId);
+        setPaymentMethods(paymentMethods);
+        navigate('/checkout');
+      },
+      onError: ({ message }) => { console.log(message); },
+    }
+  );
+
+  const { register, handleSubmit, formState: { errors } } = useForm();
+
+
   useEffect(() => {
     if (planId) setPlanToJoin(planId.toString().trim());
   }, []);
@@ -47,6 +66,10 @@ export default function JoinPlan({
         activeMembers, quantity: currQuant, totalQuantity,
       }
     } = data;
+
+    const onSubmit = ({ quantity }) => {
+      makePayment({ variables: { planId: planIdFromQuery, quantity } });
+    };
 
     return (
       <>
@@ -85,25 +108,25 @@ export default function JoinPlan({
               <CardHeader mx={6} mt={8} pb={4}>
                 <Heading as="h2" variant="nuanced" color="#272088">{name}</Heading>
               </CardHeader>
-              <CardBody mx={6} mb={8} mt={0}>
-                <Box w={{ base: '100%', md: '70%' }}>
-                  <JoinPlanGrid
-                    name={name}
-                    isOwner={isOwner}
-                    owner={owner}
-                    cycleFrequency={cycleFrequency}
-                    perCycleCost={perCycleCost}
-                    startDate={startDate}
-                    members={activeMembers}
-                    currQuant={currQuant}
-                    totalQuantity={totalQuantity}
-                    planId={planIdFromQuery}
-                    setStripeClientSecret={setStripeClientSecret}
-                    setSetupIntentId={setSetupIntentId}
-                    setPaymentMethods={setPaymentMethods}
-                  />
-                </Box>
-              </CardBody>
+              <form onSubmit={handleSubmit(onSubmit)}>
+                <CardBody mx={6} mb={8} mt={0}>
+                  <Box w={{ base: '100%', md: '70%' }}>
+                    <JoinPlanGrid
+                      name={name}
+                      isOwner={isOwner}
+                      owner={owner}
+                      cycleFrequency={cycleFrequency}
+                      perCycleCost={perCycleCost}
+                      startDate={startDate}
+                      members={activeMembers}
+                      currQuant={currQuant}
+                      totalQuantity={totalQuantity}
+                      register={register}
+                      errors={errors}
+                    />
+                  </Box>
+                </CardBody>
+              </form>
             </Card>
           </Box>
         </VStack>
