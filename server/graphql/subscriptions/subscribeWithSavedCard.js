@@ -86,7 +86,7 @@ export default async function subscribeWithSavedCardResolver(
         username,
       );
 
-      return resultRows[0];
+      return true;
     }
 
     // not first subscription, or quant > 1 --> require price adjustment

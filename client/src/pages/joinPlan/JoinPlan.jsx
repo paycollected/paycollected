@@ -70,8 +70,7 @@ export default function JoinPlan({
     } = data;
 
     const onSubmit = ({ quantity }) => {
-      console.log(quantity, typeof quantity, '<----------');
-      // makePayment({ variables: { planId: planIdFromQuery, quantity } });
+      makePayment({ variables: { planId: planIdFromQuery, quantity } });
     };
 
     return (
