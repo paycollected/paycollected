@@ -87,13 +87,14 @@ export default function CheckoutForm({ setupIntentId, paymentMethods, planId }) 
   };
 
   return (
-    <Card bg="white" mt={20} variant="outline" w="xl">
+    <Card bg="white" my={14} variant="outline" w="2xl">
       <form onSubmit={handlePaymentSubmit}>
         <CardHeader pt={10} px={12} pb={0}><Heading>Checkout</Heading></CardHeader>
         <CardBody px={12} py={8}>
-          <RadioGroup onChange={setSelectedCard} value={selectedCard}>
-            <VStack spacing={4}>
-              <>
+          <VStack spacing={6}>
+            <Heading w="100%" variant="nuanced">Select a payment method</Heading>
+            <RadioGroup w="100%" onChange={setSelectedCard} value={selectedCard}>
+              <VStack spacing={4}>
                 {paymentMethods.length > 0 && (
                   <SavedCards
                     paymentMethods={paymentMethods}
@@ -107,26 +108,26 @@ export default function CheckoutForm({ setupIntentId, paymentMethods, planId }) 
                     <Text pl={4} fontWeight="600">Use a new card</Text>
                   </Radio>
                 </Container>
-              </>
-              <Container w="100%" p={0} hidden={selectedCard !== 'newCard'}>
-                <PaymentElement />
-              </Container>
-              <FormControl hidden={selectedCard === 'newCard'} isRequired={selectedCard !== 'newCard'}>
-                <FormLabel>Your password:</FormLabel>
-                <Input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-                <FormHelperText>
-                  To use a saved card, please retype your password to confirm your identity.
-                </FormHelperText>
-              </FormControl>
-            </VStack>
-          </RadioGroup>
+              </VStack>
+            </RadioGroup>
+            <Container w="100%" px={0} pt={4} hidden={selectedCard !== 'newCard'}>
+              <PaymentElement />
+            </Container>
+            <FormControl hidden={selectedCard === 'newCard'} isRequired={selectedCard !== 'newCard'}>
+              <FormLabel>Your password:</FormLabel>
+              <Input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+              <FormHelperText>
+                To use a saved card, please retype your password to confirm your identity.
+              </FormHelperText>
+            </FormControl>
+          </VStack>
         </CardBody>
         <CardFooter px={12} pt={0} pb={10}>
-          <HStack spacing={4}>
+          <HStack spacing={6}>
             <Button variant="outline" onClick={handleCancel}>Cancel</Button>
             <Button type="submit" disabled={!stripe}>Set up payment</Button>
           </HStack>
