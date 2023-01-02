@@ -55,7 +55,6 @@ export default function JoinPlanInput({
               </NumberInput>
             )}
           />
-
           <FormHelperText>The number of subscriptions you will pay for</FormHelperText>
           <FormErrorMessage>{errors.quantity && errors.quantity.message}</FormErrorMessage>
         </FormControl>

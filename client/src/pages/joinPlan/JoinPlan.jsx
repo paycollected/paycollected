@@ -64,7 +64,7 @@ export default function JoinPlan({
   if (data) {
     const {
       viewOnePlan: {
-        planId: planIdFromQuery, name, cycleFrequency, perCycleCost, startDate, owner, isOwner,
+        planId: planIdFromQuery, name, cycleFrequency, perCycleCost, nextBillDate, owner, isOwner,
         activeMembers, quantity: currQuant, totalQuantity,
       }
     } = data;
@@ -118,7 +118,7 @@ export default function JoinPlan({
                     owner={owner}
                     cycleFrequency={cycleFrequency}
                     perCycleCost={perCycleCost}
-                    startDate={startDate}
+                    nextBillDate={nextBillDate}
                     members={activeMembers}
                     currQuant={currQuant}
                     totalQuantity={totalQuantity}

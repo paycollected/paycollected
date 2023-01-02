@@ -4,8 +4,8 @@ import PlanMembersTable from '../../components/PlanMembersTable.jsx';
 import JoinPlanInput from './JoinPlanInput.jsx';
 
 export default function JoinPlanGrid({
-  name, isOwner, owner, cycleFrequency, perCycleCost, startDate, members, currQuant, totalQuantity,
-  errors, watchQuantityInput, control,
+  name, isOwner, owner, cycleFrequency, perCycleCost, nextBillDate, members, currQuant,
+  totalQuantity, errors, watchQuantityInput, control,
 }) {
   return (
     <Grid
@@ -23,7 +23,7 @@ export default function JoinPlanGrid({
       <GridItem textStyle="gridTitle">Billing Frequency:</GridItem>
       <GridItem>{cycleFrequency}</GridItem>
       <GridItem textStyle="gridTitle">Start Date:</GridItem>
-      <GridItem>{startDate}</GridItem>
+      <GridItem>{nextBillDate}</GridItem>
       <GridItem colSpan={2}>
         <VStack spacing={8} pb={6}>
           <Text w="100%" textStyle="gridTitle">

@@ -120,6 +120,7 @@ export default `#graphql
     activeMembers: [PlanMember]! # also include owner, does NOT include self
     isOwner: Boolean!
     owner: PlanOwner!
+    nextBillDate: Date!
   }
 
   type Notification {

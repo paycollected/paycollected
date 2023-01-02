@@ -4,7 +4,7 @@ query PreJoinPlan ($planId: PlanID!) {
     name
     cycleFrequency
     perCycleCost
-    startDate
+    nextBillDate
     activeMembers {
       firstName
       lastName

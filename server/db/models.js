@@ -126,6 +126,7 @@ export function planDetail(planId, username) {
       UPPER(cycle_frequency::VARCHAR) AS "cycleFrequency",
       per_cycle_cost AS "perCycleCost",
       TO_CHAR(start_date, 'YYYY-MM-DD') AS "startDate",
+      TO_CHAR(next_bill_date, 'YYYY-MM-DD') AS "nextBillDate",
       COUNT(up) AS "totalMembers",
       SUM(up.quantity) AS "totalQuantity",
       COALESCE ((SELECT quantity FROM t1), 0) AS quantity,
@@ -134,10 +135,12 @@ export function planDetail(planId, username) {
     FROM plans p
     JOIN user_plan up
     ON p.plan_id = up.plan_id
+    JOIN next_bill_date nbd
+    ON p.plan_id = nbd.plan_id
     WHERE up.plan_id = $1
       AND up.active = True
       AND p.active = True
-    GROUP BY p.plan_id
+    GROUP BY p.plan_id, nbd.next_bill_date
   )
   SELECT
     t2.*,
