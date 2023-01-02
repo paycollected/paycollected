@@ -96,3 +96,19 @@ query GetEmail {
     email
   }
 }
+
+query SuccessfulPaymentData($setupIntentId: SetupIntentID!) {
+  successfulPayment(setupIntentId: $setupIntentId) {
+    planName
+    cycleFrequency
+    nextBillDate
+    personalCost
+    paymentMethod {
+      brand
+      last4
+      expiryMonth
+      expiryYear
+      default
+    }
+  }
+}

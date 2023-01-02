@@ -11,12 +11,16 @@ import {
 import { CancelTransaction as CANCEL_TRANSC, SubscribeWithSavedCard as SUBSCRIBE } from '../../graphql/mutations.gql';
 import SavedCards from './SavedCards.jsx';
 
-export default function CheckoutForm({ setupIntentId, paymentMethods, planId }) {
+export default function CheckoutForm({
+  setupIntentId, paymentMethods, planId, setStripeClientSecret, setSetupIntentId,
+}) {
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
 
   const [cancel, { loading }] = useMutation(CANCEL_TRANSC, {
     onCompleted: () => {
+      setStripeClientSecret(null);
+      setSetupIntentId(null);
       navigate('/dashboard');
     },
     onError: ({ message }) => {
@@ -28,7 +32,7 @@ export default function CheckoutForm({ setupIntentId, paymentMethods, planId }) 
     data, loading: subscribeLoading, error: subscribeError
   }] = useMutation(SUBSCRIBE, {
     onCompleted: () => {
-      navigate('/plan/all');
+      navigate(`/checkout-success/?setup_intent=${setupIntentId}`);
     },
     onError: ({ message }) => {
       console.log('error subscribing using a saved card: ', message);
@@ -56,7 +60,7 @@ export default function CheckoutForm({ setupIntentId, paymentMethods, planId }) 
           // Elements` instance that was used to create the Payment Element
           elements,
           confirmParams: {
-            return_url: `${process.env.HOST}/dashboard/`,
+            return_url: `${process.env.HOST}/checkout-success/`,
             // actual redirect URL string 'http://localhost:5647/dashboard/?setup_intent=seti_1Lq9rqAJ5Ik974ueIdg7WHn9&setup_intent_client_secret=seti_1Lq9rqAJ5Ik974ueIdg7WHn9_secret_MZISJyXsMF6na4pA6ryaqOfvt8JbeGa&redirect_status=succeeded'
             // correctly redirected to Successful Payment component!
             // Do we need query parameters in the redirection link?
@@ -110,7 +114,7 @@ export default function CheckoutForm({ setupIntentId, paymentMethods, planId }) 
                 </Container>
               </VStack>
             </RadioGroup>
-            <Container w="100%" px={0} pt={4} hidden={selectedCard !== 'newCard'}>
+            <Container w="100%" px={0} pt={3} hidden={selectedCard !== 'newCard'}>
               <PaymentElement />
             </Container>
             <FormControl hidden={selectedCard === 'newCard'} isRequired={selectedCard !== 'newCard'}>

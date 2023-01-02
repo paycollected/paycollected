@@ -11,6 +11,7 @@ import FourOhFour from './pages/404.jsx';
 import PwdReset from './pages/PwdReset.jsx';
 import ManageAccount from './pages/manageAccount/ManageAccount.jsx';
 import PlanDetails from './pages/planDetails/PlanDetails.jsx';
+import CheckoutSuccess from './pages/checkoutSuccess/CheckoutSuccess.jsx';
 
 // check that token is still valid before displaying logged-in state
 let token = localStorage.getItem('token');
@@ -103,6 +104,19 @@ function App() {
           )
           : <Navigate to="/" />}
       />
+      <Route
+        path="/checkout-success"
+        element={user && setupIntentId
+          ? (<CheckoutSuccess
+            user={user}
+            setUser={setUser}
+            setPlanToJoin={setPlanToJoin}
+            setPlanToView={setPlanToView}
+            setStripeClientSecret={setStripeClientSecret}
+            setSetupIntentId={setSetupIntentId}
+            />)
+          : <Navigate to="/" />
+        }
       {user && (
         <>
           <Route

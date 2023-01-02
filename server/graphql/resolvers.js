@@ -29,6 +29,7 @@ import cancelTransactionResolver from './payment/cancelTransaction';
 import { retrieveNotificationsResolver, deleteNotificationResolver } from './users/notifications';
 import transferOwnershipResolver from './plans/transferOwnership';
 import getEmailResolver from './users/getEmail';
+import successfulPaymentResolver from './payment/successfulPayment';
 
 const stripe = stripeSDK(process.env.STRIPE_SECRET_KEY);
 
@@ -76,7 +77,11 @@ export default {
 
     getEmail: authResolverWrapper((_, __, { user: { username } }) => (
       getEmailResolver(username)
-    ))
+    )),
+
+    successfulPayment: authResolverWrapper((_, { setupIntentId }, { user: { username } }) => (
+      successfulPaymentResolver(setupIntentId, username)
+    )),
   },
 
 

@@ -11,7 +11,7 @@ const stripePromise = loadStripe(process.env.STRIPE_PUBLISHABLE_KEY);
 
 export default function Checkout({
   stripeClientSecret, setupIntentId, paymentMethods, planId, user, setUser, setPlanToJoin,
-  setPlanToView,
+  setPlanToView, setStripeClientSecret, setSetupIntentId,
 }) {
   const options = { clientSecret: stripeClientSecret, appearance: stripePaymentElementAppearance };
 
@@ -36,6 +36,8 @@ export default function Checkout({
             setupIntentId={setupIntentId}
             paymentMethods={paymentMethods}
             planId={planId}
+            setSetupIntentId={setSetupIntentId}
+            setStripeClientSecret={setStripeClientSecret}
           />
         </Elements>
       </Flex>

@@ -15,6 +15,7 @@ export default `#graphql
     viewAllPlans: AllPlansSummary!
     retrieveNotifications: RetrieveNotifications! # offset pagination?
     getEmail: UserInfo!
+    successfulPayment(setupIntentId: SetupIntentID!): SuccessfulPaymentData!
   }
 
   type UserInfo {
@@ -132,6 +133,14 @@ export default `#graphql
   type RetrieveNotifications {
     count: Int!
     notifications: [Notification]!
+  }
+
+  type SuccessfulPaymentData {
+    planName: String!
+    personalCost: USCurrency!
+    cycleFrequency: CycleFrequency!
+    nextBillDate: Date!
+    paymentMethod: PaymentMethod!
   }
 
   type Mutation {
