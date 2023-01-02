@@ -6,7 +6,7 @@ import { useMutation } from '@apollo/client';
 import { useNavigate } from 'react-router-dom';
 import {
   Button, Card, CardHeader, CardBody, CardFooter, Heading, HStack, RadioGroup, Radio, VStack,
-  Container, FormControl, FormLabel, FormHelperText, Input,
+  Container, FormControl, FormLabel, FormHelperText, Input, Text,
 } from '@chakra-ui/react';
 import { CancelTransaction as CANCEL_TRANSC, SubscribeWithSavedCard as SUBSCRIBE } from '../../graphql/mutations.gql';
 import SavedCards from './SavedCards.jsx';
@@ -14,8 +14,7 @@ import SavedCards from './SavedCards.jsx';
 export default function CheckoutForm({ setupIntentId, paymentMethods, planId }) {
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
-  // CACHE IS UPDATING CORRECTLY
-  // BUT UI IN PlansTable is not rendering from cache??
+
   const [cancel, { loading }] = useMutation(CANCEL_TRANSC, {
     onCompleted: () => {
       navigate('/dashboard');
@@ -29,7 +28,6 @@ export default function CheckoutForm({ setupIntentId, paymentMethods, planId }) 
     data, loading: subscribeLoading, error: subscribeError
   }] = useMutation(SUBSCRIBE, {
     onCompleted: () => {
-      // navigate('/dashboard');
       navigate('/plan/all');
     },
     onError: ({ message }) => {
@@ -106,7 +104,7 @@ export default function CheckoutForm({ setupIntentId, paymentMethods, planId }) 
                 )}
                 <Container w="100%" p={0}>
                   <Radio value="newCard" checked={selectedCard === 'newCard'}>
-                    Use a new card
+                    <Text pl={4} fontWeight="600">Use a new card</Text>
                   </Radio>
                 </Container>
               </>
