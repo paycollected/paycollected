@@ -22,7 +22,7 @@ export default function JoinPlanGrid({
       <GridItem>{perCycleCost}</GridItem>
       <GridItem textStyle="gridTitle">Billing Frequency:</GridItem>
       <GridItem>{cycleFrequency}</GridItem>
-      <GridItem textStyle="gridTitle">Start Date:</GridItem>
+      <GridItem textStyle="gridTitle">Next Charge Date:</GridItem>
       <GridItem>{nextBillDate}</GridItem>
       <GridItem colSpan={2}>
         <VStack spacing={8} pb={6}>

@@ -304,22 +304,37 @@ export function changePassword(username, password) {
   return pool.query('UPDATE users SET password = $1 WHERE username = $2', [password, username]);
 }
 
-export function joinPlan(username, planId) {
+export function joinPlan(username, planId, quantity) {
   const query = `
-  SELECT
-    u.s_cus_id AS "stripeCusId",
-    COALESCE(
-      ( SELECT quantity
-        FROM user_plan
-        WHERE username = $1 AND plan_id = $2
-      ),
-      0
-    ) AS quantity,
-    (SELECT active FROM plans p WHERE p.plan_id = $2) AS active
+  WITH c AS (
+    SELECT
+      u.s_cus_id,
+      COALESCE(
+        ( SELECT quantity
+          FROM user_plan
+          WHERE username = $1 AND plan_id = $2
+        ),
+        0
+      ) AS quantity
     FROM users u
     WHERE username = $1
+  )
+  SELECT
+    (SELECT s_cus_id FROM c) AS "stripeCusId",
+    (SELECT quantity FROM c),
+    active,
+    plan_name AS "planName",
+    UPPER(cycle_frequency::VARCHAR) AS "cycleFrequency",
+    TO_CHAR(next_bill_date, 'YYYY-MM-DD') AS "nextBillDate",
+    '$' || (ROUND ((CEIL ((per_cycle_cost::NUMERIC) /
+      (SELECT SUM(quantity)::INTEGER + $3 FROM user_plan WHERE plan_id = $2 AND username != $1)) / 100)::NUMERIC, 2)
+    ) AS "personalCost"
+  FROM plans p
+  JOIN next_bill_date nbd
+  ON p.plan_id = nbd.plan_id
+  WHERE p.plan_id = $2
   `;
-  return pool.query(query, [username, planId]);
+  return pool.query(query, [username, planId, quantity]);
 }
 
 
@@ -601,7 +616,7 @@ export function startSubscription(
   return pool.query(query, args);
 }
 
-//
+
 export function updatePriceIdDelSubs(newPriceId, productId, username) {
   const query = `
     WITH update_price_id AS (
@@ -630,7 +645,7 @@ export function updatePriceIdDelSubs(newPriceId, productId, username) {
   return pool.query(query, [newPriceId, productId, username]);
 }
 
-//
+
 export function updatePriceIdArchiveSubs(newPriceId, productId, username) {
   const query = `
     WITH update_price_id AS (
