@@ -438,57 +438,7 @@ export function startSubsNoPriceUpdate(
 }
 
 
-export function startSubsNoPriceUpdateReturningPlan(
-  planId,
-  quantity,
-  subscriptionId,
-  subscriptionItemId,
-  username,
-) {
-  const query = `
-  WITH upd AS (
-    INSERT INTO user_plan
-        (quantity, subscription_id, subscription_item_id, plan_id, username)
-      VALUES
-        ($1, $2, $3, $4, $5)
-      ON CONFLICT
-        (username, plan_id)
-      DO UPDATE SET
-        quantity = $1, subscription_id = $2, subscription_item_id = $3
-      WHERE user_plan.username = $5 AND user_plan.plan_id = $4
-      RETURNING plan_id, quantity, subscription_id
-  ),
-  select_owner AS (
-    SELECT
-        JSON_BUILD_OBJECT(
-          'firstName', u.first_name,
-          'lastName', u.last_name,
-          'username', u.username
-        ) AS owner
-      FROM users u
-      JOIN user_plan up
-      ON u.username = up.username
-      WHERE up.plan_owner = True AND up.plan_id = $4
-  )
-  SELECT
-      p.plan_id AS "planId",
-      p.plan_name AS name,
-      UPPER(p.cycle_frequency::VARCHAR) AS "cycleFrequency",
-      (p.per_cycle_cost / 100) AS "perCycleCost",
-      (SELECT owner FROM select_owner),
-      $1 AS quantity,
-      $2 AS "subscriptionId"
-    FROM plans p
-    JOIN upd
-    ON p.plan_id = upd.plan_id
-    WHERE p.plan_id = $4
-  `;
-  const args = [quantity, subscriptionId, subscriptionItemId, planId, username];
-  return pool.query(query, args);
-}
-
-
-export function startSubsPriceUpdateReturningPlan(
+export function startSubsPriceUpdateUsingUsername(
   planId,
   quantity,
   subscriptionId,
@@ -514,49 +464,23 @@ export function startSubsPriceUpdateReturningPlan(
       SET price_id = $6
       WHERE plan_id = $4
   ),
-  update_notifications AS (
-    INSERT INTO notifications (username, message)
-      SELECT
-        username,
-        (
-          (SELECT first_name FROM users WHERE username = $5)
-          || ' has joined plan '
-          || (SELECT plan_name FROM plans WHERE plan_id = $4)
-          || '. The new unit cost for this plan is $'
-          || (SELECT
-                ROUND ((CEIL ((SELECT per_cycle_cost::NUMERIC FROM plans WHERE plan_id = $4) /
-                (SELECT SUM(quantity)::INTEGER + $1 FROM user_plan WHERE plan_id = $4 AND username != $5)) / 100)::NUMERIC, 2)
-              )
-          || '/'
-          || (SELECT cycle_frequency FROM plans WHERE plan_id = $4)
-          || ', taking effect on the next charge date.'
-        )
-      FROM user_plan WHERE plan_id = $4 AND username != $5 AND active = True
-  ),
-  select_owner AS (
+  INSERT INTO notifications (username, message)
     SELECT
-        JSON_BUILD_OBJECT(
-          'firstName', u.first_name,
-          'lastName', u.last_name,
-          'username', u.username
-        ) AS owner
-      FROM users u
-      JOIN user_plan up
-      ON u.username = up.username
-      WHERE up.plan_owner = True AND up.plan_id = $4
-  )
-  SELECT
-      p.plan_id AS "planId",
-      p.plan_name AS name,
-      UPPER(p.cycle_frequency::VARCHAR) AS "cycleFrequency",
-      (p.per_cycle_cost / 100) AS "perCycleCost",
-      (SELECT owner FROM select_owner),
-      $1 AS quantity,
-      $2 AS "subscriptionId"
-    FROM plans p
-    JOIN upd
-    ON p.plan_id = upd.plan_id
-    WHERE p.plan_id = $4
+      username,
+      (
+        (SELECT first_name FROM users WHERE username = $5)
+        || ' has joined plan '
+        || (SELECT plan_name FROM plans WHERE plan_id = $4)
+        || '. The new unit cost for this plan is $'
+        || (SELECT
+              ROUND ((CEIL ((SELECT per_cycle_cost::NUMERIC FROM plans WHERE plan_id = $4) /
+              (SELECT SUM(quantity)::INTEGER + $1 FROM user_plan WHERE plan_id = $4 AND username != $5)) / 100)::NUMERIC, 2)
+            )
+        || '/'
+        || (SELECT cycle_frequency FROM plans WHERE plan_id = $4)
+        || ', taking effect on the next charge date.'
+      )
+    FROM user_plan WHERE plan_id = $4 AND username != $5 AND active = True
   `;
   const args = [quantity, subscriptionId, subscriptionItemId, planId, username,
     newPriceId];

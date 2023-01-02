@@ -1,7 +1,7 @@
 import stripeSDK from 'stripe';
 import bcrypt from 'bcrypt';
 import { GraphQLError } from 'graphql';
-import { subscriptionSetupSavedCard, startSubsNoPriceUpdateReturningPlan, startSubsPriceUpdateReturningPlan } from '../../db/models.js';
+import { subscriptionSetupSavedCard, startSubsNoPriceUpdate, startSubsPriceUpdateUsingUsername } from '../../db/models.js';
 import { updateStripePrice } from '../../utils';
 
 const stripe = stripeSDK(process.env.STRIPE_SECRET_KEY);
@@ -78,13 +78,7 @@ export default async function subscribeWithSavedCardResolver(
         stripe.setupIntents.cancel(setupIntentId),
       ]);
       const { id: subscriptionItemId } = items.data[0];
-      const { rows: resultRows } = await startSubsNoPriceUpdateReturningPlan(
-        planId,
-        quantity,
-        subscriptionId,
-        subscriptionItemId,
-        username,
-      );
+      await startSubsNoPriceUpdate(planId, quantity, subscriptionId, subscriptionItemId, username);
 
       return true;
     }
@@ -107,7 +101,7 @@ export default async function subscribeWithSavedCardResolver(
     const createNewSubsAndUpdateDb = async () => {
       const { id: subscriptionId, items } = await stripe.subscriptions.create(subscription);
       const { id: subscriptionItemId } = items.data[0];
-      const { rows: newRows } = await startSubsPriceUpdateReturningPlan(
+      await startSubsPriceUpdateUsingUsername(
         planId,
         quantity,
         subscriptionId,
@@ -116,17 +110,14 @@ export default async function subscribeWithSavedCardResolver(
         newPriceId,
       );
       return true;
-      // return newRows[0];
     };
-
-    let plan;
 
     if (count === 0) {
       // no existing members yet
-      plan = await createNewSubsAndUpdateDb();
+      await createNewSubsAndUpdateDb();
     } else {
       // there are other members --> also have to update their subscription
-      [plan] = await Promise.all([
+      await Promise.all([
         createNewSubsAndUpdateDb(),
         ...members.map((member) => updateStripePrice(member, newPriceId)),
       ]);
