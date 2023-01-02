@@ -17,7 +17,7 @@ export default async function successfulPaymentResolver(setupIntentId, username)
     ]);
   } catch (e) {
     console.log(e);
-    throw new GraphQLError('Cannot cancel transaction', { extensions: { code: 'INTERNAL_SERVER_ERROR' } });
+    throw new GraphQLError('Cannot retrieve data', { extensions: { code: 'INTERNAL_SERVER_ERROR' } });
   }
 
   if (rows[0].stripeCusId !== stripeCusId) {
@@ -28,7 +28,12 @@ export default async function successfulPaymentResolver(setupIntentId, username)
     planName, cycleFrequency, nextBillDate, personalCost, paymentMethod
   } = metadata;
 
-  if (status !== 'succeeded') await stripe.setupIntents.cancel(setupIntentId);
+  try {
+    if (status !== 'succeeded') await stripe.setupIntents.cancel(setupIntentId);
+  } catch (e) {
+    console.log(e);
+    throw new GraphQLError('Cannot cancel setup intent', { extensions: { code: 'INTERNAL_SERVER_ERROR' } });
+  }
 
   return {
     planName,
