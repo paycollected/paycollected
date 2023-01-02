@@ -107,18 +107,18 @@ function App() {
       <Route
         path="/checkout-success"
         element={
-          //user && setupIntentId
-          //? (
-            <CheckoutSuccess
-              user={user}
-              setUser={setUser}
-              setPlanToJoin={setPlanToJoin}
-              setPlanToView={setPlanToView}
-              setStripeClientSecret={setStripeClientSecret}
-              setSetupIntentId={setSetupIntentId}
-            />
-          // )
-          // : <Navigate to="/" />
+          user && setupIntentId
+            ? (
+              <CheckoutSuccess
+                user={user}
+                setUser={setUser}
+                setPlanToJoin={setPlanToJoin}
+                setPlanToView={setPlanToView}
+                setStripeClientSecret={setStripeClientSecret}
+                setSetupIntentId={setSetupIntentId}
+              />
+            )
+            : <Navigate to="/" />
         }
       />
       {user && (

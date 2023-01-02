@@ -5,7 +5,6 @@ import { getUserInfo } from '../../db/models.js';
 const stripe = stripeSDK(process.env.STRIPE_SECRET_KEY);
 
 export default async function successfulPaymentResolver(setupIntentId, username) {
-  console.log('--------> setup intent id', setupIntentId);
   let rows;
   let stripeCusId;
   let metadata;
@@ -26,8 +25,6 @@ export default async function successfulPaymentResolver(setupIntentId, username)
   const {
     planName, cycleFrequency, nextBillDate, personalCost, paymentMethod
   } = metadata;
-
-  console.log('----------------> metadata', metadata);
 
   try {
     await stripe.setupIntents.cancel(setupIntentId);

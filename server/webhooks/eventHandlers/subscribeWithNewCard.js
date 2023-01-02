@@ -9,16 +9,22 @@ export default async function handleSubscriptionStart(setupIntent) {
   // only run this if a new subscription is created through our site
   // A new setupIntent is also created and succeeds when a user updates their payment method,
   // or when an invoice is created
-    const { customer, payment_method: paymentMethodId } = setupIntent;
+    const { id: setupIntentId, customer, payment_method: paymentMethodId } = setupIntent;
     const { planId } = setupIntent.metadata;
     const quantity = Number(setupIntent.metadata.quantity);
     try {
       const [
         { rows },
-        { invoice_settings: { default_payment_method: defaultPmntMethod } }
+        { invoice_settings: { default_payment_method: defaultPmntMethod } },
+        {
+          card: {
+            brand, exp_month: expiryMonth, exp_year: expiryYear, last4,
+          }
+        }
       ] = await Promise.all([
         subscriptionSetup(planId, customer),
-        stripe.customers.retrieve(customer)
+        stripe.customers.retrieve(customer),
+        stripe.paymentMethods.retrieve(paymentMethodId),
       ]);
 
       const {
@@ -28,6 +34,7 @@ export default async function handleSubscriptionStart(setupIntent) {
       if (active && existingQuant === 0) {
         // ensure idempotency -- do not run this code if user already subscribed
         // if plan no longer active, also don't run code
+
         const productTotalQuantity = quantity + count;
         const subscription = {
           customer,
@@ -44,7 +51,18 @@ export default async function handleSubscriptionStart(setupIntent) {
           trial_end: startDate,
           default_payment_method: paymentMethodId,
         };
-
+        console.log('----------> A');
+        const metadata = {
+          paymentMethod: JSON.stringify({
+            brand,
+            expiryMonth,
+            expiryYear,
+            last4,
+            id: paymentMethodId,
+            default: defaultPmntMethod === null || paymentMethodId === defaultPmntMethod,
+          }),
+        };
+        console.log('----------> B');
 
         if (count > 0 || quantity > 1) {
           const promises = [
@@ -57,6 +75,7 @@ export default async function handleSubscriptionStart(setupIntent) {
             // create new price ID;
             stripe.prices.update(prevPriceId, { active: false }),
             // archive old price ID
+            stripe.setupIntents.update(setupIntentId, { metadata }),
           ];
 
           if (defaultPmntMethod === null) {
@@ -104,10 +123,14 @@ export default async function handleSubscriptionStart(setupIntent) {
               stripe.customers.update(
                 customer,
                 { invoice_settings: { default_payment_method: paymentMethodId } }
-              )
+              ),
+              stripe.setupIntents.update(setupIntentId, { metadata }),
             ]);
           } else {
-            ({ id: subscriptionId, items } = await stripe.subscriptions.create(subscription));
+            [{ id: subscriptionId, items }] = await Promise.all([
+              stripe.subscriptions.create(subscription),
+              stripe.setupIntents.update(setupIntentId, { metadata }),
+            ]);
           }
           const { id: subscriptionItemId } = items.data[0];
           await startSubsNoPriceUpdate(
