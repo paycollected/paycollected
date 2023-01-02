@@ -88,7 +88,7 @@ export default function CheckoutForm({ setupIntentId, paymentMethods, planId }) 
   };
 
   return (
-    <Card bg="white">
+    <Card bg="white" mt={20}>
       <form onSubmit={handlePaymentSubmit}>
         <CardHeader><Heading>Checkout</Heading></CardHeader>
         <CardBody>
