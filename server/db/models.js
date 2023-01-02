@@ -326,8 +326,9 @@ export function joinPlan(username, planId, quantity) {
     plan_name AS "planName",
     UPPER(cycle_frequency::VARCHAR) AS "cycleFrequency",
     TO_CHAR(next_bill_date, 'YYYY-MM-DD') AS "nextBillDate",
-    '$' || (ROUND ((CEIL ((per_cycle_cost::NUMERIC) /
-      (SELECT SUM(quantity)::INTEGER + $3 FROM user_plan WHERE plan_id = $2 AND username != $1)) / 100)::NUMERIC, 2)
+    (
+      CEIL ((per_cycle_cost::NUMERIC) /
+      (SELECT SUM(quantity)::INTEGER + $3 FROM user_plan WHERE plan_id = $2 AND username != $1))
     ) AS "personalCost"
   FROM plans p
   JOIN next_bill_date nbd

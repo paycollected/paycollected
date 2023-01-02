@@ -16,7 +16,12 @@ export default async function subscribeWithSavedCardResolver(
   let err;
   try {
     const [
-      { customer: paymentMethodCustomer },
+      {
+        customer: paymentMethodCustomer,
+        card: {
+          brand, exp_month: expiryMonth, exp_year: expiryYear, last4,
+        }
+      },
       {
         customer: setupIntentCustomer,
         metadata: { quantity: savedQuant, planId: planIdToSubscribe }
@@ -47,7 +52,13 @@ export default async function subscribeWithSavedCardResolver(
       err = 'User already subscribed';
       throw new Error();
     }
-    const result = await bcrypt.compare(password, user.password);
+    const [
+      result, { invoice_settings: { default_payment_method: defaultPaymentId } }
+    ] = await Promise.all([
+      bcrypt.compare(password, user.password),
+      stripe.customers.retrieve(user.stripeCusId),
+    ]);
+
     if (!result) {
       err = 'Incorrect password';
       throw new Error();
@@ -75,7 +86,18 @@ export default async function subscribeWithSavedCardResolver(
       // and subscribed quant doesn't require price adjustment
       const [{ id: subscriptionId, items }, _] = await Promise.all([
         stripe.subscriptions.create(subscription),
-        stripe.setupIntents.cancel(setupIntentId),
+        stripe.setupIntents.update(setupIntentId, {
+          metadata: {
+            paymentMethod: {
+              brand,
+              expiryMonth,
+              expiryYear,
+              last4,
+              id: paymentMethodId,
+              default: paymentMethodId === defaultPaymentId
+            }
+          }
+        }),
       ]);
       const { id: subscriptionItemId } = items.data[0];
       await startSubsNoPriceUpdate(planId, quantity, subscriptionId, subscriptionItemId, username);
@@ -92,7 +114,18 @@ export default async function subscribeWithSavedCardResolver(
         recurring: { interval: cycleFrequency },
       }),
       stripe.prices.update(prevPriceId, { active: false }),
-      stripe.setupIntents.cancel(setupIntentId),
+      stripe.setupIntents.update(setupIntentId, {
+        metadata: {
+          paymentMethod: {
+            brand,
+            expiryMonth,
+            expiryYear,
+            last4,
+            id: paymentMethodId,
+            default: paymentMethodId === defaultPaymentId
+          }
+        }
+      }),
     ]);
     // replace old price Id with new Id
     subscription.items[0].price = newPriceId;
