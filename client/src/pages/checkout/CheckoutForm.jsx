@@ -4,7 +4,9 @@ import {
 } from '@stripe/react-stripe-js';
 import { useMutation } from '@apollo/client';
 import { useNavigate } from 'react-router-dom';
-import { Button } from '@chakra-ui/react';
+import {
+  Button, Card, CardHeader, CardBody, CardFooter, Heading,
+} from '@chakra-ui/react';
 import { CancelTransaction as CANCEL_TRANSC, SubscribeWithSavedCard as SUBSCRIBE } from '../../graphql/mutations.gql';
 import SavedCards from './SavedCards.jsx';
 
@@ -15,7 +17,7 @@ export default function CheckoutForm({ setupIntentId, paymentMethods, planId }) 
   // BUT UI IN PlansTable is not rendering from cache??
   const [cancel, { loading }] = useMutation(CANCEL_TRANSC, {
     onCompleted: () => {
-      navigate('/plan/all');
+      navigate('/dashboard');
     },
     onError: ({ message }) => {
       console.log(message);
@@ -86,41 +88,45 @@ export default function CheckoutForm({ setupIntentId, paymentMethods, planId }) 
   };
 
   return (
-    <>
-      <h3>This is the Checkout Form component</h3>
+    <Card bg="white">
       <form onSubmit={handlePaymentSubmit}>
-        {paymentMethods.length > 0 && (
-          <SavedCards
-            paymentMethods={paymentMethods}
-            setupIntentId={setupIntentId}
-            selectedCard={selectedCard}
-            setSelectedCard={setSelectedCard}
-          />
-        )}
-        <div>
-          <input
-            type="radio"
-            value="newCard"
-            checked={selectedCard === 'newCard'}
-            onChange={(e) => setSelectedCard(e.target.value)}
-          />
-          Use a new card
-          <div hidden={selectedCard !== 'newCard'}>
-            <PaymentElement />
-          </div>
-          <div hidden={selectedCard === 'newCard'}>
-            To use a saved card, please retype your password to confirm identity:
-            <input
-              type="password"
-              value={password}
-              required={selectedCard !== 'newCard'}
-              onChange={(e) => { setPassword(e.target.value); }}
+        <CardHeader><Heading>Checkout</Heading></CardHeader>
+        <CardBody>
+          {paymentMethods.length > 0 && (
+            <SavedCards
+              paymentMethods={paymentMethods}
+              setupIntentId={setupIntentId}
+              selectedCard={selectedCard}
+              setSelectedCard={setSelectedCard}
             />
+          )}
+          <div>
+            <input
+              type="radio"
+              value="newCard"
+              checked={selectedCard === 'newCard'}
+              onChange={(e) => setSelectedCard(e.target.value)}
+            />
+            Use a new card
+            <div hidden={selectedCard !== 'newCard'}>
+              <PaymentElement />
+            </div>
+            <div hidden={selectedCard === 'newCard'}>
+              To use a saved card, please retype your password to confirm identity:
+              <input
+                type="password"
+                value={password}
+                required={selectedCard !== 'newCard'}
+                onChange={(e) => { setPassword(e.target.value); }}
+              />
+            </div>
           </div>
-        </div>
-        <Button type="submit" disabled={!stripe}>Make payment</Button>
-        <Button onClick={handleCancel}>Cancel</Button>
+        </CardBody>
+        <CardFooter>
+          <Button variant="outline" onClick={handleCancel}>Cancel</Button>
+          <Button type="submit" disabled={!stripe}>Make payment</Button>
+        </CardFooter>
       </form>
-    </>
+    </Card>
   );
 }

@@ -95,6 +95,10 @@ function App() {
               setStripeClientSecret={setStripeClientSecret}
               setSetupIntentId={setSetupIntentId}
               paymentMethods={paymentMethods}
+              user={user}
+              setUser={setUser}
+              setPlanToJoin={setPlanToJoin}
+              setPlanToView={setPlanToView}
             />
           )
           : <Navigate to="/" />}
