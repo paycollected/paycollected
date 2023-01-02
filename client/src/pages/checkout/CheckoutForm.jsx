@@ -5,7 +5,8 @@ import {
 import { useMutation } from '@apollo/client';
 import { useNavigate } from 'react-router-dom';
 import {
-  Button, Card, CardHeader, CardBody, CardFooter, Heading, HStack, RadioGroup, Radio, VStack, Container,
+  Button, Card, CardHeader, CardBody, CardFooter, Heading, HStack, RadioGroup, Radio, VStack,
+  Container, FormControl, FormLabel, FormHelperText, Input,
 } from '@chakra-ui/react';
 import { CancelTransaction as CANCEL_TRANSC, SubscribeWithSavedCard as SUBSCRIBE } from '../../graphql/mutations.gql';
 import SavedCards from './SavedCards.jsx';
@@ -112,15 +113,17 @@ export default function CheckoutForm({ setupIntentId, paymentMethods, planId }) 
               <Container w="100%" p={0} hidden={selectedCard !== 'newCard'}>
                 <PaymentElement />
               </Container>
-              <div hidden={selectedCard === 'newCard'}>
-                To use a saved card, please retype your password to confirm identity:
-                <input
+              <FormControl hidden={selectedCard === 'newCard'} isRequired={selectedCard !== 'newCard'}>
+                <FormLabel>Your password:</FormLabel>
+                <Input
                   type="password"
                   value={password}
-                  required={selectedCard !== 'newCard'}
-                  onChange={(e) => { setPassword(e.target.value); }}
+                  onChange={(e) => setPassword(e.target.value)}
                 />
-              </div>
+                <FormHelperText>
+                  To use a saved card, please retype your password to confirm your identity.
+                </FormHelperText>
+              </FormControl>
             </VStack>
           </RadioGroup>
         </CardBody>
