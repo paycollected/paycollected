@@ -91,7 +91,7 @@ export default function CheckoutForm({
   };
 
   return (
-    <Card bg="white" my={14} variant="outline" w="2xl">
+    <Card bg="white" my={14} variant="outline" w="xl">
       <form onSubmit={handlePaymentSubmit}>
         <CardHeader pt={10} px={12} pb={0}><Heading>Checkout</Heading></CardHeader>
         <CardBody px={12} py={8}>

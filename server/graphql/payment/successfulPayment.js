@@ -24,7 +24,7 @@ export default async function successfulPaymentResolver(setupIntentId, username)
   try {
     return {
       planName: 'Test Plan',
-      personalCost: '$20.00',
+      personalCost: 2000,
       cycleFrequency: 'WEEKLY',
       nextBillDate: '2023-01-19',
       paymentMethod: {
