@@ -1,19 +1,16 @@
 import React from 'react';
+import { Radio, Container } from '@chakra-ui/react';
 
-export default function SavedCards({ setSelectedCard, selectedCard, paymentMethods }) {
+export default function SavedCards({ selectedCard, paymentMethods }) {
   return (
     <>
       {paymentMethods.map((method) => (
-        <div key={method.id}>
-          <input
-            type="radio"
-            value={method.id}
-            checked={method.id === selectedCard}
-            onChange={(e) => { setSelectedCard(e.target.value); }}
-          />
-          {`${method.brand} ending in ${method.last4} (exp: ${method.expiryMonth}/${method.expiryYear})`}
-          {method.default && '(default)'}
-        </div>
+        <Container w="100%" p={0}>
+          <Radio key={method.id} value={method.id} checked={method.id === selectedCard}>
+            {`${method.brand} ending in ${method.last4} (exp: ${method.expiryMonth}/${method.expiryYear})`}
+            {method.default && '(default)'}
+          </Radio>
+        </Container>
       ))}
     </>
   );

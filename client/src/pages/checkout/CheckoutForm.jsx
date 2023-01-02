@@ -5,7 +5,7 @@ import {
 import { useMutation } from '@apollo/client';
 import { useNavigate } from 'react-router-dom';
 import {
-  Button, Card, CardHeader, CardBody, CardFooter, Heading, HStack,
+  Button, Card, CardHeader, CardBody, CardFooter, Heading, HStack, RadioGroup, Radio, VStack, Container,
 } from '@chakra-ui/react';
 import { CancelTransaction as CANCEL_TRANSC, SubscribeWithSavedCard as SUBSCRIBE } from '../../graphql/mutations.gql';
 import SavedCards from './SavedCards.jsx';
@@ -88,39 +88,41 @@ export default function CheckoutForm({ setupIntentId, paymentMethods, planId }) 
   };
 
   return (
-    <Card bg="white" mt={20} variant="outline" maxW="lg">
+    <Card bg="white" mt={20} variant="outline" w="lg">
       <form onSubmit={handlePaymentSubmit}>
         <CardHeader pt={10} px={12} pb={0}><Heading>Checkout</Heading></CardHeader>
         <CardBody px={12} py={8}>
-          {paymentMethods.length > 0 && (
-            <SavedCards
-              paymentMethods={paymentMethods}
-              setupIntentId={setupIntentId}
-              selectedCard={selectedCard}
-              setSelectedCard={setSelectedCard}
-            />
-          )}
-          <div>
-            <input
-              type="radio"
-              value="newCard"
-              checked={selectedCard === 'newCard'}
-              onChange={(e) => setSelectedCard(e.target.value)}
-            />
-            Use a new card
-            <div hidden={selectedCard !== 'newCard'}>
-              <PaymentElement />
-            </div>
-            <div hidden={selectedCard === 'newCard'}>
-              To use a saved card, please retype your password to confirm identity:
-              <input
-                type="password"
-                value={password}
-                required={selectedCard !== 'newCard'}
-                onChange={(e) => { setPassword(e.target.value); }}
-              />
-            </div>
-          </div>
+          <RadioGroup onChange={setSelectedCard} value={selectedCard}>
+            <VStack spacing={4}>
+              <>
+                {paymentMethods.length > 0 && (
+                  <SavedCards
+                    paymentMethods={paymentMethods}
+                    setupIntentId={setupIntentId}
+                    selectedCard={selectedCard}
+                    setSelectedCard={setSelectedCard}
+                  />
+                )}
+                <Container w="100%" p={0}>
+                  <Radio value="newCard" checked={selectedCard === 'newCard'}>
+                    Use a new card
+                  </Radio>
+                </Container>
+              </>
+              <Container w="100%" p={0} hidden={selectedCard !== 'newCard'}>
+                <PaymentElement />
+              </Container>
+              <div hidden={selectedCard === 'newCard'}>
+                To use a saved card, please retype your password to confirm identity:
+                <input
+                  type="password"
+                  value={password}
+                  required={selectedCard !== 'newCard'}
+                  onChange={(e) => { setPassword(e.target.value); }}
+                />
+              </div>
+            </VStack>
+          </RadioGroup>
         </CardBody>
         <CardFooter px={12} pt={0} pb={10}>
           <HStack spacing={4}>
