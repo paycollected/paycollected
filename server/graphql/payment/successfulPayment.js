@@ -8,8 +8,10 @@ export default async function successfulPaymentResolver(setupIntentId, username)
   let rows;
   let stripeCusId;
   let metadata;
+  let status;
+
   try {
-    [{ customer: stripeCusId, metadata }, { rows }] = await Promise.all([
+    [{ customer: stripeCusId, metadata, status }, { rows }] = await Promise.all([
       stripe.setupIntents.retrieve(setupIntentId),
       getUserInfo(username)
     ]);
@@ -25,6 +27,8 @@ export default async function successfulPaymentResolver(setupIntentId, username)
   const {
     planName, cycleFrequency, nextBillDate, personalCost, paymentMethod
   } = metadata;
+
+  if (status !== 'succeeded') await stripe.setupIntents.cancel(setupIntentId);
 
   return {
     planName,

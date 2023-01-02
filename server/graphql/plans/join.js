@@ -21,7 +21,6 @@ export default async function joinPlanResolver(planId, newQuantity, username) {
       quantity, stripeCusId, active, planName, cycleFrequency, nextBillDate, personalCost
     } = rows[0];
 
-    console.log('---------> personal cost', personalCost);
 
     if (!active) {
       errMsg = 'This plan has already been archived';

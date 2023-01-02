@@ -40,8 +40,6 @@ export default function CheckoutSuccess({
     };
   }, []);
 
-  console.log('----------> AAA', returnedSetupIntentId);
-
   const { loading, data, error } = useQuery(SUBS_INFO, {
     variables: { setupIntentId: returnedSetupIntentId },
   });
