@@ -107,7 +107,7 @@ function App() {
       <Route
         path="/checkout-success"
         element={
-          user && setupIntentId
+          user
             ? (
               <CheckoutSuccess
                 user={user}

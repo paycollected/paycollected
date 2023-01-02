@@ -81,23 +81,23 @@ export default async function subscribeWithSavedCardResolver(
       default_payment_method: paymentMethodId,
     };
 
+    const metadata = {
+      paymentMethod: JSON.stringify({
+        brand,
+        expiryMonth,
+        expiryYear,
+        last4,
+        id: paymentMethodId,
+        default: paymentMethodId === defaultPaymentId
+      })
+    };
+
     if (count === 0 && quantity === 1) {
       // this is the first subscription on this plan
       // and subscribed quant doesn't require price adjustment
       const [{ id: subscriptionId, items }, _] = await Promise.all([
         stripe.subscriptions.create(subscription),
-        stripe.setupIntents.update(setupIntentId, {
-          metadata: {
-            paymentMethod: JSON.stringify({
-              brand,
-              expiryMonth,
-              expiryYear,
-              last4,
-              id: paymentMethodId,
-              default: paymentMethodId === defaultPaymentId
-            })
-          }
-        }),
+        stripe.setupIntents.update(setupIntentId, { metadata }),
       ]);
       const { id: subscriptionItemId } = items.data[0];
       await startSubsNoPriceUpdatingUsingUsername(
@@ -119,18 +119,7 @@ export default async function subscribeWithSavedCardResolver(
         recurring: { interval: cycleFrequency },
       }),
       stripe.prices.update(prevPriceId, { active: false }),
-      stripe.setupIntents.update(setupIntentId, {
-        metadata: {
-          paymentMethod: JSON.stringify({
-            brand,
-            expiryMonth,
-            expiryYear,
-            last4,
-            id: paymentMethodId,
-            default: paymentMethodId === defaultPaymentId
-          })
-        }
-      }),
+      stripe.setupIntents.update(setupIntentId, { metadata }),
     ]);
     // replace old price Id with new Id
     subscription.items[0].price = newPriceId;

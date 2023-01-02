@@ -14,7 +14,12 @@ export default function Home({ user, setUser, setPlanToJoin, setPlanToView }) {
 
   return (
     <>
-      <NavBar user={user} setUser={setUser} setPlanToJoin={setPlanToJoin} setPlanToView={setPlanToView} />
+      <NavBar
+        user={user}
+        setUser={setUser}
+        setPlanToJoin={setPlanToJoin}
+        setPlanToView={setPlanToView}
+      />
       <h1>This is the Home page</h1>
       <Heading my={5}>
         Info About App

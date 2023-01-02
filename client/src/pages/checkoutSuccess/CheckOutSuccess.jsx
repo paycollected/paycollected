@@ -3,31 +3,34 @@ import {
   Flex, Card, CardHeader, CardBody, CardFooter, Heading, VStack, Text, Button, Grid, GridItem,
   Container,
 } from '@chakra-ui/react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useQuery } from '@apollo/client';
 import NavBar from '../../components/NavBar.jsx';
 import { SuccessfulPaymentData as SUBS_INFO } from '../../graphql/queries.gql';
 
 // test link: http://localhost:5647/checkout-success/?setup_intent=seti_1Lq9rqAJ5Ik974ueIdg7WHn9
 
+const queryStr = window.location.search;
+let localSetupIntentId = '';
+let urlParams;
+if (queryStr.length > 0) {
+  urlParams = new URLSearchParams(queryStr);
+  localSetupIntentId = urlParams.get('setup_intent');
+}
 
 export default function CheckoutSuccess({
   user, setUser, setPlanToJoin, setPlanToView, setStripeClientSecret, setSetupIntentId,
 }) {
   const navigate = useNavigate();
-  const [returnedSetupIntentId, setReturnedSetupIntentId] = useState('');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [returnedSetupIntentId, setReturnedSetupIntentId] = useState(
+    localSetupIntentId.length > 0
+      ? localSetupIntentId
+      : searchParams.get('setup_intent')
+  );
 
   useEffect(() => {
-    const queryStr = window.location.search;
-    let localSetupIntentId;
-    let urlParams;
-    if (queryStr.length > 0) {
-      urlParams = new URLSearchParams(queryStr);
-      localSetupIntentId = urlParams.get('setup_intent');
-      setReturnedSetupIntentId(localSetupIntentId);
-    }
-
-    if (!localSetupIntentId || !/^seti_(?:[a-zA-Z0-9]{24})$/.test(localSetupIntentId)) {
+    if (!returnedSetupIntentId || !/^seti_(?:[a-zA-Z0-9]{24})$/.test(returnedSetupIntentId)) {
       navigate('/404');
     }
 
@@ -37,11 +40,11 @@ export default function CheckoutSuccess({
     };
   }, []);
 
+  console.log('----------> AAA', returnedSetupIntentId);
 
   const { loading, data, error } = useQuery(SUBS_INFO, {
     variables: { setupIntentId: returnedSetupIntentId },
   });
-
 
   if (data) {
     const {
@@ -50,7 +53,6 @@ export default function CheckoutSuccess({
         brand, last4, expiryMonth, expiryYear, default: isDefault,
       }
     } = data.successfulPayment;
-
     return (
       <Flex
         w="100%"

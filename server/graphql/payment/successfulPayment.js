@@ -26,17 +26,11 @@ export default async function successfulPaymentResolver(setupIntentId, username)
     planName, cycleFrequency, nextBillDate, personalCost, paymentMethod
   } = metadata;
 
-  try {
-    await stripe.setupIntents.cancel(setupIntentId);
-    return {
-      planName,
-      personalCost: Number(personalCost),
-      cycleFrequency,
-      nextBillDate,
-      paymentMethod: JSON.parse(paymentMethod),
-    };
-  } catch (e) {
-    console.log(e);
-    throw new GraphQLError('Cannot cancel transaction', { extensions: { code: 'INTERNAL_SERVER_ERROR' } });
-  }
+  return {
+    planName,
+    personalCost: Number(personalCost),
+    cycleFrequency,
+    nextBillDate,
+    paymentMethod: JSON.parse(paymentMethod),
+  };
 }
