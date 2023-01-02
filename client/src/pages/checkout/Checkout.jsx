@@ -4,6 +4,7 @@ import { loadStripe } from '@stripe/stripe-js';
 import { Flex } from '@chakra-ui/react';
 import CheckoutForm from './CheckoutForm.jsx';
 import NavBar from '../../components/NavBar.jsx';
+import { stripePaymentElementAppearance } from '../../styles/styles.js';
 
 const stripePromise = loadStripe(process.env.STRIPE_PUBLISHABLE_KEY);
 
@@ -12,7 +13,7 @@ export default function Checkout({
   stripeClientSecret, setupIntentId, paymentMethods, planId, user, setUser, setPlanToJoin,
   setPlanToView,
 }) {
-  const options = { clientSecret: stripeClientSecret };
+  const options = { clientSecret: stripeClientSecret, appearance: stripePaymentElementAppearance };
 
   if (stripeClientSecret && stripeClientSecret.length > 0) {
     return (

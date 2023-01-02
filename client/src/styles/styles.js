@@ -204,3 +204,19 @@ export const globalTheme = extendTheme({
     gridTitle: { color: 'blackAlpha.800', fontWeight: 500, fontSize: 'md' },
   },
 });
+
+export const stripePaymentElementAppearance = {
+  theme: 'stripe',
+  variables: {
+    fontFamily: 'Inter, sans-serif',
+    colorText: '#2D3748',
+    spacingGridRow: '1.5rem',
+    spacingGridColumn: '2rem',
+  },
+  rules: {
+    '.Label': {
+      fontSize: '16px',
+      marginBottom: '0.75rem',
+    }
+  }
+};
