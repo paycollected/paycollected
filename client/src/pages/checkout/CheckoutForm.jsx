@@ -5,7 +5,7 @@ import {
 import { useMutation } from '@apollo/client';
 import { useNavigate } from 'react-router-dom';
 import {
-  Button, Card, CardHeader, CardBody, CardFooter, Heading,
+  Button, Card, CardHeader, CardBody, CardFooter, Heading, HStack,
 } from '@chakra-ui/react';
 import { CancelTransaction as CANCEL_TRANSC, SubscribeWithSavedCard as SUBSCRIBE } from '../../graphql/mutations.gql';
 import SavedCards from './SavedCards.jsx';
@@ -88,10 +88,10 @@ export default function CheckoutForm({ setupIntentId, paymentMethods, planId }) 
   };
 
   return (
-    <Card bg="white" mt={20}>
+    <Card bg="white" mt={20} variant="outline" maxW="lg">
       <form onSubmit={handlePaymentSubmit}>
-        <CardHeader><Heading>Checkout</Heading></CardHeader>
-        <CardBody>
+        <CardHeader pt={10} px={12} pb={0}><Heading>Checkout</Heading></CardHeader>
+        <CardBody px={12} py={8}>
           {paymentMethods.length > 0 && (
             <SavedCards
               paymentMethods={paymentMethods}
@@ -122,9 +122,11 @@ export default function CheckoutForm({ setupIntentId, paymentMethods, planId }) 
             </div>
           </div>
         </CardBody>
-        <CardFooter>
-          <Button variant="outline" onClick={handleCancel}>Cancel</Button>
-          <Button type="submit" disabled={!stripe}>Make payment</Button>
+        <CardFooter px={12} pt={0} pb={10}>
+          <HStack spacing={4}>
+            <Button variant="outline" onClick={handleCancel}>Cancel</Button>
+            <Button type="submit" disabled={!stripe}>Set up payment</Button>
+          </HStack>
         </CardFooter>
       </form>
     </Card>

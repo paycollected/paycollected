@@ -1,7 +1,7 @@
 import React from 'react';
 import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
-import { Grid, Flex } from '@chakra-ui/react';
+import { Flex } from '@chakra-ui/react';
 import CheckoutForm from './CheckoutForm.jsx';
 import NavBar from '../../components/NavBar.jsx';
 
