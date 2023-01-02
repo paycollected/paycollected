@@ -34,7 +34,6 @@ export default async function loginResolver(usernameOrEmailInput, password) {
       exp: Math.floor(Date.now() / 1000) + (60 * 30),
       user: {
         username,
-        stripeCusId,
       }
     }, process.env.SIGNIN_SECRET_KEY);
 

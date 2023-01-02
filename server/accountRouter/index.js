@@ -30,7 +30,7 @@ accountRouter.get('/verify', async (req, res) => {
     const loginToken = jwt.sign({
       // expires after 30 mins
       exp: Math.floor(Date.now() / 1000) + (60 * 30),
-      user: { username, stripeCusId },
+      user: { username },
     }, process.env.SIGNIN_SECRET_KEY);
     res.redirect(`/dashboard/?username=${username}&token=${loginToken}`);
   } catch (e) {
