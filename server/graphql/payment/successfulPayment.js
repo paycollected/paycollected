@@ -5,6 +5,7 @@ import { getUserInfo } from '../../db/models.js';
 const stripe = stripeSDK(process.env.STRIPE_SECRET_KEY);
 
 export default async function successfulPaymentResolver(setupIntentId, username) {
+  console.log('--------> setup intent id', setupIntentId);
   let rows;
   let stripeCusId;
   let metadata;
@@ -23,11 +24,10 @@ export default async function successfulPaymentResolver(setupIntentId, username)
   }
 
   const {
-    planName, cycleFrequency, nextBillDate, personalCost,
-    paymentMethod: {
-      brand, expiryMonth, expiryYear, last4, id, default: isDefault
-    }
+    planName, cycleFrequency, nextBillDate, personalCost, paymentMethod
   } = metadata;
+
+  console.log('----------------> metadata', metadata);
 
   try {
     await stripe.setupIntents.cancel(setupIntentId);
@@ -36,14 +36,7 @@ export default async function successfulPaymentResolver(setupIntentId, username)
       personalCost: Number(personalCost),
       cycleFrequency,
       nextBillDate,
-      paymentMethod: {
-        id,
-        brand,
-        last4,
-        expiryMonth: Number(expiryMonth),
-        expiryYear: Number(expiryYear),
-        default: JSON.parse(isDefault),
-      }
+      paymentMethod: JSON.parse(paymentMethod),
     };
   } catch (e) {
     console.log(e);

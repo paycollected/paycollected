@@ -414,6 +414,30 @@ export function subscriptionSetupSavedCard(planId, username) {
   return pool.query(query, [username, planId]);
 }
 
+export function startSubsNoPriceUpdatingUsingUsername(
+  planId,
+  quantity,
+  subscriptionId,
+  subscriptionItemId,
+  username,
+) {
+  const query = `
+  INSERT INTO user_plan
+      (quantity, subscription_id, subscription_item_id, plan_id, username)
+    VALUES
+      ($1, $2, $3, $4, $5)
+    ON CONFLICT
+      (username, plan_id)
+    DO UPDATE SET
+      quantity = $1, subscription_id = $2, subscription_item_id = $3
+    WHERE user_plan.username = $5 AND user_plan.plan_id = $4
+    RETURNING plan_id, quantity, subscription_id
+  `;
+  const args = [quantity, subscriptionId, subscriptionItemId, planId, username];
+  return pool.query(query, args);
+}
+
+
 
 export function startSubsNoPriceUpdate(
   planId,
@@ -464,7 +488,7 @@ export function startSubsPriceUpdateUsingUsername(
       UPDATE plans
       SET price_id = $6
       WHERE plan_id = $4
-  ),
+  )
   INSERT INTO notifications (username, message)
     SELECT
       username,

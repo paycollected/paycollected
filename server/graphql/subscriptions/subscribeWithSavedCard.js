@@ -1,7 +1,7 @@
 import stripeSDK from 'stripe';
 import bcrypt from 'bcrypt';
 import { GraphQLError } from 'graphql';
-import { subscriptionSetupSavedCard, startSubsNoPriceUpdate, startSubsPriceUpdateUsingUsername } from '../../db/models.js';
+import { subscriptionSetupSavedCard, startSubsNoPriceUpdatingUsingUsername, startSubsPriceUpdateUsingUsername } from '../../db/models.js';
 import { updateStripePrice } from '../../utils';
 
 const stripe = stripeSDK(process.env.STRIPE_SECRET_KEY);
@@ -88,20 +88,25 @@ export default async function subscribeWithSavedCardResolver(
         stripe.subscriptions.create(subscription),
         stripe.setupIntents.update(setupIntentId, {
           metadata: {
-            paymentMethod: {
+            paymentMethod: JSON.stringify({
               brand,
               expiryMonth,
               expiryYear,
               last4,
               id: paymentMethodId,
               default: paymentMethodId === defaultPaymentId
-            }
+            })
           }
         }),
       ]);
       const { id: subscriptionItemId } = items.data[0];
-      await startSubsNoPriceUpdate(planId, quantity, subscriptionId, subscriptionItemId, username);
-
+      await startSubsNoPriceUpdatingUsingUsername(
+        planId,
+        quantity,
+        subscriptionId,
+        subscriptionItemId,
+        username
+      );
       return true;
     }
 
@@ -116,14 +121,14 @@ export default async function subscribeWithSavedCardResolver(
       stripe.prices.update(prevPriceId, { active: false }),
       stripe.setupIntents.update(setupIntentId, {
         metadata: {
-          paymentMethod: {
+          paymentMethod: JSON.stringify({
             brand,
             expiryMonth,
             expiryYear,
             last4,
             id: paymentMethodId,
             default: paymentMethodId === defaultPaymentId
-          }
+          })
         }
       }),
     ]);

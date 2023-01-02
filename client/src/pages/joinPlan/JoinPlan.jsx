@@ -106,7 +106,7 @@ export default function JoinPlan({
                 </Text>
               </Flex>
             </VStack>
-            <Card w={{ base: '95%', md: '80%' }}>
+            <Card w={{ base: '95%', md: '80%' }} variant="outline">
               <CardHeader mx={6} mt={8} pb={4}>
                 <Heading as="h2" variant="nuanced" color="#272088">{name}</Heading>
               </CardHeader>
