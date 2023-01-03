@@ -30,6 +30,7 @@ import { retrieveNotificationsResolver, deleteNotificationResolver } from './use
 import transferOwnershipResolver from './plans/transferOwnership';
 import getEmailResolver from './users/getEmail';
 import successfulPaymentResolver from './payment/successfulPayment';
+import managePaymentResolver from './payment/managePayment';
 
 const stripe = stripeSDK(process.env.STRIPE_SECRET_KEY);
 
@@ -135,21 +136,9 @@ export default {
       joinPlanResolver(planId, quantity, username)
     )),
 
-    editPayment: authResolverWrapper(async (_, __, { user }) => {
-      const { stripeCusId } = user;
-      try {
-        const { url } = await stripe.billingPortal.sessions.create({
-          customer: stripeCusId,
-          return_url: `${process.env.HOST}/dashboard/`,
-        });
-        return { portalSessionURL: url };
-      } catch (asyncError) {
-        console.log(asyncError);
-        throw new GraphQLError('Unable to get customer portal link', {
-          extensions: { code: 'INTERNAL_SERVER_ERROR' }
-        });
-      }
-    }),
+    editPayment: authResolverWrapper(async (_, __, { user: { username } }) => (
+      managePaymentResolver(username)
+    )),
 
     unsubscribe: authResolverWrapper((_, { subscriptionId }, { user: { username } }) => (
       unsubscribeResolver(subscriptionId, username)

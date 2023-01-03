@@ -99,7 +99,7 @@ export default function CheckoutSuccess({
             </VStack>
           </CardBody>
           <CardFooter px={12} pt={0} pb={10}>
-            <Button type="button">Back to Dashboard</Button>
+            <Button type="button" onClick={() => navigate('/dashboard')}>Back to Dashboard</Button>
           </CardFooter>
         </Card>
       </Flex>

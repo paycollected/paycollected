@@ -51,7 +51,7 @@ export default async function handleSubscriptionStart(setupIntent) {
           trial_end: startDate,
           default_payment_method: paymentMethodId,
         };
-        console.log('----------> A');
+
         const metadata = {
           paymentMethod: JSON.stringify({
             brand,
@@ -62,7 +62,6 @@ export default async function handleSubscriptionStart(setupIntent) {
             default: defaultPmntMethod === null || paymentMethodId === defaultPmntMethod,
           }),
         };
-        console.log('----------> B');
 
         if (count > 0 || quantity > 1) {
           const promises = [
