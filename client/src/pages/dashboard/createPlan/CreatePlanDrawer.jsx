@@ -9,6 +9,7 @@ import {
   TableContainer, Table, Tbody, Tr, Td, VStack, Flex, InputRightAddon, Text, Center
 } from '@chakra-ui/react';
 import { CreatePlanMutation as CREATE_PLAN } from '../../../graphql/mutations.gql';
+import { ViewAllPlans as GET_PLANS } from '../../../graphql/queries.gql';
 
 // users limited to a start date that is between tomorrow and 1 month from then
 const tomorrow = new Date();
@@ -63,6 +64,7 @@ export default function CreatePlanDrawer({ isOpen, onClose, setPlanToJoin }) {
       console.log('error creating plan: ', message);
       setSuccess(false);
     },
+    refetchQueries: [{ query: GET_PLANS }, 'ViewAllPlans'],
   });
 
   const onSubmit = ({
