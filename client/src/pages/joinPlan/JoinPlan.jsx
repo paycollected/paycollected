@@ -135,7 +135,17 @@ export default function JoinPlan({
                     gap={{ base: 4, md: 0 }}
                   >
                     <GridItem w="90%">
-                      <Button w="100%" type="button" variant="outline">Cancel</Button>
+                      <Button
+                        w="100%"
+                        type="button"
+                        variant="outline"
+                        onClick={() => {
+                          setPlanToView(null);
+                          navigate('/dashboard');
+                        }}
+                      >
+                        Cancel
+                      </Button>
                     </GridItem>
                     <GridItem w="90%">
                       <Button w="100%" type="submit">Continue to payment</Button>
