@@ -236,7 +236,7 @@ export default function PlanDetails({
                             variant="navActionBtn"
                             onClick={() => {
                               setAction('cancelAsOwner');
-                              onOpen();
+                              confirmOnOpen();
                             }}
                           >
                             Cancel your subscription
@@ -248,7 +248,7 @@ export default function PlanDetails({
                             variant="navActionBtn"
                             onClick={() => {
                               setAction('delete');
-                              onOpen();
+                              confirmOnOpen();
                             }}
                           >
                             Delete this plan
@@ -262,7 +262,7 @@ export default function PlanDetails({
                         variant="navActionBtn"
                         onClick={() => {
                           setAction('delete');
-                          onOpen();
+                          confirmOnOpen();
                         }}
                       >
                         Delete this plan
