@@ -5,7 +5,7 @@ import {
 import PlansTable from './PlansTable.jsx';
 
 
-export default function PlansTableLayout({ total, plans, setPlanToView }) {
+export default function PlansTableLayout({ total, plans, setPlanToView, setPlanToJoin }) {
   const isMobile = useBreakpointValue({ base: true, md: false });
 
   return (
@@ -17,7 +17,7 @@ export default function PlansTableLayout({ total, plans, setPlanToView }) {
       >
         <Stack spacing="5">
           <Box overflowX="auto">
-            <PlansTable plans={plans} setPlanToView={setPlanToView} />
+            <PlansTable plans={plans} setPlanToView={setPlanToView} setPlanToJoin={setPlanToJoin} />
           </Box>
           <Box px={{ base: '4', md: '6' }} pb="5">
             <HStack spacing="3" justify="space-between">

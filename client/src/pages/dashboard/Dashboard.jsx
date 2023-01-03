@@ -17,12 +17,10 @@ import CreatePlanDrawer from './createPlan/CreatePlanDrawer.jsx';
 const queryStr = window.location.search;
 let username;
 let token;
-let redirectStatus;
 if (queryStr.length > 0) {
   const urlParams = new URLSearchParams(queryStr);
   username = urlParams.get('username');
   token = urlParams.get('token');
-  redirectStatus = urlParams.get('redirect_status');
 }
 
 export default function Dashboard({
@@ -99,6 +97,7 @@ export default function Dashboard({
             total={data.viewAllPlans.total}
             plans={data.viewAllPlans.plans}
             setPlanToView={setPlanToView}
+            setPlanToJoin={setPlanToJoin}
           />
           <Wrap w="100%" align="end" spacingX={{ base: '4', md: '8' }}>
             <WrapItem>

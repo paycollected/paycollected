@@ -5,7 +5,7 @@ import {
 } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
 import ActionConfirmationModal from '../../components/ActionConfirmationModal.jsx';
-import MagicLinkModal from './MagicLinkModal.jsx';
+import MagicLinkModal from '../../components/MagicLinkModal.jsx';
 
 function MoreOptionsIcon() {
   return (
@@ -18,7 +18,7 @@ function MoreOptionsIcon() {
   );
 }
 
-export default function PlansTable({ plans, setPlanToView }) {
+export default function PlansTable({ plans, setPlanToView, setPlanToJoin }) {
   const navigate = useNavigate();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { isOpen: mlIsOpen, onOpen: mlOnOpen, onClose: mlOnClose } = useDisclosure();
@@ -86,6 +86,15 @@ export default function PlansTable({ plans, setPlanToView }) {
                       variant="menuIcon"
                     />
                     <MenuList>
+                      {isOwner && quantity === 0 && (
+                        <MenuItem onClick={() => {
+                          setPlanToJoin(planId);
+                          navigate(`/join/${planId}`);
+                        }}
+                        >
+                          Join Plan
+                        </MenuItem>
+                      )}
                       <MenuItem onClick={() => {
                         setPlanIdForAction(planId);
                         setPlanNameForAction(name);

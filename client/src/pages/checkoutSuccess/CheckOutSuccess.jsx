@@ -8,8 +8,6 @@ import { useQuery } from '@apollo/client';
 import NavBar from '../../components/NavBar.jsx';
 import { SuccessfulPaymentData as SUBS_INFO } from '../../graphql/queries.gql';
 
-// test link: http://localhost:5647/checkout-success/?setup_intent=seti_1Lq9rqAJ5Ik974ueIdg7WHn9
-
 const queryStr = window.location.search;
 let localSetupIntentId = '';
 let urlParams;

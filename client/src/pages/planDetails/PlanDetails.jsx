@@ -14,6 +14,7 @@ import {
 import ActionConfirmationModal from '../../components/ActionConfirmationModal.jsx';
 import NavBar from '../../components/NavBar.jsx';
 import EditableGrid from './EditableGrid.jsx';
+import MagicLinkModal from '../../components/MagicLinkModal.jsx';
 import { modifyQuantCacheUpdate, transferOwnershipCacheUpdate, modifyQuantTransferCacheUpdate } from './cacheUpdatingFns.js';
 
 export default function PlanDetails({
@@ -22,14 +23,14 @@ export default function PlanDetails({
   const [editAsOwner, setEditAsOwner] = useState(edit);
   const [editAsMember, setEditAsMember] = useState(false);
   const [action, setAction] = useState(null);
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const { isOpen: confirmIsOpen, onOpen: confirmOnOpen, onClose: confirmOnClose } = useDisclosure();
+  const { isOpen: shareIsOpen, onOpen: shareOnOpen, onClose: shareOnClose } = useDisclosure();
   const navigate = useNavigate();
   const { register, handleSubmit } = useForm();
 
   const { loading, data, error } = useQuery(GET_PLAN, {
     variables: { planId: planToView },
     fetchPolicy: 'cache-and-network',
-    nextFetchPolicy: 'cache-only',
   });
 
   const [changeQuant, {
@@ -109,8 +110,8 @@ export default function PlanDetails({
           setPlanToView={setPlanToView}
         />
         <ActionConfirmationModal
-          onClose={onClose}
-          isOpen={isOpen}
+          onClose={confirmOnClose}
+          isOpen={confirmIsOpen}
           action={action}
           planName={name}
           planId={planId}
@@ -118,6 +119,12 @@ export default function PlanDetails({
           members={activeMembers}
           setPlanToView={setPlanToView}
           inDashboard={false}
+        />
+        <MagicLinkModal
+          onClose={shareOnClose}
+          isOpen={shareIsOpen}
+          planName={name}
+          planId={planId}
         />
         <VStack w="93%" justify="left" spacing={{ base: 6, md: 10 }} mb={{ base: 6, md: 10 }}>
           <Flex w="100%" align="center">
@@ -136,7 +143,7 @@ export default function PlanDetails({
           <Box w="100%">
             <Flex w={{ base: '95%', lg: '80%' }} align="center" justify="space-between" mb={10}>
               <Heading as="h1" variant="accented" pb={0}>{name}</Heading>
-              <Button type="button">Share Plan</Button>
+              <Button type="button" onClick={shareOnOpen}>Share Plan</Button>
             </Flex>
             <Card w={{ base: '95%', lg: '80%' }}>
               {!isOwner && (
@@ -173,7 +180,7 @@ export default function PlanDetails({
                         variant="navActionBtn"
                         onClick={() => {
                           setAction('cancel');
-                          onOpen();
+                          confirmOnOpen();
                         }}
                       >
                         Cancel your subscription
