@@ -27,7 +27,8 @@ const authLink = setContext((_, { headers }) => {
 
 const formatDate = (date) => {
   const dateSplit = date.split('-');
-  return `${dateSplit[1]}/${dateSplit[2]}/${dateSplit[0]}`;
+  if (dateSplit.length === 3) return `${dateSplit[1]}/${dateSplit[2]}/${dateSplit[0]}`;
+  return date;
 };
 
 const cache = new InMemoryCache({
