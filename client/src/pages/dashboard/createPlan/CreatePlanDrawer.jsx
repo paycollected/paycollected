@@ -30,7 +30,7 @@ const nextMonthFullDate = processDateStr(oneMonthFromTmr);
 export default function CreatePlanDrawer({ isOpen, onClose, setPlanToJoin }) {
   const isMobile = useBreakpointValue({ base: true, md: false });
   const navigate = useNavigate();
-  const { register, handleSubmit, formState: { errors } } = useForm();
+  const { register, handleSubmit, formState: { errors } } = useForm({ shouldUnregister: true });
   const [startDate, setStartDate] = useState(fullDate);
   // conditionally render create plan form vs success page
   const [success, setSuccess] = useState(false);
@@ -87,8 +87,19 @@ export default function CreatePlanDrawer({ isOpen, onClose, setPlanToJoin }) {
     });
   };
 
+  const onCloseDrawer = () => {
+    setSuccess(false);
+    setPlanName('');
+    setPerCycleCost('');
+    setBillingFrequency('');
+    setStartDateCreated('');
+    setPlanCode('');
+    setPlanToJoin(null);
+    onClose();
+  };
+
   return (
-    <Drawer isOpen={isOpen} onClose={onClose} placement="right" size={isMobile ? 'full' : 'md'}>
+    <Drawer isOpen={isOpen} onClose={onCloseDrawer} placement="right" size={isMobile ? 'full' : 'md'}>
       <DrawerOverlay />
       <DrawerContent px={2} py={2}>
         <DrawerCloseButton />
@@ -142,12 +153,15 @@ export default function CreatePlanDrawer({ isOpen, onClose, setPlanToJoin }) {
                         {...register('perCycleCost', {
                           required: 'Enter total cost per pay cycle',
                           validate: (val) => Number(val) >= 10 || 'Cost must be at least $10',
-                          pattern: /^([1-9]([0-9]+).([0-9]{2}))|([1-9]([0-9]+))$/ || 'Cost must be a valid amount in US dollars',
+                          pattern: {
+                            value: /^(([1-9]([0-9]+)\.([0-9]{2}))|([1-9]([0-9]+)))$/,
+                            message: 'Cost must be a valid amount (i.e.: $100 or $100.00) in US dollars',
+                          },
                         })}
                       />
                     </InputGroup>
                     <FormHelperText>
-                      Total cost per billing cycle (i.e., #100 a week)
+                      Total cost per billing cycle for everyone in the plan (i.e., $100 a week)
                     </FormHelperText>
                     {errors.perCycleCost ? (
                       <FormErrorMessage>
@@ -198,7 +212,7 @@ export default function CreatePlanDrawer({ isOpen, onClose, setPlanToJoin }) {
             </DrawerBody>
             <DrawerFooter borderTopWidth="1px">
               <HStack width="100%" justify="space-between" pt={2}>
-                <Button variant="outline" width="45%" onClick={onClose}>Cancel</Button>
+                <Button variant="outline" width="45%" onClick={onCloseDrawer}>Cancel</Button>
                 <Button variant="solid" width="45%" type="submit" form="create-plan-form" isLoading={loading} disabled={loading}>Create Plan</Button>
               </HStack>
             </DrawerFooter>
@@ -269,7 +283,7 @@ export default function CreatePlanDrawer({ isOpen, onClose, setPlanToJoin }) {
             </DrawerBody>
             <DrawerFooter borderTopWidth="1px">
               <HStack width="100%" justify="space-between" pt={2}>
-                <Button variant="outline" width="45%" onClick={onClose}>Close</Button>
+                <Button variant="outline" width="45%" onClick={onCloseDrawer}>Close</Button>
                 <Button variant="solid" width="45%" onClick={() => { navigate(`/join/${planCode}`); }}>Join Plan</Button>
               </HStack>
             </DrawerFooter>
