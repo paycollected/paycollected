@@ -176,7 +176,7 @@ export default `#graphql
     createPlan(
       planName: String!
       cycleFrequency: CycleFrequency!
-      perCycleCost: Float!
+      perCycleCost: USCurrency!
       startDate: Date!
     ): PlanIdResponse!
 

@@ -21,7 +21,7 @@ function CircleIcon(props) {
       />
     </Icon>
   );
-};
+}
 
 export default function NavBar({
   user, setUser, setPlanToJoin, setPlanToView

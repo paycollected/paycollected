@@ -13,11 +13,14 @@ export default async function createPlanResolver(
   recurringInterval
 ) {
   // INPUT VALIDATION
-  const cost = perCycleCost * 100; // need in cents
-  if (cost < 1000 || !Number.isInteger(cost)) {
+  if (perCycleCost < 1000) {
     // make min $10
     throw new GraphQLError('Invalid cost', { extensions: { code: 'BAD_USER_INPUT' } });
   }
+
+  // it is necessary to check for this condition because of JS's inaccuracy in converting string
+  // to Number. For example, Number('7526') is 7526.000000000001 and not 7526.
+  const cost = Number.isInteger(perCycleCost) ? perCycleCost : Math.floor(perCycleCost);
 
   // just doing a simple input date validation
   const start = new Date(startDate);

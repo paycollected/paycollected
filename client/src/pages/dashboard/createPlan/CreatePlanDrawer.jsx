@@ -70,11 +70,14 @@ export default function CreatePlanDrawer({ isOpen, onClose, setPlanToJoin }) {
   const onSubmit = ({
     planName, billingFrequency, perCycleCost
   }) => {
+    let fCost;
+    if (/^[1-9]([0-9]+).([0-9]{2})$/.test(perCycleCost)) fCost = `$${perCycleCost}`;
+    else fCost = `$${perCycleCost}.00`;
     createNewPlan({
       variables: {
         planName,
         cycleFrequency: billingFrequency.toUpperCase(),
-        perCycleCost: Number(perCycleCost),
+        perCycleCost: fCost,
         startDate,
       },
     });
@@ -134,7 +137,8 @@ export default function CreatePlanDrawer({ isOpen, onClose, setPlanToJoin }) {
                         type="text"
                         {...register('perCycleCost', {
                           required: 'Enter total cost per pay cycle',
-                          validate: (val) => Number.isInteger(Number(val) * 100) && Number(val) >= 10 || 'Cost must be a valid amount in US dollars at least $10'
+                          validate: (val) => Number(val) >= 10 || 'Cost must be at least $10',
+                          pattern: /^([1-9]([0-9]+).([0-9]{2}))|([1-9]([0-9]+))$/ || 'Cost must be a valid amount in US dollars',
                         })}
                       />
                     </InputGroup>
