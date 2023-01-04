@@ -84,6 +84,7 @@ query RetrieveNotifications {
     count
     notifications {
       id
+      subject
       content
       createdAt
     }

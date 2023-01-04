@@ -126,6 +126,7 @@ export default `#graphql
 
   type Notification {
     id: ID!
+    subject: String!
     content: String!
     createdAt: DateTime!
   }
