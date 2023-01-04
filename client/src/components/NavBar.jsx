@@ -3,7 +3,7 @@ import { useNavigate, Link as ReactLink } from 'react-router-dom';
 import { useQuery, useMutation } from '@apollo/client';
 import {
   Flex, Box, Text, Stack, Link, Image, Avatar, Menu, MenuButton, MenuList, MenuItem, Button, HStack,
-  Circle, Icon, Popover, PopoverTrigger, PopoverContent, PopoverBody, Divider,
+  Circle, Icon, Popover, PopoverTrigger, PopoverContent, PopoverBody, Divider, Container,
 } from '@chakra-ui/react';
 import { BellIcon } from '@chakra-ui/icons';
 import Logo from '../public/Pay_Collected_Logo.png';
@@ -131,7 +131,7 @@ export default function NavBar({
                     <BellIcon boxSize={6} color="white" />
                   </Circle>
                 </PopoverTrigger>
-                <PopoverContent right={6}>
+                <PopoverContent right={6} py={4} w="sm">
                   {data.retrieveNotifications.notifications.map((noti) => (
                     <Notification
                       key={noti.id}
@@ -144,9 +144,25 @@ export default function NavBar({
             </Box>
           )}
           {(!data || (data && data.retrieveNotifications.count === 0)) && (
-            <Circle size="50px" bg="gray.400" as="button">
-              <BellIcon boxSize={6} color="white" />
-            </Circle>
+            <Box>
+              <Popover isLazy>
+                <PopoverTrigger>
+                  <Circle size="50px" bg="gray.400" as="button">
+                    <BellIcon boxSize={6} color="white" />
+                  </Circle>
+                </PopoverTrigger>
+                <PopoverContent right={6} pb={2} pt={4} w="sm">
+                  <Container px={2} pt={1}>
+                    <PopoverBody>
+                      <Container w="100%" px={3}>
+                        You have 0 new notifications.
+                      </Container>
+                    </PopoverBody>
+                    <PopoverBody><Divider /></PopoverBody>
+                  </Container>
+                </PopoverContent>
+              </Popover>
+            </Box>
           )}
           <Menu>
             <MenuButton>

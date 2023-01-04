@@ -4,14 +4,16 @@ import {
 } from '@chakra-ui/react';
 
 export default function Notification({ notification, deleteNotification }) {
-  const { id, content, subject, createdAt } = notification;
+  const {
+    id, content, subject, createdAt,
+  } = notification;
 
   return (
-    <>
+    <Container px={2} pt={1}>
       <PopoverBody>
-        <Container w="100%">
-          <VStack spacing={3} mt={4}>
-            <Flex justify="space-between">
+        <Container w="100%" px={3}>
+          <VStack w="100%" spacing={3}>
+            <Flex w="100%" justify="space-between">
               <Box w="70%" p={0}>
                 <Text fontWeight="600" fontSize="sm" color="gray.700">{subject}</Text>
               </Box>
@@ -28,6 +30,6 @@ export default function Notification({ notification, deleteNotification }) {
         </Container>
       </PopoverBody>
       <PopoverBody><Divider /></PopoverBody>
-    </>
+    </Container>
   );
 }
