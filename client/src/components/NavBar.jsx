@@ -2,8 +2,10 @@ import React from 'react';
 import { useNavigate, Link as ReactLink } from 'react-router-dom';
 import { useMutation } from '@apollo/client';
 import {
-  Flex, Box, Text, Stack, Link, Image, Avatar, Menu, MenuButton, MenuList, MenuItem, Button,
+  Flex, Box, Text, Stack, Link, Image, Avatar, Menu, MenuButton, MenuList, MenuItem, Button, HStack,
+  Circle,
 } from '@chakra-ui/react';
+import { BellIcon } from '@chakra-ui/icons'
 import Logo from '../public/Pay_Collected_Logo.png';
 import { EditPayment as EDIT_PAYMENT } from '../graphql/mutations.gql';
 import UnauthenticatedNavBar from './UnauthenticatedNavBar.jsx';
@@ -83,16 +85,21 @@ export default function NavBar({
         </Stack>
       </Box>
       <Box>
-        <Menu>
-          <MenuButton>
-            {/* TO-DO: Add Avatar Icon */}
-            <Avatar src="insert-url" />
-          </MenuButton>
-          <MenuList>
-            <MenuItem onClick={() => navigate('/manage-account')}>Profile</MenuItem>
-            <MenuItem onClick={() => logUserOut()}>Log Out</MenuItem>
-          </MenuList>
-        </Menu>
+        <HStack spacing={4}>
+          <Circle size="50px" bg="gray.400">
+            <BellIcon boxSize={6} color="white" />
+          </Circle>
+          <Menu>
+            <MenuButton>
+              {/* TO-DO: Add Avatar Icon */}
+              <Avatar src="insert-url" />
+            </MenuButton>
+            <MenuList>
+              <MenuItem onClick={() => navigate('/manage-account')}>Profile</MenuItem>
+              <MenuItem onClick={() => logUserOut()}>Log Out</MenuItem>
+            </MenuList>
+          </Menu>
+        </HStack>
       </Box>
     </Flex>
   );
