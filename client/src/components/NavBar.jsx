@@ -1,14 +1,26 @@
 import React from 'react';
 import { useNavigate, Link as ReactLink } from 'react-router-dom';
-import { useMutation } from '@apollo/client';
+import { useQuery, useMutation } from '@apollo/client';
 import {
   Flex, Box, Text, Stack, Link, Image, Avatar, Menu, MenuButton, MenuList, MenuItem, Button, HStack,
-  Circle,
+  Circle, Icon,
 } from '@chakra-ui/react';
-import { BellIcon } from '@chakra-ui/icons'
+import { BellIcon } from '@chakra-ui/icons';
 import Logo from '../public/Pay_Collected_Logo.png';
-import { EditPayment as EDIT_PAYMENT } from '../graphql/mutations.gql';
+import { EditPayment as EDIT_PAYMENT, DeleteNotification as DELETE_NOTI } from '../graphql/mutations.gql';
+import { RetrieveNotifications as GET_NOTIFICATIONS } from '../graphql/queries.gql';
 import UnauthenticatedNavBar from './UnauthenticatedNavBar.jsx';
+
+function CircleIcon(props) {
+  return (
+    <Icon viewBox="0 0 200 200" {...props}>
+      <path
+        fill="currentColor"
+        d="M 100, 100 m -75, 0 a 75,75 0 1,0 150,0 a 75,75 0 1,0 -150,0"
+      />
+    </Icon>
+  );
+};
 
 export default function NavBar({
   user, setUser, setPlanToJoin, setPlanToView
@@ -22,6 +34,25 @@ export default function NavBar({
     setPlanToView(null);
     navigate('/');
   };
+
+  const { data } = useQuery(GET_NOTIFICATIONS, {
+    fetchPolicy: 'cache-and-network',
+    nextFetchPolicy: 'cache-only',
+  });
+
+  const [deleteNoti, { loading }] = useMutation(DELETE_NOTI, {
+    update: (cache, { data: { deleteNotification: id } }) => {
+      cache.modify({
+        fields: {
+          retrieveNotifications(obj) {
+            const { count, notifications } = obj;
+            return { count, notifications: notifications.filter((noti) => noti.__ref !== `Notification:${id}`) };
+          },
+        }
+      });
+    },
+    onError: ({ message }) => { console.log(message); },
+  });
 
   const [
     submitEditPayment,
@@ -86,7 +117,8 @@ export default function NavBar({
       </Box>
       <Box>
         <HStack spacing={4}>
-          <Circle size="50px" bg="gray.400">
+          <Circle size="50px" bg="gray.400" position="relative" as="button">
+            <CircleIcon color="red.500" position="absolute" top={-1.75} right={-1.75} boxSize={5} />
             <BellIcon boxSize={6} color="white" />
           </Circle>
           <Menu>

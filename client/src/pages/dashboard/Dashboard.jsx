@@ -5,10 +5,8 @@ import {
   Button, FormControl, FormLabel, Input, Heading, VStack, WrapItem, Wrap, useDisclosure
 } from '@chakra-ui/react';
 import {
-  // RetrieveNotifications as GET_NOTIFICATIONS,
   ViewAllPlans as GET_ALL_PLANS,
 } from '../../graphql/queries.gql';
-import { DeleteNotification as DELETE_NOTI } from '../../graphql/mutations.gql';
 import NavBar from '../../components/NavBar.jsx';
 import PlansTableLayout from './PlansTableLayout.jsx';
 import CreatePlanDrawer from './createPlan/CreatePlanDrawer.jsx';
@@ -28,7 +26,6 @@ export default function Dashboard({
 }) {
   const navigate = useNavigate();
   const [code, setCode] = useState('');
-  // const [showNotifications, setShowNotifications] = useState(false);
   const {
     isOpen: isOpenCreatePlan, onOpen: onOpenCreatePlan, onClose: onCloseCreatePlan
   } = useDisclosure();
@@ -46,25 +43,6 @@ export default function Dashboard({
     fetchPolicy: 'cache-and-network',
     nextFetchPolicy: 'cache-only',
   });
-
-  // const { data } = useQuery(GET_NOTIFICATIONS, {
-  //   fetchPolicy: 'cache-and-network',
-  //   nextFetchPolicy: 'cache-only',
-  // });
-
-  // const [deleteNoti, { loading }] = useMutation(DELETE_NOTI, {
-  //   update: (cache, { data: { deleteNotification: id } }) => {
-  //     cache.modify({
-  //       fields: {
-  //         retrieveNotifications(obj) {
-  //           const { count, notifications } = obj;
-  //           return { count, notifications: notifications.filter((noti) => noti.__ref !== `Notification:${id}`) };
-  //         },
-  //       }
-  //     });
-  //   },
-  //   onError: ({ message }) => { console.log(message); },
-  // });
 
   const codeInputSubmit = (e) => {
     e.preventDefault();
@@ -126,27 +104,6 @@ export default function Dashboard({
           onClose={onCloseCreatePlan}
           setPlanToJoin={setPlanToJoin}
         />
-        {/* {data && data.retrieveNotifications.count > 0 && (
-          <div>
-            <div>
-              {`You have ${data.retrieveNotifications.count} notifications`}
-            </div>
-            <button type="button" onClick={() => setShowNotifications(!showNotifications)}>{`${!showNotifications ? 'Show' : 'Hide'} notifications`}</button>
-            {showNotifications && (
-              <div>
-                {data.retrieveNotifications.notifications.map((noti) => (
-                  <div key={noti.id}>
-                    <div style={{ font: '14px' }}>{noti.content}</div>
-                    <div style={{ font: '10px', fontStyle: 'italic' }}>{noti.createdAt}</div>
-                    <Button onClick={() => deleteNoti({ variables: { notificationId: noti.id } })}>
-                      Mark as read
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )} */}
       </>
     );
   }
