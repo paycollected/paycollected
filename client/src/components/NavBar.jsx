@@ -3,7 +3,7 @@ import { useNavigate, Link as ReactLink } from 'react-router-dom';
 import { useQuery, useMutation } from '@apollo/client';
 import {
   Flex, Box, Text, Stack, Link, Image, Avatar, Menu, MenuButton, MenuList, MenuItem, Button, HStack,
-  Circle, Icon,
+  Circle, Icon, Popover, PopoverTrigger, PopoverContent, PopoverBody,
 } from '@chakra-ui/react';
 import { BellIcon } from '@chakra-ui/icons';
 import Logo from '../public/Pay_Collected_Logo.png';
@@ -68,6 +68,7 @@ export default function NavBar({
   if (!user) {
     return (<UnauthenticatedNavBar />);
   }
+
   return (
     <Flex
       align="center"
@@ -116,11 +117,27 @@ export default function NavBar({
         </Stack>
       </Box>
       <Box>
-        <HStack spacing={4}>
-          <Circle size="50px" bg="gray.400" position="relative" as="button">
-            <CircleIcon color="red.500" position="absolute" top={-1.75} right={-1.75} boxSize={5} />
-            <BellIcon boxSize={6} color="white" />
-          </Circle>
+        <HStack spacing={6}>
+          {data && data.retrieveNotifications.count > 0 && (
+            <Box>
+              <Popover isLazy>
+                <PopoverTrigger>
+                  <Circle size="50px" bg="gray.400" position="relative" as="button">
+                    <CircleIcon color="red.500" position="absolute" top={-1.75} right={-1.75} boxSize={5} />
+                    <BellIcon boxSize={6} color="white" />
+                  </Circle>
+                </PopoverTrigger>
+                <PopoverContent right={6}>
+                  Im the popover
+                </PopoverContent>
+              </Popover>
+            </Box>
+          )}
+          {(!data || (data && data.retrieveNotifications.count === 0)) && (
+            <Circle size="50px" bg="gray.400" as="button">
+              <BellIcon boxSize={6} color="white" />
+            </Circle>
+          )}
           <Menu>
             <MenuButton>
               {/* TO-DO: Add Avatar Icon */}
