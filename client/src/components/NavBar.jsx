@@ -131,7 +131,7 @@ export default function NavBar({
                     <BellIcon boxSize={6} color="white" />
                   </Circle>
                 </PopoverTrigger>
-                <PopoverContent right={6} py={4} w="sm">
+                <PopoverContent right={6} py={4} w="sm" h="md" overflowY="auto">
                   {data.retrieveNotifications.notifications.map((noti) => (
                     <Notification
                       key={noti.id}
@@ -164,16 +164,18 @@ export default function NavBar({
               </Popover>
             </Box>
           )}
-          <Menu>
-            <MenuButton>
-              {/* TO-DO: Add Avatar Icon */}
-              <Avatar src="insert-url" />
-            </MenuButton>
-            <MenuList>
-              <MenuItem onClick={() => navigate('/manage-account')}>Profile</MenuItem>
-              <MenuItem onClick={() => logUserOut()}>Log Out</MenuItem>
-            </MenuList>
-          </Menu>
+          <Box>
+            <Menu>
+              <MenuButton>
+                {/* TO-DO: Add Avatar Icon */}
+                <Avatar src="insert-url" />
+              </MenuButton>
+              <MenuList>
+                <MenuItem onClick={() => navigate('/manage-account')}>Profile</MenuItem>
+                <MenuItem onClick={() => logUserOut()}>Log Out</MenuItem>
+              </MenuList>
+            </Menu>
+          </Box>
         </HStack>
       </Box>
     </Flex>
