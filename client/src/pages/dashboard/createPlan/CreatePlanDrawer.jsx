@@ -6,7 +6,7 @@ import {
   FormControl, FormLabel, FormErrorMessage, FormHelperText, InputGroup, InputLeftElement,
   Box, Stack, Button, Input, Select, HStack, useBreakpointValue, useClipboard,
   Drawer, DrawerOverlay, DrawerContent, DrawerCloseButton, DrawerHeader, DrawerBody, DrawerFooter,
-  TableContainer, Table, Tbody, Tr, Td, VStack, Flex, InputRightAddon, Text, Center, Container,
+  TableContainer, Table, Tbody, Tr, Td, VStack, Flex, InputRightAddon, Text, Center,
 } from '@chakra-ui/react';
 import { CreatePlanMutation as CREATE_PLAN } from '../../../graphql/mutations.gql';
 import { ViewAllPlans as GET_PLANS } from '../../../graphql/queries.gql';
@@ -88,13 +88,13 @@ export default function CreatePlanDrawer({ isOpen, onClose, setPlanToJoin }) {
   };
 
   const onCloseDrawer = () => {
-    // setSuccess(false);
-    // setPlanName('');
-    // setPerCycleCost('');
-    // setBillingFrequency('');
-    // setStartDateCreated('');
-    // setPlanCode('');
-    // setPlanToJoin(null);
+    setSuccess(false);
+    setPlanName('');
+    setPerCycleCost('');
+    setBillingFrequency('');
+    setStartDateCreated('');
+    setPlanCode('');
+    setPlanToJoin(null);
     onClose();
   };
 
