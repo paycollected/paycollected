@@ -13,6 +13,10 @@ mutation CreatePlanMutation (
   $planName: String!, $cycleFrequency: CycleFrequency!, $perCycleCost: USCurrency!, $startDate: Date!) {
   createPlan(planName: $planName, cycleFrequency: $cycleFrequency, perCycleCost: $perCycleCost, startDate: $startDate) {
     planId
+    planName
+    cycleFrequency
+    startDate
+    perCycleCost
   }
 }
 

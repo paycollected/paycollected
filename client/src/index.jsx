@@ -62,7 +62,7 @@ const cache = new InMemoryCache({
     },
     SuccessfulPaymentData: {
       fields: {
-        nextBillDate(date) { return formatDate(date)},
+        nextBillDate(date) { return formatDate(date); },
         cycleFrequency(cf) { return cf[0].concat(cf.slice(1).toLowerCase()); },
       }
     }

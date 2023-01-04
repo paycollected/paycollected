@@ -72,7 +72,6 @@ export default `#graphql
   enum UpdateStatus {
     DELETED
     ARCHIVED
-    CREATED
   }
 
   type AllPlansSummary {
@@ -144,6 +143,14 @@ export default `#graphql
     paymentMethod: PaymentMethod!
   }
 
+  type CreatePlanResponse {
+    planId: PlanID!
+    planName: String!
+    cycleFrequency: CycleFrequency!
+    startDate: Date!
+    perCycleCost: USCurrency!
+  }
+
   type Mutation {
     createUser(
       firstName: String!
@@ -178,7 +185,7 @@ export default `#graphql
       cycleFrequency: CycleFrequency!
       perCycleCost: USCurrency!
       startDate: Date!
-    ): PlanIdResponse!
+    ): CreatePlanResponse!
 
     editPayment: PortalSession!
 

@@ -36,9 +36,9 @@ export default function CreatePlanDrawer({ isOpen, onClose, setPlanToJoin }) {
   const [success, setSuccess] = useState(false);
   // data from successfully created plan
   const [planNameCreated, setPlanName] = useState('');
-  const [perCycleCostCreated, setPerCycleCost] = useState(0);
+  const [perCycleCostCreated, setPerCycleCost] = useState('');
   const [billingFrequencyCreated, setBillingFrequency] = useState('');
-  const [startDateCreated, setStartDateCreated] = useState(`${tomorrow.getUTCMonth() + 1}/${tomorrow.getUTCDate()}/${tomorrow.getUTCFullYear()}`);
+  const [startDateCreated, setStartDateCreated] = useState('');
   const [planCode, setPlanCode] = useState('');
 
   const { onCopy: onCopyURL, setValue: setValueURL } = useClipboard('');
@@ -50,13 +50,17 @@ export default function CreatePlanDrawer({ isOpen, onClose, setPlanToJoin }) {
   }, [planCode]);
 
   const [createNewPlan, { data, loading, error }] = useMutation(CREATE_PLAN, {
-    onCompleted: ({ createPlan: { planId } }) => {
+    onCompleted: ({
+      createPlan: {
+        planId, planName, cycleFrequency, startDate: returnedStartDate, perCycleCost
+      }
+    }) => {
+      const dateSplit = returnedStartDate.split('-');
       setPlanToJoin(planId);
-      // need data of new plan created
-      setPlanName('temp plan name');
-      setPerCycleCost(100);
-      setBillingFrequency('weekly');
-      setStartDateCreated(`${tomorrow.getUTCMonth() + 1}/${tomorrow.getUTCDate()}/${tomorrow.getUTCFullYear()}`);
+      setPlanName(planName);
+      setPerCycleCost(perCycleCost);
+      setBillingFrequency(cycleFrequency[0].concat(cycleFrequency.slice(1).toLowerCase()));
+      setStartDateCreated(`${dateSplit[1]}/${dateSplit[2]}/${dateSplit[0]}`);
       setPlanCode(planId);
       setSuccess(true);
     },
@@ -221,7 +225,7 @@ export default function CreatePlanDrawer({ isOpen, onClose, setPlanToJoin }) {
                         </Tr>
                         <Tr>
                           <Td fontWeight="bold">Per Cycle Cost: </Td>
-                          <Td>{`$${perCycleCostCreated}`}</Td>
+                          <Td>{perCycleCostCreated}</Td>
                         </Tr>
                         <Tr>
                           <Td fontWeight="bold">Billing Frequency: </Td>

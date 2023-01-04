@@ -57,17 +57,21 @@ export default async function createPlanResolver(
       product_data: { name: plan },
     });
 
+    const date = `${startDate.getUTCFullYear()}-${startDate.getUTCMonth() + 1}-${startDate.getUTCDate()}`;
+
     await addPlan(
       username,
       plan,
       freq,
       cost,
       planId,
-      `${startDate.getUTCFullYear()}-${startDate.getUTCMonth() + 1}-${startDate.getUTCDate()} 23:59:59 America/New_York`,
+      `${date} 23:59:59 America/New_York`,
       priceId
     );
 
-    return { planId, status: 'CREATED' };
+    return {
+      planId, planName: plan, cycleFrequency, perCycleCost: cost, startDate: new Date(date),
+    };
   } catch (asyncError) {
     console.log(asyncError);
     throw new GraphQLError('Unable to create new plan', { extensions: { code: 'INTERNAL_SERVER_ERROR' } });
