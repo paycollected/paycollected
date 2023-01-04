@@ -3,13 +3,14 @@ import { useNavigate, Link as ReactLink } from 'react-router-dom';
 import { useQuery, useMutation } from '@apollo/client';
 import {
   Flex, Box, Text, Stack, Link, Image, Avatar, Menu, MenuButton, MenuList, MenuItem, Button, HStack,
-  Circle, Icon, Popover, PopoverTrigger, PopoverContent, PopoverBody,
+  Circle, Icon, Popover, PopoverTrigger, PopoverContent, PopoverBody, Divider,
 } from '@chakra-ui/react';
 import { BellIcon } from '@chakra-ui/icons';
 import Logo from '../public/Pay_Collected_Logo.png';
 import { EditPayment as EDIT_PAYMENT, DeleteNotification as DELETE_NOTI } from '../graphql/mutations.gql';
 import { RetrieveNotifications as GET_NOTIFICATIONS } from '../graphql/queries.gql';
 import UnauthenticatedNavBar from './UnauthenticatedNavBar.jsx';
+import Notification from './Notification.jsx';
 
 function CircleIcon(props) {
   return (
@@ -46,7 +47,10 @@ export default function NavBar({
         fields: {
           retrieveNotifications(obj) {
             const { count, notifications } = obj;
-            return { count, notifications: notifications.filter((noti) => noti.__ref !== `Notification:${id}`) };
+            return {
+              count: count - 1,
+              notifications: notifications.filter((noti) => noti.__ref !== `Notification:${id}`)
+            };
           },
         }
       });
@@ -128,7 +132,13 @@ export default function NavBar({
                   </Circle>
                 </PopoverTrigger>
                 <PopoverContent right={6}>
-                  Im the popover
+                  {data.retrieveNotifications.notifications.map((noti) => (
+                    <Notification
+                      key={noti.id}
+                      notification={noti}
+                      deleteNotification={deleteNoti}
+                    />
+                  ))}
                 </PopoverContent>
               </Popover>
             </Box>
