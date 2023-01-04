@@ -6,7 +6,7 @@ import {
   FormControl, FormLabel, FormErrorMessage, FormHelperText, InputGroup, InputLeftElement,
   Box, Stack, Button, Input, Select, HStack, useBreakpointValue, useClipboard,
   Drawer, DrawerOverlay, DrawerContent, DrawerCloseButton, DrawerHeader, DrawerBody, DrawerFooter,
-  TableContainer, Table, Tbody, Tr, Td, VStack, Flex, InputRightAddon, Text, Center
+  TableContainer, Table, Tbody, Tr, Td, VStack, Flex, InputRightAddon, Text, Center, Container,
 } from '@chakra-ui/react';
 import { CreatePlanMutation as CREATE_PLAN } from '../../../graphql/mutations.gql';
 import { ViewAllPlans as GET_PLANS } from '../../../graphql/queries.gql';
@@ -88,13 +88,13 @@ export default function CreatePlanDrawer({ isOpen, onClose, setPlanToJoin }) {
   };
 
   const onCloseDrawer = () => {
-    setSuccess(false);
-    setPlanName('');
-    setPerCycleCost('');
-    setBillingFrequency('');
-    setStartDateCreated('');
-    setPlanCode('');
-    setPlanToJoin(null);
+    // setSuccess(false);
+    // setPlanName('');
+    // setPerCycleCost('');
+    // setBillingFrequency('');
+    // setStartDateCreated('');
+    // setPlanCode('');
+    // setPlanToJoin(null);
     onClose();
   };
 
@@ -230,24 +230,24 @@ export default function CreatePlanDrawer({ isOpen, onClose, setPlanToJoin }) {
                   Join the plan or invite your friends.
                 </Box>
                 <Center py={5}>
-                  <TableContainer width="75%">
+                  <TableContainer width="75%" bg="#F7FAFC" p={6} borderRadius={10}>
                     <Table variant="unstyled" size="sm">
                       <Tbody>
                         <Tr>
-                          <Td fontWeight="bold">Plan Name: </Td>
-                          <Td>{planNameCreated}</Td>
+                          <Td fontWeight="bold" fontSize="md">Plan Name: </Td>
+                          <Td fontSize="md">{planNameCreated}</Td>
                         </Tr>
                         <Tr>
-                          <Td fontWeight="bold">Per Cycle Cost: </Td>
-                          <Td>{perCycleCostCreated}</Td>
+                          <Td fontWeight="bold" fontSize="md">Per Cycle Cost: </Td>
+                          <Td fontSize="md">{perCycleCostCreated}</Td>
                         </Tr>
                         <Tr>
-                          <Td fontWeight="bold">Billing Frequency: </Td>
-                          <Td>{billingFrequencyCreated}</Td>
+                          <Td fontWeight="bold" fontSize="md">Billing Frequency: </Td>
+                          <Td fontSize="md">{billingFrequencyCreated}</Td>
                         </Tr>
                         <Tr>
-                          <Td fontWeight="bold">Start Date: </Td>
-                          <Td>{startDateCreated}</Td>
+                          <Td fontWeight="bold" fontSize="md">Start Date: </Td>
+                          <Td fontSize="md">{startDateCreated}</Td>
                         </Tr>
                       </Tbody>
                     </Table>
