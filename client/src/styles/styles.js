@@ -67,6 +67,21 @@ export const buttonTheme = defineStyleConfig({
         textDecoration: 'underline',
       }
     },
+    dismiss: {
+      bg: 'transparent',
+      color: 'blue.600',
+      fontSize: 'sm',
+      fontWeight: 'normal',
+      pt: 0.5,
+      px: 1,
+      pb: 0,
+      margin: 0,
+      h: 'min-content',
+      w: 'auto',
+      _hover: {
+        textDecoration: 'underline',
+      }
+    },
     outlineNuanced: {
       bg: 'transparent',
       color: 'gray.700',
