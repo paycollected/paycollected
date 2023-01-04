@@ -489,9 +489,10 @@ export function startSubsPriceUpdateUsingUsername(
       SET price_id = $6
       WHERE plan_id = $4
   )
-  INSERT INTO notifications (username, message)
+  INSERT INTO notifications (username, subject, message)
     SELECT
       username,
+      'A new member has joined your plan',
       (
         (SELECT first_name FROM users WHERE username = $5)
         || ' has joined plan '
@@ -536,9 +537,10 @@ export function startSubscription(
         AND user_plan.plan_id = $4
     ),
     update_notifications AS (
-      INSERT INTO notifications (username, message)
+      INSERT INTO notifications (username, subject, message)
         SELECT
           username,
+          'A new member has joined your plan',
           (
             (SELECT first_name FROM users WHERE username = (SELECT username FROM users WHERE s_cus_id = $5))
             || ' has joined plan '
@@ -573,9 +575,10 @@ export function updatePriceIdDelSubs(newPriceId, productId, username) {
     ), del AS (
       DELETE FROM user_plan WHERE plan_id = $2 AND username = $3
     )
-      INSERT INTO notifications (username, message)
+      INSERT INTO notifications (username, subject, message)
       SELECT
         username,
+        'A member has dropped out of your plan',
         (
           (SELECT first_name FROM users WHERE username = $3)
           || ' has dropped out of plan '
@@ -608,9 +611,10 @@ export function updatePriceIdArchiveSubs(newPriceId, productId, username) {
         subscription_item_id = NULL
       WHERE plan_id = $2 AND username = $3
     )
-    INSERT INTO notifications (username, message)
+    INSERT INTO notifications (username, subject, message)
       SELECT
         username,
+        'A member has dropped out of your plan',
         (
           (SELECT first_name FROM users WHERE username = $3)
           || ' has dropped out of plan '
@@ -649,8 +653,9 @@ export function updatePriceOwnerArchiveSubs(newPriceId, productId, formerOwner, 
         plan_owner = False
       WHERE plan_id = $2 AND username = $3
     ), update_new_owner_notification AS (
-        INSERT INTO notifications (username, message)
+        INSERT INTO notifications (username, subject, message)
           VALUES ($4,
+            'You are new owner of a plan!',
             (
               (SELECT first_name FROM users WHERE username = $3)
               || ' has dropped out of plan '
@@ -666,9 +671,10 @@ export function updatePriceOwnerArchiveSubs(newPriceId, productId, formerOwner, 
             )
           )
     )
-    INSERT INTO notifications (username, message)
+    INSERT INTO notifications (username, subject, message)
     SELECT
       username,
+      'Your plan has a new owner',
       (
         (SELECT first_name FROM users WHERE username = $3)
         || ' has dropped out of plan '
@@ -701,8 +707,9 @@ export function updatePriceOwnerDelSubs(newPriceId, planId, formerOwner, newOwne
       SET plan_owner = True
       WHERE plan_id = $2 AND username = $4
     ), update_new_owner_notification AS (
-      INSERT INTO notifications (username, message)
+      INSERT INTO notifications (username, subject, message)
         VALUES ($4,
+          'You are new owner of a plan!',
           (
             (SELECT first_name FROM users WHERE username = $3)
             || ' has dropped out of plan '
@@ -718,9 +725,10 @@ export function updatePriceOwnerDelSubs(newPriceId, planId, formerOwner, newOwne
           )
         )
     )
-    INSERT INTO notifications (username, message)
+    INSERT INTO notifications (username, subject, message)
     SELECT
       username,
+      'Your plan has a new owner',
       (
         (SELECT first_name FROM users WHERE username = $3)
         || ' has dropped out of plan '
@@ -745,9 +753,10 @@ export function updatePriceOwnerDelSubs(newPriceId, planId, formerOwner, newOwne
 export function deleteSubscription(username, planId) {
   const query = `
     WITH del AS (DELETE FROM user_plan WHERE username = $1 AND plan_id = $2)
-      INSERT INTO notifications (username, message)
+      INSERT INTO notifications (username, subject, message)
         SELECT
           username,
+          'A member has dropped out of your plan',
           (
             (SELECT first_name FROM users WHERE username = $1)
             || ' has dropped out of plan '
@@ -771,9 +780,10 @@ export function archiveSubs(username, planId) {
         subscription_item_id = NULL
       WHERE username = $1 AND plan_id = $2
     )
-    INSERT INTO notifications (username, message)
+    INSERT INTO notifications (username, subject, message)
       SELECT
         username,
+        'A member has dropped out of your plan',
         (
           (SELECT first_name FROM users WHERE username = $1)
           || ' has dropped out of plan '
@@ -943,9 +953,10 @@ export function updatePriceQuant(planId, newQuantity, newPriceId, username) {
   ), update_quantity AS (
     UPDATE user_plan SET quantity = $2 WHERE plan_id = $1 AND username = $4
   )
-    INSERT INTO notifications (username, message)
+    INSERT INTO notifications (username, subject, message)
       SELECT
         username,
+        'A member has update their subscription',
         (
           (SELECT first_name FROM users WHERE username = $4)
           || ' has updated their quantity in plan '
@@ -984,9 +995,10 @@ export function getPriceFromPlan(planId, username) {
 export function deletePlan(planId, username) {
   const query = `
     WITH del AS (DELETE FROM plans WHERE plan_id = $1)
-      INSERT INTO notifications (username, message)
+      INSERT INTO notifications (username, subject, message)
       SELECT
         username,
+        'Your plan has been deleted',
         (
           (SELECT first_name FROM users WHERE username = $2)
           || ' has deleted plan '
@@ -1014,9 +1026,10 @@ export function archivePlan(planId, username) {
         SET active = False
         WHERE plan_id = $1
     )
-    INSERT INTO notifications (username, message)
+    INSERT INTO notifications (username, subject, message)
       SELECT
         username,
+        'Your plan has been archived',
         (
           (SELECT first_name FROM users WHERE username = $2)
           || ' has archived plan '
@@ -1102,8 +1115,9 @@ export function updatePlanOwner(newOwner, formerOwner, planId) {
         SET plan_owner = False
         WHERE username = $2 AND plan_id = $3
     ), update_new_owner_notification AS (
-      INSERT INTO notifications (username, message)
+      INSERT INTO notifications (username, subject, message)
         VALUES ($1,
+          'You are new owner of a plan!',
           (
             (SELECT first_name FROM users WHERE username = $2)
             || ' has transferred the ownership for plan '
@@ -1112,9 +1126,10 @@ export function updatePlanOwner(newOwner, formerOwner, planId) {
           )
         )
     ), update_members_notifications AS (
-      INSERT INTO notifications (username, message)
+      INSERT INTO notifications (username, subject, message)
       SELECT
         username,
+        'Your plan has a new owner',
         (
           (SELECT first_name FROM users WHERE username = $2)
           || ' has transferred the ownership for plan '

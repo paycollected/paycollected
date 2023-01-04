@@ -3,7 +3,9 @@ import { useParams } from 'react-router-dom';
 import { Heading, Divider } from '@chakra-ui/react';
 import NavBar from '../../components/NavBar.jsx';
 
-export default function Home({ user, setUser, setPlanToJoin, setPlanToView }) {
+export default function Home({
+  user, setUser, setPlanToJoin, setPlanToView
+}) {
   const { planId } = useParams();
 
   useEffect(() => {
