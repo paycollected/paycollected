@@ -52,13 +52,12 @@ export default function CreateAccount({ setUser }) {
   }) => {
     setErrorMessage('');
     setEmail(inputEmail);
-    console.log('success');
-    // const [firstName, lastName] = fullName.split(' ');
-    // signup({
-    //   variables: {
-    //     firstName, lastName, username, password, email: inputEmail,
-    //   },
-    // });
+    const [firstName, lastName] = fullName.split(' ');
+    signup({
+      variables: {
+        firstName, lastName, username, password, email: inputEmail,
+      },
+    });
   };
 
   return (

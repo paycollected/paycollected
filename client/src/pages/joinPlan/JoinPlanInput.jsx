@@ -9,7 +9,7 @@ const calculateCost = (quantity, perCycleCost, totalQuantity) => {
   let costStr = perCycleCost.slice(1);
   costStr = costStr.replace(',', '');
   const totalCost = Number(costStr) * 100;
-  return (Math.ceil(totalCost / (quantity + totalQuantity)) / 100).toFixed(2);
+  return Number((Math.ceil(totalCost / (quantity + totalQuantity)) / 100).toFixed(2));
 };
 
 export default function JoinPlanInput({
@@ -74,7 +74,10 @@ export default function JoinPlanInput({
             color="gray.700"
             fontSize="16px"
             readOnly
-            value={`$${cost}`}
+            value={cost.toLocaleString('en-US', {
+              style: 'currency',
+              currency: 'USD'
+            })}
           />
           <Text>{`/ ${cycleFrequency[0].toLowerCase().concat(cycleFrequency.slice(1))}`}</Text>
         </HStack>
