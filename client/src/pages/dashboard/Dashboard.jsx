@@ -23,7 +23,7 @@ if (queryStr.length > 0) {
 }
 
 export default function Dashboard({
-  user, setUser, setPlanToJoin, setPlanToView, successPlan,
+  user, setUser, setPlanToJoin, setPlanToView, successPlan, setSuccessPlan,
 }) {
   const navigate = useNavigate();
   const [code, setCode] = useState('');
@@ -64,6 +64,7 @@ export default function Dashboard({
           setUser={setUser}
           setPlanToJoin={setPlanToJoin}
           setPlanToView={setPlanToView}
+          setSuccessPlan={setSuccessPlan}
         />
         <VStack w="93%" justify="left" spacing={{ base: '6', md: '10' }} mb="10">
           {successPlan && successIsOpen && (

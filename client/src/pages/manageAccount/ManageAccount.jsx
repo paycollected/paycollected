@@ -13,7 +13,7 @@ import ChangeUsernameModal from './ChangeUsernameModal.jsx';
 import ChangePasswordModal from './ChangePasswordModal.jsx';
 
 export default function ManageAccount({
-  user, setUser, setPlanToJoin, setPlanToView
+  user, setUser, setPlanToJoin, setPlanToView, setSuccessPlan,
 }) {
   const isMobile = useBreakpointValue({ base: true, md: false });
   const {
@@ -78,6 +78,7 @@ export default function ManageAccount({
         setUser={setUser}
         setPlanToJoin={setPlanToJoin}
         setPlanToView={setPlanToView}
+        setSuccessPlan={setSuccessPlan}
       />
       <VStack w="93%" align="left" spacing={{ base: '6', md: '10' }} mb="10">
         <Heading as="h1" fontSize="3xl">Profile</Heading>

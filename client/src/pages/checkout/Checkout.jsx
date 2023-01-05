@@ -11,7 +11,7 @@ const stripePromise = loadStripe(process.env.STRIPE_PUBLISHABLE_KEY);
 
 export default function Checkout({
   stripeClientSecret, setupIntentId, paymentMethods, planId, user, setUser, setPlanToJoin,
-  setPlanToView, setStripeClientSecret, setSetupIntentId,
+  setPlanToView, setStripeClientSecret, setSetupIntentId, setSuccessPlan,
 }) {
   const options = { clientSecret: stripeClientSecret, appearance: stripePaymentElementAppearance };
 
@@ -30,6 +30,7 @@ export default function Checkout({
           setUser={setUser}
           setPlanToJoin={setPlanToJoin}
           setPlanToView={setPlanToView}
+          setSuccessPlan={setSuccessPlan}
         />
         <Elements stripe={stripePromise} options={options}>
           <CheckoutForm

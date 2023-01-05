@@ -71,6 +71,7 @@ export default function CheckoutSuccess({
           setUser={setUser}
           setPlanToJoin={setPlanToJoin}
           setPlanToView={setPlanToView}
+          setSuccessPlan={setSuccessPlan}
         />
         <Card bg="white" my={14} variant="outline" w="xl">
           <CardHeader pt={10} px={12} pb={0}><Heading>{`Success! You joined ${planName}!`}</Heading></CardHeader>

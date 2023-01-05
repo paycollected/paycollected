@@ -12,7 +12,7 @@ import { JoinPlan as JOIN_PLAN } from '../../graphql/mutations.gql';
 
 export default function JoinPlan({
   setPlanToJoin, setStripeClientSecret, setSetupIntentId, setPaymentMethods, user, setUser,
-  setPlanToView,
+  setPlanToView, setSuccessPlan,
 }) {
   const navigate = useNavigate();
 
@@ -79,6 +79,7 @@ export default function JoinPlan({
           setUser={setUser}
           setPlanToJoin={setPlanToJoin}
           setPlanToView={setPlanToView}
+          setSuccessPlan={setSuccessPlan}
         />
         <VStack w="93%" justify="left" spacing={{ base: 6, md: 10 }} mb={{ base: 6, md: 10 }}>
           <Flex w="100%" align="center">

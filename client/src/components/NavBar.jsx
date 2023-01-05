@@ -24,7 +24,7 @@ function CircleIcon(props) {
 }
 
 export default function NavBar({
-  user, setUser, setPlanToJoin, setPlanToView
+  user, setUser, setPlanToJoin, setPlanToView, setSuccessPlan,
 }) {
   const navigate = useNavigate();
 
@@ -33,6 +33,7 @@ export default function NavBar({
     setUser(null);
     setPlanToJoin(null);
     setPlanToView(null);
+    setSuccessPlan(null);
     navigate('/');
   };
 
@@ -131,7 +132,7 @@ export default function NavBar({
                     <BellIcon boxSize={6} color="white" />
                   </Circle>
                 </PopoverTrigger>
-                <PopoverContent right={6} py={4} w="sm" h="md" overflowY="auto">
+                <PopoverContent right={6} py={4} w="sm" h="max-content" maxHeight="md" overflowY="scroll">
                   {data.retrieveNotifications.notifications.map((noti) => (
                     <Notification
                       key={noti.id}

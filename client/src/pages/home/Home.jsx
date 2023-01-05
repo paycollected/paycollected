@@ -4,7 +4,7 @@ import { Heading, Divider } from '@chakra-ui/react';
 import NavBar from '../../components/NavBar.jsx';
 
 export default function Home({
-  user, setUser, setPlanToJoin, setPlanToView
+  user, setUser, setPlanToJoin, setPlanToView, setSuccessPlan,
 }) {
   const { planId } = useParams();
 
@@ -21,6 +21,7 @@ export default function Home({
         setUser={setUser}
         setPlanToJoin={setPlanToJoin}
         setPlanToView={setPlanToView}
+        setSuccessPlan={setSuccessPlan}
       />
       <h1>This is the Home page</h1>
       <Heading my={5}>

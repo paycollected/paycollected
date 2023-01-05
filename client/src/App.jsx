@@ -37,7 +37,20 @@ function App() {
 
   return (
     <Routes>
-      <Route path="/" element={<Home user={user} setUser={setUser} setPlanToJoin={setPlanToJoin} setPlanToView={setPlanToView} />} />
+      <Route
+        path="/"
+        element={
+        (
+          <Home
+            user={user}
+            setUser={setUser}
+            setPlanToJoin={setPlanToJoin}
+            setPlanToView={setPlanToView}
+            setSuccessPlan={setSuccessPlan}
+          />
+        )
+        }
+      />
       <Route
         path="/login"
         element={!user
@@ -59,6 +72,7 @@ function App() {
             setPlanToJoin={setPlanToJoin}
             setPlanToView={setPlanToView}
             successPlan={successPlan}
+            setSuccessPlan={setSuccessPlan}
           />
         )}
       />
@@ -72,6 +86,7 @@ function App() {
                 setUser={setUser}
                 setPlanToJoin={setPlanToJoin}
                 setPlanToView={setPlanToView}
+                setSuccessPlan={setSuccessPlan}
               />
             )
             : (
@@ -83,6 +98,7 @@ function App() {
                 user={user}
                 setUser={setUser}
                 setPlanToView={setPlanToView}
+                setSuccessPlan={setSuccessPlan}
               />
             )
           }
@@ -102,6 +118,7 @@ function App() {
               setUser={setUser}
               setPlanToJoin={setPlanToJoin}
               setPlanToView={setPlanToView}
+              setSuccessPlan={setSuccessPlan}
             />
           )
           : <Navigate to="/" />}
@@ -138,6 +155,7 @@ function App() {
                     setPlanToView={setPlanToView}
                     setPlanToJoin={setPlanToJoin}
                     edit={false}
+                    setSuccessPlan={setSuccessPlan}
                   />
                 )
                 : <Navigate to="/dashboard" />
@@ -155,6 +173,7 @@ function App() {
                     setPlanToView={setPlanToView}
                     setPlanToJoin={setPlanToJoin}
                     edit
+                    setSuccessPlan={setSuccessPlan}
                   />
                 )
                 : <Navigate to="/dashboard" />
@@ -178,6 +197,7 @@ function App() {
               setUser={setUser}
               setPlanToJoin={setPlanToJoin}
               setPlanToView={setPlanToView}
+              setSuccessPlan={setSuccessPlan}
             />
           ) : (<Navigate to="/" />)
         }
