@@ -152,10 +152,10 @@ export default function CreatePlanDrawer({ isOpen, onClose, setPlanToJoin }) {
                         type="text"
                         {...register('perCycleCost', {
                           required: 'Enter total cost per pay cycle',
-                          validate: (val) => Number(val) >= 10 || 'Cost must be at least $10',
+                          validate: (val) => Number(val) >= 10 && Number(val) <= 999999.99 || 'Cost must be at least $10 and no more than $999,999.99',
                           pattern: {
                             value: /^(([1-9]([0-9]+)\.([0-9]{2}))|([1-9]([0-9]+)))$/,
-                            message: 'Cost must be a valid amount (i.e.: $100 or $100.00) in US dollars',
+                            message: 'Inputs must only contain digits, and a period (optional)',
                           },
                         })}
                       />

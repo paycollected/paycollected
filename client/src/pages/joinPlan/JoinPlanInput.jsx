@@ -6,7 +6,9 @@ import {
 import { Controller } from 'react-hook-form';
 
 const calculateCost = (quantity, perCycleCost, totalQuantity) => {
-  const totalCost = Number(perCycleCost.slice(1)) * 100;
+  let costStr = perCycleCost.slice(1);
+  costStr = costStr.replace(',', '');
+  const totalCost = Number(costStr) * 100;
   return (Math.ceil(totalCost / (quantity + totalQuantity)) / 100).toFixed(2);
 };
 
