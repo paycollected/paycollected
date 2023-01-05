@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS plans (
   price_id VARCHAR(50) NOT NULL UNIQUE,
   plan_name VARCHAR(100) NOT NULL,
   cycle_frequency CYCLE_FREQ NOT NULL,
-  per_cycle_cost INTEGER NOT NULL CHECK (per_cycle_cost >= 1000), -- reflective of next billing cycle
+  per_cycle_cost INTEGER NOT NULL CHECK (per_cycle_cost >= 1000 AND per_cycle_cost <= 99999999), -- reflective of next billing cycle
   start_date TIMESTAMP WITH TIME ZONE NOT NULL, -- original start date
   active BOOLEAN NOT NULL DEFAULT TRUE -- will only be false once archived
 );

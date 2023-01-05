@@ -130,7 +130,12 @@ export default function CreatePlanDrawer({ isOpen, onClose, setPlanToJoin }) {
                       name="planName"
                       type="text"
                       autoFocus
-                      {...register('planName', { required: 'Plan name required' })}
+                      {...register('planName', {
+                        required: 'Plan name required',
+                        minLength: { value: 5, message: 'Plan name must be at least 5 characters'},
+                        maxLength: { value: 100, message: 'Plan name must be no more than 100 characters'},
+                        setValueAs: (name) => name.trim(),
+                      })}
                     />
                     {errors.planName ? (
                       <FormErrorMessage>
