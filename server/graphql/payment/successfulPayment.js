@@ -25,7 +25,7 @@ export default async function successfulPaymentResolver(setupIntentId, username)
   }
 
   const {
-    planName, cycleFrequency, nextBillDate, personalCost, paymentMethod
+    planName, cycleFrequency, nextBillDate, personalCost, paymentMethod, planId,
   } = metadata;
 
   try {
@@ -36,6 +36,7 @@ export default async function successfulPaymentResolver(setupIntentId, username)
   }
 
   return {
+    planId,
     planName,
     personalCost: Number(personalCost),
     cycleFrequency,

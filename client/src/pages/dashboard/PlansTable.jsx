@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
-  Icon, IconButton, Table, Tbody, Td, Th, Thead, Tr, Menu, MenuButton, MenuList, MenuItem,
-  useDisclosure,
+  Icon, IconButton, Table, Tbody, Td, Th, Thead, Tr, Menu, MenuButton, MenuList, MenuItem, HStack,
+  Badge, Text, useDisclosure,
 } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
 import ActionConfirmationModal from '../../components/ActionConfirmationModal.jsx';
@@ -18,7 +18,7 @@ function MoreOptionsIcon() {
   );
 }
 
-export default function PlansTable({ plans, setPlanToView, setPlanToJoin }) {
+export default function PlansTable({ plans, setPlanToView, setPlanToJoin, successPlan }) {
   const navigate = useNavigate();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { isOpen: mlIsOpen, onOpen: mlOnOpen, onClose: mlOnClose } = useDisclosure();
@@ -69,7 +69,17 @@ export default function PlansTable({ plans, setPlanToView, setPlanToJoin }) {
 
             return (
               <Tr key={planId}>
-                <Td>{name}</Td>
+                {(!successPlan || (successPlan && successPlan.planId !== planId)) && (
+                  <Td>{name}</Td>
+                )}
+                {successPlan && successPlan.planId === planId && (
+                  <Td>
+                    <HStack spacing={4}>
+                      <Text>{name}</Text>
+                      <Badge variant="subtle" colorScheme="blue" fontSize="12px">NEW</Badge>
+                    </HStack>
+                  </Td>
+                )}
                 {isOwner && (<Td>You</Td>)}
                 {!isOwner && (<Td>{owner.formattedName}</Td>)}
                 <Td>{selfCost}</Td>

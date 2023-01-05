@@ -18,6 +18,7 @@ if (queryStr.length > 0) {
 
 export default function CheckoutSuccess({
   user, setUser, setPlanToJoin, setPlanToView, setStripeClientSecret, setSetupIntentId,
+  setSuccessPlan,
 }) {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -40,6 +41,13 @@ export default function CheckoutSuccess({
 
   const { loading, data, error } = useQuery(SUBS_INFO, {
     variables: { setupIntentId: returnedSetupIntentId },
+    onCompleted: (
+      {
+        successfulPayment: {
+          planId, planName
+        }
+      }
+    ) => setSuccessPlan({ planId, planName }),
   });
 
   if (data) {

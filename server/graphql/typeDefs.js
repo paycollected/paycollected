@@ -136,6 +136,7 @@ export default `#graphql
   }
 
   type SuccessfulPaymentData {
+    planId: PlanID!
     planName: String!
     personalCost: USCurrency!
     cycleFrequency: CycleFrequency!

@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@apollo/client';
 import {
-  Button, FormControl, FormLabel, Input, Heading, VStack, WrapItem, Wrap, useDisclosure
+  Button, FormControl, FormLabel, Input, Heading, VStack, WrapItem, Wrap, useDisclosure, Alert,
+  AlertIcon, AlertDescription, CloseButton, Box,
 } from '@chakra-ui/react';
 import {
   ViewAllPlans as GET_ALL_PLANS,
@@ -22,13 +23,16 @@ if (queryStr.length > 0) {
 }
 
 export default function Dashboard({
-  user, setUser, setPlanToJoin, setPlanToView
+  user, setUser, setPlanToJoin, setPlanToView, successPlan,
 }) {
   const navigate = useNavigate();
   const [code, setCode] = useState('');
   const {
     isOpen: isOpenCreatePlan, onOpen: onOpenCreatePlan, onClose: onCloseCreatePlan
   } = useDisclosure();
+  const {
+    isOpen: successIsOpen, onClose: successOnClose,
+  } = useDisclosure({ defaultIsOpen: !!successPlan });
 
   useEffect(() => {
     if (user === null && !!username && !!token) {
@@ -43,6 +47,7 @@ export default function Dashboard({
     fetchPolicy: 'cache-and-network',
     nextFetchPolicy: 'cache-only',
   });
+
 
   const codeInputSubmit = (e) => {
     e.preventDefault();
@@ -61,6 +66,23 @@ export default function Dashboard({
           setPlanToView={setPlanToView}
         />
         <VStack w="93%" justify="left" spacing={{ base: '6', md: '10' }} mb="10">
+          {successPlan && successIsOpen && (
+            <Alert status="info">
+              <AlertIcon />
+              <Box>
+                <AlertDescription>
+                  {`${successPlan.planName} has been added to your Dashboard.`}
+                </AlertDescription>
+              </Box>
+              <CloseButton
+                alignSelf="flex-start"
+                position="relative"
+                right={-1}
+                top={-1}
+                onClick={successOnClose}
+              />
+            </Alert>
+          )}
           <Wrap w="100%" spacingX={{ base: '4', md: '8' }} align="end">
             <WrapItem>
               <Heading as="h1" fontSize="3xl">
@@ -76,6 +98,7 @@ export default function Dashboard({
             plans={data.viewAllPlans.plans}
             setPlanToView={setPlanToView}
             setPlanToJoin={setPlanToJoin}
+            successPlan={successPlan}
           />
           <Wrap w="100%" align="end" spacingX={{ base: '4', md: '8' }}>
             <WrapItem>

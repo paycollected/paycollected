@@ -33,6 +33,7 @@ function App() {
   const [stripeClientSecret, setStripeClientSecret] = useState(null);
   const [setupIntentId, setSetupIntentId] = useState(null);
   const [paymentMethods, setPaymentMethods] = useState([]);
+  const [successPlan, setSuccessPlan] = useState(null);
 
   return (
     <Routes>
@@ -57,6 +58,7 @@ function App() {
             setUser={setUser}
             setPlanToJoin={setPlanToJoin}
             setPlanToView={setPlanToView}
+            successPlan={successPlan}
           />
         )}
       />
@@ -116,6 +118,7 @@ function App() {
                 setPlanToView={setPlanToView}
                 setStripeClientSecret={setStripeClientSecret}
                 setSetupIntentId={setSetupIntentId}
+                setSuccessPlan={setSuccessPlan}
               />
             )
             : <Navigate to="/" />
