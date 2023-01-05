@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@apollo/client';
 import {
   Button, FormControl, FormLabel, Input, Heading, VStack, WrapItem, Wrap, useDisclosure, Alert,
-  AlertIcon, AlertDescription, CloseButton, Box,
+  AlertIcon, AlertDescription, CloseButton, Box, HStack, Flex,
 } from '@chakra-ui/react';
 import {
   ViewAllPlans as GET_ALL_PLANS,
@@ -67,21 +67,27 @@ export default function Dashboard({
         />
         <VStack w="93%" justify="left" spacing={{ base: '6', md: '10' }} mb="10">
           {successPlan && successIsOpen && (
-            <Alert status="info">
-              <AlertIcon />
-              <Box>
-                <AlertDescription>
-                  {`${successPlan.planName} has been added to your Dashboard.`}
-                </AlertDescription>
-              </Box>
-              <CloseButton
-                alignSelf="flex-start"
-                position="relative"
-                right={-1}
-                top={-1}
-                onClick={successOnClose}
-              />
-            </Alert>
+            <Box w="100%">
+              <Alert w="65%" status="info" borderRadius={10}>
+                <Flex w="100%" justify="space-between">
+                  <HStack spacing={0}>
+                    <AlertIcon />
+                    <Box>
+                      <AlertDescription>
+                        {`${successPlan.planName} has been added to your Dashboard.`}
+                      </AlertDescription>
+                    </Box>
+                  </HStack>
+                  <CloseButton
+                    alignSelf="flex-start"
+                    position="relative"
+                    right={-1}
+                    top={-1}
+                    onClick={successOnClose}
+                  />
+                </Flex>
+              </Alert>
+            </Box>
           )}
           <Wrap w="100%" spacingX={{ base: '4', md: '8' }} align="end">
             <WrapItem>
