@@ -20,7 +20,7 @@ export default `#graphql
 
   type UserInfo {
     username: String!
-    email: String!
+    email: Email!
   }
 
   type LoginInfo {

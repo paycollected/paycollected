@@ -15,7 +15,7 @@ import { CreateUser as SIGN_UP } from '../../graphql/mutations.gql';
 export default function CreateAccount({ setUser }) {
   const navigate = useNavigate();
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const { register, handleSubmit, formState: { errors } } = useForm();
+  const { register, handleSubmit, getValues, formState: { errors } } = useForm();
   const [errorMessage, setErrorMessage] = useState('');
   const [email, setEmail] = useState('');
   const [showPassword1, setShowPassword1] = useState(false);
@@ -48,24 +48,17 @@ export default function CreateAccount({ setUser }) {
   });
 
   const onSubmit = ({
-    fullName, username, password, password2, email: inputEmail,
+    fullName, username, password, email: inputEmail,
   }) => {
-    if (password !== password2) {
-      setErrorMessage('Passwords must match');
-    } else {
-      const [firstName, lastName] = fullName.split(' ');
-      if (!lastName) {
-        setErrorMessage('Please enter first and last name');
-      } else {
-        setErrorMessage('');
-        setEmail(inputEmail);
-        signup({
-          variables: {
-            firstName, lastName, username, password, email: inputEmail,
-          },
-        });
-      }
-    }
+    setErrorMessage('');
+    setEmail(inputEmail);
+    console.log('success');
+    // const [firstName, lastName] = fullName.split(' ');
+    // signup({
+    //   variables: {
+    //     firstName, lastName, username, password, email: inputEmail,
+    //   },
+    // });
   };
 
   return (
@@ -103,14 +96,24 @@ export default function CreateAccount({ setUser }) {
               <Stack spacing="3">
                 <FormControl
                   isRequired
-                  isInvalid={errors.fullName || errorMessage === 'Please enter first and last name'}
+                  isInvalid={errors.fullName}
                 >
                   <FormLabel htmlFor="fullName">First and Last Name</FormLabel>
                   <Input
                     name="fullName"
                     type="text"
                     autoFocus
-                    {...register('fullName', { required: 'First and last name required' })}
+                    {...register('fullName', {
+                      required: 'First and last name required',
+                      setValueAs: (fullName) => fullName.trim(),
+                      validate: {
+                        firstNameExists: (fullName) => !!(fullName.split(' ')[0]) || 'Missing first name',
+                        lastNameExists: (fullName) => !!(fullName.split(' ')[1]) || 'Missing last name',
+                        onlyFirstAndLast: (fullName) => fullName.split(' ').length === 2 || 'First and last names must be separated by exactly one space character',
+                        firstNameLength: (fullName) => fullName.split(' ')[0].length <= 100 || 'First name must be no more than 100 characters',
+                        lastNameLength: (fullName) => fullName.split(' ')[1].length <= 100 || 'Last name must be no more than 100 characters',
+                      }
+                    })}
                   />
                   {errors.fullName && (
                     <FormErrorMessage>
@@ -126,7 +129,12 @@ export default function CreateAccount({ setUser }) {
                   <Input
                     name="username"
                     type="text"
-                    {...register('username', { required: 'Username required' })}
+                    {...register('username', {
+                      required: 'Username required',
+                      setValueAs: (username) => username.trim(),
+                      maxLength: { value: 50, message: 'Username must be 50 characters or less'},
+                      minLength: { value: 5, message: 'Username must be at least 5 characters'},
+                    })}
                   />
                   {errors.username && (
                     <FormErrorMessage>
@@ -142,7 +150,15 @@ export default function CreateAccount({ setUser }) {
                   <Input
                     name="email"
                     type="email"
-                    {...register('email', { required: 'Email required' })}
+                    {...register('email', {
+                      required: 'Email required',
+                      setValueAs: (email) => email.trim(),
+                      maxLength: { value: 100, message: 'Email cannot be longer than 100 characters'},
+                      pattern: {
+                        value: /^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/,
+                        message: 'Invalid email'
+                      }
+                    })}
                   />
                   {errors.email && (
                     <FormErrorMessage>
@@ -152,14 +168,18 @@ export default function CreateAccount({ setUser }) {
                 </FormControl>
                 <FormControl
                   isRequired
-                  isInvalid={errors.password || errorMessage === 'Passwords must match'}
+                  isInvalid={errors.password}
                 >
                   <FormLabel>Password</FormLabel>
                   <InputGroup>
                     <Input
                       name="password"
                       type={showPassword1 ? 'text' : 'password'}
-                      {...register('password', { required: 'Password required' })}
+                      {...register('password', {
+                        required: 'Password required',
+                        minLength: { value: 7, message: 'Password must be at least 7 characters'},
+                        setValueAs: (pwd) => pwd.trim(),
+                      })}
                     />
                     <InputRightElement>
                       <IconButton
@@ -177,14 +197,19 @@ export default function CreateAccount({ setUser }) {
                 </FormControl>
                 <FormControl
                   isRequired
-                  isInvalid={errors.password2 || errorMessage === 'Passwords must match'}
+                  isInvalid={errors.password2}
                 >
                   <FormLabel>Confirm Password</FormLabel>
                   <InputGroup>
                     <Input
                       name="password2"
                       type={showPassword2 ? 'text' : 'password'}
-                      {...register('password2', { required: 'Please enter password again' })}
+                      {...register('password2', {
+                        required: 'Please enter password again',
+                        setValueAs: (pwd) => pwd.trim(),
+                        minLength: { value: 7, message: 'Password must be at least 7 characters'},
+                        validate: (pwd) => pwd === getValues('password') || 'Passwords must match',
+                      })}
                     />
                     <InputRightElement>
                       <IconButton

@@ -155,7 +155,7 @@ export default function CreatePlanDrawer({ isOpen, onClose, setPlanToJoin }) {
                           validate: (val) => Number(val) >= 10 && Number(val) <= 999999.99 || 'Cost must be at least $10 and no more than $999,999.99',
                           pattern: {
                             value: /^(([1-9]([0-9]+)\.([0-9]{2}))|([1-9]([0-9]+)))$/,
-                            message: 'Inputs must only contain digits, and a period (optional)',
+                            message: 'Input must only contain digits, and a period (optional)',
                           },
                         })}
                       />
