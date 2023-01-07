@@ -1,12 +1,12 @@
 import React from 'react';
 import {
-  Box, Button, ButtonGroup, Container, HStack, Stack, Text, useBreakpointValue, useColorModeValue,
+  Box, Button, Container, Stack, Center, useBreakpointValue, useColorModeValue,
 } from '@chakra-ui/react';
 import PlansTable from './PlansTable.jsx';
 
 
 export default function PlansTableLayout({
-  total, plans, setPlanToView, setPlanToJoin, successPlan, fetchMore,
+  total, plans, setPlanToView, setPlanToJoin, successPlan, fetchMore, refetch,
 }) {
   const isMobile = useBreakpointValue({ base: true, md: false });
 
@@ -17,7 +17,7 @@ export default function PlansTableLayout({
         boxShadow={{ base: 'none', md: useColorModeValue('sm', 'sm-dark') }}
         borderRadius={useBreakpointValue({ base: 'none', md: 'lg' })}
       >
-        <Stack spacing="5">
+        <Stack spacing={5}>
           <Box overflowX="auto">
             <PlansTable
               plans={plans}
@@ -26,23 +26,17 @@ export default function PlansTableLayout({
               successPlan={successPlan}
             />
           </Box>
-          <Box px={{ base: '4', md: '6' }} pb="5">
-            <HStack spacing="3" justify="space-between">
-              {!isMobile && (
-                <Text color="muted" fontSize="sm">
-                  {`Showing 1 to 5 of ${total} results`}
-                </Text>
-              )}
-              <ButtonGroup
-                spacing="3"
-                justifyContent="space-between"
-                width={{ base: 'full', md: 'auto' }}
-                variant="secondary"
-              >
-                <Button>Previous</Button>
-                <Button type="button" onClick={() => fetchMore({ variables: { offset: plans.length } })}>Next</Button>
-              </ButtonGroup>
-            </HStack>
+          <Box px={{ base: '4', md: '6' }} pb={5}>
+            {plans.length < total && (
+              <Center>
+                <Button variant="secondary" type="button" onClick={() => fetchMore({ variables: { offset: plans.length } })}>Show More Results</Button>
+              </Center>
+            )}
+            {plans.length === total && (
+              <Center>
+                <Button variant="secondary" type="button" onClick={() => refetch({ variables: { limit: 5 } })}>Collapse Results</Button>
+              </Center>
+            )}
           </Box>
         </Stack>
       </Box>

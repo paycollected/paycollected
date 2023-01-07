@@ -38,6 +38,7 @@ const cache = new InMemoryCache({
         viewAllPlans: {
           keyArgs: ['orderBy'],
           read(existing, { args: { offset = 0, limit = existing?.plans.length, } }) {
+            console.log('------>', limit, offset, existing);
             if (existing) {
               const { total, plans } = existing;
               return { total, plans: plans.slice(offset, offset + limit) };
