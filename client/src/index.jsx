@@ -37,6 +37,13 @@ const cache = new InMemoryCache({
       fields: {
         viewAllPlans: {
           keyArgs: ['orderBy'],
+          read(existing, { args: { offset = 0, limit = existing?.plans.length, } }) {
+            if (existing) {
+              const { total, plans } = existing;
+              return { total, plans: plans.slice(offset, offset + limit) };
+            }
+            return existing;
+          },
           merge(existing, incoming, { args: { offset = 0 } }) {
             if (!existing) return incoming;
             const { total, plans } = existing;
@@ -45,7 +52,7 @@ const cache = new InMemoryCache({
               merged[offset + i] = incoming.plans[i];
             }
             return { total, plans: merged };
-          }
+          },
         }
       }
     },
