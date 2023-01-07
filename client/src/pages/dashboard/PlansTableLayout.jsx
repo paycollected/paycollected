@@ -6,7 +6,7 @@ import PlansTable from './PlansTable.jsx';
 
 
 export default function PlansTableLayout({
-  total, plans, setPlanToView, setPlanToJoin, successPlan,
+  total, plans, setPlanToView, setPlanToJoin, successPlan, fetchMore,
 }) {
   const isMobile = useBreakpointValue({ base: true, md: false });
 
@@ -40,7 +40,7 @@ export default function PlansTableLayout({
                 variant="secondary"
               >
                 <Button>Previous</Button>
-                <Button>Next</Button>
+                <Button type="button" onClick={() => fetchMore({ variables: { offset: plans.length } })}>Next</Button>
               </ButtonGroup>
             </HStack>
           </Box>

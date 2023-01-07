@@ -18,7 +18,9 @@ function MoreOptionsIcon() {
   );
 }
 
-export default function PlansTable({ plans, setPlanToView, setPlanToJoin, successPlan }) {
+export default function PlansTable({
+  plans, setPlanToView, setPlanToJoin, successPlan
+}) {
   const navigate = useNavigate();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { isOpen: mlIsOpen, onOpen: mlOnOpen, onClose: mlOnClose } = useDisclosure();

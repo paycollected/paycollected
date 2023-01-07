@@ -33,6 +33,22 @@ const formatDate = (date) => {
 
 const cache = new InMemoryCache({
   typePolicies: {
+    Query: {
+      fields: {
+        viewAllPlans: {
+          keyArgs: ['orderBy'],
+          merge(existing, incoming, { args: { offset = 0 } }) {
+            if (!existing) return incoming;
+            const { total, plans } = existing;
+            const merged = plans.slice(0);
+            for (let i = 0; i < incoming.plans.length; i += 1) {
+              merged[offset + i] = incoming.plans[i];
+            }
+            return { total, plans: merged };
+          }
+        }
+      }
+    },
     PlanDetail: {
       keyFields: ['planId'],
       fields: {

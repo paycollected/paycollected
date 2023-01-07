@@ -43,9 +43,10 @@ export default function Dashboard({
     }
   }, []);
 
-  const { loading, data, error } = useQuery(GET_ALL_PLANS, {
+  const { loading, data, error, fetchMore } = useQuery(GET_ALL_PLANS, {
     fetchPolicy: 'cache-and-network',
-    nextFetchPolicy: 'cache-only',
+    // nextFetchPolicy: 'cache-only',
+    variables: { orderBy: 'PLAN_NAME' },
   });
 
 
@@ -57,6 +58,7 @@ export default function Dashboard({
   };
 
   if (data) {
+    console.log('data', data);
     return (
       <>
         <NavBar
@@ -106,6 +108,7 @@ export default function Dashboard({
             setPlanToView={setPlanToView}
             setPlanToJoin={setPlanToJoin}
             successPlan={successPlan}
+            fetchMore={fetchMore}
           />
           <Wrap w="100%" align="end" spacingX={{ base: '4', md: '8' }}>
             <WrapItem>
