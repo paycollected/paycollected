@@ -1,3 +1,4 @@
+import format from 'pg-format';
 import pool from './pool';
 
 export function checkUser(username, email) {
@@ -171,8 +172,21 @@ export function planDetail(planId, username) {
 }
 
 
-export function plansSummary(username) {
-  const query = `
+export function plansSummary(username, offset, limit, orderBy) {
+  let orderCategory = null;
+  switch (orderBy) {
+    case 'SELF_COST':
+      orderCategory = 'selfCost';
+      break;
+    case 'NEXT_BILL_DATE':
+      orderCategory = 'nextBillDate';
+      break;
+    default:
+      orderCategory = 'name';
+      break;
+  }
+
+  const query = format(`
     WITH c1 AS (
       SELECT
         p.plan_id AS "planId",
@@ -224,13 +238,21 @@ export function plansSummary(username) {
         JOIN users u
         ON up.username = u.username
       WHERE up.plan_owner = True
-      ORDER BY "nextBillDate" ASC, "planId" ASC
-    ) SELECT
-        COUNT(*) AS total,
-        COALESCE(JSON_AGG(ROW_TO_JSON(c3)), '[]'::JSON) AS plans
+    ), c4 AS (
+      SELECT *
       FROM c3
-  `;
-  return pool.query(query, [username]);
+      ORDER BY %I ASC, "planId" ASC
+      LIMIT $2 OFFSET $3
+    )
+      SELECT
+        COUNT(*) AS total,
+        (SELECT COALESCE(JSON_AGG(ROW_TO_JSON(c4)), '[]'::JSON) FROM c4) AS plans
+      FROM c3
+  `, orderCategory);
+
+  return pool.query(query, [
+    username, limit > 0 ? limit : 5, offset >= 0 ? offset : 0
+  ]);
 }
 
 

@@ -12,7 +12,7 @@ export default `#graphql
 
   type Query {
     viewOnePlan (planId: PlanID!): PlanDetail!
-    viewAllPlans: AllPlansSummary!
+    viewAllPlans (offset: Int, limit: Int, orderBy: PlanOrderCategory): AllPlansSummary!
     retrieveNotifications: RetrieveNotifications! # offset pagination?
     getEmail: UserInfo!
     successfulPayment(setupIntentId: SetupIntentID!): SuccessfulPaymentData!
@@ -72,6 +72,12 @@ export default `#graphql
   enum UpdateStatus {
     DELETED
     ARCHIVED
+  }
+
+  enum PlanOrderCategory {
+    PLAN_NAME
+    SELF_COST
+    NEXT_BILL_DATE
   }
 
   type AllPlansSummary {
