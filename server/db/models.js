@@ -172,7 +172,7 @@ export function planDetail(planId, username) {
 }
 
 
-export function plansSummary(username, offset, limit, orderBy) {
+export function plansSummary(username, offset, limit, orderBy, filterByOwnership) {
   let orderCategory = null;
   switch (orderBy) {
     case 'SELF_COST':
@@ -205,6 +205,7 @@ export function plansSummary(username, offset, limit, orderBy) {
         up.username = $1
         AND p.active = True
         AND up.active = True
+        %s
     ), c2 AS (
       SELECT
         c1.*,
@@ -248,7 +249,7 @@ export function plansSummary(username, offset, limit, orderBy) {
         COUNT(*) AS total,
         (SELECT COALESCE(JSON_AGG(ROW_TO_JSON(c4)), '[]'::JSON) FROM c4) AS plans
       FROM c3
-  `, orderCategory);
+  `, filterByOwnership ? 'AND up.plan_owner = True' : '' ,orderCategory);
 
   return pool.query(query, [
     username, limit > 0 ? limit : 5, offset >= 0 ? offset : 0

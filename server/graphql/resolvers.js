@@ -68,9 +68,12 @@ export default {
       viewOnePlanResolver(planId, username)
     )),
 
-    viewAllPlans: authResolverWrapper((_, { offset, limit, orderBy }, { user: { username } }) => (
-      viewAllPlansResolver(username, offset, limit, orderBy)
-    )),
+    viewAllPlans:
+      authResolverWrapper((_, {
+        offset, limit, orderBy, filterByOwnership
+      }, { user: { username } }) => (
+        viewAllPlansResolver(username, offset, limit, orderBy, filterByOwnership)
+      )),
 
     retrieveNotifications: authResolverWrapper((_, __, { user: { username } }) => (
       retrieveNotificationsResolver(username)

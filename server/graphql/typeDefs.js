@@ -12,7 +12,7 @@ export default `#graphql
 
   type Query {
     viewOnePlan (planId: PlanID!): PlanDetail!
-    viewAllPlans (offset: Int, limit: Int, orderBy: PlanOrderCategory): AllPlansSummary!
+    viewAllPlans (offset: Int, limit: Int, orderBy: PlanOrderCategory, filterByOwnership: Boolean): AllPlansSummary!
     retrieveNotifications: RetrieveNotifications! # offset pagination?
     getEmail: UserInfo!
     successfulPayment(setupIntentId: SetupIntentID!): SuccessfulPaymentData!

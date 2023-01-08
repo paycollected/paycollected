@@ -21,9 +21,9 @@ export async function viewOnePlan(planId, username) {
   }
 }
 
-export async function viewAllPlans(username, offset, limit, orderBy) {
+export async function viewAllPlans(username, offset, limit, orderBy, filterByOwnership) {
   try {
-    const { rows } = await plansSummary(username, offset, limit, orderBy);
+    const { rows } = await plansSummary(username, offset, limit, orderBy, filterByOwnership);
     return rows[0];
   } catch (asyncError) {
     console.log(asyncError);
