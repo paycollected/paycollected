@@ -20,7 +20,12 @@ export default function PlansTableLayout({
           <Flex justify="space-between" flexWrap="wrap">
             <Tabs variant="unstyled">
               <TabList>
-                <Tab color="gray.600" _selected={{ color: 'blue.600', borderBottomColor: 'blue.600', borderBottomWidth: '2px' }}>Active</Tab>
+                <Tab color="gray.600" _selected={{ color: 'blue.600', borderBottomColor: 'blue.600', borderBottomWidth: '2px' }}>
+                  <Stack direction="row" spacing={2}>
+                    <Flex align="center"><Text>Active</Text></Flex>
+                    <Box bg="blue.600" borderRadius="50%" px={3} py={0.5} color="white">{total}</Box>
+                  </Stack>
+                </Tab>
                 <Tab isDisabled>Inactive</Tab>
                 <Tab color="gray.600" _selected={{ color: 'blue.600', borderBottomColor: 'blue.600', borderBottomWidth: '2px' }}>Owned</Tab>
               </TabList>

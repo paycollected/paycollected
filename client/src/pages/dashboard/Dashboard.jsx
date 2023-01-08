@@ -58,7 +58,6 @@ export default function Dashboard({
   };
 
   if (data) {
-    console.log('data', data);
     return (
       <>
         <NavBar
@@ -94,9 +93,7 @@ export default function Dashboard({
           )}
           <Wrap w="100%" spacingX={{ base: '4', md: '8' }} align="end">
             <WrapItem>
-              <Heading as="h1" fontSize="3xl">
-                {`${data.viewAllPlans.total} Active Plans`}
-              </Heading>
+              <Heading as="h1" fontSize="3xl">Your Plans</Heading>
             </WrapItem>
             <WrapItem>
               <Button onClick={onOpenCreatePlan}>Create Plan</Button>

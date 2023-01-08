@@ -11,6 +11,18 @@ import {
   DeletePlan as DELETE_PLAN,
 } from '../graphql/mutations.gql';
 
+function cacheModify(resultPlanId) {
+  return (cached, { readField }) => {
+    if (cached) {
+      const { total, plans } = cached;
+      return {
+        total: total - 1,
+        plans: plans.filter((planRef) => readField('planId', planRef) !== resultPlanId),
+      };
+    }
+  };
+}
+
 export default function ActionConfirmationModal({
   action, isOpen, onClose, subscriptionId, planId, planName, members, setPlanToView, inDashboard,
 }) {
@@ -44,13 +56,9 @@ export default function ActionConfirmationModal({
     update: (cache, { data: { deletePlan: { planId: resultPlanId } } }) => {
       cache.modify({
         fields: {
-          viewAllPlans(cached, { readField }) {
-            const { total, plans } = cached;
-            return {
-              total: total - 1,
-              plans: plans.filter((planRef) => readField('planId', planRef) !== resultPlanId),
-            };
-          }
+          'viewAllPlans:{"orderBy":"PLAN_NAME"}': cacheModify(resultPlanId),
+          'viewAllPlans:{"orderBy":"SELF_COST"}': cacheModify(resultPlanId),
+          'viewAllPlans:{"orderBy":"NEXT_BILL_DATE"}': cacheModify(resultPlanId),
         }
       });
     },
