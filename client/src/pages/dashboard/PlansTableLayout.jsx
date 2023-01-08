@@ -26,14 +26,16 @@ export default function PlansTableLayout({
               </TabList>
             </Tabs>
             <Stack w="max-content" spacing={3} direction="row">
-              <Box w="max-content">
-                <Text color="gray.600">Order by</Text>
-              </Box>
-              <Select onChange={(e) => refetch({ orderBy: e.target.value })}>
-                <option value="PLAN_NAME">Name (A-Z)</option>
-                <option value="SELF_COST">Your Cost (lowest - highest)</option>
-                <option value="NEXT_BILL_DATE">Next Charge Date (least - most distant)</option>
-              </Select>
+              <Flex w="max-content" align="center">
+                <Text color="gray.600" fontSize="sm" whiteSpace="nowrap">Order by</Text>
+              </Flex>
+              <Flex align="center">
+                <Select onChange={(e) => refetch({ orderBy: e.target.value })}>
+                  <option value="PLAN_NAME">Name (A-Z)</option>
+                  <option value="SELF_COST">Your Cost (lowest - highest)</option>
+                  <option value="NEXT_BILL_DATE">Next Charge Date (least - most distant)</option>
+                </Select>
+              </Flex>
             </Stack>
           </Flex>
           <Box overflowX="auto">
