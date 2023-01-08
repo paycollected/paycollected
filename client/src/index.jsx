@@ -36,7 +36,7 @@ const cache = new InMemoryCache({
     Query: {
       fields: {
         viewAllPlans: {
-          keyArgs: ['orderBy'],
+          keyArgs: ['orderBy', 'filterByOwnership'],
           read(existing, { args: { offset = 0, limit = existing?.plans.length, } }) {
             if (existing) {
               const { total, plans } = existing;

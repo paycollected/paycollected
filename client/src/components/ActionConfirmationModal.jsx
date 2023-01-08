@@ -56,9 +56,12 @@ export default function ActionConfirmationModal({
     update: (cache, { data: { deletePlan: { planId: resultPlanId } } }) => {
       cache.modify({
         fields: {
-          'viewAllPlans:{"orderBy":"PLAN_NAME"}': cacheModify(resultPlanId),
-          'viewAllPlans:{"orderBy":"SELF_COST"}': cacheModify(resultPlanId),
-          'viewAllPlans:{"orderBy":"NEXT_BILL_DATE"}': cacheModify(resultPlanId),
+          'viewAllPlans:{"orderBy":"PLAN_NAME","filterByOwnership":true}': cacheModify(resultPlanId),
+          'viewAllPlans:{"orderBy":"PLAN_NAME","filterByOwnership":false}': cacheModify(resultPlanId),
+          'viewAllPlans:{"orderBy":"SELF_COST","filterByOwnership":true}': cacheModify(resultPlanId),
+          'viewAllPlans:{"orderBy":"SELF_COST","filterByOwnership":false}': cacheModify(resultPlanId),
+          'viewAllPlans:{"orderBy":"NEXT_BILL_DATE","filterByOwnership":true}': cacheModify(resultPlanId),
+          'viewAllPlans:{"orderBy":"NEXT_BILL_DATE","filterByOwnership":false}': cacheModify(resultPlanId),
         }
       });
     },

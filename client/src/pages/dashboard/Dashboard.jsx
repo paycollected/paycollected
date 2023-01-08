@@ -43,11 +43,16 @@ export default function Dashboard({
     }
   }, []);
 
-  const { loading, data, error, fetchMore, refetch } = useQuery(GET_ALL_PLANS, {
+  const {
+    loading, data, error, fetchMore, refetch, networkStatus,
+  } = useQuery(GET_ALL_PLANS, {
     fetchPolicy: 'cache-and-network',
     nextFetchPolicy: 'cache-only',
-    variables: { orderBy: 'PLAN_NAME', offset: 0 },
+    variables: { orderBy: 'PLAN_NAME', offset: 0, filterByOwnership: false },
+    notifyOnNetworkStatusChange: true,
   });
+
+  const [tabIndex, setTabIndex] = useState(0);
 
 
   const codeInputSubmit = (e) => {
@@ -107,6 +112,9 @@ export default function Dashboard({
             successPlan={successPlan}
             fetchMore={fetchMore}
             refetch={refetch}
+            tabIndex={tabIndex}
+            setTabIndex={setTabIndex}
+            networkStatus={networkStatus}
           />
           <Wrap w="100%" align="end" spacingX={{ base: '4', md: '8' }}>
             <WrapItem>

@@ -58,8 +58,8 @@ query PlanDetails ($planId: PlanID!) {
 }
 
 
-query ViewAllPlans($offset: Int, $limit: Int, $orderBy: PlanOrderCategory) {
-  viewAllPlans(offset: $offset, limit: $limit, orderBy: $orderBy) {
+query ViewAllPlans($offset: Int, $limit: Int, $orderBy: PlanOrderCategory, $filterByOwnership: Boolean) {
+  viewAllPlans(offset: $offset, limit: $limit, orderBy: $orderBy, filterByOwnership: $filterByOwnership) {
     total
     plans {
       planId

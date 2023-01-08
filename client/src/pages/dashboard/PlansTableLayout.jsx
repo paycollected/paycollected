@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { NetworkStatus } from '@apollo/client';
 import {
   Box, Button, Container, Stack, Center, useBreakpointValue, useColorModeValue, Tabs, TabList,
   Tab, Flex, Select, Text,
@@ -7,8 +8,22 @@ import PlansTable from './PlansTable.jsx';
 
 
 export default function PlansTableLayout({
-  total, plans, setPlanToView, setPlanToJoin, successPlan, fetchMore, refetch,
+  total, plans, setPlanToView, setPlanToJoin, successPlan, fetchMore, refetch, tabIndex,
+  setTabIndex, networkStatus,
 }) {
+  const onTabChange = (index) => {
+    switch (index) {
+      case 2:
+        setTabIndex(2);
+        refetch({ filterByOwnership: true });
+        break;
+      default:
+        setTabIndex(0);
+        refetch({ filterByOwnership: false });
+        break;
+    }
+  };
+
   return (
     <Container pl="0" pr="8%" minWidth="100%">
       <Box
@@ -18,16 +33,27 @@ export default function PlansTableLayout({
       >
         <Stack spacing={5}>
           <Flex justify="space-between" flexWrap="wrap">
-            <Tabs variant="unstyled">
+            <Tabs variant="unstyled" onChange={onTabChange} defaultIndex={tabIndex}>
               <TabList>
                 <Tab color="gray.600" _selected={{ color: 'blue.600', borderBottomColor: 'blue.600', borderBottomWidth: '2px' }}>
-                  <Stack direction="row" spacing={2}>
-                    <Flex align="center"><Text>Active</Text></Flex>
-                    <Box bg="blue.600" borderRadius="50%" px={3} py={0.5} color="white">{total}</Box>
-                  </Stack>
+                  {tabIndex === 0 && networkStatus === NetworkStatus.ready && (
+                    <Stack direction="row" spacing={2}>
+                      <Flex align="center"><Text>Active</Text></Flex>
+                      <Box bg="blue.600" borderRadius="50%" px={3} py={0.5} color="white">{total}</Box>
+                    </Stack>
+                  )}
+                  {!(tabIndex === 0 && networkStatus === NetworkStatus.ready) && (<>Active</>)}
                 </Tab>
                 <Tab isDisabled>Inactive</Tab>
-                <Tab color="gray.600" _selected={{ color: 'blue.600', borderBottomColor: 'blue.600', borderBottomWidth: '2px' }}>Owned</Tab>
+                <Tab color="gray.600" _selected={{ color: 'blue.600', borderBottomColor: 'blue.600', borderBottomWidth: '2px' }}>
+                  {tabIndex === 2 && networkStatus === NetworkStatus.ready && (
+                    <Stack direction="row" spacing={2}>
+                      <Flex align="center"><Text>Owned</Text></Flex>
+                      <Box bg="blue.600" borderRadius="50%" px={3} py={0.5} color="white">{total}</Box>
+                    </Stack>
+                  )}
+                  {!(tabIndex === 2 && networkStatus === NetworkStatus.ready) && (<>Owned</>)}
+                </Tab>
               </TabList>
             </Tabs>
             <Stack w="max-content" spacing={5} direction="row" mt={{ base: 4, md: 0 }}>

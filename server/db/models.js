@@ -249,7 +249,7 @@ export function plansSummary(username, offset, limit, orderBy, filterByOwnership
         COUNT(*) AS total,
         (SELECT COALESCE(JSON_AGG(ROW_TO_JSON(c4)), '[]'::JSON) FROM c4) AS plans
       FROM c3
-  `, filterByOwnership ? 'AND up.plan_owner = True' : '' ,orderCategory);
+  `, filterByOwnership ? 'AND up.plan_owner = True' : '', orderCategory);
 
   return pool.query(query, [
     username, limit > 0 ? limit : 5, offset >= 0 ? offset : 0
