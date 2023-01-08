@@ -125,6 +125,7 @@ export default function Dashboard({
                   placeholder="Enter Code"
                   value={code}
                   onChange={(e) => { setCode(e.target.value); }}
+                  _focusVisible={{ boxShadow: 'none', zIndex: 1, borderColor: '#3182CE' }}
                 />
               </FormControl>
             </WrapItem>

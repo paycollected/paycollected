@@ -25,7 +25,7 @@ export default function PlansTableLayout({
                 <Tab color="gray.600" _selected={{ color: 'blue.600', borderBottomColor: 'blue.600', borderBottomWidth: '2px' }}>Owned</Tab>
               </TabList>
             </Tabs>
-            <Stack w="max-content" spacing={3} direction="row">
+            <Stack w="max-content" spacing={5} direction="row">
               <Flex w="max-content" align="center">
                 <Text color="gray.600" fontSize="sm" whiteSpace="nowrap">Order by</Text>
               </Flex>
