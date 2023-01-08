@@ -1,6 +1,7 @@
 import React from 'react';
 import {
-  Box, Button, Container, Stack, Center, useBreakpointValue, useColorModeValue,
+  Box, Button, Container, Stack, Center, useBreakpointValue, useColorModeValue, Tabs, TabList,
+  Tab, Flex, Select, Text,
 } from '@chakra-ui/react';
 import PlansTable from './PlansTable.jsx';
 
@@ -8,8 +9,6 @@ import PlansTable from './PlansTable.jsx';
 export default function PlansTableLayout({
   total, plans, setPlanToView, setPlanToJoin, successPlan, fetchMore, refetch,
 }) {
-  const isMobile = useBreakpointValue({ base: true, md: false });
-
   return (
     <Container pl="0" pr="8%" minWidth="100%">
       <Box
@@ -18,6 +17,25 @@ export default function PlansTableLayout({
         borderRadius={useBreakpointValue({ base: 'none', md: 'lg' })}
       >
         <Stack spacing={5}>
+          <Flex justify="space-between">
+            <Tabs variant="unstyled">
+              <TabList>
+                <Tab color="gray.600" _selected={{ color: 'blue.600', borderBottomColor: 'blue.600', borderBottomWidth: '2px' }}>Active</Tab>
+                <Tab isDisabled>Inactive</Tab>
+                <Tab color="gray.600" _selected={{ color: 'blue.600', borderBottomColor: 'blue.600', borderBottomWidth: '2px' }}>Owned</Tab>
+              </TabList>
+            </Tabs>
+            <Stack w="max-content" spacing={3} direction="row">
+              <Box w="max-content">
+                <Text color="gray.600">Order by</Text>
+              </Box>
+              <Select onChange={(e) => refetch({ orderBy: e.target.value })}>
+                <option value="PLAN_NAME">Name (A-Z)</option>
+                <option value="SELF_COST">Your Cost (lowest - highest)</option>
+                <option value="NEXT_BILL_DATE">Next Charge Date (least - most distant)</option>
+              </Select>
+            </Stack>
+          </Flex>
           <Box overflowX="auto">
             <PlansTable
               plans={plans}
@@ -34,7 +52,7 @@ export default function PlansTableLayout({
             )}
             {plans.length === total && (
               <Center>
-                <Button variant="secondary" type="button" onClick={() => refetch({ variables: { limit: 5 } })}>Collapse Results</Button>
+                <Button variant="secondary" type="button" onClick={() => refetch()}>Collapse Results</Button>
               </Center>
             )}
           </Box>

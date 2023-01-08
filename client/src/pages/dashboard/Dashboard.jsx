@@ -45,8 +45,8 @@ export default function Dashboard({
 
   const { loading, data, error, fetchMore, refetch } = useQuery(GET_ALL_PLANS, {
     fetchPolicy: 'cache-and-network',
-    // nextFetchPolicy: 'cache-only',
-    variables: { orderBy: 'PLAN_NAME' },
+    nextFetchPolicy: 'cache-only',
+    variables: { orderBy: 'PLAN_NAME', offset: 0 },
   });
 
 
