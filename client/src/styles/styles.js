@@ -28,9 +28,7 @@ export const buttonTheme = defineStyleConfig({
       fontWeight: 500,
       // TODO: Hover styling
       _hover: {
-        bg: 'blue.600',
-        color: 'white',
-        border: '1px solid white',
+        opacity: 0.7,
       }
     },
     solid: {
@@ -40,10 +38,7 @@ export const buttonTheme = defineStyleConfig({
       fontWeight: 500,
       // TODO: Hover styling
       _hover: {
-        bg: 'white',
-        color: 'blue.600',
-        border: '1px solid',
-        borderColor: 'blue.600'
+        opacity: 0.8,
       }
     },
     menuIcon: { bg: 'transparent' },
