@@ -5,14 +5,17 @@ const { formatInTimeZone } = require('date-fns-tz');
 
 let customerId;
 let apolloClient;
-let status;
+let createPlan;
 
 const mutation = gql`
   mutation CreatePlanMutation (
-    $planName: String!, $cycleFrequency: CycleFrequency!, $perCycleCost: Float!, $startDate: Date!) {
+    $planName: String!, $cycleFrequency: CycleFrequency!, $perCycleCost: USCurrency!, $startDate: Date!) {
     createPlan(planName: $planName, cycleFrequency: $cycleFrequency, perCycleCost: $perCycleCost, startDate: $startDate) {
       planId
-      status
+      planName
+      cycleFrequency
+      perCycleCost
+      startDate
     }
   }`;
 
@@ -21,7 +24,6 @@ beforeAll(async () => {
     exp: Math.floor(Date.now() / 1000) + (60 * 5),
     user: {
       username: 'testUser',
-      stripeCusId: null,
     }
   }, process.env.SIGNIN_SECRET_KEY);
 
@@ -60,17 +62,27 @@ describe('createPlan mutation', () => {
   });
 
   it('Should create a new test plan', async () => {
-    ({ data: { createPlan: { planId, status } }} = await apolloClient.mutate({
-      mutation,
-      variables: {
-        planName: 'Test Plan',
-        cycleFrequency: 'WEEKLY',
-        perCycleCost: 49.87,
-        startDate: `${tomorrow.getFullYear()}-${(tomorrow.getMonth() + 1).toString().padStart(2, '0')}-${(tomorrow.getDate()).toString().padStart(2, '0')}`,
-      }
-    }));
+    const date = `${tomorrow.getFullYear()}-${(tomorrow.getMonth() + 1).toString().padStart(2, '0')}-${(tomorrow.getDate()).toString().padStart(2, '0')}`;
+    try {
+      ({ data: { createPlan }} = await apolloClient.mutate({
+        mutation,
+        variables: {
+          planName: 'Test Plan',
+          cycleFrequency: 'WEEKLY',
+          perCycleCost: '$49.87',
+          startDate: date,
+        }
+      }));
+    } catch(e) {
+      console.log(e);
+    }
 
-    expect(status).toBe('CREATED');
+    expect(createPlan.planName).toBe('Test Plan');
+    expect(createPlan.cycleFrequency).toBe('WEEKLY');
+    expect(createPlan.perCycleCost).toBe('$49.87');
+    expect(createPlan.startDate).toBe(date);
+
+    planId = createPlan.planId;
 
     const query = `
       SELECT
@@ -100,7 +112,12 @@ describe('createPlan mutation', () => {
       WHERE p.plan_id = $1
     `;
 
-    const { rows } = await pgClient.query(query, [planId]);
+    let rows;
+    try {
+      ({ rows } = await pgClient.query(query, [planId]));
+    } catch(e) {
+      console.log(e);
+    }
 
     expect(rows).toHaveLength(1);
 
@@ -114,8 +131,8 @@ describe('createPlan mutation', () => {
     const [product, price] = await Promise.all([stripe.products.retrieve(planId), stripe.prices.retrieve(priceId)]);
 
     expect(price.product).toBe(planId);
-    expect(price.unit_amount).toBe(perCycleCost);
-    expect(price.unit_amount).toBe(4987);
+    expect(price.unit_amount).toBe(Math.round(perCycleCost * 1.05));
+    expect(price.unit_amount).toBe(Math.round(4987 * 1.05));
     expect(price.billing_scheme).toBe('per_unit');
     expect(price.type).toBe('recurring');
     expect(price.active).toBe(true);
@@ -136,7 +153,7 @@ describe('createPlan mutation', () => {
     expect(priceStartDate).toBeInstanceOf(Date);
     expect(priceStartDate).toMatchObject(startDate);
     expect(startDate).toMatchObject(priceStartDate);
-    expect(formatInTimeZone(startDate, 'America/New_York', 'yyyy-MM-dd HH:mm:ss zzz')).toBe(`${tomorrow.getFullYear()}-${tomorrow.getMonth() + 1}-${tomorrow.getDate()} 23:59:59 EST`);
+    expect(formatInTimeZone(startDate, 'America/New_York', 'yyyy-MM-dd HH:mm:ss zzz')).toBe(`${date} 23:59:59 EST`);
   });
 
   it('Should throw an error if start date is before tomorrow', async () => {
@@ -147,7 +164,7 @@ describe('createPlan mutation', () => {
         variables: {
           planName: 'Test Plan',
           cycleFrequency: 'WEEKLY',
-          perCycleCost: 49.87,
+          perCycleCost: '$49.87',
           startDate: `${today.getFullYear()}-${(today.getMonth() + 1).toString().padStart(2, '0')}-${(today.getDate()).toString().padStart(2, '0')}`,
         }
       });
@@ -165,7 +182,7 @@ describe('createPlan mutation', () => {
         variables: {
           planName: 'Test Plan',
           cycleFrequency: 'WEEKLY',
-          perCycleCost: 49.87,
+          perCycleCost: '$49.87',
           startDate: `${day.getFullYear()}-${(day.getMonth() + 1).toString().padStart(2, '0')}-${(day.getDate()).toString().padStart(2, '0')}`,
         }
       });
@@ -182,7 +199,7 @@ describe('createPlan mutation', () => {
         variables: {
           planName: 'Test Plan',
           cycleFrequency: 'WEEKLY',
-          perCycleCost: 49.87,
+          perCycleCost: '$49.87',
           startDate: random,
         }
       });
@@ -200,7 +217,7 @@ describe('createPlan mutation', () => {
         variables: {
           planName: 'Test Plan',
           cycleFrequency: randomStr,
-          perCycleCost: 49.87,
+          perCycleCost: '$49.87',
           startDate: `${tomorrow.getFullYear()}-${(tomorrow.getMonth() + 1).toString().padStart(2, '0')}-${(tomorrow.getDate()).toString().padStart(2, '0')}`,
         }
       });
@@ -216,7 +233,7 @@ describe('createPlan mutation', () => {
         variables: {
           planName: 'Test Plan',
           cycleFrequency: 'WEEKLY',
-          perCycleCost: 9.75,
+          perCycleCost: '$9.75',
           startDate: `${tomorrow.getFullYear()}-${(tomorrow.getMonth() + 1).toString().padStart(2, '0')}-${(tomorrow.getDate()).toString().padStart(2, '0')}`,
         }
       });
@@ -232,7 +249,7 @@ describe('createPlan mutation', () => {
         variables: {
           planName: 'Test Plan',
           cycleFrequency: 'WEEKLY',
-          perCycleCost: 12.75982,
+          perCycleCost: '$12.75982',
           startDate: `${tomorrow.getFullYear()}-${(tomorrow.getMonth() + 1).toString().padStart(2, '0')}-${(tomorrow.getDate()).toString().padStart(2, '0')}`,
         }
       });
