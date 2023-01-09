@@ -13,10 +13,10 @@ export const buttonTheme = defineStyleConfig({
   sizes: {
     sm: { fontSize: 'sm', borderRadius: '6px' },
     md: {
-      fontSize: 'md', px: 8, py: 4, borderRadius: '40px',
+      fontSize: 'md', px: 8, borderRadius: '40px',
     },
     lg: {
-      fontSize: 'md', px: 10, py: 8, borderRadius: '40px',
+      fontSize: 'md', px: 10, borderRadius: '40px',
     },
   },
   variants: {

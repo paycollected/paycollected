@@ -13,7 +13,7 @@ export default function CreatePlanSuccess({
 
   return (
     <>
-      <DrawerHeader pt={4}>
+      <DrawerHeader pt={4} pb={0}>
         <Text color="#2B6CB0" fontSize="3xl">
           Success! Your plan was created
         </Text>
@@ -31,6 +31,7 @@ export default function CreatePlanSuccess({
               borderRadius={10}
               templateColumns="3fr 2fr"
               templateRows="repeat(4, max-content)"
+              rowGap={2}
             >
               <GridItem fontWeight="bold" fontSize="md">Plan Name:</GridItem>
               <GridItem fontSize="md">{planNameCreated}</GridItem>
