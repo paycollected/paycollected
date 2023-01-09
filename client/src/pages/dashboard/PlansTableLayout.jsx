@@ -9,7 +9,7 @@ import PlansTable from './PlansTable.jsx';
 
 export default function PlansTableLayout({
   total, plans, setPlanToView, setPlanToJoin, successPlan, fetchMore, refetch, tabIndex,
-  setTabIndex, networkStatus,
+  setTabIndex, networkStatus, setSuccessPlan
 }) {
   const onTabChange = (index) => {
     switch (index) {
@@ -75,6 +75,7 @@ export default function PlansTableLayout({
               setPlanToView={setPlanToView}
               setPlanToJoin={setPlanToJoin}
               successPlan={successPlan}
+              setSuccessPlan={setSuccessPlan}
             />
           </Box>
           <Box px={{ base: '4', md: '6' }} pb={5}>

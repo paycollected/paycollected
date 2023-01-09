@@ -109,6 +109,7 @@ export default function Dashboard({
             setPlanToView={setPlanToView}
             setPlanToJoin={setPlanToJoin}
             successPlan={successPlan}
+            setSuccessPlan={setSuccessPlan}
             fetchMore={fetchMore}
             refetch={refetch}
             tabIndex={tabIndex}

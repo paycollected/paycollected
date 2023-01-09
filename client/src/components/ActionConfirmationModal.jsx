@@ -15,6 +15,7 @@ import { ViewAllPlans as GET_PLANS } from '../graphql/queries.gql';
 
 export default function ActionConfirmationModal({
   action, isOpen, onClose, subscriptionId, planId, planName, members, setPlanToView, inDashboard,
+  successPlan, setSuccessPlan,
 }) {
   const [newOwner, setNewOwner] = useState(
     (members === null || members.length === 0)
@@ -24,6 +25,9 @@ export default function ActionConfirmationModal({
   const navigate = useNavigate();
   const requestCompleted = () => {
     setPlanToView(null);
+    if (action === 'delete' && planId === successPlan.planId) {
+      setSuccessPlan(null);
+    }
     onClose();
     if (!inDashboard) navigate('/dashboard');
   };

@@ -18,7 +18,7 @@ import MagicLinkModal from '../../components/MagicLinkModal.jsx';
 import { modifyQuantCacheUpdate, transferOwnershipCacheUpdate, modifyQuantTransferCacheUpdate } from './cacheUpdatingFns.js';
 
 export default function PlanDetails({
-  user, setUser, setPlanToJoin, planToView, setPlanToView, edit, setSuccessPlan,
+  user, setUser, setPlanToJoin, planToView, setPlanToView, edit, setSuccessPlan, successPlan,
 }) {
   const [editAsOwner, setEditAsOwner] = useState(edit);
   const [editAsMember, setEditAsMember] = useState(false);
@@ -120,6 +120,8 @@ export default function PlanDetails({
           members={activeMembers}
           setPlanToView={setPlanToView}
           inDashboard={false}
+          successPlan={successPlan}
+          setSuccessPlan={setSuccessPlan}
         />
         <MagicLinkModal
           onClose={shareOnClose}

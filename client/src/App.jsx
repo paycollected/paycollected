@@ -11,7 +11,7 @@ import FourOhFour from './pages/404.jsx';
 import PwdReset from './pages/PwdReset.jsx';
 import ManageAccount from './pages/manageAccount/ManageAccount.jsx';
 import PlanDetails from './pages/planDetails/PlanDetails.jsx';
-import CheckoutSuccess from './pages/checkoutSuccess/CheckoutSuccess.jsx';
+import CheckoutSuccess from './pages/checkoutSuccess/CheckOutSuccess.jsx';
 
 // check that token is still valid before displaying logged-in state
 let token = localStorage.getItem('token');
@@ -156,6 +156,7 @@ function App() {
                     setPlanToJoin={setPlanToJoin}
                     edit={false}
                     setSuccessPlan={setSuccessPlan}
+                    successPlan={successPlan}
                   />
                 )
                 : <Navigate to="/dashboard" />
@@ -174,6 +175,7 @@ function App() {
                     setPlanToJoin={setPlanToJoin}
                     edit
                     setSuccessPlan={setSuccessPlan}
+                    successPlan={successPlan}
                   />
                 )
                 : <Navigate to="/dashboard" />

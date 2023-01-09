@@ -19,7 +19,7 @@ function MoreOptionsIcon() {
 }
 
 export default function PlansTable({
-  plans, setPlanToView, setPlanToJoin, successPlan
+  plans, setPlanToView, setPlanToJoin, successPlan, setSuccessPlan,
 }) {
   const navigate = useNavigate();
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -39,6 +39,8 @@ export default function PlansTable({
         members={null}
         setPlanToView={setPlanToView}
         inDashboard
+        successPlan={successPlan}
+        setSuccessPlan={setSuccessPlan}
       />
       <MagicLinkModal
         onClose={mlOnClose}
