@@ -38,7 +38,7 @@ export default function ActionConfirmationModal({
 
   const [
     confirmUnsubscribeAsOwner,
-    { data: ownerData, loading: ownerLoading, error: ownerError}
+    { data: ownerData, loading: ownerLoading, error: ownerError }
   ] = useMutation(UNSUBSCRIBE_AS_OWNER, {
     onCompleted: requestCompleted,
   });

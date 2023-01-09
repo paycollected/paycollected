@@ -82,27 +82,27 @@ export default function Login({ setUser, planToJoin }) {
             autoComplete="off"
             onSubmit={handleSubmit(onSubmit)}
           >
-            <Stack spacing="6" align="center">
+            <Stack spacing="6" align="center" pb={8}>
               <Link as={ReactLink} to="/">
                 <Image src={Logo} alt="Pay Collected Logo" fit="cover" htmlWidth="200px" loading="eager" />
               </Link>
               <Stack spacing={{ base: '2', md: '3' }} textAlign="center">
-                <Heading size="lg">
+                <Heading size="lg" color="black">
                   Log in to your account
                 </Heading>
-                <HStack spacing="1" justify="center">
+                <HStack spacing="2" justify="center">
                   <Text color="muted">Don&apos;t have an account?</Text>
-                  <Button variant="link" colorScheme="blue" onClick={() => { navigate('/create-account'); }}>
+                  <Button variant="link" fontWeight="normal" colorScheme="blue" onClick={() => { navigate('/create-account'); }}>
                     Sign up
                   </Button>
                 </HStack>
               </Stack>
             </Stack>
             <Box
-              py={{ base: '0', sm: '8' }}
+              py={{ base: '0', sm: '12' }}
               px={{ base: '4', sm: '10' }}
               bg={useBreakpointValue({ base: 'transparent', sm: 'bg-surface' })}
-              boxShadow={{ base: 'none', sm: useColorModeValue('md', 'md-dark') }}
+              border="1px solid #DFDFDF"
               borderRadius={{ base: 'none', sm: 'xl' }}
             >
               <Stack spacing="2">
@@ -111,7 +111,7 @@ export default function Login({ setUser, planToJoin }) {
                     isRequired
                     isInvalid={errors.usernameOrEmail || errorMessage === 'Incorrect username and password'}
                   >
-                    <FormLabel htmlFor="usernameOrEmail">Username or Email</FormLabel>
+                    <FormLabel htmlFor="usernameOrEmail" textStyle="formLabel" fontWeight={600}>Username or Email</FormLabel>
                     <Input
                       name="usernameOrEmail"
                       type="text"
@@ -130,7 +130,7 @@ export default function Login({ setUser, planToJoin }) {
                     isRequired
                     isInvalid={errors.password || errorMessage === 'Incorrect username and password'}
                   >
-                    <FormLabel htmlFor="password">Password</FormLabel>
+                    <FormLabel htmlFor="password" textStyle="formLabel" fontWeight={600}>Password</FormLabel>
                     <InputGroup>
                       <Input
                         name="password"
@@ -164,17 +164,18 @@ export default function Login({ setUser, planToJoin }) {
                     </FormControl>
                   </FormControl>
                 </Stack>
-                <HStack justify="space-between">
-                  <Button variant="link" colorScheme="blue" size="sm" onClick={onOpenVerify}>
+                <HStack justify="space-between" pb={6}>
+                  <Button variant="link" fontWeight="normal" colorScheme="blue" size="sm" onClick={onOpenVerify}>
                     Reverify Email
                   </Button>
-                  <Button variant="link" colorScheme="blue" size="sm" onClick={onOpenReset}>
+                  <Button variant="link" fontWeight="normal" colorScheme="blue" size="sm" onClick={onOpenReset}>
                     Forgot password?
                   </Button>
                 </HStack>
                 <Stack spacing="6">
                   <Button
                     type="submit"
+                    bg="#272088"
                     onClick={() => handleSubmit(onSubmit)}
                     isLoading={loading}
                     disabled={loading}
