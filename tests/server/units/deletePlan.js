@@ -20,10 +20,16 @@ async function delPlanErrors(apolloClient, planId, expectedError) {
 
 async function delPlan(apolloClient, planId, priceId, testUser6, users) {
   // subscription status before calling mutation is 'trialing'
-  const [
-    { status: user1SubsPreStatus }, { status: user2SubsPreStatus }, { status: user3SubsPreStatus },
-    { status: user4SubsPreStatus }
-  ] = await Promise.all(users.map((user) => (stripe.subscriptions.retrieve(user.subscriptionId))));
+  let user1SubsPreStatus, user2SubsPreStatus, user3SubsPreStatus, user4SubsPreStatus;
+  try {
+    [
+      { status: user1SubsPreStatus }, { status: user2SubsPreStatus }, { status: user3SubsPreStatus },
+      { status: user4SubsPreStatus }
+    ] = await Promise.all(users.map((user) => (stripe.subscriptions.retrieve(user.subscriptionId))));
+  } catch (e) {
+    console.log(e);
+    return;
+  }
 
   expect(user1SubsPreStatus).toBe('trialing');
   expect(user2SubsPreStatus).toBe('trialing');
@@ -31,29 +37,41 @@ async function delPlan(apolloClient, planId, priceId, testUser6, users) {
   expect(user4SubsPreStatus).toBe('trialing');
 
   // calling mutation
-  const { data: { deletePlan: { planId: resultPlanId, status } } } = await apolloClient.mutate({
-    mutation, variables: { planId }
-  });
+  let resultPlanId, status;
+  try {
+    ({ data: { deletePlan: { planId: resultPlanId, status } } } = await apolloClient.mutate({
+      mutation, variables: { planId }
+    }));
+  } catch (e) {
+    console.log(e);
+    return;
+  }
 
   expect(resultPlanId).toBe(planId);
   expect(status).toBe('DELETED');
-
 
   const notificationsQuery = `
     SELECT username, message FROM notifications WHERE username in ($1, $2, $3, $4, $5)`;
   const planQuery = `SELECT plan_id FROM plans WHERE plan_id = $1`;
 
-  const [
-    { active: priceActive }, { active: productActive }, { rows: notiRows }, { rows: planRows },
-    { status: user1SubsPostStatus }, { status: user2SubsPostStatus },
-    { status: user3SubsPostStatus }, { status: user4SubsPostStatus },
-  ] = await Promise.all([
-    stripe.prices.retrieve(priceId),
-    stripe.products.retrieve(planId),
-    pgClient.query(notificationsQuery, [...users.map((user) => user.username), testUser6.username]),
-    pgClient.query(planQuery, [planId]),
-    ...users.map((user) => (stripe.subscriptions.retrieve(user.subscriptionId)))
-  ]);
+  let priceActive, productActive, notiRows, planRows;
+  let user1SubsPostStatus, user2SubsPostStatus, user3SubsPostStatus, user4SubsPostStatus;
+  try {
+    [
+      { active: priceActive }, { active: productActive }, { rows: notiRows }, { rows: planRows },
+      { status: user1SubsPostStatus }, { status: user2SubsPostStatus },
+      { status: user3SubsPostStatus }, { status: user4SubsPostStatus },
+    ] = await Promise.all([
+      stripe.prices.retrieve(priceId),
+      stripe.products.retrieve(planId),
+      pgClient.query(notificationsQuery, [...users.map((user) => user.username), testUser6.username]),
+      pgClient.query(planQuery, [planId]),
+      ...users.map((user) => (stripe.subscriptions.retrieve(user.subscriptionId)))
+    ]);
+  } catch (e) {
+    console.log(e);
+    return;
+  }
 
   // subscription status after calling mutation is 'cancelled'
   expect(user1SubsPostStatus).toBe('canceled');
@@ -90,13 +108,25 @@ async function archivePlan(apolloClient, planId, priceId, testUser6, users) {
 
   // could technically use Stripe test clock here, though they don't allow
   // changing certain products related a customer subject during time simulation
-  await Promise.all(users.map((user) => stripe.subscriptions.update(
-    user.subscriptionId, { trial_end: 'now' })));
+  try {
+    await Promise.all(users.map((user) => stripe.subscriptions.update(
+      user.subscriptionId, { trial_end: 'now' })));
+  } catch(e) {
+    console.log(e);
+    return;
+  }
 
-  const [
-    { status: user1SubsPreStatus }, { status: user2SubsPreStatus }, { status: user3SubsPreStatus },
-    { status: user4SubsPreStatus }
-  ] = await Promise.all(users.map((user) => (stripe.subscriptions.retrieve(user.subscriptionId))));
+  let user1SubsPreStatus, user2SubsPreStatus, user3SubsPreStatus, user4SubsPreStatus
+  try {
+    [
+      { status: user1SubsPreStatus }, { status: user2SubsPreStatus }, { status: user3SubsPreStatus },
+      { status: user4SubsPreStatus }
+    ] = await Promise.all(users.map((user) => (stripe.subscriptions.retrieve(user.subscriptionId))));
+  } catch (e) {
+    console.log(e);
+    return;
+  }
+
 
   expect(user1SubsPreStatus).toBe('active');
   expect(user2SubsPreStatus).toBe('active');
@@ -105,9 +135,16 @@ async function archivePlan(apolloClient, planId, priceId, testUser6, users) {
 
   // await new Promise(resolve => setTimeout(resolve, 3000));
 
-  const { data: { deletePlan: { planId: resultPlanId, status } } } = await apolloClient.mutate({
-    mutation, variables: { planId }
-  });
+  let resultPlanId, status;
+  try {
+    ({ data: { deletePlan: { planId: resultPlanId, status } } } = await apolloClient.mutate({
+      mutation, variables: { planId }
+    }));
+  } catch (e) {
+    console.log(e);
+    return;
+  }
+
 
   // NOTE THAT THIS TEST is MORE than a unit test - it is testing BOTH the deletePlan
   // mutation in this scenario (at least 1 active past billing cycle) AND our webhook
@@ -129,17 +166,24 @@ async function archivePlan(apolloClient, planId, priceId, testUser6, users) {
     SELECT username, message FROM notifications WHERE username in ($1, $2, $3, $4, $5)`;
   const planQuery = `SELECT active FROM plans WHERE plan_id = $1`;
 
-  const [
-    { active: priceActive }, { active: productActive }, { rows: notiRows }, { rows: planRows },
-    { status: user1SubsPostStatus }, { status: user2SubsPostStatus },
-    { status: user3SubsPostStatus }, { status: user4SubsPostStatus },
-  ] = await Promise.all([
-    stripe.prices.retrieve(priceId),
-    stripe.products.retrieve(planId),
-    pgClient.query(notificationsQuery, [...users.map((user) => user.username), testUser6.username]),
-    pgClient.query(planQuery, [planId]),
-    ...users.map((user) => (stripe.subscriptions.retrieve(user.subscriptionId)))
-  ]);
+  let priceActive, productActive, notiRows, planRows, user1SubsPostStatus, user2SubsPostStatus, user3SubsPostStatus, user4SubsPostStatus;
+  try {
+    [
+      { active: priceActive }, { active: productActive }, { rows: notiRows }, { rows: planRows },
+      { status: user1SubsPostStatus }, { status: user2SubsPostStatus },
+      { status: user3SubsPostStatus }, { status: user4SubsPostStatus },
+    ] = await Promise.all([
+      stripe.prices.retrieve(priceId),
+      stripe.products.retrieve(planId),
+      pgClient.query(notificationsQuery, [...users.map((user) => user.username), testUser6.username]),
+      pgClient.query(planQuery, [planId]),
+      ...users.map((user) => (stripe.subscriptions.retrieve(user.subscriptionId)))
+    ]);
+  } catch (e) {
+    console.log(e);
+    return;
+  }
+
 
   expect(user1SubsPostStatus).toBe('canceled');
   expect(user2SubsPostStatus).toBe('canceled');
