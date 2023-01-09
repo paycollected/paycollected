@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   InputGroup, Box, Stack, Button, Input, HStack, DrawerHeader, DrawerBody, DrawerFooter,
-  TableContainer, Table, Tbody, Tr, Td, VStack, Flex, InputRightAddon, Text, Center,
+  VStack, Flex, InputRightAddon, Text, Center, Grid, GridItem,
 } from '@chakra-ui/react';
 
 export default function CreatePlanSuccess({
@@ -23,29 +23,24 @@ export default function CreatePlanSuccess({
           <Box>
             Join the plan or invite your friends.
           </Box>
-          <Center py={5}>
-            <TableContainer width="75%" bg="#F7FAFC" p={6} borderRadius={10}>
-              <Table variant="unstyled" size="sm">
-                <Tbody>
-                  <Tr>
-                    <Td fontWeight="bold" fontSize="md">Plan Name: </Td>
-                    <Td fontSize="md">{planNameCreated}</Td>
-                  </Tr>
-                  <Tr>
-                    <Td fontWeight="bold" fontSize="md">Per Cycle Cost: </Td>
-                    <Td fontSize="md">{perCycleCostCreated}</Td>
-                  </Tr>
-                  <Tr>
-                    <Td fontWeight="bold" fontSize="md">Billing Frequency: </Td>
-                    <Td fontSize="md">{billingFrequencyCreated}</Td>
-                  </Tr>
-                  <Tr>
-                    <Td fontWeight="bold" fontSize="md">Start Date: </Td>
-                    <Td fontSize="md">{startDateCreated}</Td>
-                  </Tr>
-                </Tbody>
-              </Table>
-            </TableContainer>
+          <Center py={5} w="100%">
+            <Grid
+              w="85%"
+              p={8}
+              bg="#F7FAFC"
+              borderRadius={10}
+              templateColumns="3fr 2fr"
+              templateRows="repeat(4, max-content)"
+            >
+              <GridItem fontWeight="bold" fontSize="md">Plan Name:</GridItem>
+              <GridItem fontSize="md">{planNameCreated}</GridItem>
+              <GridItem fontWeight="bold" fontSize="md">Per Cycle Cost: </GridItem>
+              <GridItem fontSize="md">{perCycleCostCreated}</GridItem>
+              <GridItem fontWeight="bold" fontSize="md">Billing Frequency: </GridItem>
+              <GridItem fontSize="md">{billingFrequencyCreated}</GridItem>
+              <GridItem fontWeight="bold" fontSize="md">Start Date: </GridItem>
+              <GridItem fontSize="md">{startDateCreated}</GridItem>
+            </Grid>
           </Center>
           <VStack w="100%" spacing={8}>
             <Flex w="100%" justify="left">
