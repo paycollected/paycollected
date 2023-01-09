@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { NetworkStatus } from '@apollo/client';
 import {
   Box, Button, Container, Stack, Center, useBreakpointValue, useColorModeValue, Tabs, TabList,
@@ -83,10 +83,13 @@ export default function PlansTableLayout({
                 <Button variant="secondary" type="button" onClick={() => fetchMore({ variables: { offset: plans.length } })}>Show More Results</Button>
               </Center>
             )}
-            {plans.length === total && (
+            {plans.length === total && total > 5 && (
               <Center>
                 <Button variant="secondary" type="button" onClick={() => refetch()}>Collapse Results</Button>
               </Center>
+            )}
+            {plans.length === total && total <= 5 && (
+              <Center>End of Results</Center>
             )}
           </Box>
         </Stack>

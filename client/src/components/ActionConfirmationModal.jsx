@@ -10,18 +10,8 @@ import {
   UnsubscribeAsPlanOwner as UNSUBSCRIBE_AS_OWNER,
   DeletePlan as DELETE_PLAN,
 } from '../graphql/mutations.gql';
+import { ViewAllPlans as GET_PLANS } from '../graphql/queries.gql';
 
-function cacheModify(resultPlanId) {
-  return (cached, { readField }) => {
-    if (cached) {
-      const { total, plans } = cached;
-      return {
-        total: total - 1,
-        plans: plans.filter((planRef) => readField('planId', planRef) !== resultPlanId),
-      };
-    }
-  };
-}
 
 export default function ActionConfirmationModal({
   action, isOpen, onClose, subscriptionId, planId, planName, members, setPlanToView, inDashboard,
@@ -53,18 +43,7 @@ export default function ActionConfirmationModal({
     data: deleteData, loading: deleteLoading, error: deleteError
   }] = useMutation(DELETE_PLAN, {
     onCompleted: requestCompleted,
-    update: (cache, { data: { deletePlan: { planId: resultPlanId } } }) => {
-      cache.modify({
-        fields: {
-          'viewAllPlans:{"orderBy":"PLAN_NAME","filterByOwnership":true}': cacheModify(resultPlanId),
-          'viewAllPlans:{"orderBy":"PLAN_NAME","filterByOwnership":false}': cacheModify(resultPlanId),
-          'viewAllPlans:{"orderBy":"SELF_COST","filterByOwnership":true}': cacheModify(resultPlanId),
-          'viewAllPlans:{"orderBy":"SELF_COST","filterByOwnership":false}': cacheModify(resultPlanId),
-          'viewAllPlans:{"orderBy":"NEXT_BILL_DATE","filterByOwnership":true}': cacheModify(resultPlanId),
-          'viewAllPlans:{"orderBy":"NEXT_BILL_DATE","filterByOwnership":false}': cacheModify(resultPlanId),
-        }
-      });
-    },
+    refetchQueries: [{ query: GET_PLANS }, 'ViewAllPlans'],
   });
 
   const handleConfirmation = () => {
