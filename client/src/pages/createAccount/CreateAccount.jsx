@@ -63,41 +63,41 @@ export default function CreateAccount({ setUser }) {
   return (
     <>
       <EmailSentModal isOpen={isOpen} onClose={onClose} email={email} />
-      <Container maxW="lg" py={{ base: '12', md: '24' }} px={{ base: '0', sm: '8' }}>
+      <Container w="xl" py={{ base: '12', md: '12' }} px={{ base: '0', sm: '8' }}>
         <Stack spacing="8">
           <form
             autoComplete="off"
             onSubmit={handleSubmit(onSubmit)}
           >
-            <Stack spacing="6" align="center">
+            <Stack spacing="6" align="center" pb={8}>
               <Link as={ReactLink} to="/">
                 <Image src={Logo} alt="Pay Collected Logo" fit="cover" htmlWidth="200px" loading="eager" />
               </Link>
               <Stack spacing="3" textAlign="center">
-                <Heading size="lg">
+                <Heading size="lg" color="black">
                   Create an account
                 </Heading>
-                <HStack spacing="1" justify="center">
+                <HStack spacing="2" justify="center">
                   <Text color="muted">Already have an account?</Text>
-                  <Button variant="link" colorScheme="blue" onClick={() => { navigate('/login'); }}>
+                  <Button variant="link" colorScheme="blue" fontWeight="normal" onClick={() => { navigate('/login'); }}>
                     Log in
                   </Button>
                 </HStack>
               </Stack>
             </Stack>
             <Box
-              py={{ base: '0', sm: '8' }}
-              px={{ base: '4', sm: '10' }}
+              py={{ base: '0', sm: '12' }}
+              px={{ base: '4', sm: '14' }}
               bg={useBreakpointValue({ base: 'transparent', sm: 'bg-surface' })}
-              boxShadow={{ base: 'none', sm: useColorModeValue('md', 'md-dark') }}
+              border="1px solid #DFDFDF"
               borderRadius={{ base: 'none', sm: 'xl' }}
             >
-              <Stack spacing="3">
+              <Stack spacing="5">
                 <FormControl
                   isRequired
                   isInvalid={errors.fullName}
                 >
-                  <FormLabel htmlFor="fullName">First and Last Name</FormLabel>
+                  <FormLabel htmlFor="fullName" textStyle="formLabel" fontWeight={600}>First and Last Name</FormLabel>
                   <Input
                     name="fullName"
                     type="text"
@@ -124,7 +124,7 @@ export default function CreateAccount({ setUser }) {
                   isRequired
                   isInvalid={errors.username || errorMessage === 'Username already exists'}
                 >
-                  <FormLabel htmlFor="username">Username</FormLabel>
+                  <FormLabel htmlFor="username" textStyle="formLabel" fontWeight={600}>Username</FormLabel>
                   <Input
                     name="username"
                     type="text"
@@ -145,7 +145,7 @@ export default function CreateAccount({ setUser }) {
                   isRequired
                   isInvalid={errors.email || errorMessage === 'Email already exists'}
                 >
-                  <FormLabel>Email</FormLabel>
+                  <FormLabel textStyle="formLabel" fontWeight={600}>Email</FormLabel>
                   <Input
                     name="email"
                     type="email"
@@ -169,7 +169,7 @@ export default function CreateAccount({ setUser }) {
                   isRequired
                   isInvalid={errors.password}
                 >
-                  <FormLabel>Password</FormLabel>
+                  <FormLabel textStyle="formLabel" fontWeight={600}>Password</FormLabel>
                   <InputGroup>
                     <Input
                       name="password"
@@ -198,7 +198,7 @@ export default function CreateAccount({ setUser }) {
                   isRequired
                   isInvalid={errors.password2}
                 >
-                  <FormLabel>Confirm Password</FormLabel>
+                  <FormLabel textStyle="formLabel" fontWeight={600}>Confirm Password</FormLabel>
                   <InputGroup>
                     <Input
                       name="password2"
@@ -227,12 +227,13 @@ export default function CreateAccount({ setUser }) {
                 {errorMessage.length > 0 ? (
                   <Text color="red">{errorMessage}</Text>
                 ) : (
-                  <div>&nbsp;</div>
+                  <>&nbsp;</>
                 )}
                 <Button
                   type="submit"
                   isLoading={loading}
                   disabled={loading}
+                  bg="#272088"
                 >
                   Create account
                 </Button>

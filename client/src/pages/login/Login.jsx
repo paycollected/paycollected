@@ -76,7 +76,7 @@ export default function Login({ setUser, planToJoin }) {
     <>
       <ReverifyEmailModal isOpen={isOpenVerify} onClose={onCloseVerify} />
       <ForgotPwdModal isOpen={isOpenReset} onClose={onCloseReset} />
-      <Container maxW="lg" py={{ base: '12', md: '24' }} px={{ base: '0', sm: '8' }}>
+      <Container w="xl" py={{ base: '12', md: '12' }} px={{ base: '0', sm: '8' }}>
         <Stack spacing="8">
           <form
             autoComplete="off"
@@ -100,7 +100,7 @@ export default function Login({ setUser, planToJoin }) {
             </Stack>
             <Box
               py={{ base: '0', sm: '12' }}
-              px={{ base: '4', sm: '10' }}
+              px={{ base: '4', sm: '14' }}
               bg={useBreakpointValue({ base: 'transparent', sm: 'bg-surface' })}
               border="1px solid #DFDFDF"
               borderRadius={{ base: 'none', sm: 'xl' }}
