@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
   Icon, IconButton, Table, Tbody, Td, Th, Thead, Tr, Menu, MenuButton, MenuList, MenuItem, HStack,
-  Badge, Text, useDisclosure,
+  Badge, Text, useDisclosure, Button,
 } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
 import ActionConfirmationModal from '../../components/ActionConfirmationModal.jsx';
@@ -74,7 +74,19 @@ export default function PlansTable({
             return (
               <Tr key={planId}>
                 {(!successPlan || (successPlan && successPlan.planId !== planId)) && (
-                  <Td>{name}</Td>
+                  <Td>
+                    <Button
+                      type="button"
+                      variant="navBarBtn"
+                      px={0}
+                      onClick={() => {
+                        setPlanToView(planId);
+                        navigate('/view');
+                      }
+                    }>
+                      {name}
+                    </Button>
+                  </Td>
                 )}
                 {successPlan && successPlan.planId === planId && (
                   <Td>

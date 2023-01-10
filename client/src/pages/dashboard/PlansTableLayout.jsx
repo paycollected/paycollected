@@ -61,13 +61,16 @@ export default function PlansTableLayout({
                 <Text color="gray.600" fontSize="sm" whiteSpace="nowrap">Order by</Text>
               </Flex>
               <Flex align="center">
-                <Select onChange={(e) => {
-                  setSortBy(e.target.value);
-                  refetch({ orderBy: e.target.value });
-                }}>
-                  <option value="PLAN_NAME" selected={sortBy === 'PLAN_NAME'}>Name (A-Z)</option>
-                  <option value="SELF_COST" selected={sortBy === 'SELF_COST'}>Your Cost (lowest - highest)</option>
-                  <option value="NEXT_BILL_DATE" selected={sortBy === 'NEXT_BILL_DATE'}>Next Charge Date (least - most distant)</option>
+                <Select
+                  defaultValue={sortBy}
+                  onChange={(e) => {
+                    setSortBy(e.target.value);
+                    refetch({ orderBy: e.target.value });
+                  }
+                }>
+                  <option value="PLAN_NAME">Name (A-Z)</option>
+                  <option value="SELF_COST">Your Cost (lowest - highest)</option>
+                  <option value="NEXT_BILL_DATE">Next Charge Date (least - most distant)</option>
                 </Select>
               </Flex>
             </Stack>
