@@ -73,7 +73,7 @@ export default function Dashboard({
         <VStack w="93%" justify="left" spacing={{ base: '6', md: '10' }} mb="10">
           {successPlan && successIsOpen && (
             <Box w="100%">
-              <Alert w={{ base: '100%', md: '65%' }} status="info" borderRadius={10}>
+              <Alert w={{ base: '95%', md: '65%' }} status="info" borderRadius={10}>
                 <Flex w="100%" justify="space-between">
                   <HStack spacing={0}>
                     <AlertIcon />

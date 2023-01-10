@@ -96,7 +96,7 @@ export default function JoinPlan({
             </Button>
           </Flex>
           <Box w="100%">
-            <VStack w={{ base: '95%', md: '80%' }} mb={10} spacing={4}>
+            <VStack w={{ base: '95%', md: '80%', lg: '60%' }} mb={10} spacing={4}>
               <Flex w="100%" id="flex" direction="column" justify="start">
                 <Heading as="h1" variant="accented" pb={0}>Join plan</Heading>
               </Flex>
@@ -106,7 +106,7 @@ export default function JoinPlan({
                 </Text>
               </Flex>
             </VStack>
-            <Card w={{ base: '95%', md: '80%' }} variant="outline">
+            <Card w={{ base: '95%', md: '80%', lg: '60%' }} variant="outline">
               <CardHeader mx={6} mt={8} pb={4}>
                 <Heading as="h2" variant="nuanced" color="#272088">{name}</Heading>
               </CardHeader>

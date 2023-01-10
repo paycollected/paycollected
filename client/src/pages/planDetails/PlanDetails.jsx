@@ -144,11 +144,11 @@ export default function PlanDetails({
             </Button>
           </Flex>
           <Box w="100%">
-            <Flex w={{ base: '95%', lg: '80%' }} align="center" justify="space-between" mb={10}>
+            <Flex w={{ base: '95%', md: '80%', lg: '60%' }} align="center" justify="space-between" mb={10}>
               <Heading as="h1" variant="accented" pb={0}>{name}</Heading>
               <Button type="button" onClick={shareOnOpen}>Share Plan</Button>
             </Flex>
-            <Card w={{ base: '95%', lg: '80%' }}>
+            <Card w={{ base: '95%', md: '80%', lg: '60%' }} variant="outline">
               {!isOwner && (
                 <>
                   <CardHeader mx={6} mt={8} pb={0}>
