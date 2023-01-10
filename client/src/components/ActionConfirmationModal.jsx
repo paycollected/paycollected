@@ -25,7 +25,7 @@ export default function ActionConfirmationModal({
   const navigate = useNavigate();
   const requestCompleted = () => {
     setPlanToView(null);
-    if (successPlan && planId === successPlan.planId) {
+    if (successPlan && planName === successPlan) {
       setSuccessPlan(null);
     }
     onClose();

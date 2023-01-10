@@ -71,6 +71,7 @@ query ViewAllPlans($offset: Int, $limit: Int, $orderBy: PlanOrderCategory, $filt
       }
       isOwner
       nextBillDate
+      startDate
       cycleFrequency
       perCycleCost
       quantity

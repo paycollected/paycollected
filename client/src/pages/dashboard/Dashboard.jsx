@@ -79,7 +79,7 @@ export default function Dashboard({
                     <AlertIcon />
                     <Box>
                       <AlertDescription>
-                        {`${successPlan.planName} has been added to your Dashboard.`}
+                        {`${successPlan} has been added to your Dashboard.`}
                       </AlertDescription>
                     </Box>
                   </HStack>

@@ -47,7 +47,7 @@ export default function CheckoutSuccess({
           planId, planName
         }
       }
-    ) => setSuccessPlan({ planId, planName }),
+    ) => setSuccessPlan(planName),
   });
 
   if (data) {

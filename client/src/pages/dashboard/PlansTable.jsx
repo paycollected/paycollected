@@ -4,6 +4,7 @@ import {
   Badge, Text, useDisclosure, Button,
 } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
+import { isFuture } from 'date-fns';
 import ActionConfirmationModal from '../../components/ActionConfirmationModal.jsx';
 import MagicLinkModal from '../../components/MagicLinkModal.jsx';
 
@@ -68,12 +69,13 @@ export default function PlansTable({
           {plans.map((plan) => {
             const {
               planId, name, owner, isOwner, nextBillDate, cycleFrequency, perCycleCost, quantity,
-              selfCost,
+              selfCost, startDate,
             } = plan;
+            const [year, month, date] = startDate.split('-');
 
             return (
               <Tr key={planId}>
-                {(!successPlan || (successPlan && successPlan.planId !== planId)) && (
+                {!isFuture(new Date(Number(year), Number(month) - 1, Number(date))) && (
                   <Td>
                     <Button
                       type="button"
@@ -82,13 +84,13 @@ export default function PlansTable({
                       onClick={() => {
                         setPlanToView(planId);
                         navigate('/view');
-                      }
-                    }>
+                      }}
+                    >
                       {name}
                     </Button>
                   </Td>
                 )}
-                {successPlan && successPlan.planId === planId && (
+                {isFuture(new Date(Number(year), Number(month) - 1, Number(date))) && (
                   <Td>
                     <HStack spacing={4}>
                       <Text>{name}</Text>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import jwtDecode from 'jwt-decode';
 import Home from './pages/home/Home.jsx';
@@ -34,6 +34,10 @@ function App() {
   const [setupIntentId, setSetupIntentId] = useState(null);
   const [paymentMethods, setPaymentMethods] = useState([]);
   const [successPlan, setSuccessPlan] = useState(null);
+
+  useEffect(() => {
+    if (successPlan) setTimeout(() => setSuccessPlan(null), 10000);
+  }, [successPlan]);
 
   return (
     <Routes>

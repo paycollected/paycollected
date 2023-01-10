@@ -92,6 +92,7 @@ export default `#graphql
     selfCost: USCurrency!
     cycleFrequency: CycleFrequency!
     perCycleCost: USCurrency!
+    startDate: Date!
     nextBillDate: Date!
     isOwner: Boolean!
     owner: PlanOwner!

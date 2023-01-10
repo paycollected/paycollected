@@ -66,8 +66,8 @@ export default function PlansTableLayout({
                   onChange={(e) => {
                     setSortBy(e.target.value);
                     refetch({ orderBy: e.target.value });
-                  }
-                }>
+                  }}
+                >
                   <option value="PLAN_NAME">Name (A-Z)</option>
                   <option value="SELF_COST">Your Cost (lowest - highest)</option>
                   <option value="NEXT_BILL_DATE">Next Charge Date (least - most distant)</option>

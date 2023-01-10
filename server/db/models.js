@@ -195,6 +195,7 @@ export function plansSummary(username, offset, limit, orderBy, filterByOwnership
         UPPER(p.cycle_frequency::VARCHAR) AS "cycleFrequency",
         p.per_cycle_cost AS "perCycleCost",
         TO_CHAR(nbd.next_bill_date, 'YYYY-MM-DD') AS "nextBillDate",
+        TO_CHAR(p.start_date, 'YYYY-MM-DD') AS "startDate",
         up.plan_owner AS "isOwner"
       FROM user_plan up
         JOIN plans p
@@ -224,7 +225,8 @@ export function plansSummary(username, offset, limit, orderBy, filterByOwnership
         "cycleFrequency",
         "perCycleCost",
         "nextBillDate",
-        "isOwner"
+        "isOwner",
+        "startDate"
     ), c3 AS (
       SELECT
         c2.*,
