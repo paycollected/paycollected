@@ -2,7 +2,7 @@ import React from 'react';
 import { NetworkStatus } from '@apollo/client';
 import {
   Box, Button, Container, Stack, Center, useBreakpointValue, useColorModeValue, Tabs, TabList,
-  Tab, Flex, Select, Text,
+  Tab, Flex, Select, Text, Circle
 } from '@chakra-ui/react';
 import PlansTable from './PlansTable.jsx';
 
@@ -39,7 +39,7 @@ export default function PlansTableLayout({
                   {tabIndex === 0 && networkStatus === NetworkStatus.ready && (
                     <Stack direction="row" spacing={2}>
                       <Flex align="center"><Text>Active</Text></Flex>
-                      <Box bg="blue.600" borderRadius="50%" px={3} py={0.5} color="white">{total}</Box>
+                      <Circle size="2rem" bg="blue.600" color="white">{total}</Circle>
                     </Stack>
                   )}
                   {!(tabIndex === 0 && networkStatus === NetworkStatus.ready) && (<>Active</>)}
@@ -49,7 +49,7 @@ export default function PlansTableLayout({
                   {tabIndex === 2 && networkStatus === NetworkStatus.ready && (
                     <Stack direction="row" spacing={2}>
                       <Flex align="center"><Text>Owned</Text></Flex>
-                      <Box bg="blue.600" borderRadius="50%" px={3} py={0.5} color="white">{total}</Box>
+                      <Circle size="2rem" bg="blue.600" color="white">{total}</Circle>
                     </Stack>
                   )}
                   {!(tabIndex === 2 && networkStatus === NetworkStatus.ready) && (<>Owned</>)}
