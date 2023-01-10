@@ -5,9 +5,7 @@ import {
   Button, FormControl, FormLabel, Input, Heading, VStack, WrapItem, Wrap, useDisclosure, Alert,
   AlertIcon, AlertDescription, CloseButton, Box, HStack, Flex,
 } from '@chakra-ui/react';
-import {
-  ViewAllPlans as GET_ALL_PLANS,
-} from '../../graphql/queries.gql';
+import { ViewAllPlans as GET_ALL_PLANS } from '../../graphql/queries.gql';
 import NavBar from '../../components/NavBar.jsx';
 import PlansTableLayout from './PlansTableLayout.jsx';
 import CreatePlanDrawer from './createPlan/CreatePlanDrawer.jsx';
@@ -52,6 +50,7 @@ export default function Dashboard({
   });
 
   const [tabIndex, setTabIndex] = useState(0);
+  const [sortBy, setSortBy] = useState('PLAN_NAME');
 
 
   const codeInputSubmit = (e) => {
@@ -115,6 +114,8 @@ export default function Dashboard({
             tabIndex={tabIndex}
             setTabIndex={setTabIndex}
             networkStatus={networkStatus}
+            sortBy={sortBy}
+            setSortBy={setSortBy}
           />
           <Wrap w="100%" align="end" spacingX={{ base: '4', md: '8' }}>
             <WrapItem>

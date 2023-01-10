@@ -9,7 +9,7 @@ import PlansTable from './PlansTable.jsx';
 
 export default function PlansTableLayout({
   total, plans, setPlanToView, setPlanToJoin, successPlan, fetchMore, refetch, tabIndex,
-  setTabIndex, networkStatus, setSuccessPlan
+  setTabIndex, networkStatus, setSuccessPlan, sortBy, setSortBy,
 }) {
   const onTabChange = (index) => {
     switch (index) {
@@ -61,10 +61,13 @@ export default function PlansTableLayout({
                 <Text color="gray.600" fontSize="sm" whiteSpace="nowrap">Order by</Text>
               </Flex>
               <Flex align="center">
-                <Select onChange={(e) => refetch({ orderBy: e.target.value })}>
-                  <option value="PLAN_NAME">Name (A-Z)</option>
-                  <option value="SELF_COST">Your Cost (lowest - highest)</option>
-                  <option value="NEXT_BILL_DATE">Next Charge Date (least - most distant)</option>
+                <Select onChange={(e) => {
+                  setSortBy(e.target.value);
+                  refetch({ orderBy: e.target.value });
+                }}>
+                  <option value="PLAN_NAME" selected={sortBy === 'PLAN_NAME'}>Name (A-Z)</option>
+                  <option value="SELF_COST" selected={sortBy === 'SELF_COST'}>Your Cost (lowest - highest)</option>
+                  <option value="NEXT_BILL_DATE" selected={sortBy === 'NEXT_BILL_DATE'}>Next Charge Date (least - most distant)</option>
                 </Select>
               </Flex>
             </Stack>
