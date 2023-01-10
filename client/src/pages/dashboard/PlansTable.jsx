@@ -100,7 +100,10 @@ export default function PlansTable({
                 )}
                 {isOwner && (<Td>You</Td>)}
                 {!isOwner && (<Td>{owner.formattedName}</Td>)}
-                <Td>{selfCost}</Td>
+                {((!isOwner) || (isOwner && quantity > 0)) && (<Td>{selfCost}</Td>)}
+                {isOwner && quantity === 0 && (
+                  <Td><Button size="sm" type="button" onClick={() => navigate(`/join/${planId}`)}>Join</Button></Td>
+                )}
                 <Td>{nextBillDate}</Td>
                 <Td>{perCycleCost}</Td>
                 <Td>{cycleFrequency}</Td>
@@ -114,15 +117,6 @@ export default function PlansTable({
                       variant="menuIcon"
                     />
                     <MenuList>
-                      {isOwner && quantity === 0 && (
-                        <MenuItem onClick={() => {
-                          setPlanToJoin(planId);
-                          navigate(`/join/${planId}`);
-                        }}
-                        >
-                          Join Plan
-                        </MenuItem>
-                      )}
                       <MenuItem onClick={() => {
                         setPlanIdForAction(planId);
                         setPlanNameForAction(name);

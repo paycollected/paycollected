@@ -44,7 +44,7 @@ export default function CheckoutSuccess({
     onCompleted: (
       {
         successfulPayment: {
-          planId, planName
+          planName
         }
       }
     ) => setSuccessPlan(planName),
