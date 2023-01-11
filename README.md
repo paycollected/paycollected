@@ -10,6 +10,7 @@ Disney+ plan is $120.00 billed monthly.
 - Mai-Ly has 1 subscription of this plan.
 - Jessica has 2 subscriptions (she is paying for two people).
 - Binh has 1 subscription.<br>
+
 Then each individual subscription will cost $120.00 / (4 subscriptions) = $30.00.
 Thus, Mai-Ly and Binh will each pay $30.00 (+ $1.05 platform fees) at each billing cycle.
 Jessica will pay a total of $60.00 (2 subscriptions * $30.00/subscription) plus $3.00 platform fees.
