@@ -3,7 +3,7 @@
 ## Intro
 PayCollected is a web application aimed at reducing friction for groups to split up recurring payments. Any user can create a new plan, in effect becoming "owner" of the plan. Once other users have joined a plan, they become "members" of that plan.
 
-At plan creation, the plan owner will decide in advance how much the plan will cost in total at each billing cycle, as well as the frequency of at which everyone will be charged and the first charge date of the plan. This cost is then divided equally by the total number of subscriptions to the plan. On the charge date of each billing cycle, every subscribed member will be charged at 11:59 PM EST.
+At plan creation, the plan owner will decide in advance how much the plan will cost in total at each billing cycle, as well as the frequency at which everyone will be charged and the first charge date of the plan. This cost is then divided equally by the total number of subscriptions to the plan. On the charge date of each billing cycle, every subscribed member will be charged at 11:59 PM EST.
 
 Example of cost calculation:
 Disney+ plan is $120.00 billed monthly.
