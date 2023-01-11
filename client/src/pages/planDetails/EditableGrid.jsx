@@ -88,10 +88,12 @@ export default function EditableGrid({
               </Button>
             </HStack>
           )}
-          {((isOwner && !editAsOwner) || (!isOwner && !editAsMember)) && (
+          {((isOwner && !editAsOwner)
+          || (!isOwner && !editAsMember)
+          || (isOwner && editAsOwner && quantity === 0)) && (
             <Text w="100%" textStyle="formSavedInput">{quantity}</Text>
           )}
-          {isOwner && editAsOwner && (
+          {isOwner && editAsOwner && quantity > 0 && (
             <Flex w="100%" justify="start">
               <NumberInput w={{ base: '40%', md: '85%' }}>
                 <NumberInputField

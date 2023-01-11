@@ -94,7 +94,7 @@ On the frontend, payment is handled via Stripe.js according to their recommended
 ## Current Status
 Please note that due to our inability to access Stripe's Issuing API, we are missing the second major component of this application, which is funding groups via virtual credit cards.
 
-Even without this element, we have attempted to incorporate as many features as we would like to see in this application as possible under the assumption that we would use this application ourselves. We may occassionally add some minor features, bug fix or test in the future, but at this point (January 2023) the project is no longer actively worked on.
+Even without this element, we have attempted to incorporate as many features as we would like to see in this application as possible under the assumption that we would use it ourselves. We may occassionally add some minor features, bug fix or test in the future, but at this point (January 2023) the project is no longer actively worked on.
 
 ## Current Features
 - Basic authentication and JWT for stateless "session" management
@@ -110,8 +110,8 @@ Even without this element, we have attempted to incorporate as many features as 
 ## Missing Features
 Some additional features (beyond access to Stripe Issuing) that we would love to see but were not able to incorporate in this release due to time constraints are:
 - Implementation of a JWT token blacklisting system using an in-memory datastore so that user sessions are a hybrid of both stateful and stateless.
-- Better mobile responsiveness
 - Automatic extension of JWT expiration to 3 days if there is continuous activity in the allotted 30 minutes
+- Better mobile responsiveness
 - Loading state and error UI feedback
 - Handling of payment failure frontend (at checkout) and backend (webhook)
 - (Plan owners) Editability of plan's name and plan's total cost
