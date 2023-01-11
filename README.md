@@ -103,7 +103,8 @@ Even without this element, we have attempted to incorporate as many features as 
 - Dashboard with the ability to filter plans by status and ownership, and to order by plan's name / next charge date / user's cost
 - (Existing plan members) Sharing and (Potential plan members) Joining a new plan using either a plan code or a link
 - (Plan owners) Plan creation, deletion, or transfer of plan ownership to someone else
-- (Plan members) Cancellation of subscription to a plan, or changing the number of subscriptions to it, access to Stripe customer portal for payment method management
+- (Plan members) Cancellation of subscription to a plan, or changing the number of subscriptions to it
+- Access to Stripe customer portal for payment method management
 - Notifications when there are new activity on a subscribed plan
 
 ## Missing Features
@@ -114,10 +115,10 @@ Some additional features (beyond access to Stripe Issuing) that we would love to
 - Handling of payment failure frontend (at checkout) and backend (webhook)
 - (Plan owners) Editability of plan's name and plan's total cost
 - Access to inactive (archived) plans/subscriptions
-- Access to platform invoice with detailed breakdown of charge date, charge breakdown (base cost, platform fees, total), members' breakdown of number of subscriptions & cost at each past billing cycle
+- Access to platform invoice with detailed data of charge date, charge breakdown (base cost, platform fees, total), members' breakdown of number of subscriptions & cost at each past billing cycle
 
 ## For Developers
-If you are in the finance sector and/or developer interested in checking out this application or further contributing to it, you will need a Stripe and a Twilio Sendgrid developer accounts. Please refer to their respective websites for account and project setup.
+If you are in the finance sector and/or are a developer interested in checking out this application or further contributing to it, you will need a Stripe and a Twilio Sendgrid developer account. Please refer to their respective websites for account and project setup.
 
 To test Stripe webhooks in the local environment, you will also need to install and use the [Stripe CLI](https://stripe.com/docs/stripe-cli/overview).
 
