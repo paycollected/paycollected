@@ -94,7 +94,7 @@ On the frontend, payment is handled via Stripe.js according to their recommended
 ## Current Status
 Please note that due to our inability to access Stripe's Issuing API, we are missing the second major component of this application, which is funding groups via virtual credit cards.
 
-Even without this element, we have attempted to incorporate as many features as we would like see in this application as possible under the assumption that we would be its real users. We may occassionally add some minor features, bug fix or test in the future, but at this point (January 2023) the project is no longer actively worked on.
+Even without this element, we have attempted to incorporate as many features as we would like to see in this application as possible under the assumption that we would use this application ourselves. We may occassionally add some minor features, bug fix or test in the future, but at this point (January 2023) the project is no longer actively worked on.
 
 ## Current Features
 - Basic authentication and JWT for stateless "session" management
