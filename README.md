@@ -142,10 +142,6 @@ Please reach out if you are interested in collaborative opportunities with us or
 ## Contributors
 - Project Manager: Chan Le
 - Developers
-  - Binh (kbinhnguyen@gmail.com)
-[![GitHub](https://img.shields.io/badge/github-%23121011.svg?style=for-the-badge&logo=github&logoColor=white&link=https://github.com/cariboukim)](https://github.com/kbinhnguyen)
-  - Jessica
-[![Linkedin: LinkedIn](https://img.shields.io/badge/linkedin-%230077B5.svg?style=for-the-badge&logo=linkedin&logoColor=white&link=https://www.linkedin.com/in/caleb-kim0510/)](https://www.linkedin.com/in/jessica-chen-md/)
-- UX Designer
-  - Mai-Ly
-[![Linkedin: LinkedIn](https://img.shields.io/badge/linkedin-%230077B5.svg?style=for-the-badge&logo=linkedin&logoColor=white&link=https://www.linkedin.com/in/caleb-kim0510/)](https://www.linkedin.com/in/mai-lywinn/)
+  - [Binh](https://github.com/kbinhnguyen) (kbinhnguyen@gmail.com)
+  - [Jessica](https://www.linkedin.com/in/jessica-chen-md/)
+- UX Designer: [Mai-Ly](https://www.linkedin.com/in/mai-lywinn/)
