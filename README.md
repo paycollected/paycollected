@@ -1,5 +1,5 @@
 # PayCollected
-
+![PayCollected Logo](client/src/public/Pay_Collected_Logo.png)
 ## Intro
 PayCollected is a web application aimed at reducing friction for groups to split up recurring payments. Any user can create a new plan, in effect becoming "owner" of the plan. Once other users have joined a plan, they become "members" of that plan.
 
