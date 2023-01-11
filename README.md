@@ -23,7 +23,7 @@ Once the first charge has occurred, the platform will provide the plan owner wit
 With this application, users can set up their recurring group payment once and forget about it!
 
 ## Screenshots
-#### Create account and log in
+### Create account and log in
 ![Create account](https://i.imgur.com/ubR8DQ0.jpg)
 
 ![Log in](https://i.imgur.com/2uZycug.jpg)
@@ -31,7 +31,7 @@ With this application, users can set up their recurring group payment once and f
 ![Password recovery](https://i.imgur.com/uyPW617.jpg)
 
 
-#### Dashboard
+### Dashboard
 ![Dashboard with notifications](https://i.imgur.com/OZVGeHd.jpg)
 
 ![Dashboard with expanded menu options](https://i.imgur.com/p0qYV0F.jpg)
@@ -39,29 +39,29 @@ With this application, users can set up their recurring group payment once and f
 ![Dashboard tabs](https://i.imgur.com/HoDZO6t.jpg)
 
 
-#### Create a new plan
+### Create a new plan
 ![Create a plan](https://i.imgur.com/bQqO58H.jpg)
 
 ![Successful plan creation](https://i.imgur.com/B92sbE7.jpg)
 
 
-#### Plan details
+### Plan details
 ![Plan details edit mode as owner 1](https://i.imgur.com/pnouOlh.jpg)
 
 ![Plan details edit mode as owner 2](https://i.imgur.com/4NHCNGP.jpg)
 
 
-#### Share a plan
+### Share a plan
 ![Share plan](https://i.imgur.com/2cKa671.jpg)
 
 
-#### Join a plan
+### Join a plan
 ![Join plan 1](https://i.imgur.com/kure3Gt.jpg)
 
 ![Join plan 2](https://i.imgur.com/HoG3XkQ.jpg)
 
 
-#### Checkout
+### Checkout
 ![Checkout saved card](https://i.imgur.com/7THqKJy.jpg)
 
 ![Checkout new card](https://i.imgur.com/LgmUJBH.jpg)
@@ -71,7 +71,7 @@ With this application, users can set up their recurring group payment once and f
 ![Successful checkout dashboard](https://i.imgur.com/39aJxkf.jpg)
 
 
-#### Stripe Customer Portal (Prebuilt)
+### Stripe Customer Portal (Prebuilt)
 ![Portal 1](https://i.imgur.com/htqHsiM.jpg)
 
 ![Portal 2](https://i.imgur.com/iMPFb3z.jpg)
