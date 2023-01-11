@@ -5,11 +5,11 @@ PayCollected is a web application aimed at reducing friction for groups to split
 
 At plan creation, the plan owner will decide in advance how much the plan will cost in total at each billing cycle, as well as the frequency at which everyone will be charged and the first charge date of the plan. This cost is then divided equally by the total number of subscriptions to the plan. On the charge date of each billing cycle, every subscribed member will be charged at 11:59 PM EST.
 
-Example of cost calculation:
+Example of cost calculation:<br>
 Disney+ plan is $120.00 billed monthly.
 - Mai-Ly has 1 subscription of this plan.
 - Jessica has 2 subscriptions (she is paying for two people).
-- Binh has 1 subscription.
+- Binh has 1 subscription.<br>
 Then each individual subscription will cost $120.00 / (4 subscriptions) = $30.00.
 Thus, Mai-Ly and Binh will each pay $30.00 (+ $1.05 platform fees) at each billing cycle.
 Jessica will pay a total of $60.00 (2 subscriptions * $30.00/subscription) plus $3.00 platform fees.
