@@ -29,6 +29,7 @@ With this application, users can set up their recurring group payment once and f
 ![Log in](https://i.imgur.com/2uZycug.jpg)
 
 ![Password recovery](https://i.imgur.com/uyPW617.jpg)
+![Password recovery 2](https://i.imgur.com/fPNIbFA.jpg)
 
 
 ### Dashboard
@@ -36,7 +37,7 @@ With this application, users can set up their recurring group payment once and f
 
 ![Dashboard with expanded menu options](https://i.imgur.com/p0qYV0F.jpg)
 
-![Dashboard tabs](https://i.imgur.com/HoDZO6t.jpg)
+![Dashboard tabs](https://i.imgur.com/egTdGCZ.jpg)
 
 
 ### Create a new plan
