@@ -80,16 +80,16 @@ With this application, users can set up their recurring group payment once and f
 
 ## Payment Processing Platform: Stripe
 For this application, we used the following Stripe financial products:
-- Billing (to charge)
-- Issuing (to fund, planned)
+- [Billing](https://stripe.com/billing) (to charge)
+- [Issuing](https://stripe.com/issuing) (to fund, planned)
 
 On the frontend, payment is handled via Stripe.js according to their recommended protocol to ensure PCI-compliance. The payment life cycle is completed on the backend with the use of webhooks.
 
 ## Technologies Used
-- Frontend: React.js, and ChakraUI for styling
-- Backend: Node.js, Express and Apollo Server (our API is GraphQL-based)
-- Datastore: PostgreSQL and Node-Postgres as the client
-- Email client: Twilio Sendgrid
+- Frontend: [React.js](https://reactjs.org/), [Apollo Client](https://www.apollographql.com/apollo-client/), [React Hook Form](https://react-hook-form.com/), and [ChakraUI](https://chakra-ui.com/) for styling
+- Backend: [Node.js](https://nodejs.org/en/), [Express](https://expressjs.com/) and [Apollo Server](https://www.apollographql.com/docs/apollo-server/) (our API is GraphQL-based)
+- Datastore: [PostgreSQL](https://www.postgresql.org/) and [Node-Postgres](https://node-postgres.com/) as the client
+- Email client: [Twilio Sendgrid](https://docs.sendgrid.com/for-developers)
 
 ## Current Status
 Please note that due to our inability to access Stripe's Issuing API, we are missing the second major component of this application, which is funding groups via virtual credit cards.
