@@ -111,6 +111,7 @@ Even without this element, we have attempted to incorporate as many features as 
 Some additional features (beyond access to Stripe Issuing) that we would love to see but were not able to incorporate in this release due to time constraints are:
 - Implementation of a JWT token blacklisting system using an in-memory datastore so that user sessions are a hybrid of both stateful and stateless.
 - Better mobile responsiveness
+- Automatic extension of JWT expiration to 3 days if there is continuous activity in the allotted 30 minutes
 - Loading state and error UI feedback
 - Handling of payment failure frontend (at checkout) and backend (webhook)
 - (Plan owners) Editability of plan's name and plan's total cost
