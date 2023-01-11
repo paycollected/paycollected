@@ -119,7 +119,7 @@ Some additional features (beyond access to Stripe Issuing) that we would love to
 - Access to platform invoice with detailed data of charge date, charge breakdown (base cost, platform fees, total), members' breakdown of number of subscriptions & cost at each past billing cycle
 
 ## For Developers
-If you are in the finance sector and/or are a developer interested in checking out this application or further contributing to it, you will need a Stripe and a Twilio Sendgrid developer account. Please refer to their respective websites for account and project setup.
+If you are in the finance sector and/or are a developer interested in checking out this application or further contributing to it, you will need a Stripe and a Twilio Sendgrid developer account. Please refer to their respective websites for account and project setup instructions.
 
 To test Stripe webhooks in the local environment, you will also need to install and use the [Stripe CLI](https://stripe.com/docs/stripe-cli/overview).
 
