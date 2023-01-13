@@ -160,7 +160,7 @@ Please reach out if you are interested in collaborative opportunities with us or
     <th>Chan Le</th>
     <th>Binh Nguyen</th>
     <th>Jessica Chen</th>
-    <th>Mai-Ly</th>
+    <th>Mai-Ly Nguyen</th>
   </tr>
   <tr>
     <td>Project Manager</td>
